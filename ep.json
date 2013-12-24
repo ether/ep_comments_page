@@ -1,0 +1,19 @@
+{
+  "parts": [
+    {
+      "name": "main",
+      "pre": ["ep_etherpad-lite/webaccess"],
+      "client_hooks": {
+        "postAceInit": "ep_comments/static/js/index",
+        "aceAttribsToClasses": "ep_comments/static/js/index",
+        "aceEditorCSS": "ep_comments/static/js/index"
+      },
+      "hooks": {
+        "socketio": "ep_comments/index",
+        "eejsBlock_editbarMenuLeft": "ep_comments/index",
+        "eejsBlock_scripts": "ep_comments/index",
+        "eejsBlock_styles": "ep_comments/index"
+      }
+    }
+  ]
+}

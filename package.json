@@ -1,0 +1,31 @@
+{
+  "description": "Adds comments on sidebar and link it to the text.",
+  "name": "ep_comments",
+  "version": "0.0.1",
+  "author": {
+    "name": "Nicolas Lescop",
+    "email": "limplementeur@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Nicolas Lescop",
+      "email": "limplementeur@gmail.com"
+    }
+  ],
+  "dependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "homepage": "https://github.com/nicolas-lescop/etherpad-plugins",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nicolas-lescop/etherpad-plugins.git"
+  },
+  "_id": "ep_comments@0.0.1",
+  "_from": "etherpad-plugins/ep_comments",
+  "readme": "ERROR: No README.md file found!",
+  "dist": {
+    "shasum": "99884ed7ddab0e5b74f57d7d59cc618e8cf681f3"
+  }
+}

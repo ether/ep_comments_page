@@ -1,0 +1,16 @@
+<script src="/static/plugins/ep_comments/static/js/jquery.tmpl.min.js"></script>
+<script id="commentsTemplate" type="text/html">
+    <div id="${commentId}" class="sidebar-comment">
+    	<p class="comment-author-name">${name}</p>
+    	<p class="comment-date">${date}</p>
+        <p class="comment-text">${text}</p>
+    </div>
+</script>
+
+<script id="newCommentTemplate" type="text/html">
+    <form id="newComment" class="sidebar-comment">
+    	<p class="comment-author-name">${name}</p>
+    	<p class="comment-text"><textarea class="comment-content" autofocus></textarea></p>
+    	<p class="comment-buttons"><input type="submit" value="Comment" /><input type="reset" id="comment-reset" value="Cancel" /></p>
+    </form>
+</script>
