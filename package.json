@@ -1,6 +1,6 @@
 {
-  "description": "Adds comments on sidebar and link it to the text.",
-  "name": "ep_comments",
+  "description": "Adds comments on sidebar and link it to the text.  Support for Page View",
+  "name": "ep_comments_page",
   "version": "0.0.1",
   "author": {
     "name": "Nicolas Lescop",
@@ -10,7 +10,10 @@
     {
       "name": "Nicolas Lescop",
       "email": "limplementeur@gmail.com"
-    }
+    },
+    {
+      "name": "John McLear",
+      "email": "john@mclear.co.uk"
   ],
   "dependencies": {},
   "engines": {

@@ -35,6 +35,11 @@ exports.socketio = function (hook_name, args, cb){
   });
 };
 
+exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_comments/templates/menuButtons.ejs");
+  return cb();
+};
+
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments/templates/commentBarButtons.ejs");
   return cb();

@@ -90,11 +90,15 @@ ep_comments.prototype.init = function(){
   });
 
   // On click comment icon toolbar 
-  $('#addComment').on('click', function(){
+  $('.addComment').on('click', function(){
     // If a new comment box doesn't already exist 
     // Add a new comment and link it to the selection 
+    $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
     if (self.container.find('#newComment').length == 0) self.addComment();
   });
+
+  // Show all comments
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
 };
 
 // Insert comments container on sideDiv element use for linenumbers 
@@ -127,11 +131,8 @@ ep_comments.prototype.collectComments = function(callback){
     if (commentId === null) {
       var isAuthorClassName = /(?:^| )(a.[A-Za-z0-9]*)/.exec(cls);
       if (isAuthorClassName) self.removeComment(isAuthorClassName[1], it);
-
-      console.log('o_O', cls);
       return;
     }
-
     var commentId   = classCommentId[1];
     var commentElm  = container.find('#'+ commentId);
     var comment     = comments[commentId];
@@ -172,6 +173,7 @@ ep_comments.prototype.collectComments = function(callback){
     
     commentElm.css({ 'top': commentPos });
   });
+  self.setYofComments()
 };
 
 ep_comments.prototype.removeComment = function(className, id){
@@ -210,6 +212,20 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
 
     return false;
   });
+
+  // Set the top of the form 
+  var ace = this.ace;
+
+  ace.callWithAce(function (ace){
+    var rep = ace.ace_getRep();
+    var line = rep.lines.atIndex(rep.selStart[0]);
+    var key = "#"+line.key;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+    var ele = padInner.contents().find(key);
+    var y = ele[0].offsetTop;
+    $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", y+"px");
+  },'getYofRep', true);
 };
 
 // Insert a comment node 
@@ -222,6 +238,8 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   comment.commentId = commentId;
   content = $('#'+ template).tmpl(comment);
 
+  // position doesn't seem to be relative to rep
+
   console.log('position', index, commentAfterIndex);
   if (index === 0) {
     content.prependTo(container);
@@ -230,6 +248,21 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   } else {
     commentAfterIndex.before(content);
   }
+  this.setYofComments();
+};
+
+// Set all comments ot be inline with their target REP
+ep_comments.prototype.setYofComments = function(){
+  // for each comment
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var inlineComments = padInner.contents().find(".comment");
+  $.each(inlineComments, function(inlineComment){
+    var y = this.offsetTop;
+    var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
+    var commentEle = padOuter.find('#c-'+commentId[1]);
+    commentEle.css("top", y+"px");
+  });
 };
 
 // Set comments content data
@@ -282,6 +315,9 @@ ep_comments.prototype.addComment = function (callback){
   var self    = this;
   var rep     = {};
 
+  // Show comments
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
+
   ace.callWithAce(function (ace){
     var saveRep = ace.ace_getRep();
     rep.selStart = saveRep.selStart;
@@ -291,6 +327,9 @@ ep_comments.prototype.addComment = function (callback){
   if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
     return;
   }
+
+  // Set the top of the form
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", "200px");
 
   this.insertNewComment(data, function (text, index){
     data.comment.text = text;

@@ -10,7 +10,8 @@
       },
       "hooks": {
         "socketio": "ep_comments/index",
-        "eejsBlock_editbarMenuLeft": "ep_comments/index",
+        "eejsBlock_dd_editbarMenuLeft": "ep_comments/index",
+        "eejsBlock_dd_insert": "ep_comments/index",
         "eejsBlock_scripts": "ep_comments/index",
         "eejsBlock_styles": "ep_comments/index"
       }
