@@ -223,7 +223,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     var ele = padInner.contents().find(key);
     var y = ele[0].offsetTop;
-    $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", y+"px");
+    $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", y+"px").show();
     // scroll new comment form to focus
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop(y); // Works in Chrome
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
@@ -255,15 +255,19 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
 // Set all comments ot be inline with their target REP
 ep_comments.prototype.setYofComments = function(){
-  // for each comment
+  // for each comment in the pad
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
   var inlineComments = padInner.contents().find(".comment");
-  $.each(inlineComments, function(inlineComment){
+  padOuter.find("#comments").children().each(function(){
+    // hide each outer comment
+    $(this).hide();
+  });
+  $.each(inlineComments, function(){
     var y = this.offsetTop;
-    var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
-    var commentEle = padOuter.find('#c-'+commentId[1]);
-    commentEle.css("top", y+"px");
+    var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
+    commentEle.css("top", y+"px").show();
   });
 };
 
@@ -331,7 +335,7 @@ ep_comments.prototype.addComment = function (callback){
   }
 
   // Set the top of the form
-  $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", "200px");
+  // $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", "200px");
 
   this.insertNewComment(data, function (text, index){
     data.comment.text = text;
@@ -391,11 +395,15 @@ var hooks = {
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     var inlineComments = padInner.contents().find(".comment");
-    $.each(inlineComments, function(inlineComment){
+    padOuter.find("#comments").children().each(function(){
+      // hide each outer comment
+      $(this).hide();
+    });
+    $.each(inlineComments, function(){
       var y = this.offsetTop;
       var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
       var commentEle = padOuter.find('#c-'+commentId[1]);
-      commentEle.css("top", y+"px");
+      commentEle.css("top", y+"px").show();
     });
   },
 

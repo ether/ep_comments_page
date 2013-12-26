@@ -4,6 +4,7 @@
 }
 
 #comments {
+  display:none;
   min-width: 180px;
   width:90%;
   font-family: Helvetica, Arial, sans-serif;
@@ -62,7 +63,7 @@
   color: #555;
   font-weight:bold;
   font-size: 1em;
-  display:inline-block;
+  display:inline;
 }
 
 .comment-text {
@@ -70,7 +71,7 @@
   color: #333;
   word-wrap: break-word;
   white-space: normal;
-  display: inline-block;
+  display: inline;
 }
 
 .comment-content {
@@ -105,4 +106,12 @@
 
 #newComment{
   z-index:1000;
+}
+
+@media (min-width: 1020px) {
+
+  #comments{
+    display:block;
+  }
+
 }
