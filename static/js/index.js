@@ -213,9 +213,8 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     return false;
   });
 
-  // Set the top of the form 
+  // Set the top of the form to be the same Y as the target Rep
   var ace = this.ace;
-
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
     var line = rep.lines.atIndex(rep.selStart[0]);
@@ -225,6 +224,9 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var ele = padInner.contents().find(key);
     var y = ele[0].offsetTop;
     $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", y+"px");
+    // scroll new comment form to focus
+    $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop(y); // Works in Chrome
+    $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
   },'getYofRep', true);
 };
 
