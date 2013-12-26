@@ -6,7 +6,8 @@
       "client_hooks": {
         "postAceInit": "ep_comments_page/static/js/index",
         "aceAttribsToClasses": "ep_comments_page/static/js/index",
-        "aceEditorCSS": "ep_comments_page/static/js/index"
+        "aceEditorCSS": "ep_comments_page/static/js/index",
+        "aceEditEvent": "ep_comments_page/static/js/index"
       },
       "hooks": {
         "socketio": "ep_comments_page/index",

@@ -383,6 +383,22 @@ var hooks = {
     var Comments = new ep_comments(context);
   },
 
+  aceEditEvent: function(hook, context){
+    if(!context.callstack.docTextChanged) return;
+    // for each comment
+
+    // NOTE this is duplicate code because of the way this is written, ugh, this needs fixing
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+    var inlineComments = padInner.contents().find(".comment");
+    $.each(inlineComments, function(inlineComment){
+      var y = this.offsetTop;
+      var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
+      var commentEle = padOuter.find('#c-'+commentId[1]);
+      commentEle.css("top", y+"px");
+    });
+  },
+
   // Insert comments classes
   aceAttribsToClasses: function(hook, context){
     if(context.key == 'comment') return ['comment', context.value];
@@ -397,3 +413,4 @@ var hooks = {
 exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
+exports.aceEditEvent          = hooks.aceEditEvent;

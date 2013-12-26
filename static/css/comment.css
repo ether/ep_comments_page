@@ -9,6 +9,15 @@
   font-family: Helvetica, Arial, sans-serif;
 }
 
+.comment-reply-button{
+  float:right;
+}
+
+.comment-reply-button:hover{
+  cursor:pointer;
+  color:#000;
+}
+
 .sidebar-comment {
   margin-left: 10px;
   padding: 3px 5px;  
@@ -56,18 +65,12 @@
   display:inline-block;
 }
 
-.comment-date {
-  line-height: 1em;
-  font-size: 1em;
-  display:inline-block;
-}
-
 .comment-text {
   font-size: 1em;
   color: #333;
-  width: 160px;
   word-wrap: break-word;
-  white-space : normal;
+  white-space: normal;
+  display: inline-block;
 }
 
 .comment-content {
