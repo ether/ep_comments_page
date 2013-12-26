@@ -1,7 +1,7 @@
 {
-  "description": "Adds comments on sidebar and link it to the text.  Support for Page View",
+  "description": "Adds comments on sidebar and link it to the text.  Support for Page View, requires ep_page_view",
   "name": "ep_comments_page",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Nicolas Lescop",
     "email": "limplementeur@gmail.com"
@@ -14,21 +14,14 @@
     {
       "name": "John McLear",
       "email": "john@mclear.co.uk"
+    }
   ],
   "dependencies": {},
   "engines": {
     "node": "*"
   },
-  "homepage": "https://github.com/nicolas-lescop/etherpad-plugins",
-  "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git://github.com/nicolas-lescop/etherpad-plugins.git"
-  },
-  "_id": "ep_comments@0.0.1",
-  "_from": "etherpad-plugins/ep_comments",
-  "readme": "ERROR: No README.md file found!",
-  "dist": {
-    "shasum": "99884ed7ddab0e5b74f57d7d59cc618e8cf681f3"
+    "url": "https://github.com/JohnMcLear/ep_comments"
   }
 }

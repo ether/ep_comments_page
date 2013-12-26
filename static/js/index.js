@@ -2,7 +2,7 @@ var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
-var cssFiles = ['ep_comments/static/css/comment.css'];
+var cssFiles = ['ep_comments_page/static/css/comment.css'];
 
 /************************************************************************/
 /*                         ep_comments Plugin                           */

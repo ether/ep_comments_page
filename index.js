@@ -1,4 +1,3 @@
-
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var commentManager = require('./commentManager');
 
@@ -36,22 +35,22 @@ exports.socketio = function (hook_name, args, cb){
 };
 
 exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments/templates/menuButtons.ejs");
+  args.content = args.content + eejs.require("ep_comments_page/templates/menuButtons.ejs");
   return cb();
 };
 
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments/templates/commentBarButtons.ejs");
+  args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
   return cb();
 };
 
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments/templates/comments.html", {}, module);
+  args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   return cb();
 };
 
 exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments/templates/styles.html", {}, module);
+  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html", {}, module);
   return cb();
 };
 
@@ -88,4 +87,5 @@ exports.expressCreateServer = function (hook_name, args, cb) {
     args.app.set('view options', {layout: false});
 		args.app.engine('ejs', require('ejs').renderFile);
 	}
-};*/
+};
+*/
