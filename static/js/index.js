@@ -265,6 +265,7 @@ ep_comments.prototype.setYofComments = function(){
   });
   $.each(inlineComments, function(){
     var y = this.offsetTop;
+    y = y+5;
     var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
     var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
     commentEle.css("top", y+"px").show();
@@ -388,11 +389,13 @@ var hooks = {
   },
 
   aceEditEvent: function(hook, context){
+    // Cake this bit is a bit rough..
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
     // for each comment
 
     // NOTE this is duplicate code because of the way this is written, ugh, this needs fixing
-    var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     var inlineComments = padInner.contents().find(".comment");
     padOuter.find("#comments").children().each(function(){
@@ -403,6 +406,7 @@ var hooks = {
       var y = this.offsetTop;
       var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
       var commentEle = padOuter.find('#c-'+commentId[1]);
+      y = y+5;
       commentEle.css("top", y+"px").show();
     });
   },
