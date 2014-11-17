@@ -171,23 +171,25 @@ ep_comments.prototype.collectComments = function(callback){
     
     commentElm.css({ 'top': commentPos });
   });
-  self.setYofComments();
 
   // hover event
-  this.padInner.contents().find('.comment').on('mouseover',function(e){
+  this.padInner.contents().on("mouseover", ".comment" ,function(e){
     var cls             = e.currentTarget.classList;
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
-    var commentElm = container.find('#'+ commentId);
+    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
     commentElm.addClass('mouseover');
-  }).mouseleave(function(e){
+  });
+
+  this.padInner.contents().on("mouseleave", ".comment" ,function(e){
     var cls             = e.currentTarget.classList;
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
-    var commentElm = container.find('#'+ commentId);
+    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
     commentElm.removeClass('mouseover');
   });
 
+  self.setYofComments();
 };
 
 ep_comments.prototype.removeComment = function(className, id){
@@ -284,6 +286,7 @@ ep_comments.prototype.setYofComments = function(){
     var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
     commentEle.css("top", y+"px").show();
   });
+
 };
 
 // Set comments content data
@@ -420,7 +423,7 @@ var hooks = {
       var y = this.offsetTop;
       var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
       var commentEle = padOuter.find('#c-'+commentId[1]);
-      y = y+5;
+      y = y-5;
       commentEle.css("top", y+"px").show();
     });
   },
