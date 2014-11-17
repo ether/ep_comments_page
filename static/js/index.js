@@ -449,7 +449,9 @@ var hooks = {
 
   // Init pad comments 
   postAceInit: function(hook, context){
+    if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
+    pad.plugins.ep_comments_page = Comments;
   },
 
   aceEditEvent: function(hook, context){
