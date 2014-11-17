@@ -3,6 +3,19 @@
   border-radius: 0px;
 }
 
+.comment-modal{
+  position:absolute;
+  min-width:20px;
+  min-height:10px;
+  background-color:#fff;
+  z-index:99999;
+  top:0;
+  left:0;
+  border:solid #ccc 1px;
+  display:none;
+  padding:10px;
+}
+
 #comments {
   display:none;
   min-width: 180px;
@@ -46,7 +59,7 @@
 
 .sidebar-comment.mouseover {
   z-index:99999;
-  margin: 8px 0 0 14px;
+  margin: 0px 0 0 14px;
   /*-moz-box-shadow: 0 0 2px #EB5C2E;
   -webkit-box-shadow: 0 0 2px #EB5C2E;
   box-shadow: 0 0 2px #EB5C2E;*/
@@ -108,19 +121,25 @@
 #newComment{
   z-index:1000;
 }
-@media (max-width: 1020px) {
+
+#outerdocbody{
+  width:1050px;
+}
+
+@media (max-width: 949px) {
 
   #sidediv{
     display:none;
   }
 
   #outerdocbody{
+    width:100%;
     padding-right:0px;
   }
 
 }
 
-@media (min-width: 1020px) {
+@media (min-width: 950px) {
 
   #comments{
     display:block;

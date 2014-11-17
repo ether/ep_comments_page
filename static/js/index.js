@@ -102,6 +102,11 @@ ep_comments.prototype.init = function(){
 
   // Show all comments
   $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
+
+  // Create hover modal
+  $('iframe[name="ace_outer"]').contents().find("body")
+    .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
+
 };
 
 // Insert comments container on sideDiv element use for linenumbers 
@@ -118,7 +123,7 @@ ep_comments.prototype.hideLineNumbers = function(){
   this.sideDiv.find('table').hide();
   this.sideDiv.css("width","200px");
   // Correct padding if page_view is enabled
-  if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
+//  if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
 };
 
 // Collect Comments and link text content to the sidediv
@@ -193,11 +198,12 @@ ep_comments.prototype.collectComments = function(callback){
 
   // hover event
   this.padInner.contents().on("mouseover", ".comment" ,function(e){
-    var cls             = e.currentTarget.classList;
-    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId       = (classCommentId) ? classCommentId[1] : null;
-    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
-    commentElm.addClass('mouseover');
+    self.highlightComment(e);
+  });
+
+  // click event
+  this.padInner.contents().on("click", ".comment" ,function(e){
+    self.highlightComment(e);
   });
 
   this.padInner.contents().on("mouseleave", ".comment" ,function(e){
@@ -206,10 +212,31 @@ ep_comments.prototype.collectComments = function(callback){
     var commentId       = (classCommentId) ? classCommentId[1] : null;
     var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
     commentElm.removeClass('mouseover');
+    $('iframe[name="ace_outer"]').contents().find('.comment-modal').hide();
   });
 
   self.setYofComments();
 };
+
+ep_comments.prototype.highlightComment = function(e){
+  var cls             = e.currentTarget.classList;
+  var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+  var commentId       = (classCommentId) ? classCommentId[1] : null;
+  var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
+  var sideDivIsVisible = this.sideDiv.is(":visible");
+  if(sideDivIsVisible){
+    // sidebar view highlight
+    commentElm.addClass('mouseover');
+  }else{
+    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
+    $('iframe[name="ace_outer"]').contents().find('.comment-modal').show().css({
+      left: e.clientX +"px",
+      top: e.clientY + 25 +"px"
+    });
+    // hovering comment view
+    $('iframe[name="ace_outer"]').contents().find('.comment-modal-comment').html(commentElm.html());
+  }
+}
 
 ep_comments.prototype.removeComment = function(className, id){
   // console.log('remove comment', className, id);
