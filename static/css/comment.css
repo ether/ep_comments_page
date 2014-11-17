@@ -41,6 +41,7 @@
 #sidediv{
   border-right:none;
   background-color: transparent;
+  padding-right:20px;
 }
 
 .sidebar-comment.mouseover {
@@ -106,6 +107,17 @@
 
 #newComment{
   z-index:1000;
+}
+@media (max-width: 1020px) {
+
+  #sidediv{
+    display:none;
+  }
+
+  #outerdocbody{
+    padding-right:0px;
+  }
+
 }
 
 @media (min-width: 1020px) {

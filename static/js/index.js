@@ -83,7 +83,7 @@ ep_comments.prototype.init = function(){
   // Init add push event
   this.pushComment('add', function (commentId, comment){
     self.setComment(commentId, comment);
-    console.log('pushComment', comment);
+    // console.log('pushComment', comment);
     window.setTimeout(function() {
       self.collectComments();
     }, 300);
@@ -108,11 +108,15 @@ ep_comments.prototype.findContainers = function(){
   this.padOuter = padOuter;
   this.sideDiv  = padOuter.find('#sidediv');
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
+  this.outerBody = padOuter.find('#outerdocbody')
 };
 
 // Hide line numbers
 ep_comments.prototype.hideLineNumbers = function(){
   this.sideDiv.find('table').hide();
+  this.sideDiv.css("width","200px");
+  // Correct padding if page_view is enabled
+  if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
 };
 
 // Collect Comments and link text content to the sidediv
@@ -153,7 +157,7 @@ ep_comments.prototype.collectComments = function(callback){
           markerTop = $(this).position().top;
           commentTop = commentElm.position().top;
           containerTop = container.css('top');
-          console.log(container);
+          // console.log(container);
           container.css('top', containerTop - (commentTop - markerTop));
         });
       }
@@ -177,7 +181,7 @@ ep_comments.prototype.collectComments = function(callback){
 };
 
 ep_comments.prototype.removeComment = function(className, id){
-  console.log('remove comment', className, id);
+  // console.log('remove comment', className, id);
 }
 
 // Insert comment container in sidebar
@@ -242,7 +246,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
   // position doesn't seem to be relative to rep
 
-  console.log('position', index, commentAfterIndex);
+  // console.log('position', index, commentAfterIndex);
   if (index === 0) {
     content.prependTo(container);
   } else if (commentAfterIndex.length === 0) {
@@ -265,7 +269,7 @@ ep_comments.prototype.setYofComments = function(){
   });
   $.each(inlineComments, function(){
     var y = this.offsetTop;
-    y = y+5;
+    y = y-5;
     var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
     var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
     commentEle.css("top", y+"px").show();
@@ -347,7 +351,7 @@ ep_comments.prototype.addComment = function (callback){
       
       //callback(commentId);
       ace.callWithAce(function (ace){
-        console.log('addComment :: ', commentId);
+        // console.log('addComment :: ', commentId);
         ace.ace_performSelectionChange(rep.selStart,rep.selEnd,true);
         ace.ace_setAttributeOnSelection('comment', commentId);
       },'insertComment', true);
