@@ -76,9 +76,10 @@
 .comment-content {
   border: 2px solid #DDD;
   background: #fff;
-  width: 139px;
+  width: 170px;
   height: 60px;
-  padding: 2px;
+  padding: 5px;
+  font-size:1em;
 }
 
 .comment-content:focus {
@@ -89,13 +90,14 @@
   color: #666;
   border: 2px solid #DDD;
   background: #EEE;
-  width: 71px;
+  width: 59px;
   height: 30px;
   font-size:12px;
 }
 
 .comment-buttons input[type="submit"] {
   margin-right: 5px;
+  width:120px;
 }
 
 .comment-buttons input:hover {

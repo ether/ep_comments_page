@@ -90,11 +90,14 @@ ep_comments.prototype.init = function(){
   });
 
   // On click comment icon toolbar 
-  $('.addComment').on('click', function(){
+  $('.addComment').on('click', function(e){
+    e.preventDefault(); // stops focus from being lost
     // If a new comment box doesn't already exist 
     // Add a new comment and link it to the selection 
     $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
     if (self.container.find('#newComment').length == 0) self.addComment();
+    // console.log("setting focus to .comment-content");
+    $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
   });
 
   // Show all comments
@@ -225,7 +228,7 @@ ep_comments.prototype.insertContainer = function(){
 // Insert new Comment Form
 ep_comments.prototype.insertNewComment = function(comment, callback){
   var index = 0;
-  
+
   this.insertComment("", comment, index, true);
 
   this.container.find('#newComment #comment-reset').on('click',function(){
@@ -282,6 +285,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   } else {
     commentAfterIndex.before(content);
   }
+
   this.setYofComments();
 };
 
