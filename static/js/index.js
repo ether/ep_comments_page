@@ -104,7 +104,6 @@ ep_comments.prototype.init = function(){
 // Insert comments container on sideDiv element use for linenumbers 
 ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
-
   this.padOuter = padOuter;
   this.sideDiv  = padOuter.find('#sidediv');
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -147,12 +146,6 @@ ep_comments.prototype.collectComments = function(callback){
         self.insertComment(commentId, comment.data, it);
         commentElm = container.find('#'+ commentId);
 
-        $this.mouseenter(function(){
-          commentElm.addClass('mouseover');
-        }).mouseleave(function(){
-          commentElm.removeClass('mouseover');
-        });
-
         $(this).on('click', function(){
           markerTop = $(this).position().top;
           commentTop = commentElm.position().top;
@@ -161,6 +154,7 @@ ep_comments.prototype.collectComments = function(callback){
           container.css('top', containerTop - (commentTop - markerTop));
         });
       }
+
     }
     
     var prevCommentElm = commentElm.prev();
@@ -177,7 +171,23 @@ ep_comments.prototype.collectComments = function(callback){
     
     commentElm.css({ 'top': commentPos });
   });
-  self.setYofComments()
+  self.setYofComments();
+
+  // hover event
+  this.padInner.contents().find('.comment').on('mouseover',function(e){
+    var cls             = e.currentTarget.classList;
+    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId       = (classCommentId) ? classCommentId[1] : null;
+    var commentElm = container.find('#'+ commentId);
+    commentElm.addClass('mouseover');
+  }).mouseleave(function(e){
+    var cls             = e.currentTarget.classList;
+    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId       = (classCommentId) ? classCommentId[1] : null;
+    var commentElm = container.find('#'+ commentId);
+    commentElm.removeClass('mouseover');
+  });
+
 };
 
 ep_comments.prototype.removeComment = function(className, id){

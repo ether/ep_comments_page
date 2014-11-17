@@ -1,6 +1,6 @@
 .comment {
-  background: #FFCC91 !important;
-  border-radius: 2px;
+  background: #FFFACD !important;
+  border-radius: 0px;
 }
 
 #comments {
@@ -45,19 +45,17 @@
 }
 
 .sidebar-comment.mouseover {
-  z-index:999;
-/*  margin: 8px 0 0 14px;*/
+  z-index:99999;
+  margin: 8px 0 0 14px;
   /*-moz-box-shadow: 0 0 2px #EB5C2E;
   -webkit-box-shadow: 0 0 2px #EB5C2E;
   box-shadow: 0 0 2px #EB5C2E;*/
-  background: #FFCC91;
-/*
-  -webkit-transition: margin 300ms ease-in, background 300ms ease-in;
-  -moz-transition: margin 300ms ease-in, background 300ms ease-in;
-  -ms-transition: margin 300ms ease-in, background 300ms ease-in;
-  -o-transition: margin 300ms ease-in, background 300ms ease-in;
-  transition: margin 300ms ease-in, background 300ms ease-in;
-*/
+  background: #FFFACD;
+  -webkit-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  -moz-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  -ms-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  -o-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
 }
 
 .comment-author-name {
