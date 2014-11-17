@@ -172,6 +172,22 @@ ep_comments.prototype.collectComments = function(callback){
     commentElm.css({ 'top': commentPos });
   });
 
+  // now if we apply a class such as mouseover to the editor it will go shitty
+  // so what we need to do is add CSS for the specific ID to the document...
+  // It's fucked up but that's how we do it..
+  var padInner = this.padInner;
+  this.sideDiv.contents().on("mouseover", ".sidebar-comment", function(e){
+    var commentId = e.currentTarget.id;
+    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+    inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+  }).on("mouseout", ".sidebar-comment", function(e){
+    var commentId = e.currentTarget.id;
+    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');  
+    inner.contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
+    // TODO this could potentially break ep_font_color
+  });
+
+
   // hover event
   this.padInner.contents().on("mouseover", ".comment" ,function(e){
     var cls             = e.currentTarget.classList;
