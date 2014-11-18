@@ -186,7 +186,7 @@ ep_comments.prototype.collectComments = function(callback){
   // It's fucked up but that's how we do it..
   var padInner = this.padInner;
   console.log(this.container);
-  this.container.contents().on("mouseover", ".sidebar-comment", function(e){
+  this.container.on("mouseover", ".sidebar-comment", function(e){
     console.log("oh wow");
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
