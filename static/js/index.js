@@ -52,7 +52,7 @@ function prettyDate(time){
 function ep_comments(context){
   this.container  = null;
   this.padOuter   = null;
-  this.sideDiv    = null;
+//  this.sideDiv    = null;
   this.padInner   = null;
   this.ace        = context.ace;
   this.socket     = io.connect('/comment');
@@ -94,14 +94,15 @@ ep_comments.prototype.init = function(){
     e.preventDefault(); // stops focus from being lost
     // If a new comment box doesn't already exist 
     // Add a new comment and link it to the selection 
-    $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
+    // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
     if (self.container.find('#newComment').length == 0) self.addComment();
     // console.log("setting focus to .comment-content");
     $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
+    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').show();
   });
 
   // Show all comments
-  $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
+  // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
 
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
@@ -109,24 +110,24 @@ ep_comments.prototype.init = function(){
 
 };
 
-// Insert comments container on sideDiv element use for linenumbers 
+// Insert comments container on element use for linenumbers 
 ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   this.padOuter = padOuter;
-  this.sideDiv  = padOuter.find('#sidediv');
+//  this.sideDiv  = padOuter.find('#sidediv');
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
   this.outerBody = padOuter.find('#outerdocbody')
 };
 
 // Hide line numbers
 ep_comments.prototype.hideLineNumbers = function(){
-  this.sideDiv.find('table').hide();
-  this.sideDiv.css("width","200px");
+  // this.sideDiv.find('table').hide();
+  // this.sideDiv.css("width","200px"); // cake
   // Correct padding if page_view is enabled
-//  if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
+  // if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
 };
 
-// Collect Comments and link text content to the sidediv
+// Collect Comments and link text content to the comments div
 ep_comments.prototype.collectComments = function(callback){
   var self        = this;
   var container   = this.container;
@@ -184,7 +185,9 @@ ep_comments.prototype.collectComments = function(callback){
   // so what we need to do is add CSS for the specific ID to the document...
   // It's fucked up but that's how we do it..
   var padInner = this.padInner;
-  this.sideDiv.contents().on("mouseover", ".sidebar-comment", function(e){
+  console.log(this.container);
+  this.container.contents().on("mouseover", ".sidebar-comment", function(e){
+    console.log("oh wow");
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
@@ -194,7 +197,6 @@ ep_comments.prototype.collectComments = function(callback){
     inner.contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
     // TODO this could potentially break ep_font_color
   });
-
 
   // hover event
   this.padInner.contents().on("mouseover", ".comment" ,function(e){
@@ -223,8 +225,8 @@ ep_comments.prototype.highlightComment = function(e){
   var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
   var commentId       = (classCommentId) ? classCommentId[1] : null;
   var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
-  var sideDivIsVisible = this.sideDiv.is(":visible");
-  if(sideDivIsVisible){
+  var commentsVisible = this.container.is(":visible");
+  if(commentsVisible){
     // sidebar view highlight
     commentElm.addClass('mouseover');
   }else{
@@ -244,12 +246,10 @@ ep_comments.prototype.removeComment = function(className, id){
 
 // Insert comment container in sidebar
 ep_comments.prototype.insertContainer = function(){
-  var sideDiv = this.sideDiv;
-
   // Add comments 
-  sideDiv.prepend('<div id="comments"></div>');
+  $('iframe[name="ace_outer"]').contents().find("#outerdocbody").prepend('<div id="comments"></div>');
 
-  this.container = sideDiv.find('#comments');
+  this.container = this.padOuter.find('#comments'); // cake
 };
 
 // Insert new Comment Form
@@ -285,7 +285,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     var ele = padInner.contents().find(key);
     var y = ele[0].offsetTop;
-    $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", y+"px").show();
+    $('iframe[name="ace_outer"]').contents().find('#comments').contents().find('#newComment').css("top", y+"px").show();
     // scroll new comment form to focus
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop(y); // Works in Chrome
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
@@ -305,6 +305,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   // position doesn't seem to be relative to rep
 
   // console.log('position', index, commentAfterIndex);
+console.log("Sup");
   if (index === 0) {
     content.prependTo(container);
   } else if (commentAfterIndex.length === 0) {
@@ -380,6 +381,7 @@ ep_comments.prototype.getCommentData = function (){
 
 // Add a pad comment 
 ep_comments.prototype.addComment = function (callback){
+console.log("oho");
   var socket  = this.socket;
   var data    = this.getCommentData();
   var ace     = this.ace;
@@ -387,7 +389,7 @@ ep_comments.prototype.addComment = function (callback){
   var rep     = {};
 
   // Show comments
-  $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
+  // $('iframe[name="ace_outer"]').contents().find('#comments').removeClass('sidedivhidden');
 
   ace.callWithAce(function (ace){
     var saveRep = ace.ace_getRep();
@@ -398,9 +400,8 @@ ep_comments.prototype.addComment = function (callback){
   if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
     return;
   }
-
   // Set the top of the form
-  // $('iframe[name="ace_outer"]').contents().find('#sidediv').contents().find('#newComment').css("top", "200px");
+  $('iframe[name="ace_outer"]').contents().find('#comments').contents().find('#newComment').css("top", "200px");
 
   this.insertNewComment(data, function (text, index){
     data.comment.text = text;
@@ -457,7 +458,7 @@ var hooks = {
   aceEditEvent: function(hook, context){
     // Cake this bit is a bit rough..
     var padOuter = $('iframe[name="ace_outer"]').contents();
-    padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
+    // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
     // for each comment
 

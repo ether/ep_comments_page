@@ -18,9 +18,13 @@
 
 #comments {
   display:none;
-  min-width: 180px;
-  width:90%;
+  width:210px;
+  bottom:0;
+  position:absolute;
+  top:10px;
+  right:0px;
   font-family: Helvetica, Arial, sans-serif;
+  z-index:105;
 }
 
 .comment-reply-button{
@@ -33,6 +37,7 @@
 }
 
 .sidebar-comment {
+  right:0px;
   margin-left: 10px;
   padding: 3px 5px;  
 /*  margin-top: 10px;*/
@@ -51,11 +56,13 @@
   z-index:999;
 }
 
+/*
 #sidediv{
   border-right:none;
   background-color: transparent;
   padding-right:20px;
 }
+*/
 
 .sidebar-comment.mouseover {
   z-index:99999;
@@ -127,10 +134,11 @@
 }
 
 @media (max-width: 949px) {
-
+/*
   #sidediv{
     display:none;
   }
+*/
 
   #outerdocbody{
     width:100%;
