@@ -97,8 +97,9 @@ ep_comments.prototype.init = function(){
     // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
     if (self.container.find('#newComment').length == 0) self.addComment();
     // console.log("setting focus to .comment-content");
-    $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
     $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').show();
+    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("visible").removeClass("hidden");
+    $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
   });
 
   // Show all comments
@@ -187,7 +188,6 @@ ep_comments.prototype.collectComments = function(callback){
   var padInner = this.padInner;
   console.log(this.container);
   this.container.on("mouseover", ".sidebar-comment", function(e){
-    console.log("oh wow");
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
@@ -248,8 +248,7 @@ ep_comments.prototype.removeComment = function(className, id){
 ep_comments.prototype.insertContainer = function(){
   // Add comments 
   $('iframe[name="ace_outer"]').contents().find("#outerdocbody").prepend('<div id="comments"></div>');
-
-  this.container = this.padOuter.find('#comments'); // cake
+  this.container = this.padOuter.find('#comments');
 };
 
 // Insert new Comment Form
@@ -260,7 +259,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
 
   this.container.find('#newComment #comment-reset').on('click',function(){
     var form = $(this).parent().parent();
-    form.remove();
+    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
   });
 
   this.container.find('#newComment').submit(function(){
@@ -268,7 +267,8 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var text = form.find('.comment-content').val();
 
     if (text.length != 0) {
-      form.remove();
+      // form.remove();
+      $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
       callback(text, index);
     }
 
@@ -304,8 +304,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
   // position doesn't seem to be relative to rep
 
-  // console.log('position', index, commentAfterIndex);
-console.log("Sup");
+  console.log('position', index, commentAfterIndex);
   if (index === 0) {
     content.prependTo(container);
   } else if (commentAfterIndex.length === 0) {
@@ -313,7 +312,6 @@ console.log("Sup");
   } else {
     commentAfterIndex.before(content);
   }
-
   this.setYofComments();
 };
 
@@ -323,7 +321,7 @@ ep_comments.prototype.setYofComments = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
   var inlineComments = padInner.contents().find(".comment");
-  padOuter.find("#comments").children().each(function(){
+  padOuter.find("#comments").children("div").each(function(){
     // hide each outer comment
     $(this).hide();
   });
@@ -381,7 +379,6 @@ ep_comments.prototype.getCommentData = function (){
 
 // Add a pad comment 
 ep_comments.prototype.addComment = function (callback){
-console.log("oho");
   var socket  = this.socket;
   var data    = this.getCommentData();
   var ace     = this.ace;
@@ -400,8 +397,12 @@ console.log("oho");
   if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
     return;
   }
+
   // Set the top of the form
-  $('iframe[name="ace_outer"]').contents().find('#comments').contents().find('#newComment').css("top", "200px");
+  console.log("setting top");
+  $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", "200px");
+
+  // CAKE TODO This doesn't appear to get the Y right for the input field...
 
   this.insertNewComment(data, function (text, index){
     data.comment.text = text;

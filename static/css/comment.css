@@ -42,7 +42,6 @@
   padding: 3px 5px;  
 /*  margin-top: 10px;*/
   background: white;
-  min-width: 147px;
   width:90%;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
@@ -125,7 +124,31 @@
   cursor: pointer;
 }
 
+#newComment.visible{
+  width:250px;
+  right:0px;
+  -webkit-transition: width 500ms;
+  -moz-transition: width 500ms;
+  -ms-transition: width 500ms;
+  -o-transition: width 500ms;
+  transition: width 500ms;
+}
+
+#newComment.hidden{
+  width:0px;
+  right:-50px;
+  -webkit-transition: right 500ms, width 500ms;
+  -moz-transition: right 500ms, width 500ms;
+  -ms-transition: right 500ms, width 500ms;
+  -o-transition: right 500ms, width 500ms;
+  transition: right 500ms, width 500ms;
+}
+
 #newComment{
+  position:fixed;
+  display:block;
+  top:200px;
+  width:0px;
   z-index:1000;
 }
 
