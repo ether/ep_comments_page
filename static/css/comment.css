@@ -24,7 +24,6 @@
   top:10px;
   right:0px;
   font-family: Helvetica, Arial, sans-serif;
-  z-index:105;
 }
 
 .comment-reply-button{
@@ -147,7 +146,6 @@
 #newComment{
   position:fixed;
   display:block;
-  top:200px;
   width:0px;
   z-index:1000;
 }

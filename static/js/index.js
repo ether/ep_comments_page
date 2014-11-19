@@ -400,7 +400,7 @@ ep_comments.prototype.addComment = function (callback){
 
   // Set the top of the form
   console.log("setting top");
-  $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", "200px");
+  $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
 
   // CAKE TODO This doesn't appear to get the Y right for the input field...
 
