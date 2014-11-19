@@ -24,6 +24,7 @@
   top:10px;
   right:0px;
   font-family: Helvetica, Arial, sans-serif;
+  z-index:1;
 }
 
 .comment-reply-button{
@@ -175,3 +176,9 @@
   }
 
 }
+
+#innerdocbody{
+  margin-right:200px;
+}
+
+
