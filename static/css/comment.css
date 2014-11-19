@@ -3,6 +3,11 @@
   border-radius: 0px;
 }
 
+.sidebar-comment:hover .comment-reply-button {
+  display:block;
+  margin-top:10px;
+}
+
 .comment-modal{
   position:absolute;
   min-width:20px;
@@ -14,6 +19,16 @@
   border:solid #ccc 1px;
   display:none;
   padding:10px;
+}
+
+.comment-reply{
+  max-width:190px;
+  margin-top:10px;
+  margin-bottom:5px;
+}
+
+.comment-reply-input{
+  max-width:140px;
 }
 
 #comments {
@@ -29,6 +44,7 @@
 
 .comment-reply-button{
   float:right;
+  display:none;
 }
 
 .comment-reply-button:hover{
@@ -180,5 +196,4 @@
 #innerdocbody{
   margin-right:200px;
 }
-
 

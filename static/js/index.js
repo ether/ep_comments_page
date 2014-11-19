@@ -58,6 +58,7 @@ function ep_comments(context){
   this.socket     = io.connect('/comment');
   this.padId      = clientVars.padId;
   this.comments   = [];
+  this.commentReplies = {};
 
   this.init();
 }
@@ -108,6 +109,31 @@ ep_comments.prototype.init = function(){
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
+
+  // Listen to reply clicks
+  this.container.on("click", ".comment-reply-button", function(e){
+    var commentId = $(this).parent()[0].id;
+    $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><input type=submit></form>");
+  });
+
+  var socket = this.socket;
+  this.container.on("submit", ".comment-reply", function(e){
+    console.log("replie");
+    e.preventDefault();
+
+    var data = self.getCommentData();
+
+    console.log("commented data", data);
+    var commentId = $(this).parent()[0].id;
+    var comment = $(this).find(".comment-reply-input").val();
+    console.log("comment", commentId, comment);
+
+    socket.emit('addCommentReply', data, function (commentId, comment){
+      self.setCommentReply(commentId, comment);
+      self.collectComments();
+    });
+
+  });
 
 };
 
@@ -191,6 +217,7 @@ ep_comments.prototype.collectComments = function(callback){
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+    // on hover we should show the reply option
   }).on("mouseout", ".sidebar-comment", function(e){
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');  
@@ -348,6 +375,14 @@ ep_comments.prototype.setComment = function(commentId, comment){
   comment.date = prettyDate(comment.timestamp);
   if (comments[commentId] == null) comments[commentId] = {};
   comments[commentId].data = comment;
+};
+
+// Set comment reply data
+ep_comments.prototype.setCommentReply = function(commentId, comment){
+  var commentReplies = this.commentReplies;
+  // comment.date = prettyDate(comment.timestamp);
+  if (commentReplies[commentId] == null) commentReplies[commentId] = {};
+  commentReplies[commentId].data = comment;
 };
 
 // Get all comments
