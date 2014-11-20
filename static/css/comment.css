@@ -177,29 +177,28 @@
   width:1050px;
 }
 
-@media (max-width: 949px) {
-/*
-  #sidediv{
-    display:none;
-  }
-*/
-
+/* dont display comments at < 850px wide */
+@media (max-width: 850px) {
   #outerdocbody{
     width:100%;
     padding-right:0px;
   }
-
+  #innerdocbody{
+    margin-right:0px;
+  }
 }
 
-@media (min-width: 950px) {
-
+/* display comments at > 850px wide */
+@media (min-width: 850px) {
   #comments{
     display:block;
   }
 
+  #innerdocbody{
+    margin-right:200px;
+  }
+
 }
 
-#innerdocbody{
-  margin-right:200px;
-}
+
 
