@@ -47,44 +47,49 @@ exports.addComment = function(padId, data, callback)
 
 exports.getCommentReplies = function (padId, callback)
 {
+  console.warn("Loading comment replies for ", padId);
   //get the globalComments replies
-  db.get("comment-replies:" + padId, function(err, comments)
+  db.get("comment-replies:" + padId, function(err, replies)
   {
+    console.warn("Replies from DB", replies);
     if(ERR(err, callback)) return;
     //comment does not exists
-    if(comments == null) comments = {};
-    callback(null, { comments: comments });
+    if(replies == null) replies = {};
+    callback(null, { replies: replies });
   });
 };
 
 
 exports.addCommentReply = function(padId, data, callback)
 {
-  //create the new comment reply id
-  var commentId = "c-reply-" + randomString(16);
+  //create the new reply replyid
+  var replyId = "c-reply-" + randomString(16);
 
   //get the entry
-  db.get("comment-replies:" + padId, function(err, comments){
+  db.get("comment-replies:" + padId, function(err, replies){
 
     if(ERR(err, callback)) return;
 
     // the entry doesn't exist so far, let's create it
-    if(comments == null) comments = {};
+    if(replies == null) replies = {};
 
-    var comment = {
-      "author": data.author,
-      "name": data.name,
-      "text": data.text,
+    console.warn("this should be populated", data);
+    metadata = data.comment;
+
+    var reply = {
+      "author": metadata.author,
+      "name": metadata.name,
+      "text": data.reply,
       "timestamp": new Date().getTime()
     };
 
     //add the entry for this pad
-    comments[commentId] = comment;
-
+    replies[replyId] = reply;
+console.warn("writing reply to DB", padId, replies);
     //save the new element back
-    db.set("comment-replies:" + padId, comments);
+    db.set("comment-replies:" + padId, replies);
 
-    callback(null, commentId, comment);
+    callback(null, replyId, reply);
   });
 };
 

@@ -20,6 +20,17 @@ exports.socketio = function (hook_name, args, cb){
         callback(comments);
       });
     });
+
+    socket.on('getCommentReplies', function (data, callback) {
+      var padId = data.padId;
+      
+      socket.join(padId);
+      
+      commentManager.getCommentReplies(padId, function (err, replies){
+        console.warn("emitting", replies);
+        callback(replies);
+      });
+    });
     
     socket.on('addComment', function (data, callback) {
       var padId = data.padId;
@@ -33,15 +44,16 @@ exports.socketio = function (hook_name, args, cb){
 
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
-      var content = data.comment;
+      var content = data.reply;
       var commentId = data.commentId;
-      console.warn("data", data);
-      commentManager.addCommentReply(padId, content, function (err, commentId, comment){
-        socket.broadcast.to(padId).emit('pushAddCommentReply', commentId, comment);
-        callback(commentId, comment);
+      console.warn("addCommentReply data", data);
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply){
+        console.warn("calllllllchewbacka", padId, replyId, reply);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+        console.warn("replies reply ID as ", replyId);
+        callback(replyId, reply);
       });
     });
-
 
   });
 };

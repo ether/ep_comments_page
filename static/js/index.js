@@ -7,59 +7,16 @@ var cssFiles = ['ep_comments_page/static/css/comment.css'];
 /************************************************************************/
 /*                         ep_comments Plugin                           */
 /************************************************************************/
-function prettyDate(time){
-  var time_formats = [
-  [60, 'seconds', 1], // 60
-  [120, '1 minute ago', '1 minute from now'], // 60*2
-  [3600, 'minutes', 60], // 60*60, 60
-  [7200, '1 hour ago', '1 hour from now'], // 60*60*2
-  [86400, 'hours', 3600], // 60*60*24, 60*60
-  [172800, 'yesterday', 'tomorrow'], // 60*60*24*2
-  [604800, 'days', 86400], // 60*60*24*7, 60*60*24
-  [1209600, 'last week', 'next week'], // 60*60*24*7*4*2
-  [2419200, 'weeks', 604800], // 60*60*24*7*4, 60*60*24*7
-  [4838400, 'last month', 'next month'], // 60*60*24*7*4*2
-  [29030400, 'months', 2419200], // 60*60*24*7*4*12, 60*60*24*7*4
-  [58060800, 'last year', 'next year'], // 60*60*24*7*4*12*2
-  [2903040000, 'years', 29030400], // 60*60*24*7*4*12*100, 60*60*24*7*4*12
-  [5806080000, 'last century', 'next century'], // 60*60*24*7*4*12*100*2
-  [58060800000, 'centuries', 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
-  ];
-  /*
-  var time = ('' + date_str).replace(/-/g,"/").replace(/[TZ]/g," ").replace(/^\s\s*/   /*rappel   , '').replace(/\s\s*$/, '');
-  if(time.substr(time.length-4,1)==".") time =time.substr(0,time.length-4);
-  */
-  var seconds = (new Date - new Date(time)) / 1000;
-  var token = 'ago', list_choice = 1;
-  if (seconds < 0) {
-    seconds = Math.abs(seconds);
-    token = 'from now';
-    list_choice = 2;
-  }
-  var i = 0, format;
-  while (format = time_formats[i++]) 
-    if (seconds < format[0]) {
-      if (typeof format[2] == 'string')
-        return format[list_choice];
-      else
-        return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
-    }
-  return time;
-};
- 
-
 // Container 
 function ep_comments(context){
   this.container  = null;
   this.padOuter   = null;
-//  this.sideDiv    = null;
   this.padInner   = null;
   this.ace        = context.ace;
   this.socket     = io.connect('/comment');
   this.padId      = clientVars.padId;
   this.comments   = [];
   this.commentReplies = {};
-
   this.init();
 }
 
@@ -121,15 +78,13 @@ ep_comments.prototype.init = function(){
     e.preventDefault();
     var data = self.getCommentData();
     data.commentId = $(this).parent()[0].id;
-    data.comment = $(this).find(".comment-reply-input").val();
-    console.log("comment", data);
+    data.reply = $(this).find(".comment-reply-input").val();
 
     socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
-      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply').before('<p>'+data.comment+'</p>');
-      // clear the value
+console.log("addCommentReplyEmit", data);
+      self.setCommentReply(data.commentId, data);
       $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
-      self.setCommentReply(data.commentId, data.comment);
       self.collectComments();
     });
 
@@ -138,25 +93,26 @@ ep_comments.prototype.init = function(){
 };
 
 ep_comments.prototype.setCommentReply = function(commentId, comment){
-  console.log("here");
-  $('#'+commentId + ' > comment-reply').before('boobs');
+  if(!this.commentReplies[commentId]) this.commentReplies[commentId] = [];
+  // console.log("[pushing comment", comment.comment);
+//  this.commentReplies[commentId].push({reply: comment.comment});
+//  this.
+//  this.collectCommentReplies();
+  console.log("comments & replies", this.commentReplies);
 };
+
+
 
 // Insert comments container on element use for linenumbers 
 ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   this.padOuter = padOuter;
-//  this.sideDiv  = padOuter.find('#sidediv');
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
   this.outerBody = padOuter.find('#outerdocbody')
 };
 
 // Hide line numbers
 ep_comments.prototype.hideLineNumbers = function(){
-  // this.sideDiv.find('table').hide();
-  // this.sideDiv.css("width","200px"); // cake
-  // Correct padding if page_view is enabled
-  // if($('iframe[name="ace_outer"]').hasClass("page_view")) this.outerBody.css("padding-right", "200px");
 };
 
 // Collect Comments and link text content to the comments div
@@ -186,6 +142,17 @@ ep_comments.prototype.collectComments = function(callback){
       if (commentElm.length == 0) {
         self.insertComment(commentId, comment.data, it);
         commentElm = container.find('#'+ commentId);
+console.log("collecting comment replies too");
+//        self.collectCommentReplies();
+
+  self.getCommentReplies(function (replies){
+    console.log("got replies", replies);
+    if (!$.isEmptyObject(replies)){
+      console.log("collecting comment replies");
+      self.commentReplies = replies;
+      self.collectCommentReplies(commentId);
+    };
+  });
 
         $(this).on('click', function(){
           markerTop = $(this).position().top;
@@ -250,6 +217,22 @@ ep_comments.prototype.collectComments = function(callback){
   });
 
   self.setYofComments();
+};
+
+// Collect Comments and link text content to the comments div
+ep_comments.prototype.collectCommentReplies = function(commentId, callback){
+  console.warn("collectCommentReplies", this.commentReplies);
+  var self        = this;
+  var container   = this.container;
+  var commentReplies = this.commentReplies;
+  var padComment  = this.padInner.contents().find('.comment');
+
+  console.log("this.commentReplies", this.commentReplies);
+  $.each(this.commentReplies, function(replyId, replies){
+    console.log("commentId", commentId);
+    console.log("replies", replies);
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' > .comment-reply-button').before("<p id='"+replyId+"'>"+replies.text+"</p>");
+  });
 };
 
 ep_comments.prototype.highlightComment = function(e){
@@ -382,20 +365,21 @@ ep_comments.prototype.setComment = function(commentId, comment){
   comments[commentId].data = comment;
 };
 
-// Set comment reply data
-ep_comments.prototype.setCommentReply = function(commentId, comment){
-  var commentReplies = this.commentReplies;
-  // comment.date = prettyDate(comment.timestamp);
-  if (commentReplies[commentId] == null) commentReplies[commentId] = {};
-  commentReplies[commentId].data = comment;
-};
-
 // Get all comments
 ep_comments.prototype.getComments = function (callback){
   var req = { padId: this.padId };
 
   this.socket.emit('getComments', req, function (res){
     callback(res.comments);
+  });
+};
+
+// Get all comment replies
+ep_comments.prototype.getCommentReplies = function (callback){
+  var req = { padId: this.padId };
+
+  this.socket.emit('getCommentReplies', req, function (res){
+    callback(res.replies);
   });
 };
 
@@ -439,7 +423,6 @@ ep_comments.prototype.addComment = function (callback){
   }
 
   // Set the top of the form
-  console.log("setting top");
   $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
 
   // CAKE TODO This doesn't appear to get the Y right for the input field...
@@ -468,6 +451,8 @@ ep_comments.prototype.addComment = function (callback){
 ep_comments.prototype.pushComment = function(eventType, callback){
   var socket = this.socket;
 
+  console.log("eventType", eventType);
+
   // On collaborator add a comment in the current pad
   if (eventType == 'add'){
     socket.on('pushAddComment', function (commentId, comment){
@@ -479,6 +464,13 @@ ep_comments.prototype.pushComment = function(eventType, callback){
   else if (eventType == 'remove'){
     socket.on('pushRemoveComment', function (commentId){
       callback(commentId);
+    });
+  }
+
+  // On reply
+  else if (eventType == "addCommentReply"){
+    socket.on('pushAddCommentReply', function (commentId, comment){
+      callback(replyId, comment);
     });
   }
 };
@@ -530,7 +522,48 @@ var hooks = {
 
 };
 
+function prettyDate(time){
+  var time_formats = [
+  [60, 'seconds', 1], // 60
+  [120, '1 minute ago', '1 minute from now'], // 60*2
+  [3600, 'minutes', 60], // 60*60, 60
+  [7200, '1 hour ago', '1 hour from now'], // 60*60*2
+  [86400, 'hours', 3600], // 60*60*24, 60*60
+  [172800, 'yesterday', 'tomorrow'], // 60*60*24*2
+  [604800, 'days', 86400], // 60*60*24*7, 60*60*24
+  [1209600, 'last week', 'next week'], // 60*60*24*7*4*2
+  [2419200, 'weeks', 604800], // 60*60*24*7*4, 60*60*24*7
+  [4838400, 'last month', 'next month'], // 60*60*24*7*4*2
+  [29030400, 'months', 2419200], // 60*60*24*7*4*12, 60*60*24*7*4
+  [58060800, 'last year', 'next year'], // 60*60*24*7*4*12*2
+  [2903040000, 'years', 29030400], // 60*60*24*7*4*12*100, 60*60*24*7*4*12
+  [5806080000, 'last century', 'next century'], // 60*60*24*7*4*12*100*2
+  [58060800000, 'centuries', 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
+  ];
+  /*
+  var time = ('' + date_str).replace(/-/g,"/").replace(/[TZ]/g," ").replace(/^\s\s*/   /*rappel   , '').replace(/\s\s*$/, '');
+  if(time.substr(time.length-4,1)==".") time =time.substr(0,time.length-4);
+  */
+  var seconds = (new Date - new Date(time)) / 1000;
+  var token = 'ago', list_choice = 1;
+  if (seconds < 0) {
+    seconds = Math.abs(seconds);
+    token = 'from now';
+    list_choice = 2;
+  }
+  var i = 0, format;
+  while (format = time_formats[i++]) 
+    if (seconds < format[0]) {
+      if (typeof format[2] == 'string')
+        return format[list_choice];
+      else
+        return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
+    }
+  return time;
+};
+ 
 exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
+
