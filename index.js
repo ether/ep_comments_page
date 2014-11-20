@@ -31,6 +31,18 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('addCommentReply', function (data, callback) {
+      var padId = data.padId;
+      var content = data.comment;
+      var commentId = data.commentId;
+      console.warn("data", data);
+      commentManager.addCommentReply(padId, content, function (err, commentId, comment){
+        socket.broadcast.to(padId).emit('pushAddCommentReply', commentId, comment);
+        callback(commentId, comment);
+      });
+    });
+
+
   });
 };
 

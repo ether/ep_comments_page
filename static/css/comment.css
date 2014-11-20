@@ -3,6 +3,10 @@
   border-radius: 0px;
 }
 
+.sidebar-comment:hover{
+  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
+}
+
 .sidebar-comment:hover .comment-reply-button {
   display:block;
   margin-top:10px;
@@ -91,6 +95,8 @@
   -ms-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   -o-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
+
 }
 
 .comment-author-name {

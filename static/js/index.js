@@ -118,23 +118,28 @@ ep_comments.prototype.init = function(){
 
   var socket = this.socket;
   this.container.on("submit", ".comment-reply", function(e){
-    console.log("replie");
     e.preventDefault();
-
     var data = self.getCommentData();
+    data.commentId = $(this).parent()[0].id;
+    data.comment = $(this).find(".comment-reply-input").val();
+    console.log("comment", data);
 
-    console.log("commented data", data);
-    var commentId = $(this).parent()[0].id;
-    var comment = $(this).find(".comment-reply-input").val();
-    console.log("comment", commentId, comment);
-
-    socket.emit('addCommentReply', data, function (commentId, comment){
-      self.setCommentReply(commentId, comment);
+    socket.emit('addCommentReply', data, function (){
+      // Append the reply to the comment
+      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply').before('<p>'+data.comment+'</p>');
+      // clear the value
+      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
+      self.setCommentReply(data.commentId, data.comment);
       self.collectComments();
     });
 
   });
 
+};
+
+ep_comments.prototype.setCommentReply = function(commentId, comment){
+  console.log("here");
+  $('#'+commentId + ' > comment-reply').before('boobs');
 };
 
 // Insert comments container on element use for linenumbers 
