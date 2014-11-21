@@ -78,7 +78,7 @@ ep_comments.prototype.init = function(){
   // Listen to reply clicks
   this.container.on("click", ".comment-reply-button", function(e){
     var commentId = $(this).parent()[0].id;
-    $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><input type=submit></form>");
+    $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><!--<input type=submit>--></form>");
   });
 
   // var socket = this.socket;
@@ -263,20 +263,22 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   this.container.find('#newComment').submit(function(){
     var form = $(this);
     var text = form.find('.comment-content').val();
-
     if (text.length != 0) {
-      // form.remove();
+      form.remove();
       $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
+      // console.log("calling back", text, index);
       callback(text, index);
     }
-
     return false;
   });
 
   // Set the top of the form to be the same Y as the target Rep
+console.log("oh snap");
   var ace = this.ace;
+console.log("SUP"); // never gets here..
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
+    console.log("rep", rep); // doesn't fire twice
     var line = rep.lines.atIndex(rep.selStart[0]);
     var key = "#"+line.key;
     var padOuter = $('iframe[name="ace_outer"]').contents();
