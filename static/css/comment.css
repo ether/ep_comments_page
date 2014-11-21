@@ -198,7 +198,7 @@
     display:block;
   }
 
-  #innerdocbody{
+  #innerdocbody:not(.innerPV){
     margin-right:200px;
   }
 

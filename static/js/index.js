@@ -28,7 +28,6 @@ ep_comments.prototype.init = function(){
   // Init prerequisite
   this.findContainers();
   this.insertContainer();
-  this.hideLineNumbers();
 
   // Get all comments
   this.getComments(function (comments){
@@ -92,7 +91,6 @@ ep_comments.prototype.init = function(){
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
-      self.setCommentReply(data);
       $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
       self.getCommentReplies(function(replies){
         self.commentReplies = replies;
