@@ -11,11 +11,10 @@ exports.socketio = function (hook_name, args, cb){
   .of('/comment')
   .on('connection', function (socket) {
     
+    // Join the rooms
     socket.on('getComments', function (data, callback) {
       var padId = data.padId;
-      
       socket.join(padId);
-      
       commentManager.getComments(padId, function (err, comments){
         callback(comments);
       });
@@ -23,19 +22,15 @@ exports.socketio = function (hook_name, args, cb){
 
     socket.on('getCommentReplies', function (data, callback) {
       var padId = data.padId;
-      
-      socket.join(padId);
-      
       commentManager.getCommentReplies(padId, function (err, replies){
-        console.warn("emitting", replies);
         callback(replies);
       });
     });
     
+    // On add events
     socket.on('addComment', function (data, callback) {
       var padId = data.padId;
       var content = data.comment;
-
       commentManager.addComment(padId, content, function (err, commentId, comment){
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
         callback(commentId, comment);
@@ -46,11 +41,11 @@ exports.socketio = function (hook_name, args, cb){
       var padId = data.padId;
       var content = data.reply;
       var commentId = data.commentId;
-      console.warn("addCommentReply data", data);
+      // console.warn("addCommentReply data", data);
       commentManager.addCommentReply(padId, data, function (err, replyId, reply){
-        console.warn("calllllllchewbacka", padId, replyId, reply);
+        reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-        console.warn("replies reply ID as ", replyId);
+        console.warn("Broadcast replies reply ID as ", replyId);
         callback(replyId, reply);
       });
     });

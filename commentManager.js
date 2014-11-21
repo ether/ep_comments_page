@@ -1,4 +1,3 @@
-
 var db = require('ep_etherpad-lite/node/db/DB').db;
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
@@ -48,13 +47,14 @@ exports.addComment = function(padId, data, callback)
 exports.getCommentReplies = function (padId, callback)
 {
   console.warn("Loading comment replies for ", padId);
+  console.warn("TO DO is support for getting specific comment ID replies");
   //get the globalComments replies
   db.get("comment-replies:" + padId, function(err, replies)
   {
-    console.warn("Replies from DB", replies);
     if(ERR(err, callback)) return;
     //comment does not exists
     if(replies == null) replies = {};
+    // console.warn("Sending replies", replies);
     callback(null, { replies: replies });
   });
 };
@@ -77,15 +77,16 @@ exports.addCommentReply = function(padId, data, callback)
     metadata = data.comment;
 
     var reply = {
+      "commentId": data.commentId,
+      "text": data.reply,
       "author": metadata.author,
       "name": metadata.name,
-      "text": data.reply,
       "timestamp": new Date().getTime()
     };
 
     //add the entry for this pad
     replies[replyId] = reply;
-console.warn("writing reply to DB", padId, replies);
+    // console.warn("writing reply to DB", padId, replies);
     //save the new element back
     db.set("comment-replies:" + padId, replies);
 

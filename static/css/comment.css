@@ -25,6 +25,10 @@
   padding:10px;
 }
 
+.sidebar-comment-reply{
+  margin-left:10px;
+}
+
 .comment-reply{
   max-width:190px;
   margin-top:10px;

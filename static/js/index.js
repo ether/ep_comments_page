@@ -38,6 +38,15 @@ ep_comments.prototype.init = function(){
     }
   });
 
+  this.getCommentReplies(function (replies){
+    if (!$.isEmptyObject(replies)){
+      // console.log("collecting comment replies");
+      self.commentReplies = replies;
+      self.collectCommentReplies();
+      self.commentRepliesListen();
+    }
+  });
+
   // Init add push event
   this.pushComment('add', function (commentId, comment){
     self.setComment(commentId, comment);
@@ -73,35 +82,27 @@ ep_comments.prototype.init = function(){
     $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><input type=submit></form>");
   });
 
-  var socket = this.socket;
+  // var socket = this.socket;
   this.container.on("submit", ".comment-reply", function(e){
     e.preventDefault();
     var data = self.getCommentData();
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
 
-    socket.emit('addCommentReply', data, function (){
+    self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
-console.log("addCommentReplyEmit", data);
-      self.setCommentReply(data.commentId, data);
+      console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
+      self.setCommentReply(data);
       $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
-      self.collectComments();
+      self.getCommentReplies(function(replies){
+        self.commentReplies = replies;
+        self.collectCommentReplies();
+      });
     });
 
   });
 
 };
-
-ep_comments.prototype.setCommentReply = function(commentId, comment){
-  if(!this.commentReplies[commentId]) this.commentReplies[commentId] = [];
-  // console.log("[pushing comment", comment.comment);
-//  this.commentReplies[commentId].push({reply: comment.comment});
-//  this.
-//  this.collectCommentReplies();
-  console.log("comments & replies", this.commentReplies);
-};
-
-
 
 // Insert comments container on element use for linenumbers 
 ep_comments.prototype.findContainers = function(){
@@ -109,10 +110,6 @@ ep_comments.prototype.findContainers = function(){
   this.padOuter = padOuter;
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
   this.outerBody = padOuter.find('#outerdocbody')
-};
-
-// Hide line numbers
-ep_comments.prototype.hideLineNumbers = function(){
 };
 
 // Collect Comments and link text content to the comments div
@@ -142,23 +139,10 @@ ep_comments.prototype.collectComments = function(callback){
       if (commentElm.length == 0) {
         self.insertComment(commentId, comment.data, it);
         commentElm = container.find('#'+ commentId);
-console.log("collecting comment replies too");
-//        self.collectCommentReplies();
-
-  self.getCommentReplies(function (replies){
-    console.log("got replies", replies);
-    if (!$.isEmptyObject(replies)){
-      console.log("collecting comment replies");
-      self.commentReplies = replies;
-      self.collectCommentReplies(commentId);
-    };
-  });
-
         $(this).on('click', function(){
           markerTop = $(this).position().top;
           commentTop = commentElm.position().top;
           containerTop = container.css('top');
-          // console.log(container);
           container.css('top', containerTop - (commentTop - markerTop));
         });
       }
@@ -184,7 +168,6 @@ console.log("collecting comment replies too");
   // so what we need to do is add CSS for the specific ID to the document...
   // It's fucked up but that's how we do it..
   var padInner = this.padInner;
-  console.log(this.container);
   this.container.on("mouseover", ".sidebar-comment", function(e){
     var commentId = e.currentTarget.id;
     var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
@@ -220,18 +203,20 @@ console.log("collecting comment replies too");
 };
 
 // Collect Comments and link text content to the comments div
-ep_comments.prototype.collectCommentReplies = function(commentId, callback){
+ep_comments.prototype.collectCommentReplies = function(callback){
   console.warn("collectCommentReplies", this.commentReplies);
   var self        = this;
   var container   = this.container;
   var commentReplies = this.commentReplies;
   var padComment  = this.padInner.contents().find('.comment');
-
-  console.log("this.commentReplies", this.commentReplies);
   $.each(this.commentReplies, function(replyId, replies){
-    console.log("commentId", commentId);
-    console.log("replies", replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' > .comment-reply-button').before("<p id='"+replyId+"'>"+replies.text+"</p>");
+    var commentId = replies.commentId;
+    var existsAlready = $('iframe[name="ace_outer"]').contents().find('#'+replyId).length;
+    if(existsAlready) return;
+
+    replies.replyId = replyId;
+    var content = $("#replyTemplate").tmpl(replies);
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' > .comment-reply-button').before(content);
   });
 };
 
@@ -319,7 +304,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
   // position doesn't seem to be relative to rep
 
-  console.log('position', index, commentAfterIndex);
+  // console.log('position', index, commentAfterIndex);
   if (index === 0) {
     content.prependTo(container);
   } else if (commentAfterIndex.length === 0) {
@@ -377,8 +362,8 @@ ep_comments.prototype.getComments = function (callback){
 // Get all comment replies
 ep_comments.prototype.getCommentReplies = function (callback){
   var req = { padId: this.padId };
-
   this.socket.emit('getCommentReplies', req, function (res){
+    // console.log("res.replies", res.replies);
     callback(res.replies);
   });
 };
@@ -447,11 +432,32 @@ ep_comments.prototype.addComment = function (callback){
   });
 };
 
+// Listen for comment replies
+ep_comments.prototype.commentRepliesListen = function(){
+  var self = this;
+  var socket = this.socket;
+  socket.on('pushAddCommentReply', function (replyId, reply){
+    console.warn("pAcR response", replyId, reply);
+    // callback(replyId, reply);
+    // self.collectCommentReplies();
+    self.getCommentReplies(function (replies){
+      if (!$.isEmptyObject(replies)){
+        // console.log("collecting comment replies");
+        self.commentReplies = replies;
+        self.collectCommentReplies();
+        self.commentRepliesListen();
+      }
+    });
+  });
+};
+
+
+
 // Push comment from collaborators
 ep_comments.prototype.pushComment = function(eventType, callback){
   var socket = this.socket;
 
-  console.log("eventType", eventType);
+//  console.error("eventType", eventType);
 
   // On collaborator add a comment in the current pad
   if (eventType == 'add'){
@@ -469,8 +475,8 @@ ep_comments.prototype.pushComment = function(eventType, callback){
 
   // On reply
   else if (eventType == "addCommentReply"){
-    socket.on('pushAddCommentReply', function (commentId, comment){
-      callback(replyId, comment);
+    socket.on('pushAddCommentReply', function (replyId, reply){
+      callback(replyId, reply);
     });
   }
 };
