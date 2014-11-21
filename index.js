@@ -41,11 +41,9 @@ exports.socketio = function (hook_name, args, cb){
       var padId = data.padId;
       var content = data.reply;
       var commentId = data.commentId;
-      // console.warn("addCommentReply data", data);
       commentManager.addCommentReply(padId, data, function (err, replyId, reply){
         reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-        console.warn("Broadcast replies reply ID as ", replyId);
         callback(replyId, reply);
       });
     });

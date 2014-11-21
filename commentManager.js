@@ -46,15 +46,12 @@ exports.addComment = function(padId, data, callback)
 
 exports.getCommentReplies = function (padId, callback)
 {
-  console.warn("Loading comment replies for ", padId);
-  console.warn("TO DO is support for getting specific comment ID replies");
   //get the globalComments replies
   db.get("comment-replies:" + padId, function(err, replies)
   {
     if(ERR(err, callback)) return;
     //comment does not exists
     if(replies == null) replies = {};
-    // console.warn("Sending replies", replies);
     callback(null, { replies: replies });
   });
 };
@@ -73,7 +70,6 @@ exports.addCommentReply = function(padId, data, callback)
     // the entry doesn't exist so far, let's create it
     if(replies == null) replies = {};
 
-    console.warn("this should be populated", data);
     metadata = data.comment;
 
     var reply = {
@@ -86,7 +82,6 @@ exports.addCommentReply = function(padId, data, callback)
 
     //add the entry for this pad
     replies[replyId] = reply;
-    // console.warn("writing reply to DB", padId, replies);
     //save the new element back
     db.set("comment-replies:" + padId, replies);
 
