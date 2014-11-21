@@ -3,7 +3,7 @@
     <div id="${commentId}" class="sidebar-comment" title="${date}">
         <p class="comment-author-name">${name}:</p>
         <p class="comment-text">${text}</p>
-<!--        <p class="comment-reply-button">Reply</p> -->
+        <p class="comment-reply-button" title="reply to this comment">... Reply</p>
     </div>
 </script>
 
@@ -14,3 +14,11 @@
     	<p class="comment-buttons"><input type="submit" value="Comment" /><input type="reset" id="comment-reset" value="Cancel" /></p>
     </form>
 </script>
+
+<script id="replyTemplate" type="text/html">
+    <div id="${replyId}" class="sidebar-comment-reply">
+        <p class="comment-author-name">${name}:</p>
+        <p class="comment-text">${text}</p>
+    </div>
+</script>
+

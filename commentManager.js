@@ -1,4 +1,3 @@
-
 var db = require('ep_etherpad-lite/node/db/DB').db;
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
@@ -9,17 +8,8 @@ exports.getComments = function (padId, callback)
   db.get("comments:" + padId, function(err, comments)
   {
     if(ERR(err, callback)) return;
-
     //comment does not exists
     if(comments == null) comments = {};
-
-    /*var comments = [];
-    var jsonComments = globalComments.comments;
-    for (var commentId in jsonComments)
-    {
-      comments[commentId] = jsonComments;
-    }*/
-    
     callback(null, { comments: comments });
   });
 };
@@ -53,3 +43,49 @@ exports.addComment = function(padId, data, callback)
     callback(null, commentId, comment);
   });
 };
+
+exports.getCommentReplies = function (padId, callback)
+{
+  //get the globalComments replies
+  db.get("comment-replies:" + padId, function(err, replies)
+  {
+    if(ERR(err, callback)) return;
+    //comment does not exists
+    if(replies == null) replies = {};
+    callback(null, { replies: replies });
+  });
+};
+
+
+exports.addCommentReply = function(padId, data, callback)
+{
+  //create the new reply replyid
+  var replyId = "c-reply-" + randomString(16);
+
+  //get the entry
+  db.get("comment-replies:" + padId, function(err, replies){
+
+    if(ERR(err, callback)) return;
+
+    // the entry doesn't exist so far, let's create it
+    if(replies == null) replies = {};
+
+    metadata = data.comment;
+
+    var reply = {
+      "commentId": data.commentId,
+      "text": data.reply,
+      "author": metadata.author,
+      "name": metadata.name,
+      "timestamp": new Date().getTime()
+    };
+
+    //add the entry for this pad
+    replies[replyId] = reply;
+    //save the new element back
+    db.set("comment-replies:" + padId, replies);
+
+    callback(null, replyId, reply);
+  });
+};
+

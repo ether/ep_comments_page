@@ -11,23 +11,40 @@ exports.socketio = function (hook_name, args, cb){
   .of('/comment')
   .on('connection', function (socket) {
     
+    // Join the rooms
     socket.on('getComments', function (data, callback) {
       var padId = data.padId;
-      
       socket.join(padId);
-      
       commentManager.getComments(padId, function (err, comments){
         callback(comments);
       });
     });
+
+    socket.on('getCommentReplies', function (data, callback) {
+      var padId = data.padId;
+      commentManager.getCommentReplies(padId, function (err, replies){
+        callback(replies);
+      });
+    });
     
+    // On add events
     socket.on('addComment', function (data, callback) {
       var padId = data.padId;
       var content = data.comment;
-
       commentManager.addComment(padId, content, function (err, commentId, comment){
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
         callback(commentId, comment);
+      });
+    });
+
+    socket.on('addCommentReply', function (data, callback) {
+      var padId = data.padId;
+      var content = data.reply;
+      var commentId = data.commentId;
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply){
+        reply.replyId = replyId;
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+        callback(replyId, reply);
       });
     });
 

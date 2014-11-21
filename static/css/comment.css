@@ -3,6 +3,15 @@
   border-radius: 0px;
 }
 
+.sidebar-comment:hover{
+  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
+}
+
+.sidebar-comment:hover .comment-reply-button {
+  display:block;
+  margin-top:10px;
+}
+
 .comment-modal{
   position:absolute;
   min-width:20px;
@@ -16,15 +25,34 @@
   padding:10px;
 }
 
+.sidebar-comment-reply{
+  margin-left:10px;
+}
+
+.comment-reply{
+  max-width:190px;
+  margin-top:10px;
+  margin-bottom:5px;
+}
+
+.comment-reply-input{
+  width:184px;
+}
+
 #comments {
   display:none;
-  min-width: 180px;
-  width:90%;
+  width:210px;
+  bottom:0;
+  position:absolute;
+  top:10px;
+  right:0px;
   font-family: Helvetica, Arial, sans-serif;
+  z-index:1;
 }
 
 .comment-reply-button{
   float:right;
+  display:none;
 }
 
 .comment-reply-button:hover{
@@ -33,11 +61,11 @@
 }
 
 .sidebar-comment {
+  right:0px;
   margin-left: 10px;
   padding: 3px 5px;  
 /*  margin-top: 10px;*/
   background: white;
-  min-width: 147px;
   width:90%;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
@@ -51,11 +79,13 @@
   z-index:999;
 }
 
+/*
 #sidediv{
   border-right:none;
   background-color: transparent;
   padding-right:20px;
 }
+*/
 
 .sidebar-comment.mouseover {
   z-index:99999;
@@ -69,6 +99,8 @@
   -ms-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   -o-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
+  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
+
 }
 
 .comment-author-name {
@@ -118,7 +150,30 @@
   cursor: pointer;
 }
 
+#newComment.visible{
+  width:250px;
+  right:0px;
+  -webkit-transition: width 500ms;
+  -moz-transition: width 500ms;
+  -ms-transition: width 500ms;
+  -o-transition: width 500ms;
+  transition: width 500ms;
+}
+
+#newComment.hidden{
+  width:0px;
+  right:-50px;
+  -webkit-transition: right 500ms, width 500ms;
+  -moz-transition: right 500ms, width 500ms;
+  -ms-transition: right 500ms, width 500ms;
+  -o-transition: right 500ms, width 500ms;
+  transition: right 500ms, width 500ms;
+}
+
 #newComment{
+  position:fixed;
+  display:block;
+  width:0px;
   z-index:1000;
 }
 
@@ -126,23 +181,28 @@
   width:1050px;
 }
 
-@media (max-width: 949px) {
-
-  #sidediv{
-    display:none;
-  }
-
+/* dont display comments at < 850px wide */
+@media (max-width: 850px) {
   #outerdocbody{
     width:100%;
     padding-right:0px;
   }
-
+  #innerdocbody{
+    margin-right:0px;
+  }
 }
 
-@media (min-width: 950px) {
-
+/* display comments at > 850px wide */
+@media (min-width: 850px) {
   #comments{
     display:block;
   }
 
+  #innerdocbody:not(.innerPV){
+    margin-right:200px;
+  }
+
 }
+
+
+
