@@ -57,6 +57,8 @@ ep_comments.prototype.init = function(){
 
   // On click comment icon toolbar 
   $('.addComment').on('click', function(e){
+    $('iframe[name="ace_outer"]').contents().find('#comments').show();
+    $('iframe[name="ace_outer"]').contents().find('#comments').addClass("active");
     e.preventDefault(); // stops focus from being lost
     // If a new comment box doesn't already exist 
     // Add a new comment and link it to the selection 
@@ -67,9 +69,6 @@ ep_comments.prototype.init = function(){
     $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("visible").removeClass("hidden");
     $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
   });
-
-  // Show all comments
-  // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
 
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
@@ -122,6 +121,11 @@ ep_comments.prototype.collectComments = function(callback){
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
+
+    // make sure comments aer visible on the page
+    container.show();
+    container.addClass("active");
+    self.padInner.contents().find("#innerdocbody").addClass("comments");
 
     if (commentId === null) {
       var isAuthorClassName = /(?:^| )(a.[A-Za-z0-9]*)/.exec(cls);
@@ -393,9 +397,6 @@ ep_comments.prototype.addComment = function (callback){
   var ace     = this.ace;
   var self    = this;
   var rep     = {};
-
-  // Show comments
-  // $('iframe[name="ace_outer"]').contents().find('#comments').removeClass('sidedivhidden');
 
   ace.callWithAce(function (ace){
     var saveRep = ace.ace_getRep();

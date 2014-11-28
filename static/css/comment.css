@@ -194,11 +194,11 @@
 
 /* display comments at > 850px wide */
 @media (min-width: 850px) {
-  #comments{
+  #comments.active{
     display:block;
   }
 
-  #innerdocbody:not(.innerPV){
+  #innerdocbody.comments:not(.innerPV){
     margin-right:200px;
   }
 
