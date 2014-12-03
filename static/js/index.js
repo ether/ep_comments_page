@@ -277,9 +277,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   });
 
   // Set the top of the form to be the same Y as the target Rep
-console.log("oh snap");
   var ace = this.ace;
-console.log("SUP"); // never gets here..
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
     console.log("rep", rep); // doesn't fire twice
