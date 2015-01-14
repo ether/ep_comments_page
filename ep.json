@@ -14,6 +14,7 @@
         "eejsBlock_editbarMenuLeft": "ep_comments_page/index",
         "eejsBlock_dd_insert": "ep_comments_page/index",
         "eejsBlock_scripts": "ep_comments_page/index",
+        "eejsBlock_mySettings": "ep_comments_page/index",
         "eejsBlock_styles": "ep_comments_page/index"
       }
     }

@@ -56,6 +56,11 @@ exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
   return cb();
 };
 
+exports.eejsBlock_mySettings = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_comments_page/templates/settings.ejs");
+  return cb();
+};
+
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
   return cb();

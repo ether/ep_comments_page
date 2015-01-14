@@ -2,6 +2,8 @@ var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
+var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+
 var cssFiles = ['ep_comments_page/static/css/comment.css'];
 
 /************************************************************************/
@@ -99,6 +101,23 @@ ep_comments.prototype.init = function(){
 
   });
 
+  // Enable and handle cookies
+  if (padcookie.getPref("comments")) {
+    $('#options-comments').attr('checked','checked');
+  }else{
+    self.container.hide();
+  }
+
+  $('#options-comments').on('click', function() {
+    if($('#options-comments').is(':checked')) {
+      padcookie.setPref("comments", true);
+      self.container.show();
+    } else {
+      padcookie.setPref("comments", false);
+      self.container.hide();
+    }
+  });
+
 };
 
 // Insert comments container on element use for linenumbers 
@@ -123,7 +142,7 @@ ep_comments.prototype.collectComments = function(callback){
     var commentId       = (classCommentId) ? classCommentId[1] : null;
 
     // make sure comments aer visible on the page
-    container.show();
+    // container.show();
     container.addClass("active");
     self.padInner.contents().find("#innerdocbody").addClass("comments");
 
