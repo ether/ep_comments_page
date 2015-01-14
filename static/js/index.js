@@ -89,7 +89,7 @@ ep_comments.prototype.init = function(){
 
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
-      console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
+      // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
       $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
       self.getCommentReplies(function(replies){
         self.commentReplies = replies;
@@ -206,7 +206,7 @@ ep_comments.prototype.collectComments = function(callback){
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function(callback){
-  console.warn("collectCommentReplies", this.commentReplies);
+  // console.warn("collectCommentReplies", this.commentReplies);
   var self        = this;
   var container   = this.container;
   var commentReplies = this.commentReplies;
@@ -280,7 +280,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   var ace = this.ace;
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
-    console.log("rep", rep); // doesn't fire twice
+    // console.log("rep", rep); // doesn't fire twice
     var line = rep.lines.atIndex(rep.selStart[0]);
     var key = "#"+line.key;
     var padOuter = $('iframe[name="ace_outer"]').contents();
@@ -436,7 +436,7 @@ ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
   socket.on('pushAddCommentReply', function (replyId, reply){
-    console.warn("pAcR response", replyId, reply);
+    // console.warn("pAcR response", replyId, reply);
     // callback(replyId, reply);
     // self.collectCommentReplies();
     self.getCommentReplies(function (replies){
