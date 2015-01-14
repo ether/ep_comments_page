@@ -102,10 +102,12 @@ ep_comments.prototype.init = function(){
   });
 
   // Enable and handle cookies
-  if (padcookie.getPref("comments")) {
-    $('#options-comments').attr('checked','checked');
-  }else{
+  if (padcookie.getPref("comments") === false) {
     self.container.hide();
+    $('#options-comments').attr('checked','unchecked');
+    $('#options-comments').attr('checked',false);
+  }else{
+    $('#options-comments').attr('checked','checked');
   }
 
   $('#options-comments').on('click', function() {
