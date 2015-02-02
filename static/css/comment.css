@@ -3,8 +3,17 @@
   border-radius: 0px;
 }
 
+.sidebar-comment:hover .comment-text{
+  height:auto;
+  white-space:normal;
+  text-overflow:auto;
+}
+
 .sidebar-comment:hover{
   box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
+  height:auto;
+  white-space:normal;
+  text-overflow:auto;
 }
 
 .sidebar-comment:hover .comment-reply-button {
@@ -61,12 +70,16 @@
 }
 
 .sidebar-comment {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
   right:0px;
   margin-left: 10px;
   padding: 3px 5px;  
 /*  margin-top: 10px;*/
   background: white;
   width:90%;
+  height:10px;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
   -moz-box-shadow: 0 0 2px #888;
@@ -116,6 +129,9 @@
   word-wrap: break-word;
   white-space: normal;
   display: inline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .comment-content {
