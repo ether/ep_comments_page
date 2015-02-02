@@ -15,7 +15,14 @@ function ep_comments(context){
   this.padOuter   = null;
   this.padInner   = null;
   this.ace        = context.ace;
-  this.socket     = io.connect('/comment');
+
+  // Required for instances running on weird ports
+  // This probably needs some work for instances running on root or not on /p/
+  var loc = document.location;
+  var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
+  var url = loc.protocol + "//" + loc.hostname + ":" + port + "/" + "comment";
+  this.socket     = io.connect(url);
+
   this.padId      = clientVars.padId;
   this.comments   = [];
   this.commentReplies = {};
