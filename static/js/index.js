@@ -61,7 +61,7 @@ ep_comments.prototype.init = function(){
     // console.log('pushComment', comment);
     window.setTimeout(function() {
       self.collectComments();
-            var count_comments=0;
+      var count_comments=0;
       for(var key in self.comments)  {count_comments++;}
       var padComment  = this.padInner.contents().find('.comment');
       if( count_comments > padComment.length ) {
