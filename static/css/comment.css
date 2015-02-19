@@ -174,6 +174,7 @@
   -ms-transition: width 500ms;
   -o-transition: width 500ms;
   transition: width 500ms;
+  height:auto;
 }
 
 #newComment.hidden{
