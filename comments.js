@@ -21,10 +21,10 @@ exports.getPadComments = function(padID, callback)
 
 exports.addPadComment = function(padID, data, callback)
 {
-  commentManager.addComment(padID, data, function (err, commentID)
+  commentManager.addComment(padID, data, function (err, commentID, comment)
   {
     if(ERR(err, callback)) return;
 
-    if(commentID !== null) callback(null, commentID);
+    if(commentID !== null) callback(null, commentID, comment);
   });
 };

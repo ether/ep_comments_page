@@ -11,6 +11,7 @@
       },
       "hooks": {
         "socketio": "ep_comments_page/index",
+        "expressCreateServer": "ep_comments_page/index",
         "eejsBlock_editbarMenuLeft": "ep_comments_page/index",
         "eejsBlock_dd_insert": "ep_comments_page/index",
         "eejsBlock_scripts": "ep_comments_page/index",
