@@ -5,6 +5,7 @@
       "pre": ["ep_etherpad-lite/webaccess"],
       "client_hooks": {
         "postAceInit": "ep_comments_page/static/js/index",
+        "collectContentPre": "ep_comments_page/static/js/shared",
         "aceAttribsToClasses": "ep_comments_page/static/js/index",
         "aceEditorCSS": "ep_comments_page/static/js/index",
         "aceEditEvent": "ep_comments_page/static/js/index"
@@ -12,6 +13,7 @@
       "hooks": {
         "socketio": "ep_comments_page/index",
         "expressCreateServer": "ep_comments_page/index",
+        "collectContentPre": "ep_comments_page/static/js/shared",
         "eejsBlock_editbarMenuLeft": "ep_comments_page/index",
         "eejsBlock_dd_insert": "ep_comments_page/index",
         "eejsBlock_scripts": "ep_comments_page/index",
