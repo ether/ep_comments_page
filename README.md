@@ -13,7 +13,7 @@ If you need to add a comment to a pad:
 
 * Call this route to create the comment on Etherpad and get the comment id:
   ```
-  curl "http://localhost:9001/p/THE_PAD_ID/comments?api_key=YOUR_API_KEY&name=AUTHOR&text=COMMENT"
+  curl -X POST http://localhost:9001/p/THE_PAD_ID/comments -d "apikey=YOUR_API_KEY" -d "name=AUTHOR" -d "text=COMMENT"
   ```
 
   The response will be:

@@ -23,43 +23,57 @@ describe('addComment', function(){
   });
 
   it('returns code 1 if name is missing', function(done) {
-    api.get(padEndPointWithMissingName())
+    api.post(commentsEndPoint())
+    .field('apikey', apiKey)
+    .field('text', 'This is a comment')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
   it('returns code 1 if text is missing', function(done) {
-    api.get(padEndPointWithMissingText())
+    api.post(commentsEndPoint())
+    .field('apikey', apiKey)
+    .field('name', 'John Doe')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
   it('returns code 4 if API key is missing', function(done) {
-    var missingApiKey = null;
-    api.get(padEndPoint('comments', missingApiKey))
+    api.post(commentsEndPoint())
+    .field('name', 'John Doe')
+    .field('text', 'This is a comment')
     .expect(codeToBe4)
     .expect('Content-Type', /json/)
     .expect(401, done)
   });
 
   it('returns code 4 if API key is wrong', function(done) {
-    api.get(padEndPoint('comments', 'wrongApiKey'))
+    api.post(commentsEndPoint())
+    .field('apikey', 'wrongApiKey')
+    .field('name', 'John Doe')
+    .field('text', 'This is a comment')
     .expect(codeToBe4)
     .expect('Content-Type', /json/)
     .expect(401, done)
   });
 
   it('returns code 0 when comment is successfully added', function(done) {
-    api.get(padEndPointWithAllParams())
+    api.post(commentsEndPoint())
+    .field('apikey', apiKey)
+    .field('name', 'John Doe')
+    .field('text', 'This is a comment')
     .expect(codeToBe0)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
   it('returns comment id when comment is successfully added', function(done) {
-    api.get(padEndPointWithAllParams())
+    api.post(commentsEndPoint())
+    .field('apikey', apiKey)
+    .field('name', 'John Doe')
+    .field('text', 'This is a comment')
     .expect(function(res){
       if(res.body.commentId === undefined) throw new Error("Response should have commentId.")
     })
@@ -75,7 +89,10 @@ describe('addComment', function(){
   //   });
 
   //   // creates comment:
-  //   api.get(padEndPointWithAllParams())
+  //   api.post(commentsEndPoint())
+  //   .field('apikey', apiKey)
+  //   .field('name', 'John Doe')
+  //   .field('text', 'This is a comment')
   //   .expect(function(res){
   //     setTimeout(function() { //give it a second to process the message on the client
   //       // TODO review this, test is not failing ever
@@ -103,19 +120,9 @@ var createPad = function(pad, done) {
   done();
 }
 
-var padEndPoint = function(point, key, pad){
-  key = (typeof key !== 'undefined') ?  key : apiKey;
-  pad = (typeof pad !== 'undefined') ?  pad : padID;
-
-  url = '/p/'+pad+'/'+point
-  if (key != null) url += '?apikey='+key
-
-  return url;
+function commentsEndPoint() {
+  return '/p/'+padID+'/comments'
 }
-
-function padEndPointWithMissingName() { return padEndPoint('comments')+"&text=This is a comment" }
-function padEndPointWithMissingText() { return padEndPoint('comments')+"&name=John Doe" }
-function padEndPointWithAllParams()   { return padEndPoint('comments')+"&name=John Doe&text=This is a comment" }
 
 var codeToBe = function(expectedCode, res) {
   if(res.body.code !== expectedCode){

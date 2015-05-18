@@ -16,7 +16,9 @@
       "email": "john@mclear.co.uk"
     }
   ],
-  "dependencies": {},
+  "dependencies": {
+    "formidable": "*"
+  },
   "engines": {
     "node": "*"
   },

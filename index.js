@@ -1,5 +1,6 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var fs = require("fs");
+var formidable = require('formidable');
 // var clientIO = require('socket.io-client');
 var commentManager = require('./commentManager');
 var comments = require('./comments');
@@ -101,48 +102,50 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {
-  args.app.get('/p/:pad/:rev?/comments', function(req, res) {
-    // check the api key
-    apiKeyReceived = req.query.apikey || req.query.api_key;
-    if(apiKeyReceived !== apikey.trim()) {
-      res.statusCode = 401;
-      res.json({code: 4, message: "no or wrong API Key", data: null});
-      return;
-    }
-
-    // check comment data
-    var error = checkCommentData(req);
-    if(error) {
-      res.json({code: 1, message: error, data: null});
-      return;
-    }
-    var data = {
-      author: "empty",
-      name: req.query.name,
-      text: req.query.text
-    };
-
-    // sanitize pad id before continuing
-    var padIdReceived = req.params.pad
-    padManager.sanitizePadId(padIdReceived, function(padId) {
-      padIdReceived = padId;
-    });
-
-    comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
-      if(err) {
-        res.json({code: 2, message: "internal error", data: null});
-      } else {
-        // broadcastCommentAdded(padIdReceived, commentId, comment);
-        res.json({code: 0, commentId: commentId});
+  args.app.post('/p/:pad/:rev?/comments', function(req, res) {
+    new formidable.IncomingForm().parse(req, function (err, fields, files) {
+      // check the api key
+      apiKeyReceived = fields.apikey || fields.api_key;
+      if(apiKeyReceived !== apikey.trim()) {
+        res.statusCode = 401;
+        res.json({code: 4, message: "no or wrong API Key", data: null});
+        return;
       }
+
+      // check comment data
+      var error = checkCommentData(fields);
+      if(error) {
+        res.json({code: 1, message: error, data: null});
+        return;
+      }
+      var data = {
+        author: "empty",
+        name: fields.name,
+        text: fields.text
+      };
+
+      // sanitize pad id before continuing
+      var padIdReceived = req.params.pad
+      padManager.sanitizePadId(padIdReceived, function(padId) {
+        padIdReceived = padId;
+      });
+
+      comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
+        if(err) {
+          res.json({code: 2, message: "internal error", data: null});
+        } else {
+          // broadcastCommentAdded(padIdReceived, commentId, comment);
+          res.json({code: 0, commentId: commentId});
+        }
+      });
     });
   });
 
 }
 
-var checkCommentData = function(req) {
-  if(typeof req.query.name === 'undefined') return "name is required";
-  if(typeof req.query.text === 'undefined') return "text is required";
+var checkCommentData = function(fields) {
+  if(typeof fields.name === 'undefined') return "name is required";
+  if(typeof fields.text === 'undefined') return "text is required";
 
   return false;
 }
