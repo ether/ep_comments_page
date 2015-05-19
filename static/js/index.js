@@ -189,21 +189,24 @@ ep_comments.prototype.collectComments = function(callback){
     var commentElm  = container.find('#'+ commentId);
     var comment     = comments[commentId];
 
-    if (comment !== null) {
-      // If comment is not in sidebar insert it
-      if (commentElm.length == 0) {
-        self.insertComment(commentId, comment.data, it);
-        commentElm = container.find('#'+ commentId);
-        $(this).on('click', function(){
-          markerTop = $(this).position().top;
-          commentTop = commentElm.position().top;
-          containerTop = container.css('top');
-          container.css('top', containerTop - (commentTop - markerTop));
-        });
-      }
+console.log("comment", comment, comments);
 
+    if(comment){
+      if (comment !== null) {
+        // If comment is not in sidebar insert it
+        if (commentElm.length == 0) {
+          self.insertComment(commentId, comment.data, it);
+          commentElm = container.find('#'+ commentId);
+          $(this).on('click', function(){
+            markerTop = $(this).position().top;
+            commentTop = commentElm.position().top;
+            containerTop = container.css('top');
+            container.css('top', containerTop - (commentTop - markerTop));
+          });
+        }
+      }
     }
-    
+
     var prevCommentElm = commentElm.prev();
     var commentPos;
 

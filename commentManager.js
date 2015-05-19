@@ -1,9 +1,20 @@
 var db = require('ep_etherpad-lite/node/db/DB').db;
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 
 exports.getComments = function (padId, callback)
 {
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  // Not sure if we will encouter race conditions here..  Be careful.
+
   //get the globalComments
   db.get("comments:" + padId, function(err, comments)
   {
@@ -16,6 +27,14 @@ exports.getComments = function (padId, callback)
 
 exports.addComment = function(padId, data, callback)
 {
+ // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
   //create the new comment
   var commentId = "c-" + randomString(16);
 
@@ -44,8 +63,15 @@ exports.addComment = function(padId, data, callback)
   });
 };
 
-exports.getCommentReplies = function (padId, callback)
-{
+exports.getCommentReplies = function (padId, callback){
+ // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
   //get the globalComments replies
   db.get("comment-replies:" + padId, function(err, replies)
   {
@@ -57,8 +83,15 @@ exports.getCommentReplies = function (padId, callback)
 };
 
 
-exports.addCommentReply = function(padId, data, callback)
-{
+exports.addCommentReply = function(padId, data, callback){
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
   //create the new reply replyid
   var replyId = "c-reply-" + randomString(16);
 
