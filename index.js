@@ -1,11 +1,11 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var fs = require("fs");
 var formidable = require('formidable');
-// var clientIO = require('socket.io-client');
+var clientIO = require('socket.io-client');
 var commentManager = require('./commentManager');
 var comments = require('./comments');
 var padManager = require("ep_etherpad-lite/node/db/PadManager");
-// var settings = require("ep_etherpad-lite/node/utils/Settings");
+var settings = require("ep_etherpad-lite/node/utils/Settings");
 
 //ensure we have an apikey
 var apikey = "";
@@ -63,15 +63,14 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
-    // // comment added via API
-    // socket.on('apiAddComment', function (data, callback) {
-    //   var padId = data.padId;
-    //   var commentId = data.commentId;
-    //   var comment = data.comment;
+    // comment added via API
+    socket.on('apiAddComment', function (data) {
+      var padId = data.padId;
+      var commentId = data.commentId;
+      var comment = data.comment;
 
-    //   socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
-    //   callback(commentId, comment);
-    // });
+      socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
+    });
 
   });
 };
@@ -134,7 +133,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         if(err) {
           res.json({code: 2, message: "internal error", data: null});
         } else {
-          // broadcastCommentAdded(padIdReceived, commentId, comment);
+          broadcastCommentAdded(padIdReceived, commentId, comment);
           res.json({code: 0, commentId: commentId});
         }
       });
@@ -150,30 +149,30 @@ var checkCommentData = function(fields) {
   return false;
 }
 
-// var broadcastCommentAdded = function(padId, commentId, comment) {
-//   var socket = clientIO.connect(broadcastUrl);
+var broadcastCommentAdded = function(padId, commentId, comment) {
+  var socket = clientIO.connect(broadcastUrl);
 
-//   var data = {
-//     padId: padId,
-//     commentId: commentId,
-//     comment: comment
-//   };
+  var data = {
+    padId: padId,
+    commentId: commentId,
+    comment: comment
+  };
 
-//   socket.emit('apiAddComment', data);
-// }
+  socket.emit('apiAddComment', data);
+}
 
-// var buildBroadcastUrl = function() {
-//   var url = "";
-//   if(settings.ssl) {
-//     url += "https://";
-//   } else {
-//     url += "http://";
-//   }
-//   url += settings.ip + ":" + settings.port + "/comment";
+var buildBroadcastUrl = function() {
+  var url = "";
+  if(settings.ssl) {
+    url += "https://";
+  } else {
+    url += "http://";
+  }
+  url += settings.ip + ":" + settings.port + "/comment";
 
-//   return url;
-// }
-// var broadcastUrl = buildBroadcastUrl();
+  return url;
+}
+var broadcastUrl = buildBroadcastUrl();
 
 /*
 exports.expressCreateServer = function (hook_name, args, cb) {

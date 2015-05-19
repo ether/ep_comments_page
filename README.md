@@ -29,5 +29,7 @@ If you need to add a comment to a pad:
   Result:
   ![Screen shot](http://i.imgur.com/KM4lPJx.png)
 
+NOTE: Adding a comment to a pad via API will make the other editors with that pad to be alerted, but this feature is only active if your Etherpad is run in `loadTest` mode. Read [the Etherpad Guide](https://github.com/ether/etherpad-lite/wiki/Load-Testing-Etherpad) for how to enable load testing.
+
 ## License
 Apache 2
