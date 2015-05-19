@@ -175,6 +175,7 @@
   -o-transition: width 500ms;
   transition: width 500ms;
   height:auto;
+  min-height:100px;
 }
 
 #newComment.hidden{
