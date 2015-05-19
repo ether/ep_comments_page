@@ -189,8 +189,6 @@ ep_comments.prototype.collectComments = function(callback){
     var commentElm  = container.find('#'+ commentId);
     var comment     = comments[commentId];
 
-console.log("comment", comment, comments);
-
     if(comment){
       if (comment !== null) {
         // If comment is not in sidebar insert it
