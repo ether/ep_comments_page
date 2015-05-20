@@ -10,7 +10,6 @@
 }
 
 .sidebar-comment:hover{
-  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
   height:auto;
   white-space:normal;
   text-overflow:auto;
@@ -79,7 +78,7 @@
 /*  margin-top: 10px;*/
   background: white;
   width:90%;
-  height:10px;
+  height:15px;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
   -moz-box-shadow: 0 0 2px #888;
@@ -92,28 +91,17 @@
   z-index:999;
 }
 
-/*
-#sidediv{
-  border-right:none;
-  background-color: transparent;
-  padding-right:20px;
-}
-*/
-
 .sidebar-comment.mouseover {
+
   z-index:99999;
   margin: 0px 0 0 14px;
-  /*-moz-box-shadow: 0 0 2px #EB5C2E;
-  -webkit-box-shadow: 0 0 2px #EB5C2E;
-  box-shadow: 0 0 2px #EB5C2E;*/
-  background: #FFFACD;
+  white-space:normal;
+  height:auto;
   -webkit-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   -moz-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   -ms-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   -o-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
   transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-  box-shadow: 0px 10px 5px #fff, 0px -10px 5px #fff;
-
 }
 
 .comment-author-name {

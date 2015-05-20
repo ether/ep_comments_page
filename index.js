@@ -1,6 +1,24 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var commentManager = require('./commentManager');
 
+exports.handleMessageSecurity = function(hook_name, context, callback){
+  if(context.message && context.message.data && context.message.data.apool){
+    var apool = context.message.data.apool;
+    if(apool.numToAttrib && apool.numToAttrib[0] && apool.numToAttrib[0][0]){
+      if(apool.numToAttrib[0][0] === "comment"){
+        // Comment change, allow it to override readonly security model!!
+        callback(true);
+      }else{
+        callback();
+      }
+    }else{
+      callback();
+    }
+  }else{
+    callback();
+  }
+};
+
 exports.socketio = function (hook_name, args, cb){
   var app = args.app;
   var io = args.io;
@@ -80,14 +98,14 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 exports.expressCreateServer = function (hook_name, args, cb) {
   var app = args.app;
 
-	app.get('/p/:pad/:rev?/comments', function(req, res, next) {
-		var padId = req.params.pad;
-		var revision = req.params.rev ? req.params.rev : null;
+  app.get('/p/:pad/:rev?/comments', function(req, res, next) {
+    var padId = req.params.pad;
+    var revision = req.params.rev ? req.params.rev : null;
 
-		comments.getPadComments(padId, revision, function(err, padComments) {
-			res.render('comments.ejs', { locals: { comments: padComments } });
-		});
-	});
+    comments.getPadComments(padId, revision, function(err, padComments) {
+      res.render('comments.ejs', { locals: { comments: padComments } });
+    });
+  });
 
   app.get('/p/:pad/:rev?/add/comment/:name/:text', function(req, res, next) {
     var padId = req.params.pad;
@@ -104,10 +122,10 @@ exports.expressCreateServer = function (hook_name, args, cb) {
       res.send('{ "commentId": "'+ commentId +'" }');
     });
   });
-	app.configure(function(){
-		args.app.set('views', __dirname + '/views');
+  app.configure(function(){
+    args.app.set('views', __dirname + '/views');
     args.app.set('view options', {layout: false});
-		args.app.engine('ejs', require('ejs').renderFile);
-	}
+    args.app.engine('ejs', require('ejs').renderFile);
+  }
 };
 */

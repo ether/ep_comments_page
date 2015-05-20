@@ -57,6 +57,7 @@ exports.addComment = function(padId, data, callback)
     comments[commentId] = comment;
 
     //save the new element back
+console.log("saved", comment);
     db.set("comments:" + padId, comments);
 
     callback(null, commentId, comment);
