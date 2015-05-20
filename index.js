@@ -79,6 +79,16 @@ exports.socketio = function (hook_name, args, cb){
       socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
     });
 
+    // comment reply added via API
+    socket.on('apiAddCommentReply', function (data) {
+      var padId = data.padId;
+      var replyId = data.replyId;
+      var reply = data.reply;
+
+      reply.replyId = replyId;
+      socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+    });
+
   });
 };
 
@@ -164,7 +174,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         if(err) {
           res.json({code: 2, message: "internal error", data: null});
         } else {
-          // broadcastCommentReplyAdded(padIdReceived, replyId, reply);
+          broadcastCommentReplyAdded(padIdReceived, replyId, reply);
           res.json({code: 0, replyId: replyId});
         }
       });
@@ -183,6 +193,18 @@ var broadcastCommentAdded = function(padId, commentId, comment) {
   };
 
   socket.emit('apiAddComment', data);
+}
+
+var broadcastCommentReplyAdded = function(padId, replyId, reply) {
+  var socket = clientIO.connect(broadcastUrl);
+
+  var data = {
+    padId: padId,
+    replyId: replyId,
+    reply: reply
+  };
+
+  socket.emit('apiAddCommentReply', data);
 }
 
 var broadcastUrl = apiUtils.broadcastUrlFor("/comment");

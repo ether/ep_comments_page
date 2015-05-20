@@ -4,6 +4,7 @@ var             supertest = require('ep_etherpad-lite/node_modules/supertest'),
                     utils = require('../../../utils'),
                 createPad = utils.createPad,
             createComment = utils.createComment,
+       createCommentReply = utils.createCommentReply,
 commentRepliesEndPointFor = utils.commentRepliesEndPointFor,
                    apiKey = utils.apiKey,
                    appUrl = utils.appUrl,
@@ -93,5 +94,71 @@ describe('create comment reply API', function() {
       if(res.body.replyId === undefined) throw new Error("Response should have replyId.")
     })
     .end(done)
+  });
+});
+
+describe('create comment reply API broadcast', function() {
+  var padID;
+  var messageReceived;
+
+  // NOTE: this hook will timeout if you don't run your Etherpad in
+  // loadTest mode. Be sure to adjust your settings.json when running
+  // this test suite
+  beforeEach(function(done){
+    messageReceived = false
+
+    // creates a new pad...
+    padID = createPad(function(err, pad) {
+      // ... and a comment before each test run, then...
+      createComment(pad, function(err, comment) {
+        commentID = comment;
+
+        // ... listens to the broadcast message:
+        var socket = io.connect(appUrl + "/comment");
+        var req = { padId: pad };
+        // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
+        socket.emit('getComments', req, function (res){
+          socket.on('pushAddCommentReply', function(data) {
+            messageReceived = true;
+          });
+
+          done();
+        });
+      });
+    });
+  });
+
+  it('broadcasts comment reply creation to other clients of same pad', function(done) {
+    createCommentReply(padID, commentID, function(err, replyId) {
+      if(err) throw err;
+      if(!replyId) throw new Error("Reply should had been created");
+
+      setTimeout(function() { //give it some time to process the message on the client
+        if(!messageReceived) throw new Error("Message should had been received");
+        done();
+      }, 100);
+    });
+  });
+
+  it('does not broadcast comment reply creation to clients of different pad', function(done) {
+    // creates another pad...
+    createPad(function(err, otherPadId) {
+      // ... and another comment...
+      createComment(otherPadId, function(err, otherCommentId) {
+        if(err) throw err;
+        if(!otherCommentId) throw new Error("Comment should had been created");
+
+        // ... and adds comment reply to it:
+        createCommentReply(otherPadId, otherCommentId, function(err, replyId) {
+          if(err) throw err;
+          if(!replyId) throw new Error("Reply should had been created");
+
+          setTimeout(function() { //give it some time to process the message on the client
+            if(messageReceived) throw new Error("Message should had been received only for pad " + padID);
+            done();
+          }, 100);
+        });
+      });
+    });
   });
 });

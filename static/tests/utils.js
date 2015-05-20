@@ -81,12 +81,41 @@ var createComment = function(pad, done) {
   );
 }
 
+// Creates a comment reply and calls the callback when finished.
+var createCommentReply = function(pad, comment, done) {
+  var replyId;
+
+  var url = appUrl + commentRepliesEndPointFor(pad);
+  request.post(url,
+    { form: {
+        'apikey': apiKey,
+        'commentId': comment,
+        'name': 'John Doe',
+        'text': 'This is a comment',
+    } },
+    function(error, res, body) {
+      if(error) {
+        throw error;
+      }
+      else if(res.statusCode != 200) {
+        throw new Error("Failed on calling API. Status code: " + res.statusCode);
+      }
+      else {
+        json = JSON.parse(body);
+        replyId = json.replyId;
+        done(null, replyId);
+      }
+    }
+  );
+}
+
 /* ********** Available functions/values: ********** */
 
 exports.appUrl = appUrl;
 exports.apiKey = apiKey;
 exports.createPad = createPad;
 exports.createComment = createComment;
+exports.createCommentReply = createCommentReply;
 exports.codeToBe0 = codeToBe0;
 exports.codeToBe1 = codeToBe1;
 exports.codeToBe4 = codeToBe4;

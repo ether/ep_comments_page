@@ -109,10 +109,10 @@ describe('create comment API broadcast', function(){
       if(err) throw err;
       if(!commentId) throw new Error("Comment should had been created");
 
-      setTimeout(function() { //give it a second to process the message on the client
+      setTimeout(function() { //give it some time to process the message on the client
         if(!messageReceived) throw new Error("Message should had been received");
         done();
-      }, 1000);
+      }, 100);
     });
   });
 
@@ -124,10 +124,10 @@ describe('create comment API broadcast', function(){
         if(err) throw err;
         if(!commentId) throw new Error("Comment should had been created");
 
-        setTimeout(function() { //give it a second to process the message on the client
+        setTimeout(function() { //give it some time to process the message on the client
           if(messageReceived) throw new Error("Message should had been received only for pad " + padID);
           done();
-        }, 1000);
+        }, 100);
       });
     });
   });
