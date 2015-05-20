@@ -14,9 +14,16 @@
     {
       "name": "John McLear",
       "email": "john@mclear.co.uk"
+    },
+    {
+      "name": "Luiza Pagliari",
+      "email": "lpagliari@gmail.com"
     }
   ],
-  "dependencies": {},
+  "dependencies": {
+    "formidable": "*",
+    "socket.io-client": "*"
+  },
   "engines": {
     "node": "*"
   },
