@@ -6,6 +6,8 @@
 ```
 npm install ep_page_view
 git clone https://github.com/JohnMcLear/ep_comments.git node_modules/ep_comments_page
+cd node_modules/ep_comments_page
+npm install
 ```
 
 ## Creating comment via API
