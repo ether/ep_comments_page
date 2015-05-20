@@ -104,6 +104,15 @@ ep_comments.prototype.init = function(){
     $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
   });
 
+  // Listen for include suggested change toggle
+  this.container.on("change", '#suggestion-checkbox', function(){
+    if($(this).is(':checked')){
+      $('iframe[name="ace_outer"]').contents().find('.suggestion').show();
+    }else{
+      $('iframe[name="ace_outer"]').contents().find('.suggestion').hide();
+    }
+  });
+
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
@@ -452,9 +461,13 @@ ep_comments.prototype.addComment = function (callback){
 
   ace.callWithAce(function (ace){
     var saveRep = ace.ace_getRep();
+    rep.lines = saveRep.lines;
     rep.selStart = saveRep.selStart;
     rep.selEnd = saveRep.selEnd;
   },'saveCommentedSelection', true);
+
+  var line = rep.lines.atIndex(rep.selStart[0]);
+  var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1]);
 
   if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
     return;
@@ -483,6 +496,9 @@ ep_comments.prototype.addComment = function (callback){
       self.collectComments();
     });
   });
+
+  $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").val(selectedText);
+
 };
 
 // Listen for comment replies

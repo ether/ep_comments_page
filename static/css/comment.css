@@ -9,6 +9,10 @@
   text-overflow:auto;
 }
 
+.sidebar-comment p{
+  line-height:24px;
+}
+
 .sidebar-comment:hover{
   height:auto;
   white-space:normal;
@@ -122,11 +126,11 @@
   text-overflow: ellipsis;
 }
 
-.comment-content {
+.sidebar-comment textarea {
   border: 2px solid #DDD;
   background: #fff;
   width: 170px;
-  height: 60px;
+  height: 40px;
   padding: 5px;
   font-size:1em;
 }
@@ -181,6 +185,7 @@
   display:block;
   width:0px;
   z-index:1000;
+  font-size:12px;
 }
 
 #outerdocbody{
@@ -210,5 +215,6 @@
 
 }
 
-
-
+.suggestion{
+  display:none;
+}

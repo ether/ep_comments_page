@@ -10,8 +10,17 @@
 <script id="newCommentTemplate" type="text/html">
     <form id="newComment" class="sidebar-comment">
     	<p class="comment-author-name">${name}</p>
+        <p>Comment</p>
     	<p class="comment-text"><textarea class="comment-content" autofocus></textarea></p>
-    	<p class="comment-buttons"><input type="submit" value="Comment" /><input type="reset" id="comment-reset" value="Cancel" /></p>
+
+        <span class="suggestion">
+            <p>Suggest change From:</p>
+            <p class="comment-suggest-from-p"><textarea class="comment-suggest-from" disabled="disabled"></textarea></p> 
+            <p>To:</p>
+            <p class="comment-suggest-to-p"><textarea class="comment-suggest-to"></textarea></p>
+        </span>
+        <p class="comment-suggest"><input type="checkbox" id="suggestion-checkbox"><label for="suggestion-checkbox">Include suggested change</label></p>
+        <p class="comment-buttons"><input type="submit" value="Comment" /><input type="reset" id="comment-reset" value="Cancel" /></p>
     </form>
 </script>
 
