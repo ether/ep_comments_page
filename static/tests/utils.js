@@ -54,7 +54,7 @@ var createPad = function(done) {
   return pad;
 }
 
-// Creates a comment and returns the comment id. Calls the callback when finished.
+// Creates a comment and calls the callback when finished.
 var createComment = function(pad, done) {
   var commentId;
 
@@ -79,8 +79,6 @@ var createComment = function(pad, done) {
       }
     }
   );
-
-  return commentId;
 }
 
 /* ********** Available functions/values: ********** */

@@ -138,6 +138,39 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     });
   });
 
+  args.app.post('/p/:pad/:rev?/commentReplies', function(req, res) {
+    new formidable.IncomingForm().parse(req, function (err, fields, files) {
+      // check the api key
+      if(!apiUtils.validateApiKey(fields, res)) return;
+
+      // check required fields from comment data
+      if(!apiUtils.validateRequiredFields(fields, ['commentId', 'name', 'text'], res)) return;
+
+      // sanitize pad id before continuing
+      var padIdReceived = apiUtils.sanitizePadId(req);
+
+      // create data to hold comment reply information:
+      var comment = {
+        name: fields.name
+      };
+      var data = {
+        author: "empty",
+        commentId: fields.commentId,
+        reply: fields.text,
+        comment: comment
+      };
+
+      comments.addPadCommentReply(padIdReceived, data, function(err, replyId, reply) {
+        if(err) {
+          res.json({code: 2, message: "internal error", data: null});
+        } else {
+          // broadcastCommentReplyAdded(padIdReceived, replyId, reply);
+          res.json({code: 0, replyId: replyId});
+        }
+      });
+    });
+  });
+
 }
 
 var broadcastCommentAdded = function(padId, commentId, comment) {
