@@ -330,11 +330,17 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   this.container.find('#newComment').submit(function(){
     var form = $(this);
     var text = form.find('.comment-content').val();
+    var changeTo = form.find('.comment-suggest-to').val();
+    var comment = {};
+    comment.text = text;
+    if(changeTo){
+      comment.changeTo = changeTo;
+    }
     if (text.length != 0) {
       form.remove();
       $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
       // console.log("calling back", text, index);
-      callback(text, index);
+      callback(comment, index);
     }
     return false;
   });
@@ -444,6 +450,7 @@ ep_comments.prototype.getCommentData = function (){
   data.comment.timestamp  = new Date().getTime();
   
   // Si le client est Anonyme
+  // In English please? :P
   if(data.comment.name === undefined){
     data.comment.name = clientVars.userAgent;
   }
@@ -476,10 +483,11 @@ ep_comments.prototype.addComment = function (callback){
   // Set the top of the form
   $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
 
-  // CAKE TODO This doesn't appear to get the Y right for the input field...
+  // TODO This doesn't appear to get the Y right for the input field...
 
-  this.insertNewComment(data, function (text, index){
-    data.comment.text = text;
+  this.insertNewComment(data, function (comment, index){
+    if(comment.changeTo) data.comment.changeTo = comment.changeTo;
+    data.comment.text = comment.text;
 
     // Save comment
     socket.emit('addComment', data, function (commentId, comment){

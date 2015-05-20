@@ -79,16 +79,20 @@
   right:0px;
   margin-left: 10px;
   padding: 3px 5px;  
-/*  margin-top: 10px;*/
   background: white;
   width:90%;
-  height:15px;
+  height:20px;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
   -moz-box-shadow: 0 0 2px #888;
   -webkit-box-shadow: 0 0 2px #888;
   box-shadow: 0 0 2px #888;
   position:absolute;
+  font-size:12px;
+}
+
+.sidebar-comment button{
+  padding:2px;
 }
 
 .sidebar-comment:hover{
