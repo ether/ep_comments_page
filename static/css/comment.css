@@ -37,6 +37,10 @@
   padding:10px;
 }
 
+.comment-modal .comment-changeTo-approve{
+  display:none;
+}
+
 .sidebar-comment-reply{
   margin-left:10px;
 }

@@ -473,16 +473,36 @@ ep_comments.prototype.addComment = function (callback){
     rep.selEnd = saveRep.selEnd;
   },'saveCommentedSelection', true);
 
-  var line = rep.lines.atIndex(rep.selStart[0]);
-  var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1]);
-
+  // If we don't have a selection then return nothing
   if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
     return;
   }
 
+  var firstLine, lastLine;
+  firstLine = rep.selStart[0];
+  lastLine = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
+  var totalNumberOfLines = 0;
+  $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").html("");
+
+  // TODO: allow selecting multiple lines..  Dunno why my brain can't handle this today..
+/*
+  _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
+     var line = rep.lines.atIndex(lineNumber);
+     console.log("arbl", line.text);
+     // If we span over multiple lines
+     if(rep.selStart[0] !== selEnd[0]){
+       // Is this the first line?
+     }
+     var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1])
+     console.log(selectedText);
+     if(selectedText){
+       $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").append(escape(selectedText));
+     }
+  });
+*/
+
   // Set the top of the form
   $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
-
   // TODO This doesn't appear to get the Y right for the input field...
 
   this.insertNewComment(data, function (comment, index){
@@ -505,6 +525,9 @@ ep_comments.prototype.addComment = function (callback){
     });
   });
 
+
+  var line = rep.lines.atIndex(rep.selStart[0]);
+  var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1]);
   $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").val(selectedText);
 
 };
