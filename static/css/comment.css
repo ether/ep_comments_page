@@ -238,6 +238,10 @@
 
 }
 
-.suggestion{
+.suggestion, .reply-suggestion{
   display:none;
+}
+
+.sidebar-comment-reply input{
+  margin-left:40px;
 }

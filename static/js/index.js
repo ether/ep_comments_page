@@ -31,7 +31,7 @@ function ep_comments(context){
   // If we're on a read only pad then hide the ability to attempt to merge a suggestion
   if(clientVars.readonly){
     this.padInner.append("<style>.comment-changeTo-approve{display:none;}</style>");
-  } 
+  }
 }
 
 // Init Etherpad plugin comment pads
@@ -117,6 +117,25 @@ ep_comments.prototype.init = function(){
       $('iframe[name="ace_outer"]').contents().find('.suggestion').hide();
     }
   });
+
+  // Listen for include suggested change toggle
+  this.container.on("change", '#reply-suggestion-checkbox', function(){
+    if($(this).is(':checked')){
+      // Get current text -- cake
+      var commentId = $(this).parent().parent().parent()[0].id;
+      var padOuter = $('iframe[name="ace_outer"]').contents();
+      var padInner = padOuter.find('iframe[name="ace_inner"]');
+
+      var currentString = padInner.contents().find("."+commentId).html();
+console.log("cS", currentString);
+      $(this).parent().parent().find(".comment-suggest-from").html(currentString);
+
+      $('iframe[name="ace_outer"]').contents().find('.suggestion').show();
+    }else{
+      $('iframe[name="ace_outer"]').contents().find('.suggestion').hide();
+    }
+  });
+
 
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
@@ -547,6 +566,12 @@ ep_comments.prototype.addComment = function (callback){
   $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").val(selectedText);
 
 };
+
+// Gets the original text of a comment
+ep_comments.prototype.getOriginalText = function(commentId){
+  console.log(this.text);
+  console.log("CAKE need TODO -- get the text of a given commentId, this would return a string such as 'Hello world'");
+}
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){

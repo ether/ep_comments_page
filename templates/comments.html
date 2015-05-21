@@ -16,9 +16,20 @@
         {{/if}}
         <form class='comment-reply'>
             <input class='comment-reply-input'>
-            <p class="comment-suggest">
-                <input type="checkbox" id="suggestion-checkbox">
-                <label for="suggestion-checkbox">Include suggested change</label>
+
+            <span class="reply-suggestion">
+                <p>Suggest change From:</p>
+                <p class="reply-comment-suggest-from-p">
+                    <textarea class="reply-comment-suggest-from" disabled="disabled"></textarea>
+                </p> 
+                <p>To:</p>
+                <p class="reply-comment-suggest-to-p">
+                    <textarea class="reply-comment-suggest-to"></textarea>
+                </p>
+            </span>
+            <p class="reply-comment-suggest">
+                <input type="checkbox" id="reply-suggestion-checkbox">
+                <label for="reply-suggestion-checkbox">Include suggested change</label>
             </p>
         </form>
     </div>
