@@ -27,6 +27,11 @@ function ep_comments(context){
   this.comments   = [];
   this.commentReplies = {};
   this.init();
+
+  // If we're on a read only pad then hide the ability to attempt to merge a suggestion
+  if(clientVars.readonly){
+    this.padInner.append("<style>.comment-changeTo-approve{display:none;}</style>");
+  } 
 }
 
 // Init Etherpad plugin comment pads
