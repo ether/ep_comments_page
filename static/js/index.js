@@ -117,20 +117,19 @@ ep_comments.prototype.init = function(){
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
-  this.container.on("click", ".comment-changeTo-approve", function(e){
+  this.container.on("submit", ".comment-changeTo-form", function(e){
+    e.preventDefault();
     var data = self.getCommentData();
-    var newString = "test";
-    console.log(data);
+    var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
     data.commentId = $(this).parent()[0].id;
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     // We know the ID, so we can do a html replace no?
     var padCommentContent = padInner.contents().find("."+data.commentId);
-    console.log($(padCommentContent).text());
     $(padCommentContent).html(newString);
   });
 
-  // var socket = this.socket;
+  // TODO is this even used?
   this.container.on("submit", ".comment-reply", function(e){
     e.preventDefault();
     var data = self.getCommentData();

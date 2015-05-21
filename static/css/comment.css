@@ -103,7 +103,7 @@
   font-size:12px;
 }
 
-.sidebar-comment button{
+.sidebar-comment input[type=submit]{
   padding:2px;
 }
 
