@@ -42,6 +42,10 @@
   display:none;
 }
 
+.comment-changeTo-approve{
+  margin:0px 0px 10px 0px;
+}
+
 .comment-modal .comment-changeTo-approve{
   display:none;
 }
@@ -121,6 +125,13 @@
 }
 
 .comment-author-name {
+  color: #555;
+  font-weight:bold;
+  font-size: 1em;
+  display:inline;
+}
+
+.comment-changeTo-label{
   color: #555;
   font-weight:bold;
   font-size: 1em;

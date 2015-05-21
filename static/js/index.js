@@ -117,13 +117,18 @@ ep_comments.prototype.init = function(){
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
-  // Listen to reply clicks
-/*
-  this.container.on("click", ".comment-reply-button", function(e){
-    var commentId = $(this).parent()[0].id;
-    $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><!--<input type=submit>--></form>");
+  this.container.on("click", ".comment-changeTo-approve", function(e){
+    var data = self.getCommentData();
+    var newString = "test";
+    console.log(data);
+    data.commentId = $(this).parent()[0].id;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+    // We know the ID, so we can do a html replace no?
+    var padCommentContent = padInner.contents().find("."+data.commentId);
+    console.log($(padCommentContent).text());
+    $(padCommentContent).html(newString);
   });
-*/
 
   // var socket = this.socket;
   this.container.on("submit", ".comment-reply", function(e){
@@ -162,6 +167,11 @@ ep_comments.prototype.init = function(){
       self.container.hide();
     }
   });
+
+  // Check to see if we should show already..
+  if($('#options-comments').is(':checked')){
+    self.container.show();
+  }
 
 };
 
