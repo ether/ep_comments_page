@@ -118,10 +118,12 @@ ep_comments.prototype.init = function(){
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
   // Listen to reply clicks
+/*
   this.container.on("click", ".comment-reply-button", function(e){
     var commentId = $(this).parent()[0].id;
     $('iframe[name="ace_outer"]').contents().find("#"+commentId).append("<form class='comment-reply'><input class='comment-reply-input'><!--<input type=submit>--></form>");
   });
+*/
 
   // var socket = this.socket;
   this.container.on("submit", ".comment-reply", function(e){
@@ -281,7 +283,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     replies.replyId = replyId;
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' > .comment-reply-button').before(content);
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' input').before(content);
   });
 };
 

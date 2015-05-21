@@ -21,7 +21,6 @@
 
 .sidebar-comment:hover .comment-reply-button {
   display:block;
-  margin-top:10px;
 }
 
 .comment-modal{
@@ -34,7 +33,13 @@
   left:0;
   border:solid #ccc 1px;
   display:none;
-  padding:10px;
+  padding:10px 10px 0px 10px;
+  font-size:12px;
+  line-height:24px;
+}
+
+.comment-modal input{
+  display:none;
 }
 
 .comment-modal .comment-changeTo-approve{
@@ -47,7 +52,6 @@
 
 .comment-reply{
   max-width:190px;
-  margin-top:10px;
   margin-bottom:5px;
 }
 

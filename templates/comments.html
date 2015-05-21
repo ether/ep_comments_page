@@ -3,9 +3,12 @@
     <div id="${commentId}" class="sidebar-comment" title="${date}">
         <p class="comment-author-name">${name}:</p>
         <p class="comment-text">${text}</p>
+        {{if changeTo}}
         <p class="comment-changeTo">Suggested Change: ${changeTo}</p>
-        <p><button>Accept Change</button></p>
-        <button class="comment-reply-button" title="reply to this comment">... Reply</button>
+        <p class="comment-changeTo-approve"><button>Accept Change</button></p>
+        {{/if}}
+        <!--  <button class="comment-reply-button" title="reply to this comment">... Reply</button> -->
+        <form class='comment-reply'><input class='comment-reply-input'></form>
     </div>
 </script>
 
