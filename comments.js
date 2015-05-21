@@ -28,3 +28,13 @@ exports.addPadComment = function(padID, data, callback)
     if(commentID !== null) callback(null, commentID, comment);
   });
 };
+
+exports.addPadCommentReply = function(padID, data, callback)
+{
+  commentManager.addCommentReply(padID, data, function (err, replyID, reply)
+  {
+    if(ERR(err, callback)) return;
+
+    if(replyID !== null) callback(null, replyID, reply);
+  });
+};

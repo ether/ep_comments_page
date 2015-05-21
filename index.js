@@ -1,20 +1,9 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
-var fs = require("fs");
 var formidable = require('formidable');
 var clientIO = require('socket.io-client');
 var commentManager = require('./commentManager');
 var comments = require('./comments');
-var padManager = require("ep_etherpad-lite/node/db/PadManager");
-var settings = require("ep_etherpad-lite/node/utils/Settings");
-
-//ensure we have an apikey
-var apikey = "";
-try {
-  apikey = fs.readFileSync("./APIKEY.txt","utf8");
-}
-catch(e){
-  console.warn('Could not find APIKEY');
-}
+var apiUtils = require('./apiUtils');
 
 exports.handleMessageSecurity = function(hook_name, context, callback){
   if(context.message && context.message.data && context.message.data.apool){
@@ -90,6 +79,16 @@ exports.socketio = function (hook_name, args, cb){
       socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
     });
 
+    // comment reply added via API
+    socket.on('apiAddCommentReply', function (data) {
+      var padId = data.padId;
+      var replyId = data.replyId;
+      var reply = data.reply;
+
+      reply.replyId = replyId;
+      socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+    });
+
   });
 };
 
@@ -122,31 +121,21 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   args.app.post('/p/:pad/:rev?/comments', function(req, res) {
     new formidable.IncomingForm().parse(req, function (err, fields, files) {
       // check the api key
-      apiKeyReceived = fields.apikey || fields.api_key;
-      if(apiKeyReceived !== apikey.trim()) {
-        res.statusCode = 401;
-        res.json({code: 4, message: "no or wrong API Key", data: null});
-        return;
-      }
+      if(!apiUtils.validateApiKey(fields, res)) return;
 
-      // check comment data
-      var error = checkCommentData(fields);
-      if(error) {
-        res.json({code: 1, message: error, data: null});
-        return;
-      }
+      // check required fields from comment data
+      if(!apiUtils.validateRequiredFields(fields, ['name', 'text'], res)) return;
+
+      // sanitize pad id before continuing
+      var padIdReceived = apiUtils.sanitizePadId(req);
+
+      // create data to hold comment information:
       var data = {
         author: "empty",
         name: fields.name,
         text: fields.text,
         changeTo: fields.changeTo
       };
-
-      // sanitize pad id before continuing
-      var padIdReceived = req.params.pad
-      padManager.sanitizePadId(padIdReceived, function(padId) {
-        padIdReceived = padId;
-      });
 
       comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
         if(err) {
@@ -159,13 +148,39 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     });
   });
 
-}
+  args.app.post('/p/:pad/:rev?/commentReplies', function(req, res) {
+    new formidable.IncomingForm().parse(req, function (err, fields, files) {
+      // check the api key
+      if(!apiUtils.validateApiKey(fields, res)) return;
 
-var checkCommentData = function(fields) {
-  if(typeof fields.name === 'undefined') return "name is required";
-  if(typeof fields.text === 'undefined') return "text is required";
+      // check required fields from comment data
+      if(!apiUtils.validateRequiredFields(fields, ['commentId', 'name', 'text'], res)) return;
 
-  return false;
+      // sanitize pad id before continuing
+      var padIdReceived = apiUtils.sanitizePadId(req);
+
+      // create data to hold comment reply information:
+      var comment = {
+        name: fields.name
+      };
+      var data = {
+        author: "empty",
+        commentId: fields.commentId,
+        reply: fields.text,
+        comment: comment
+      };
+
+      comments.addPadCommentReply(padIdReceived, data, function(err, replyId, reply) {
+        if(err) {
+          res.json({code: 2, message: "internal error", data: null});
+        } else {
+          broadcastCommentReplyAdded(padIdReceived, replyId, reply);
+          res.json({code: 0, replyId: replyId});
+        }
+      });
+    });
+  });
+
 }
 
 var broadcastCommentAdded = function(padId, commentId, comment) {
@@ -180,15 +195,16 @@ var broadcastCommentAdded = function(padId, commentId, comment) {
   socket.emit('apiAddComment', data);
 }
 
-var buildBroadcastUrl = function() {
-  var url = "";
-  if(settings.ssl) {
-    url += "https://";
-  } else {
-    url += "http://";
-  }
-  url += settings.ip + ":" + settings.port + "/comment";
+var broadcastCommentReplyAdded = function(padId, replyId, reply) {
+  var socket = clientIO.connect(broadcastUrl);
 
-  return url;
+  var data = {
+    padId: padId,
+    replyId: replyId,
+    reply: reply
+  };
+
+  socket.emit('apiAddCommentReply', data);
 }
-var broadcastUrl = buildBroadcastUrl();
+
+var broadcastUrl = apiUtils.broadcastUrlFor("/comment");
