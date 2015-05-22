@@ -22,7 +22,8 @@
   ],
   "dependencies": {
     "formidable": "*",
-    "socket.io-client": "*"
+    "socket.io-client": "*",
+    "expect": "*"
   },
   "engines": {
     "node": "*"
