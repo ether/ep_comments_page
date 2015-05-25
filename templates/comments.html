@@ -6,11 +6,11 @@
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeTo">
-                <span class="comment-changeTo-label">${window._("ep_comments_page.comments_template.suggested_change") || "Suggested Change:"}</span>
+                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change">Suggested Change:</span>
                 <span class="comment-changeTo-value">${changeTo}</span>
             </p>
             <p class="comment-changeTo-approve">
-                <input type="Submit" value='${window._("ep_comments_page.comments_template.accept_change") || "Accept Change"}'>
+                <input type="Submit" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
             </p>
         </form>
         {{/if}}
@@ -38,28 +38,28 @@
 <script id="newCommentTemplate" type="text/html">
     <form id="newComment" class="sidebar-comment">
     	<p class="comment-author-name">${name}</p>
-        <p>${window._("ep_comments_page.comment") || "Comment"}</p>
+        <p data-l10n-id="ep_comments_page.comment">Comment</p>
     	<p class="comment-text">
-            <textarea class="comment-content" autofocus></textarea>
-        </p>
+          <textarea class="comment-content" autofocus></textarea>
+      </p>
 
         <span class="suggestion">
-            <p>${window._("ep_comments_page.comments_template.suggest_change_from") || "Suggest change From:"}</p>
+            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest change From:</p>
             <p class="comment-suggest-from-p">
                 <textarea class="comment-suggest-from" disabled="disabled"></textarea>
             </p>
-            <p>${window._("ep_comments_page.comments_template.to") || "To:"}</p>
+            <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
             <p class="comment-suggest-to-p">
                 <textarea class="comment-suggest-to"></textarea>
             </p>
         </span>
         <p class="comment-suggest">
             <input type="checkbox" id="suggestion-checkbox">
-            <label for="suggestion-checkbox">${window._("ep_comments_page.comments_template.include_suggestion") || "Include suggested change"}</label>
+            <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
         </p>
-        <p class="comment-buttons"><input type="submit" value=
-          <input type="submit" value='${window._("ep_comments_page.comment") || "Comment"}' />
-            <input type="reset" id="comment-reset" value='${window._("ep_comments_page.cancel") || "Cancel"}' />
+        <p class="comment-buttons">
+            <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
+            <input type="reset" id="comment-reset" value="Cancel" data-l10n-id="ep_comments_page.comments_template.cancel.value" />
         </p>
     </form>
 </script>

@@ -95,6 +95,13 @@ ep_comments.prototype.init = function(){
     }, 300);
   });
 
+  // When language is changed, we need to reload the comments to make sure
+  // all templates are localized
+  html10n.bind('localized', function() {
+    self.localizeExistingComments();
+    self.localizeNewCommentForm();
+  });
+
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
     $('iframe[name="ace_outer"]').contents().find('#comments').show();
@@ -248,6 +255,9 @@ ep_comments.prototype.collectComments = function(callback){
             container.css('top', containerTop - (commentTop - markerTop));
           });
         }
+
+        // localize comment element
+        self.localize(commentElm);
       }
     }
 
@@ -410,6 +420,8 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   comment.commentId = commentId;
   content = $('#'+ template).tmpl(comment);
 
+  this.localize(content);
+
   // position doesn't seem to be relative to rep
 
   // console.log('position', index, commentAfterIndex);
@@ -441,6 +453,39 @@ ep_comments.prototype.setYofComments = function(){
     commentEle.css("top", y+"px").show();
   });
 
+};
+
+ep_comments.prototype.localize = function(element) {
+  html10n.translateElement(html10n.translations, element.get(0));
+};
+
+ep_comments.prototype.localizeNewCommentForm = function() {
+  var newCommentForm = this.container.find('#newComment');
+  if (newCommentForm.length !== 0) this.localize(newCommentForm);
+};
+
+ep_comments.prototype.localizeExistingComments = function() {
+  var self        = this;
+  var padComments = this.padInner.contents().find('.comment');
+  var comments    = this.comments;
+
+  padComments.each(function(it) {
+    var $this           = $(this);
+    var cls             = $this.attr('class');
+    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId       = (classCommentId) ? classCommentId[1] : null;
+
+    if (commentId !== null) {
+      var commentElm  = self.container.find('#'+ commentId);
+      var comment     = comments[commentId];
+
+      // localize comment element...
+      self.localize(commentElm);
+      // ... and update its date
+      comment.data.date = prettyDate(comment.data.timestamp);
+      commentElm.attr('title', comment.data.date);
+    }
+  });
 };
 
 // Set comments content data
