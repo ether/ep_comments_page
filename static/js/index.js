@@ -316,7 +316,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     replies.replyId = replyId;
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' input').before(content);
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
   });
 };
 
