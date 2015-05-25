@@ -119,7 +119,7 @@ ep_comments.prototype.init = function(){
   });
 
   // Listen for include suggested change toggle
-  this.container.on("change", '#reply-suggestion-checkbox', function(){
+  this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
       // Get current text -- cake
       var commentId = $(this).parent().parent().parent()[0].id;
@@ -127,10 +127,11 @@ ep_comments.prototype.init = function(){
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-      $(this).parent().parent().find(".comment-suggest-from").html(currentString);
-      $(this).parent().parent().contents().find('.reply-suggestion').show();
+      console.log(self.comments[commentId].data);
+      $(this).parent().parent().find(".reply-comment-suggest-from").html(currentString);
+      $(this).parent().parent().find('.reply-suggestion').show();
     }else{
-      $(this).parent().parent().contents().find('.reply-suggestion').hide();
+      $(this).parent().parent().find('.reply-suggestion').hide();
     }
   });
 
@@ -167,7 +168,9 @@ ep_comments.prototype.init = function(){
         self.collectCommentReplies();
       });
     });
-
+    if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
+      $(this).parent().parent().find(".reply-suggestion-checkbox").click();
+    }
   });
 
   // Enable and handle cookies
@@ -539,7 +542,9 @@ ep_comments.prototype.addComment = function (callback){
   // TODO This doesn't appear to get the Y right for the input field...
 
   this.insertNewComment(data, function (comment, index){
-    if(comment.changeTo) data.comment.changeTo = comment.changeTo;
+    if(comment.changeTo){
+      data.comment.changeTo = comment.changeTo;
+    }
     data.comment.text = comment.text;
 
     // Save comment
@@ -557,7 +562,6 @@ ep_comments.prototype.addComment = function (callback){
       self.collectComments();
     });
   });
-
 
   var line = rep.lines.atIndex(rep.selStart[0]);
   var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1]);
