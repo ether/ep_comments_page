@@ -127,12 +127,10 @@ ep_comments.prototype.init = function(){
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-console.log("cS", currentString);
       $(this).parent().parent().find(".comment-suggest-from").html(currentString);
-
-      $('iframe[name="ace_outer"]').contents().find('.suggestion').show();
+      $(this).parent().parent().contents().find('.reply-suggestion').show();
     }else{
-      $('iframe[name="ace_outer"]').contents().find('.suggestion').hide();
+      $(this).parent().parent().contents().find('.reply-suggestion').hide();
     }
   });
 
