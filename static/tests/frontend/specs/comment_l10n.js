@@ -10,6 +10,11 @@ describe("Comment Localization", function(){
     this.timeout(60000);
   });
 
+  // ensure we go back to English to avoid breaking other tests:
+  after(function(cb){
+    changeLanguageTo('en', cb);
+  });
+
   it("uses default values when language was not localized yet", function(done) {
     changeLanguageTo('de', function(){
       var chrome$ = helper.padChrome$;

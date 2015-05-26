@@ -2,26 +2,19 @@ var localizable = typeof html10n !== "undefined";
 
 l10nKeys = {
   "seconds"           : "ep_comments_page.time.seconds",
-  "1 minute ago"      : "ep_comments_page.time.one_minute_ago",
-  "1 minute from now" : "ep_comments_page.time.one_minute_from_now",
+  "1 minute ago"      : "ep_comments_page.time.one_minute",
   "minutes"           : "ep_comments_page.time.minutes",
-  "1 hour ago"        : "ep_comments_page.time.one_hour_ago",
-  "1 hour from now"   : "ep_comments_page.time.one_hour_from_now",
+  "1 hour ago"        : "ep_comments_page.time.one_hour",
   "hours"             : "ep_comments_page.time.hours",
-  "yesterday"         : "ep_comments_page.time.yesterday",
-  "tomorrow"          : "ep_comments_page.time.tomorrow",
+  "yesterday"         : "ep_comments_page.time.one_day",
   "days"              : "ep_comments_page.time.days",
-  "last week"         : "ep_comments_page.time.last_week",
-  "next week"         : "ep_comments_page.time.next_week",
+  "last week"         : "ep_comments_page.time.one_week",
   "weeks"             : "ep_comments_page.time.weeks",
-  "last month"        : "ep_comments_page.time.last_month",
-  "next month"        : "ep_comments_page.time.next_month",
+  "last month"        : "ep_comments_page.time.one_month",
   "months"            : "ep_comments_page.time.months",
-  "last year"         : "ep_comments_page.time.last_year",
-  "next year"         : "ep_comments_page.time.next_year",
+  "last year"         : "ep_comments_page.time.one_year",
   "years"             : "ep_comments_page.time.years",
-  "last century"      : "ep_comments_page.time.last_century",
-  "next century"      : "ep_comments_page.time.next_century",
+  "last century"      : "ep_comments_page.time.one_century",
   "centuries"         : "ep_comments_page.time.centuries"
 }
 
@@ -51,12 +44,12 @@ function prettyDate(time){
   var seconds = (new Date - new Date(time)) / 1000;
   var     token = 'ago',
     list_choice = 1,
-  l10n_appendix = '_ago';
+  l10n_appendix = '.past';
 
   if (seconds < 0) {
     seconds = Math.abs(seconds);
     token = 'from now';
-    l10n_appendix = '_from_now';
+    l10n_appendix = '.future';
     list_choice = 2;
   }
 
@@ -66,7 +59,7 @@ function prettyDate(time){
       var count = Math.floor(seconds / format[2]);
       var formatted_time;
       if (localizable) {
-        var key = l10nKeys[format[list_choice]] + l10n_appendix;
+        var key = l10nKeys[format[1]] + l10n_appendix;
         formatted_time = html10n.get(key, { count: count });
       }
 
@@ -81,5 +74,9 @@ function prettyDate(time){
     }
   return time;
 };
+
+// TODO I could not find a way to access the prttyDate on client-side (used
+// for the tests), I'm sure there's a better way to avoid errors than this:
+if (typeof exports === 'undefined') exports = {};
 
 exports.prettyDate = prettyDate;
