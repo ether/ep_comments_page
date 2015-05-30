@@ -3,13 +3,14 @@ var _, $, jQuery;
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
 
 var cssFiles = ['ep_comments_page/static/css/comment.css'];
 
 /************************************************************************/
 /*                         ep_comments Plugin                           */
 /************************************************************************/
-// Container 
+// Container
 function ep_comments(context){
   this.container  = null;
   this.padOuter   = null;
@@ -84,7 +85,7 @@ ep_comments.prototype.init = function(){
                   if( count_comments > padComment.length ) {
                      window.setTimeout(function() {
                         self.collectComments();
-                        
+
                       }, 9000);
                   }
                 }, 3000);
@@ -94,13 +95,20 @@ ep_comments.prototype.init = function(){
     }, 300);
   });
 
-  // On click comment icon toolbar 
+  // When language is changed, we need to reload the comments to make sure
+  // all templates are localized
+  html10n.bind('localized', function() {
+    self.localizeExistingComments();
+    self.localizeNewCommentForm();
+  });
+
+  // On click comment icon toolbar
   $('.addComment').on('click', function(e){
     $('iframe[name="ace_outer"]').contents().find('#comments').show();
     $('iframe[name="ace_outer"]').contents().find('#comments').addClass("active");
     e.preventDefault(); // stops focus from being lost
-    // If a new comment box doesn't already exist 
-    // Add a new comment and link it to the selection 
+    // If a new comment box doesn't already exist
+    // Add a new comment and link it to the selection
     // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
     if (self.container.find('#newComment').length == 0) self.addComment();
     // console.log("setting focus to .comment-content");
@@ -199,7 +207,7 @@ ep_comments.prototype.init = function(){
 
 };
 
-// Insert comments container on element use for linenumbers 
+// Insert comments container on element use for linenumbers
 ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   this.padOuter = padOuter;
@@ -247,6 +255,9 @@ ep_comments.prototype.collectComments = function(callback){
             container.css('top', containerTop - (commentTop - markerTop));
           });
         }
+
+        // localize comment element
+        self.localize(commentElm);
       }
     }
 
@@ -258,10 +269,10 @@ ep_comments.prototype.collectComments = function(callback){
     } else {
       var prevCommentPos = prevCommentElm.css('top');
       var prevCommentHeight = prevCommentElm.innerHeight();
-      
+
       commentPos = parseInt(prevCommentPos) + prevCommentHeight + 30;
     }
-    
+
     commentElm.css({ 'top': commentPos });
   });
 
@@ -276,7 +287,7 @@ ep_comments.prototype.collectComments = function(callback){
     // on hover we should show the reply option
   }).on("mouseout", ".sidebar-comment", function(e){
     var commentId = e.currentTarget.id;
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');  
+    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     inner.contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
     // TODO this could potentially break ep_font_color
   });
@@ -347,7 +358,7 @@ ep_comments.prototype.removeComment = function(className, id){
 
 // Insert comment container in sidebar
 ep_comments.prototype.insertContainer = function(){
-  // Add comments 
+  // Add comments
   $('iframe[name="ace_outer"]').contents().find("#outerdocbody").prepend('<div id="comments"></div>');
   this.container = this.padOuter.find('#comments');
 };
@@ -399,7 +410,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   },'getYofRep', true);
 };
 
-// Insert a comment node 
+// Insert a comment node
 ep_comments.prototype.insertComment = function(commentId, comment, index, isNew){
   var template          = (isNew === true) ? 'newCommentTemplate' : 'commentsTemplate';
   var content           = null;
@@ -408,6 +419,8 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
   comment.commentId = commentId;
   content = $('#'+ template).tmpl(comment);
+
+  this.localize(content);
 
   // position doesn't seem to be relative to rep
 
@@ -440,6 +453,39 @@ ep_comments.prototype.setYofComments = function(){
     commentEle.css("top", y+"px").show();
   });
 
+};
+
+ep_comments.prototype.localize = function(element) {
+  html10n.translateElement(html10n.translations, element.get(0));
+};
+
+ep_comments.prototype.localizeNewCommentForm = function() {
+  var newCommentForm = this.container.find('#newComment');
+  if (newCommentForm.length !== 0) this.localize(newCommentForm);
+};
+
+ep_comments.prototype.localizeExistingComments = function() {
+  var self        = this;
+  var padComments = this.padInner.contents().find('.comment');
+  var comments    = this.comments;
+
+  padComments.each(function(it) {
+    var $this           = $(this);
+    var cls             = $this.attr('class');
+    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId       = (classCommentId) ? classCommentId[1] : null;
+
+    if (commentId !== null) {
+      var commentElm  = self.container.find('#'+ commentId);
+      var comment     = comments[commentId];
+
+      // localize comment element...
+      self.localize(commentElm);
+      // ... and update its date
+      comment.data.date = prettyDate(comment.data.timestamp);
+      commentElm.attr('title', comment.data.date);
+    }
+  });
 };
 
 // Set comments content data
@@ -478,13 +524,13 @@ ep_comments.prototype.getCommentReplies = function (callback){
 ep_comments.prototype.getCommentData = function (){
   var data = {};
 
-  // Insert comment data 
+  // Insert comment data
   data.padId              = this.padId;
   data.comment            = {};
   data.comment.author     = clientVars.userId;
   data.comment.name       = clientVars.userName;
   data.comment.timestamp  = new Date().getTime();
-  
+
   // Si le client est Anonyme
   // In English please? :P
   if(data.comment.name === undefined){
@@ -494,7 +540,7 @@ ep_comments.prototype.getCommentData = function (){
   return data;
 }
 
-// Add a pad comment 
+// Add a pad comment
 ep_comments.prototype.addComment = function (callback){
   var socket  = this.socket;
   var data    = this.getCommentData();
@@ -550,7 +596,7 @@ ep_comments.prototype.addComment = function (callback){
     // Save comment
     socket.emit('addComment', data, function (commentId, comment){
       comment.commentId = commentId;
-      
+
       //callback(commentId);
       ace.callWithAce(function (ace){
         // console.log('addComment :: ', commentId);
@@ -630,7 +676,7 @@ ep_comments.prototype.pushComment = function(eventType, callback){
 
 var hooks = {
 
-  // Init pad comments 
+  // Init pad comments
   postAceInit: function(hook, context){
     if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
@@ -671,46 +717,6 @@ var hooks = {
 
 };
 
-function prettyDate(time){
-  var time_formats = [
-  [60, 'seconds', 1], // 60
-  [120, '1 minute ago', '1 minute from now'], // 60*2
-  [3600, 'minutes', 60], // 60*60, 60
-  [7200, '1 hour ago', '1 hour from now'], // 60*60*2
-  [86400, 'hours', 3600], // 60*60*24, 60*60
-  [172800, 'yesterday', 'tomorrow'], // 60*60*24*2
-  [604800, 'days', 86400], // 60*60*24*7, 60*60*24
-  [1209600, 'last week', 'next week'], // 60*60*24*7*4*2
-  [2419200, 'weeks', 604800], // 60*60*24*7*4, 60*60*24*7
-  [4838400, 'last month', 'next month'], // 60*60*24*7*4*2
-  [29030400, 'months', 2419200], // 60*60*24*7*4*12, 60*60*24*7*4
-  [58060800, 'last year', 'next year'], // 60*60*24*7*4*12*2
-  [2903040000, 'years', 29030400], // 60*60*24*7*4*12*100, 60*60*24*7*4*12
-  [5806080000, 'last century', 'next century'], // 60*60*24*7*4*12*100*2
-  [58060800000, 'centuries', 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
-  ];
-  /*
-  var time = ('' + date_str).replace(/-/g,"/").replace(/[TZ]/g," ").replace(/^\s\s*/   /*rappel   , '').replace(/\s\s*$/, '');
-  if(time.substr(time.length-4,1)==".") time =time.substr(0,time.length-4);
-  */
-  var seconds = (new Date - new Date(time)) / 1000;
-  var token = 'ago', list_choice = 1;
-  if (seconds < 0) {
-    seconds = Math.abs(seconds);
-    token = 'from now';
-    list_choice = 2;
-  }
-  var i = 0, format;
-  while (format = time_formats[i++]) 
-    if (seconds < format[0]) {
-      if (typeof format[2] == 'string')
-        return format[list_choice];
-      else
-        return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
-    }
-  return time;
-};
- 
 exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
