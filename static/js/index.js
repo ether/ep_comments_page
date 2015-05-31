@@ -139,6 +139,23 @@ ep_comments.prototype.init = function(){
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
+  // DUPLICATE CODE REQUJIRED FOR COMMENT REPLIES, see below for slightly different version
+  this.container.on("click", ".comment-changeTo-approve", function(e){
+    e.preventDefault();
+    var commentId = $(this).parent().parent().parent().parent()[0].id;
+    var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+
+    // Nuke all that aren't first lines of this comment
+    padInner.contents().find("."+commentId+":not(:first)").html("");
+    var padCommentContent = padInner.contents().find("."+commentId).first();
+    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
+
+    // Write the new pad contents
+    $(padCommentContent).html(newString);
+  });
+
   // User accepts a change
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
