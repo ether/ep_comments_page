@@ -62,10 +62,11 @@ exports.socketio = function (hook_name, args, cb){
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
       var content = data.reply;
+      var changeTo = data.changeTo || null;
       var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply){
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo);
         callback(replyId, reply);
       });
     });

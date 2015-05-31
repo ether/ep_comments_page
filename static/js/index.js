@@ -129,13 +129,11 @@ ep_comments.prototype.init = function(){
   // Listen for include suggested change toggle
   this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
-      // Get current text -- cake
       var commentId = $(this).parent().parent().parent()[0].id;
       var padOuter = $('iframe[name="ace_outer"]').contents();
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-      console.log(self.comments[commentId].data);
       $(this).parent().parent().find(".reply-comment-suggest-from").html(currentString);
       $(this).parent().parent().find('.reply-suggestion').show();
     }else{
@@ -148,6 +146,24 @@ ep_comments.prototype.init = function(){
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
+  // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
+  this.container.on("click", ".comment-reply-changeTo-approve", function(e){
+    e.preventDefault();
+    var commentId = $(this).parent().parent().parent().parent()[0].id;
+    var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+
+    // Nuke all that aren't first lines of this comment
+    padInner.contents().find("."+commentId+":not(:first)").html("");
+    var padCommentContent = padInner.contents().find("."+commentId).first();
+    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
+
+    // Write the new pad contents
+    $(padCommentContent).html(newString);
+  });
+
+  // User accepts a change
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
     var data = self.getCommentData();
@@ -155,8 +171,14 @@ ep_comments.prototype.init = function(){
     data.commentId = $(this).parent()[0].id;
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
-    // We know the ID, so we can do a html replace no?
-    var padCommentContent = padInner.contents().find("."+data.commentId);
+
+    // Nuke all that aren't first lines of this comment
+    padInner.contents().find("."+data.commentId+":not(:first)").html("");
+
+    var padCommentContent = padInner.contents().find("."+data.commentId).first();
+    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
+    
+    // Write the new pad contents
     $(padCommentContent).html(newString);
   });
 
@@ -166,7 +188,7 @@ ep_comments.prototype.init = function(){
     var data = self.getCommentData();
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
-
+    data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -350,10 +372,6 @@ ep_comments.prototype.highlightComment = function(e){
     // hovering comment view
     $('iframe[name="ace_outer"]').contents().find('.comment-modal-comment').html(commentElm.html());
   }
-}
-
-ep_comments.prototype.removeComment = function(className, id){
-  // console.log('remove comment', className, id);
 }
 
 // Insert comment container in sidebar
@@ -566,22 +584,37 @@ ep_comments.prototype.addComment = function (callback){
   var totalNumberOfLines = 0;
   $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").html("");
 
-  // TODO: allow selecting multiple lines..  Dunno why my brain can't handle this today..
-/*
+  var selectedText = "";
+
   _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
+     // rep looks like -- starts at line 2, character 1, ends at line 4 char 1
+     /* 
+     {
+        rep.selStart[2,0],
+        rep.selEnd[4,2]
+     }
+     */
      var line = rep.lines.atIndex(lineNumber);
-     console.log("arbl", line.text);
+
      // If we span over multiple lines
-     if(rep.selStart[0] !== selEnd[0]){
+     if(rep.selStart[0] === lineNumber){
        // Is this the first line?
+       if(rep.selStart[1] > 0){
+         var posStart = rep.selStart[1];
+       }else{
+         var posStart = 0;
+       }
      }
-     var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1])
-     console.log(selectedText);
-     if(selectedText){
-       $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").append(escape(selectedText));
+     if(rep.selEnd[0] === lineNumber){
+       if(rep.selEnd[1] <= line.text.length){
+         var posEnd = rep.selEnd[1];
+       }else{
+         var posEnd = 0;
+       }
      }
+     var lineText = line.text.substring(posStart, posEnd);
+     selectedText += lineText + "\n";
   });
-*/
 
   // Set the top of the form
   $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
@@ -609,24 +642,17 @@ ep_comments.prototype.addComment = function (callback){
     });
   });
 
-  var line = rep.lines.atIndex(rep.selStart[0]);
-  var selectedText = line.text.substring(rep.selStart[1], rep.selEnd[1]);
+  // Write the text to the changeFrom form
   $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").val(selectedText);
 
 };
-
-// Gets the original text of a comment
-ep_comments.prototype.getOriginalText = function(commentId){
-  console.log(this.text);
-  console.log("CAKE need TODO -- get the text of a given commentId, this would return a string such as 'Hello world'");
-}
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply){
-    // console.warn("pAcR response", replyId, reply);
+  socket.on('pushAddCommentReply', function (replyId, reply, changeTo){
+    console.warn("pAcR response", replyId, reply, changeTo);
     // callback(replyId, reply);
     // self.collectCommentReplies();
     self.getCommentReplies(function (replies){

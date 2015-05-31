@@ -51,7 +51,12 @@
 }
 
 .sidebar-comment-reply{
-  margin-left:10px;
+  padding-top:5px;
+  padding-left:10px;
+}
+
+.sidebar-comment-reply:nth-child(even){
+  background-color:#f1f1f1;
 }
 
 .comment-reply{
@@ -60,7 +65,8 @@
 }
 
 .comment-reply-input{
-  width:184px;
+  margin-top:10px;
+  width:187px;
 }
 
 #comments {
@@ -243,5 +249,6 @@
 }
 
 .sidebar-comment-reply input{
-  margin-left:40px;
+  margin-bottom:10px;
+/*  margin-left:40px; */
 }
