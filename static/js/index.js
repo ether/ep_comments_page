@@ -126,7 +126,6 @@ ep_comments.prototype.init = function(){
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-      console.log(self.comments[commentId].data);
       $(this).parent().parent().find(".reply-comment-suggest-from").html(currentString);
       $(this).parent().parent().find('.reply-suggestion').show();
     }else{
@@ -139,8 +138,8 @@ ep_comments.prototype.init = function(){
   $('iframe[name="ace_outer"]').contents().find("body")
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
-  // DUPLICATE CODE REQUJIRED FOR COMMENT REPLIES, see below for slightly different version
-  this.container.on("click", ".comment-changeTo-approve", function(e){
+  // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
+  this.container.on("click", ".comment-reply-changeTo-approve", function(e){
     e.preventDefault();
     var commentId = $(this).parent().parent().parent().parent()[0].id;
     var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
@@ -362,10 +361,6 @@ ep_comments.prototype.highlightComment = function(e){
     // hovering comment view
     $('iframe[name="ace_outer"]').contents().find('.comment-modal-comment').html(commentElm.html());
   }
-}
-
-ep_comments.prototype.removeComment = function(className, id){
-  // console.log('remove comment', className, id);
 }
 
 // Insert comment container in sidebar
