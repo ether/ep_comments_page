@@ -109,6 +109,7 @@ exports.addCommentReply = function(padId, data, callback){
     var reply = {
       "commentId": data.commentId,
       "text": data.reply,
+      "changeTo": data.changeTo || null,
       "author": metadata.author,
       "name": metadata.name,
       "timestamp": new Date().getTime()

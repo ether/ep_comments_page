@@ -67,6 +67,17 @@
     <div id="${replyId}" class="sidebar-comment-reply">
         <p class="comment-author-name">${name}:</p>
         <p class="comment-text">${text}</p>
+        {{if changeTo}}
+        <form class="comment-changeTo-form">
+            <p class="comment-changeTo">
+                <span class="comment-changeTo-label">Suggested Change:</span>
+                <span class="comment-changeTo-value">${changeTo}</span>
+            </p>
+            <p class="comment-changeTo-approve">
+                <input type="Submit" value="Accept Change">
+            </p>
+        </form>
+        {{/if}}
     </div>
 </script>
 

@@ -121,7 +121,6 @@ ep_comments.prototype.init = function(){
   // Listen for include suggested change toggle
   this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
-      // Get current text -- cake
       var commentId = $(this).parent().parent().parent()[0].id;
       var padOuter = $('iframe[name="ace_outer"]').contents();
       var padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -165,7 +164,7 @@ ep_comments.prototype.init = function(){
     var data = self.getCommentData();
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
-
+    data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -590,18 +589,12 @@ ep_comments.prototype.addComment = function (callback){
 
 };
 
-// Gets the original text of a comment
-ep_comments.prototype.getOriginalText = function(commentId){
-  console.log(this.text);
-  console.log("CAKE need TODO -- get the text of a given commentId, this would return a string such as 'Hello world'");
-}
-
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply){
-    // console.warn("pAcR response", replyId, reply);
+  socket.on('pushAddCommentReply', function (replyId, reply, changeTo){
+    console.warn("pAcR response", replyId, reply, changeTo);
     // callback(replyId, reply);
     // self.collectCommentReplies();
     self.getCommentReplies(function (replies){
