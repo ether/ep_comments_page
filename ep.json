@@ -3,6 +3,7 @@
     {
       "name":"comments_page",
       "pre": ["ep_etherpad-lite/webaccess"],
+      "post": ["ep_etherpad-lite/static"],
       "client_hooks": {
         "postAceInit": "ep_comments_page/static/js/index",
         "collectContentPre": "ep_comments_page/static/js/shared",
