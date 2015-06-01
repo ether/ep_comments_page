@@ -1,4 +1,5 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
+var settings = require('ep_etherpad-lite/node/utils/Settings');
 var formidable = require('formidable');
 var clientIO = require('socket.io-client');
 var commentManager = require('./commentManager');
@@ -116,6 +117,11 @@ exports.eejsBlock_scripts = function (hook_name, args, cb) {
 exports.eejsBlock_styles = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/styles.html", {}, module);
   return cb();
+};
+
+exports.clientVars = function (hook, context, cb) {
+  var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
+  return cb({ "displayCommentAsIcon": displayCommentAsIcon });
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {
