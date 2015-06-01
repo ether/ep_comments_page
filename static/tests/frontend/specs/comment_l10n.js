@@ -4,7 +4,7 @@ describe("Comment Localization", function(){
     helper.newPad(function() {
       createComment(function() {
         // ensure we start on the default language
-        changeLanguageTo('en', cb)
+        changeEtherpadLanguageTo('en', cb)
       });
     });
     this.timeout(60000);
@@ -12,11 +12,11 @@ describe("Comment Localization", function(){
 
   // ensure we go back to English to avoid breaking other tests:
   after(function(cb){
-    changeLanguageTo('en', cb);
+    changeEtherpadLanguageTo('en', cb);
   });
 
   it("uses default values when language was not localized yet", function(done) {
-    changeLanguageTo('de', function(){
+    changeEtherpadLanguageTo('de', function(){
       var chrome$ = helper.padChrome$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
@@ -30,7 +30,7 @@ describe("Comment Localization", function(){
   });
 
   it("localizes comment when Etherpad language is changed", function(done) {
-    changeLanguageTo('pt-br', function(){
+    changeEtherpadLanguageTo('pt-br', function(){
       var chrome$ = helper.padChrome$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
@@ -57,9 +57,8 @@ describe("Comment Localization", function(){
     var $commentButton = chrome$(".addComment");
     $commentButton.click();
 
-    changeLanguageTo('pt-br', function(){
+    changeEtherpadLanguageTo('pt-br', function(){
       //get the 'Include suggested change' label
-      console.log(outer$('#newComment'));
       var $changeToLabel = outer$('#newComment label[for=suggestion-checkbox]').first();
       expect($changeToLabel.text()).to.be("Incluir alteração sugerida");
 
@@ -103,7 +102,7 @@ function createComment(callback) {
   .done(callback);
 }
 
-function changeLanguageTo(lang, callback) {
+function changeEtherpadLanguageTo(lang, callback) {
   var boldTitles = {
     'en' : 'Bold (Ctrl+B)',
     'pt-br' : 'Negrito (Ctrl-B)',
@@ -115,12 +114,9 @@ function changeLanguageTo(lang, callback) {
   var $settingsButton = chrome$(".buttonicon-settings");
   $settingsButton.click();
 
-  //click the language button
+  //select the language
   var $language = chrome$("#languagemenu");
-  var $languageoption = $language.find("[value="+lang+"]");
-
-  //select the target language
-  $languageoption.attr('selected','selected');
+  $language.val(lang);
   $language.change();
 
   // hide settings again
