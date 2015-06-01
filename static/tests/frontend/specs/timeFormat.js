@@ -9,6 +9,11 @@ _.each({'en': 'English', 'de': 'a language not localized yet'}, function(descrip
       this.timeout(60000);
     });
 
+    // ensure we go back to English to avoid breaking other tests:
+    after(function(cb){
+      changeLanguageTo('en', cb);
+    });
+
     it("returns '12 seconds ago' when time is 12 seconds in the past", function(done) {
       expect(prettyDate(secondsInThePast(12))).to.be('12 seconds ago');
       done();
@@ -387,12 +392,9 @@ function changeLanguageTo(lang, callback) {
   var $settingsButton = chrome$(".buttonicon-settings");
   $settingsButton.click();
 
-  //click the language button
+  //select the language
   var $language = chrome$("#languagemenu");
-  var $languageoption = $language.find("[value="+lang+"]");
-
-  //select the target language
-  $languageoption.attr('selected','selected');
+  $language.val(lang);
   $language.change();
 
   // hide settings again
