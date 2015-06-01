@@ -11,6 +11,22 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
     if(apool.numToAttrib && apool.numToAttrib[0] && apool.numToAttrib[0][0]){
       if(apool.numToAttrib[0][0] === "comment"){
         // Comment change, allow it to override readonly security model!!
+
+        var sandstormPermissions =
+            context.client.request.headers["x-sandstorm-permissions"];
+        if(sandstormPermissions !== undefined){
+          // We're running on Sandstorm (or we're *not* on Sandstorm but for
+          // some reason the client has forged a Sandstorm permissions header).
+          // If the header doesn't indicate commenting is allowed, then do
+          // *not* permit the message through. (Since this strictly reduces
+          // the client's permissions, it's not a problem for this code to
+          // run even when not on Sandstorm.)
+          if(sandstormPermissions.split(",").indexOf("comment") === -1){
+            callback();
+            return;
+          }
+        }
+
         callback(true);
       }else{
         callback();
