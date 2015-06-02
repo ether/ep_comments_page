@@ -128,6 +128,13 @@ ep_comments.prototype.init = function(){
     }
   });
 
+  // Listen for events to delete a comment
+  // All this does is remove the comment attr on the selection
+  this.container.on("click", ".comment-delete", function(){
+    var commentId = $(this).parent()[0].id;
+    self.deleteComment(commentId);
+  })
+
   // Listen for include suggested change toggle
   this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
@@ -385,6 +392,7 @@ ep_comments.prototype.insertContainer = function(){
 
 // Insert new Comment Form
 ep_comments.prototype.insertNewComment = function(comment, callback){
+  var ace = this.ace;
   var index = 0;
 
   this.insertComment("", comment, index, true);
@@ -413,7 +421,6 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   });
 
   // Set the top of the form to be the same Y as the target Rep
-  var ace = this.ace;
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
     // console.log("rep", rep); // doesn't fire twice
@@ -558,6 +565,23 @@ ep_comments.prototype.getCommentData = function (){
   }
 
   return data;
+}
+
+// Delete a pad comment cake
+ep_comments.prototype.deleteComment = function(commentId){
+
+  // CAKE NONE OF THIS IS WORKING, NEED A NEW APPROACH
+
+  // We need to get the REP of a given comment and set the comment attribute to null..
+  // All we know is the commentId so we use that to locate the string in a line
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+
+  var comment = padInner.contents().find("."+commentId);
+  console.log(comment);
+  comment.removeClass("comment");
+  var self    = this;
+
 }
 
 // Add a pad comment
@@ -712,7 +736,6 @@ var hooks = {
   },
 
   aceEditEvent: function(hook, context){
-    // Cake this bit is a bit rough..
     var padOuter = $('iframe[name="ace_outer"]').contents();
     // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
