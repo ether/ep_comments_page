@@ -570,17 +570,7 @@ ep_comments.prototype.getCommentData = function (){
 // Delete a pad comment cake
 ep_comments.prototype.deleteComment = function(commentId){
 
-  // CAKE NONE OF THIS IS WORKING, NEED A NEW APPROACH
-
-  // We need to get the REP of a given comment and set the comment attribute to null..
-  // All we know is the commentId so we use that to locate the string in a line
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
-
-  var comment = padInner.contents().find("."+commentId);
-  console.log(comment);
-  comment.removeClass("comment");
-  var self    = this;
+  alert("deleting");
 
 }
 
