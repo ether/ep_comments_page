@@ -4,8 +4,10 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
+var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
+var commentIcons = require('ep_comments_page/static/js/commentIcons');
 
-var cssFiles = ['ep_comments_page/static/css/comment.css'];
+var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
 /************************************************************************/
 /*                         ep_comments Plugin                           */
@@ -46,6 +48,9 @@ ep_comments.prototype.init = function(){
   // Init prerequisite
   this.findContainers();
   this.insertContainers();
+
+  // Init icons container
+  commentIcons.insertContainer();
 
   // Get all comments
   this.getComments(function (comments){
@@ -338,22 +343,28 @@ ep_comments.prototype.collectComments = function(callback){
   });
 
   // hover event
-  this.padInner.contents().on("mouseover", ".comment" ,function(e){
-    self.highlightComment(e);
+  this.padInner.contents().on("mouseover", ".comment", function(e){
+    var commentId = self.commentIdOf(e);
+    commentBoxes.highlightComment(commentId, e);
   });
 
   // click event
-  this.padInner.contents().on("click", ".comment" ,function(e){
-    self.highlightComment(e);
+  this.padInner.contents().on("click", ".comment", function(e){
+    var commentId = self.commentIdOf(e);
+    commentBoxes.highlightComment(commentId, e);
   });
 
-  this.padInner.contents().on("mouseleave", ".comment" ,function(e){
-    var cls             = e.currentTarget.classList;
-    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId       = (classCommentId) ? classCommentId[1] : null;
-    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
-    commentElm.removeClass('mouseover');
-    $('iframe[name="ace_outer"]').contents().find('.comment-modal').hide();
+  this.padInner.contents().on("mouseleave", ".comment", function(e){
+    var commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
+
+    // only hides comment if it was not opened by a click on the icon
+    if (!commentOpenedByClickOnIcon) {
+      var cls             = e.currentTarget.classList;
+      var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+      var commentId       = (classCommentId) ? classCommentId[1] : null;
+
+      commentBoxes.hideComment(commentId);
+    }
   });
   self.setYofComments();
 };
@@ -367,6 +378,10 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   var padComment  = this.padInner.contents().find('.comment');
   $.each(this.commentReplies, function(replyId, replies){
     var commentId = replies.commentId;
+
+    // tell comment icon that this comment has 1+ replies
+    commentIcons.commentHasReply(commentId);
+
     var existsAlready = $('iframe[name="ace_outer"]').contents().find('#'+replyId).length;
     if(existsAlready) return;
 
@@ -376,25 +391,12 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   });
 };
 
-ep_comments.prototype.highlightComment = function(e){
+ep_comments.prototype.commentIdOf = function(e){
   var cls             = e.currentTarget.classList;
   var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-  var commentId       = (classCommentId) ? classCommentId[1] : null;
-  var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
-  var commentsVisible = this.container.is(":visible");
-  if(commentsVisible){
-    // sidebar view highlight
-    commentElm.addClass('mouseover');
-  }else{
-    var commentElm      = $('iframe[name="ace_outer"]').contents().find("#comments").find('#'+ commentId);
-    $('iframe[name="ace_outer"]').contents().find('.comment-modal').show().css({
-      left: e.clientX +"px",
-      top: e.clientY + 25 +"px"
-    });
-    // hovering comment view
-    $('iframe[name="ace_outer"]').contents().find('.comment-modal-comment').html(commentElm.html());
-  }
-}
+
+  return (classCommentId) ? classCommentId[1] : null;
+};
 
 // Insert comment container in sidebar
 ep_comments.prototype.insertContainers = function(){
@@ -478,29 +480,44 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   } else {
     commentAfterIndex.before(content);
   }
+
+  // insert icon
+  if (!isNew) commentIcons.addIcon(commentId, comment);
+
   this.setYofComments();
 };
 
-// Set all comments ot be inline with their target REP
+// Set all comments to be inline with their target REP
 ep_comments.prototype.setYofComments = function(){
   // for each comment in the pad
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
   var inlineComments = padInner.contents().find(".comment");
-  padOuter.find("#comments").children("div").each(function(){
-    // hide each outer comment
-    $(this).hide();
-  });
+  var commentsToBeShown = [];
+
+  // hide each outer comment...
+  commentBoxes.hideAllComments();
+  // ... and hide comment icons too
+  commentIcons.hideIcons();
+
   $.each(inlineComments, function(){
     var y = this.offsetTop;
-    y = y-5;
-    var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
-    if(commentId){
-      var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
-      commentEle.css("top", y+"px").show();
+    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    if(commentId) {
+      // adjust outer comment...
+      var commentEle = commentBoxes.adjustTopOf(commentId[1], y);
+      // ... and adjust icons too
+      commentIcons.adjustTopOf(commentId[1], y);
+
+      // mark this comment to be displayed if it was visible before we start adjusting its position
+      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
     }
   });
 
+  // re-display comments that were visible before
+  _.each(commentsToBeShown, function(commentEle) {
+    commentEle.show();
+  });
 };
 
 ep_comments.prototype.localize = function(element) {
@@ -760,27 +777,15 @@ var hooks = {
   },
 
   aceEditEvent: function(hook, context){
-    var padOuter = $('iframe[name="ace_outer"]').contents();
+    // var padOuter = $('iframe[name="ace_outer"]').contents();
     // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
-    // for each comment
 
-    // NOTE this is duplicate code because of the way this is written, ugh, this needs fixing
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-    var inlineComments = padInner.contents().find(".comment");
-    padOuter.find("#comments").children().each(function(){
-      // hide each outer comment
-      $(this).hide();
-    });
-    $.each(inlineComments, function(){
-      var y = this.offsetTop;
-      var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
-      if(commentId){
-        var commentEle = padOuter.find('#c-'+commentId[1]);
-        y = y-5;
-        commentEle.css("top", y+"px").show();
-      }
-    });
+    // only adjust comments if plugin was already initialized,
+    // otherwise there's nothing to adjust anyway
+    if (pad.plugins && pad.plugins.ep_comments_page) {
+      pad.plugins.ep_comments_page.setYofComments();
+    }
   },
 
   // Insert comments classes
