@@ -2,6 +2,20 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
+// Criteria to display (or not) comment as icons
+var displayIcons = function() {
+  var shouldDisplayIcons = false;
+  if (clientVars.displayCommentAsIcon) {
+    // we will only display icons if right margin has some space
+    var firstElementOnPad      = getPadInner().contents().find("#innerdocbody > div").first();
+    var rightMargin            = firstElementOnPad.css("margin-right");
+    var hasSpaceToDisplayIcons = rightMargin !== "0px";
+    shouldDisplayIcons         = hasSpaceToDisplayIcons;
+  }
+
+  return shouldDisplayIcons;
+}
+
 // Easier access to outer pad
 var padOuter;
 var getPadOuter = function() {
@@ -9,7 +23,7 @@ var getPadOuter = function() {
   return padOuter;
 }
 
-// easier access to inner pad
+// Easier access to inner pad
 var padInner;
 var getPadInner = function() {
   padInner = padInner || getPadOuter().find('iframe[name="ace_inner"]');
@@ -82,7 +96,7 @@ var addListeners = function() {
 // Create container to hold comment icons
 var insertContainer = function() {
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return;
+  if (!displayIcons()) return;
 
   getPadInner().before('<div id="commentIcons"></div>');
 
@@ -92,7 +106,7 @@ var insertContainer = function() {
 // Create a new comment icon
 var addIcon = function(commentId, comment){
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return;
+  if (!displayIcons()) return;
 
   var inlineComment = getPadInner().contents().find(".comment."+commentId);
   var top = inlineComment.get(0).offsetTop + 5;
@@ -105,7 +119,7 @@ var addIcon = function(commentId, comment){
 // Hide comment icons from container
 var hideIcons = function() {
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return;
+  if (!displayIcons()) return;
 
   getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
@@ -116,7 +130,7 @@ var hideIcons = function() {
 // height of the pad text associated to the comment, and return the affected icon
 var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return;
+  if (!displayIcons()) return;
 
   var icon = getPadOuter().find('#icon-'+commentId);
   var targetTop = baseTop+5;
@@ -134,7 +148,7 @@ var adjustTopOf = function(commentId, baseTop) {
 // comment icon.
 var isCommentOpenedByClickOnIcon = function() {
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return false;
+  if (!displayIcons()) return false;
 
   var iconClicked = getPadOuter().find('#commentIcons').find(".comment-icon.active");
   var commentOpenedByClickOnIcon = iconClicked.length !== 0;
@@ -146,7 +160,7 @@ var isCommentOpenedByClickOnIcon = function() {
 // different icon
 var commentHasReply = function(commentId) {
   // we're only doing something if icons will be displayed at all
-  if (!clientVars.displayCommentAsIcon) return;
+  if (!displayIcons()) return;
 
   // change comment icon
   var iconForComment = getPadOuter().find('#commentIcons').find("#icon-"+commentId);
@@ -158,7 +172,7 @@ var commentHasReply = function(commentId) {
 var shouldShow = function(commentElement) {
   var shouldShowComment = false;
 
-  if (!clientVars.displayCommentAsIcon) {
+  if (!displayIcons()) {
     // if icons are not being displayed, we always show comments
     shouldShowComment = true;
   } else if (commentElement.hasClass("mouseover")) {
