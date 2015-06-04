@@ -258,6 +258,10 @@ ep_comments.prototype.collectComments = function(callback){
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
+    if(!commentId){
+      // console.log("returning due to no comment id, probably due to a deleted comment");
+      return;
+    }
 
     // make sure comments aer visible on the page
     // container.show();
@@ -272,7 +276,6 @@ ep_comments.prototype.collectComments = function(callback){
     var commentId   = classCommentId[1];
     var commentElm  = container.find('#'+ commentId);
     var comment     = comments[commentId];
-
     if(comment){
       if (comment !== null) {
         // If comment is not in sidebar insert it
@@ -291,7 +294,6 @@ ep_comments.prototype.collectComments = function(callback){
         self.localize(commentElm);
       }
     }
-
     var prevCommentElm = commentElm.prev();
     var commentPos;
 
@@ -306,7 +308,6 @@ ep_comments.prototype.collectComments = function(callback){
 
     commentElm.css({ 'top': commentPos });
   });
-
   // now if we apply a class such as mouseover to the editor it will go shitty
   // so what we need to do is add CSS for the specific ID to the document...
   // It's fucked up but that's how we do it..
@@ -341,7 +342,6 @@ ep_comments.prototype.collectComments = function(callback){
     commentElm.removeClass('mouseover');
     $('iframe[name="ace_outer"]').contents().find('.comment-modal').hide();
   });
-
   self.setYofComments();
 };
 
@@ -476,8 +476,10 @@ ep_comments.prototype.setYofComments = function(){
     var y = this.offsetTop;
     y = y-5;
     var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
-    var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
-    commentEle.css("top", y+"px").show();
+    if(commentId){
+      var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
+      commentEle.css("top", y+"px").show();
+    }
   });
 
 };
@@ -574,8 +576,16 @@ ep_comments.prototype.deleteComment = function(commentId){
   var selector = "."+commentId;
   var repArr = getRepFromSelector(selector, padInner);
   // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+  var ace = this.ace;
   $.each(repArr, function(index, rep){
-    console.log("I need to set an attribute on ", rep);
+
+    ace.callWithAce(function (ace){
+      ace.ace_performSelectionChange(rep[0],rep[1],true);
+      ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+      // Note that this is the correct way of doing it, instead of there being
+      // a commentId we now flag it as "comment-deleted"
+    },'deleteCommentedSelection', true);
+   
   });
 }
 
@@ -746,9 +756,11 @@ var hooks = {
     $.each(inlineComments, function(){
       var y = this.offsetTop;
       var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
-      var commentEle = padOuter.find('#c-'+commentId[1]);
-      y = y-5;
-      commentEle.css("top", y+"px").show();
+      if(commentId){
+        var commentEle = padOuter.find('#c-'+commentId[1]);
+        y = y-5;
+        commentEle.css("top", y+"px").show();
+      }
     });
   },
 
@@ -804,10 +816,10 @@ function getRepFromSelector(selector, container){
     var lineNumber = $(parentDiv).prevAll("div").length;
 
     // We can set beginning of rep Y (lineNumber)
-    rep[0][1] = lineNumber;
+    rep[0][0] = lineNumber;
  
     // We can also update the end rep Y
-    rep[1][1] = lineNumber;
+    rep[1][0] = lineNumber;
 
     // Given the comment span, how many characters are before it?
     
@@ -829,18 +841,18 @@ function getRepFromSelector(selector, container){
     // In the example before the correct number would be 21
     // I guess we could do prevAll each length?
     // If there are no spans before we get 0, simples!
+    // Note that this only works if spans are being used, which imho
+    // Is the correct container however if block elements are registered
+    // It's plausable that attributes are not maintained :(
     var leftOffset = 0;
     $(span).prevAll("span").each(function(){
       var spanOffset = $(this).text().length;
-      leftOffset += spanOffset
+      leftOffset += spanOffset;
     });
-
-    rep[0][0] = leftOffset; // Cake this is left to do
-
-    // THIS IS FAKE AND NEEDS FIXING
+    rep[0][1] = leftOffset;
 
     // All we need to know is span text length and it's left offset in chars
-    rep[1][0] = rep[0][0] + $(span).text().length; // Easy!
+    rep[1][1] = rep[0][1] + $(span).text().length; // Easy!
     repArr.push(rep);
   });
   return repArr;
