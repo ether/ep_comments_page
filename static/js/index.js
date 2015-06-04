@@ -129,7 +129,7 @@ ep_comments.prototype.init = function(){
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
   this.container.on("click", ".comment-delete", function(){
-    var commentId = $(this).parent()[0].id;
+    var commentId = $(this).parent().parent()[0].id;
     self.deleteComment(commentId);
   })
 
@@ -586,11 +586,16 @@ ep_comments.prototype.getCommentData = function (){
   return data;
 }
 
-// Delete a pad comment cake
+// Delete a pad comment
 ep_comments.prototype.deleteComment = function(commentId){
-
-  alert("deleting");
-
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var selector = "."+commentId;
+  var repArr = getRepFromSelector(selector, padInner);
+  // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+  $.each(repArr, function(index, rep){
+    console.log("I need to set an attribute on ", rep);
+  });
 }
 
 // Add a pad comment
@@ -782,3 +787,80 @@ exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
 
+// Given a CSS selector and a target element (in this case pad inner)
+// return the rep as an array of array of tuples IE [[[0,1],[0,2]], [[1,3],[1,5]]]
+// We have to return an array of a array of tuples because there can be multiple reps
+// For a given selector
+// A more sane data structure might be an object such as..
+/*
+0:{
+  xStart: 0,
+  xEnd: 1,
+  yStart: 0,
+  yEnd: 1
+},
+1:...
+*/
+// Alas we follow the Etherpad convention of using tuples here.
+function getRepFromSelector(selector, container){
+
+  var repArr = [];
+  // first find the element
+  var elements = container.contents().find(selector);
+  // One might expect this to be a rep for the entire document
+  // However what we actually need to do is find each selection that includes
+  // this comment and remove it.  This is because content can be pasted
+  // Mid comment which would mean a remove selection could have unexpected consequences
+  
+  $.each(elements, function(index, span){
+    // create a rep array container we can push to..
+    var rep = [[],[]];
+
+    // span not be the div so we have to go to parents until we find a div
+    var parentDiv = $(span).parent("div");
+    // line Number is obviously relative to entire document
+    // So find out how many elements before in this parent?
+    var lineNumber = $(parentDiv).prevAll("div").length;
+
+    // We can set beginning of rep Y (lineNumber)
+    rep[0][1] = lineNumber;
+ 
+    // We can also update the end rep Y
+    rep[1][1] = lineNumber;
+
+    // Given the comment span, how many characters are before it?
+    
+    // All we need to know is the number of characters before .foo
+    /*
+
+    <div id="boo">
+      hello 
+      <span class='nope'>
+        world 
+      </span>
+      are you 
+      <span class='foo'>
+        here?
+      </span>
+    </div>
+
+    */
+    // In the example before the correct number would be 21
+    // I guess we could do prevAll each length?
+    // If there are no spans before we get 0, simples!
+    var leftOffset = 0;
+    $(span).prevAll("span").each(function(){
+      var spanOffset = $(this).text().length;
+      leftOffset += spanOffset
+    });
+
+    rep[0][0] = leftOffset; // Cake this is left to do
+
+    // THIS IS FAKE AND NEEDS FIXING
+
+    // All we need to know is span text length and it's left offset in chars
+    rep[1][0] = rep[0][0] + $(span).text().length; // Easy!
+    repArr.push(rep);
+  });
+  return repArr;
+}
