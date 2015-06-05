@@ -107,7 +107,6 @@ ep_comments.prototype.init = function(){
 
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
-    $('iframe[name="ace_outer"]').contents().find('#comments').addClass("active");
     e.preventDefault(); // stops focus from being lost
     // If a new comment box doesn't already exist
     // Add a new comment and link it to the selection
