@@ -116,6 +116,22 @@
   z-index:1;
 }
 
+#newComments {
+  display:none;
+  width:210px;
+  bottom:0;
+  position:absolute;
+  top:10px;
+  right:0px;
+  font-family: Helvetica, Arial, sans-serif;
+  z-index:1;
+}
+
+#newComments.active {
+  display:block;
+  z-index: 1000;
+}
+
 .comment-reply-button{
   float:right;
   display:none;
