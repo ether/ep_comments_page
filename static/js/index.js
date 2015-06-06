@@ -128,6 +128,13 @@ ep_comments.prototype.init = function(){
     }
   });
 
+  // Listen for events to delete a comment
+  // All this does is remove the comment attr on the selection
+  this.container.on("click", ".comment-delete", function(){
+    var commentId = $(this).parent().parent()[0].id;
+    self.deleteComment(commentId);
+  })
+
   // Listen for include suggested change toggle
   this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
@@ -251,6 +258,10 @@ ep_comments.prototype.collectComments = function(callback){
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
+    if(!commentId){
+      // console.log("returning due to no comment id, probably due to a deleted comment");
+      return;
+    }
 
     // make sure comments aer visible on the page
     // container.show();
@@ -265,7 +276,6 @@ ep_comments.prototype.collectComments = function(callback){
     var commentId   = classCommentId[1];
     var commentElm  = container.find('#'+ commentId);
     var comment     = comments[commentId];
-
     if(comment){
       if (comment !== null) {
         // If comment is not in sidebar insert it
@@ -284,7 +294,6 @@ ep_comments.prototype.collectComments = function(callback){
         self.localize(commentElm);
       }
     }
-
     var prevCommentElm = commentElm.prev();
     var commentPos;
 
@@ -299,7 +308,6 @@ ep_comments.prototype.collectComments = function(callback){
 
     commentElm.css({ 'top': commentPos });
   });
-
   // now if we apply a class such as mouseover to the editor it will go shitty
   // so what we need to do is add CSS for the specific ID to the document...
   // It's fucked up but that's how we do it..
@@ -334,7 +342,6 @@ ep_comments.prototype.collectComments = function(callback){
     commentElm.removeClass('mouseover');
     $('iframe[name="ace_outer"]').contents().find('.comment-modal').hide();
   });
-
   self.setYofComments();
 };
 
@@ -385,6 +392,7 @@ ep_comments.prototype.insertContainer = function(){
 
 // Insert new Comment Form
 ep_comments.prototype.insertNewComment = function(comment, callback){
+  var ace = this.ace;
   var index = 0;
 
   this.insertComment("", comment, index, true);
@@ -413,7 +421,6 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   });
 
   // Set the top of the form to be the same Y as the target Rep
-  var ace = this.ace;
   ace.callWithAce(function (ace){
     var rep = ace.ace_getRep();
     // console.log("rep", rep); // doesn't fire twice
@@ -469,8 +476,10 @@ ep_comments.prototype.setYofComments = function(){
     var y = this.offsetTop;
     y = y-5;
     var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
-    var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
-    commentEle.css("top", y+"px").show();
+    if(commentId){
+      var commentEle = padOuter.find('#c-'+commentId[1]) // find the comment
+      commentEle.css("top", y+"px").show();
+    }
   });
 
 };
@@ -558,6 +567,26 @@ ep_comments.prototype.getCommentData = function (){
   }
 
   return data;
+}
+
+// Delete a pad comment
+ep_comments.prototype.deleteComment = function(commentId){
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var selector = "."+commentId;
+  var repArr = getRepFromSelector(selector, padInner);
+  // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+  var ace = this.ace;
+  $.each(repArr, function(index, rep){
+
+    ace.callWithAce(function (ace){
+      ace.ace_performSelectionChange(rep[0],rep[1],true);
+      ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+      // Note that this is the correct way of doing it, instead of there being
+      // a commentId we now flag it as "comment-deleted"
+    },'deleteCommentedSelection', true);
+   
+  });
 }
 
 // Add a pad comment
@@ -712,7 +741,6 @@ var hooks = {
   },
 
   aceEditEvent: function(hook, context){
-    // Cake this bit is a bit rough..
     var padOuter = $('iframe[name="ace_outer"]').contents();
     // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
@@ -728,15 +756,17 @@ var hooks = {
     $.each(inlineComments, function(){
       var y = this.offsetTop;
       var commentId = /(?:^| )c-([A-Za-z0-9]*)/.exec(this.className);
-      var commentEle = padOuter.find('#c-'+commentId[1]);
-      y = y-5;
-      commentEle.css("top", y+"px").show();
+      if(commentId){
+        var commentEle = padOuter.find('#c-'+commentId[1]);
+        y = y-5;
+        commentEle.css("top", y+"px").show();
+      }
     });
   },
 
   // Insert comments classes
   aceAttribsToClasses: function(hook, context){
-    if(context.key == 'comment') return ['comment', context.value];
+    if(context.key == 'comment' && context.value !== "comment-deleted") return ['comment', context.value];
   },
 
   aceEditorCSS: function(){
@@ -750,3 +780,80 @@ exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
 
+// Given a CSS selector and a target element (in this case pad inner)
+// return the rep as an array of array of tuples IE [[[0,1],[0,2]], [[1,3],[1,5]]]
+// We have to return an array of a array of tuples because there can be multiple reps
+// For a given selector
+// A more sane data structure might be an object such as..
+/*
+0:{
+  xStart: 0,
+  xEnd: 1,
+  yStart: 0,
+  yEnd: 1
+},
+1:...
+*/
+// Alas we follow the Etherpad convention of using tuples here.
+function getRepFromSelector(selector, container){
+
+  var repArr = [];
+  // first find the element
+  var elements = container.contents().find(selector);
+  // One might expect this to be a rep for the entire document
+  // However what we actually need to do is find each selection that includes
+  // this comment and remove it.  This is because content can be pasted
+  // Mid comment which would mean a remove selection could have unexpected consequences
+  
+  $.each(elements, function(index, span){
+    // create a rep array container we can push to..
+    var rep = [[],[]];
+
+    // span not be the div so we have to go to parents until we find a div
+    var parentDiv = $(span).parent("div");
+    // line Number is obviously relative to entire document
+    // So find out how many elements before in this parent?
+    var lineNumber = $(parentDiv).prevAll("div").length;
+
+    // We can set beginning of rep Y (lineNumber)
+    rep[0][0] = lineNumber;
+ 
+    // We can also update the end rep Y
+    rep[1][0] = lineNumber;
+
+    // Given the comment span, how many characters are before it?
+    
+    // All we need to know is the number of characters before .foo
+    /*
+
+    <div id="boo">
+      hello 
+      <span class='nope'>
+        world 
+      </span>
+      are you 
+      <span class='foo'>
+        here?
+      </span>
+    </div>
+
+    */
+    // In the example before the correct number would be 21
+    // I guess we could do prevAll each length?
+    // If there are no spans before we get 0, simples!
+    // Note that this only works if spans are being used, which imho
+    // Is the correct container however if block elements are registered
+    // It's plausable that attributes are not maintained :(
+    var leftOffset = 0;
+    $(span).prevAll("span").each(function(){
+      var spanOffset = $(this).text().length;
+      leftOffset += spanOffset;
+    });
+    rep[0][1] = leftOffset;
+
+    // All we need to know is span text length and it's left offset in chars
+    rep[1][1] = rep[0][1] + $(span).text().length; // Easy!
+    repArr.push(rep);
+  });
+  return repArr;
+}

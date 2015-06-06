@@ -1,6 +1,9 @@
 <script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
 <script id="commentsTemplate" type="text/html">
     <div id="${commentId}" class="sidebar-comment" title="${date}">
+        <p class="comment-delete-container">
+          <span class="comment-delete" title="Delete this comment"></span>
+        </p>
         <p class="comment-author-name">${name}:</p>
         <p class="comment-text">${text}</p>
         {{if changeTo}}

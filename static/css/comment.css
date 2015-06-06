@@ -3,6 +3,42 @@
   border-radius: 0px;
 }
 
+.comment-delete-container{
+  margin-left:160px;
+  height: 15px;
+  background-color:#c6c6c6;
+  text-align:center;
+  line-height:14px;
+  color:#666;
+  display:none;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+
+  /* Rules below not implemented in browsers yet */
+  -o-user-select: none;
+  user-select: none;  
+}
+
+.comment-delete{
+  cursor:pointer;
+  line-height:14px;
+  display:block;
+  font-family: "fontawesome-etherpad";
+}
+
+.comment-delete:before{
+  content: "\e82a";
+}
+
+.comment-delete:hover{
+  font-weight:bold;
+}
+
+.sidebar-comment:hover .comment-delete-container{
+  display:block;
+}
+
 .sidebar-comment:hover .comment-text{
   height:auto;
   white-space:normal;
@@ -96,7 +132,7 @@
   overflow: hidden;
   right:0px;
   margin-left: 10px;
-  padding: 3px 5px;  
+  padding: 0px 5px 5px 5px;  
   background: white;
   width:90%;
   height:20px;
