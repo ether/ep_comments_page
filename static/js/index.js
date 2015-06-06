@@ -785,7 +785,7 @@ var hooks = {
 
   // Insert comments classes
   aceAttribsToClasses: function(hook, context){
-    if(context.key == 'comment') return ['comment', context.value];
+    if(context.key == 'comment' && context.value !== "comment-deleted") return ['comment', context.value];
   },
 
   aceEditorCSS: function(){
