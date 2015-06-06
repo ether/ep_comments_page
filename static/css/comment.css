@@ -24,6 +24,11 @@
   cursor:pointer;
   line-height:14px;
   display:block;
+  font-family: "fontawesome-etherpad";
+}
+
+.comment-delete:before{
+  content: "\e82a";
 }
 
 .comment-delete:hover{
