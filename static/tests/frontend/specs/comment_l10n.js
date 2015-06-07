@@ -65,75 +65,77 @@ describe("Comment Localization", function(){
       done();
     });
   });
+
+  /* ********** Helper functions ********** */
+
+  var createComment = function(callback) {
+    var inner$ = helper.padInner$;
+    var outer$ = helper.padOuter$;
+    var chrome$ = helper.padChrome$;
+
+    // get the first text element out of the inner iframe
+    var $firstTextElement = inner$("div").first();
+
+    // simulate key presses to delete content
+    $firstTextElement.sendkeys('{selectall}'); // select all
+    $firstTextElement.sendkeys('{del}'); // clear the first line
+    $firstTextElement.sendkeys('This content will receive a comment'); // insert text
+
+    // get the comment button and click it
+    $firstTextElement.sendkeys('{selectall}'); // needs to select content to add comment to
+    var $commentButton = chrome$(".addComment");
+    $commentButton.click();
+
+    // fill the comment form and submit it
+    var $commentField = outer$("textarea.comment-content");
+    $commentField.val("My comment");
+    var $hasSuggestion = outer$("#suggestion-checkbox");
+    $hasSuggestion.click();
+    var $suggestionField = outer$("textarea.comment-suggest-to");
+    $suggestionField.val("Change to this suggestion");
+    var $submittButton = outer$("input[type=submit]");
+    $submittButton.click();
+
+    // wait until comment is created and comment id is set
+    helper.waitFor(function() {
+      return getCommentId() !== null;
+     })
+    .done(callback);
+  }
+
+  var changeEtherpadLanguageTo = function(lang, callback) {
+    var boldTitles = {
+      'en' : 'Bold (Ctrl+B)',
+      'pt-br' : 'Negrito (Ctrl-B)',
+      'de' : 'Fett (Strg-B)'
+    };
+    var chrome$ = helper.padChrome$;
+
+    //click on the settings button to make settings visible
+    var $settingsButton = chrome$(".buttonicon-settings");
+    $settingsButton.click();
+
+    //select the language
+    var $language = chrome$("#languagemenu");
+    $language.val(lang);
+    $language.change();
+
+    // hide settings again
+    $settingsButton.click();
+
+    helper.waitFor(function() {
+      return chrome$(".buttonicon-bold").parent()[0]["title"] == boldTitles[lang];
+     })
+    .done(callback);
+  }
+
+  var getCommentId = function() {
+    var inner$ = helper.padInner$;
+    var comment = inner$(".comment").first();
+    var cls = comment.attr('class');
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId = (classCommentId) ? classCommentId[1] : null;
+
+    return commentId;
+  }
 });
-
-function createComment(callback) {
-  var inner$ = helper.padInner$;
-  var outer$ = helper.padOuter$;
-  var chrome$ = helper.padChrome$;
-
-  // get the first text element out of the inner iframe
-  var $firstTextElement = inner$("div").first();
-
-  // simulate key presses to delete content
-  $firstTextElement.sendkeys('{selectall}'); // select all
-  $firstTextElement.sendkeys('{del}'); // clear the first line
-  $firstTextElement.sendkeys('This content will receive a comment'); // insert text
-
-  // get the comment button and click it
-  $firstTextElement.sendkeys('{selectall}'); // needs to select content to add comment to
-  var $commentButton = chrome$(".addComment");
-  $commentButton.click();
-
-  // fill the comment form and submit it
-  var $commentField = outer$("textarea.comment-content");
-  $commentField.val("My comment");
-  var $hasSuggestion = outer$("#suggestion-checkbox");
-  $hasSuggestion.click();
-  var $suggestionField = outer$("textarea.comment-suggest-to");
-  $suggestionField.val("Change to this suggestion");
-  var $submittButton = outer$("input[type=submit]");
-  $submittButton.click();
-
-  // wait until comment is created and comment id is set
-  helper.waitFor(function() {
-    return getCommentId() !== null;
-   })
-  .done(callback);
-}
-
-function changeEtherpadLanguageTo(lang, callback) {
-  var boldTitles = {
-    'en' : 'Bold (Ctrl+B)',
-    'pt-br' : 'Negrito (Ctrl-B)',
-    'de' : 'Fett (Strg-B)'
-  };
-  var chrome$ = helper.padChrome$;
-
-  //click on the settings button to make settings visible
-  var $settingsButton = chrome$(".buttonicon-settings");
-  $settingsButton.click();
-
-  //select the language
-  var $language = chrome$("#languagemenu");
-  $language.val(lang);
-  $language.change();
-
-  // hide settings again
-  $settingsButton.click();
-
-  helper.waitFor(function() {
-    return chrome$(".buttonicon-bold").parent()[0]["title"] == boldTitles[lang];
-   })
-  .done(callback);
-}
-
-function getCommentId() {
-  var inner$ = helper.padInner$;
-  var comment = inner$(".comment").first();
-  var cls = comment.attr('class');
-  var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-  var commentId = (classCommentId) ? classCommentId[1] : null;
-
-  return commentId;
-}
