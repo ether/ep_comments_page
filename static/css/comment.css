@@ -237,8 +237,8 @@
   width:1050px;
 }
 
-/* dont display comments at < 850px wide */
-@media (max-width: 850px) {
+/* dont display comments at < 955px wide */
+@media (max-width: 955px) {
   #outerdocbody{
     width:100%;
     padding-right:0px;
@@ -248,8 +248,8 @@
   }
 }
 
-/* display comments at > 850px wide */
-@media (min-width: 850px) {
+/* display comments at > 955px wide */
+@media (min-width: 955px) {
   #comments.active{
     display:block;
   }
