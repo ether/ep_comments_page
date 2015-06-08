@@ -11,13 +11,13 @@
   line-height:14px;
   color:#666;
   display:none;
-  -webkit-user-select: none; /* Chrome/Safari */        
+  -webkit-user-select: none; /* Chrome/Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
 
   /* Rules below not implemented in browsers yet */
   -o-user-select: none;
-  user-select: none;  
+  user-select: none;
 }
 
 .comment-delete{
@@ -36,6 +36,10 @@
 }
 
 .sidebar-comment:hover .comment-delete-container{
+  display:block;
+}
+
+.sidebar-comment.mouseover .comment-delete-container{
   display:block;
 }
 
@@ -148,7 +152,7 @@
   overflow: hidden;
   right:0px;
   margin-left: 10px;
-  padding: 0px 5px 5px 5px;  
+  padding: 0px 5px 5px 5px;
   background: white;
   width:90%;
   height:20px;
