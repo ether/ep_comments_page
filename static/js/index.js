@@ -12,10 +12,11 @@ var cssFiles = ['ep_comments_page/static/css/comment.css'];
 /************************************************************************/
 // Container
 function ep_comments(context){
-  this.container  = null;
-  this.padOuter   = null;
-  this.padInner   = null;
-  this.ace        = context.ace;
+  this.container           = null;
+  this.padOuter            = null;
+  this.padInner            = null;
+  this.newCommentContainer = null;
+  this.ace                 = context.ace;
 
   // Required for instances running on weird ports
   // This probably needs some work for instances running on root or not on /p/
@@ -44,7 +45,7 @@ ep_comments.prototype.init = function(){
 
   // Init prerequisite
   this.findContainers();
-  this.insertContainer();
+  this.insertContainers();
 
   // Get all comments
   this.getComments(function (comments){
@@ -106,21 +107,18 @@ ep_comments.prototype.init = function(){
 
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
-    $('iframe[name="ace_outer"]').contents().find('#comments').show();
-    $('iframe[name="ace_outer"]').contents().find('#comments').addClass("active");
     e.preventDefault(); // stops focus from being lost
     // If a new comment box doesn't already exist
     // Add a new comment and link it to the selection
     // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
-    if (self.container.find('#newComment').length == 0) self.addComment();
+    if (self.newCommentContainer.find('#newComment').length == 0) self.addComment();
     // console.log("setting focus to .comment-content");
-    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').show();
-    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("visible").removeClass("hidden");
+    self.showNewCommentForm();
     $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
   });
 
   // Listen for include suggested change toggle
-  this.container.on("change", '#suggestion-checkbox', function(){
+  this.newCommentContainer.on("change", '#suggestion-checkbox', function(){
     if($(this).is(':checked')){
       $('iframe[name="ace_outer"]').contents().find('.suggestion').show();
     }else{
@@ -186,7 +184,7 @@ ep_comments.prototype.init = function(){
 
     var padCommentContent = padInner.contents().find("."+data.commentId).first();
     newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
-    
+
     // Write the new pad contents
     $(padCommentContent).html(newString);
   });
@@ -214,7 +212,7 @@ ep_comments.prototype.init = function(){
 
   // Enable and handle cookies
   if (padcookie.getPref("comments") === false) {
-    self.container.hide();
+    self.container.removeClass("active");
     $('#options-comments').attr('checked','unchecked');
     $('#options-comments').attr('checked',false);
   }else{
@@ -224,16 +222,16 @@ ep_comments.prototype.init = function(){
   $('#options-comments').on('click', function() {
     if($('#options-comments').is(':checked')) {
       padcookie.setPref("comments", true);
-      self.container.show();
+      self.container.addClass("active");
     } else {
       padcookie.setPref("comments", false);
-      self.container.hide();
+      self.container.removeClass("active");
     }
   });
 
   // Check to see if we should show already..
   if($('#options-comments').is(':checked')){
-    self.container.show();
+    self.container.addClass("active");
   }
 
 };
@@ -245,6 +243,24 @@ ep_comments.prototype.findContainers = function(){
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
   this.outerBody = padOuter.find('#outerdocbody')
 };
+
+ep_comments.prototype.showNewCommentForm = function(){
+  var self = this;
+  this.newCommentContainer.addClass("active");
+  // we need to set a timeout otherwise the animation to show #newComment won't be visible
+  window.setTimeout(function() {
+     self.newCommentContainer.find('#newComment').removeClass("hidden").addClass("visible");
+   }, 0);
+}
+
+ep_comments.prototype.hideNewCommentForm = function(){
+  var self = this;
+  this.newCommentContainer.find('#newComment').removeClass("visible").addClass("hidden");
+  // we need to give some time for the animation of #newComment to finish
+  window.setTimeout(function() {
+     self.newCommentContainer.removeClass("active");
+   }, 500);
+}
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectComments = function(callback){
@@ -263,9 +279,6 @@ ep_comments.prototype.collectComments = function(callback){
       return;
     }
 
-    // make sure comments aer visible on the page
-    // container.show();
-    container.addClass("active");
     self.padInner.contents().find("#innerdocbody").addClass("comments");
 
     if (commentId === null) {
@@ -384,25 +397,31 @@ ep_comments.prototype.highlightComment = function(e){
 }
 
 // Insert comment container in sidebar
-ep_comments.prototype.insertContainer = function(){
+ep_comments.prototype.insertContainers = function(){
+  var target = $('iframe[name="ace_outer"]').contents().find("#outerdocbody");
+
   // Add comments
-  $('iframe[name="ace_outer"]').contents().find("#outerdocbody").prepend('<div id="comments"></div>');
+  target.prepend('<div id="comments"></div>');
   this.container = this.padOuter.find('#comments');
+
+  // Add newComments
+  target.prepend('<div id="newComments"></div>');
+  this.newCommentContainer = this.padOuter.find('#newComments');
 };
 
 // Insert new Comment Form
 ep_comments.prototype.insertNewComment = function(comment, callback){
   var ace = this.ace;
   var index = 0;
+  var self = this;
 
   this.insertComment("", comment, index, true);
 
-  this.container.find('#newComment #comment-reset').on('click',function(){
-    var form = $(this).parent().parent();
-    $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
+  this.newCommentContainer.find('#newComment #comment-reset').on('click',function(){
+    self.hideNewCommentForm();
   });
 
-  this.container.find('#newComment').submit(function(){
+  this.newCommentContainer.find('#newComment').submit(function(){
     var form = $(this);
     var text = form.find('.comment-content').val();
     var changeTo = form.find('.comment-suggest-to').val();
@@ -413,7 +432,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     }
     if (text.length != 0) {
       form.remove();
-      $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').addClass("hidden").removeClass("visible");
+      self.hideNewCommentForm();
       // console.log("calling back", text, index);
       callback(comment, index);
     }
@@ -430,7 +449,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var padInner = padOuter.find('iframe[name="ace_inner"]');
     var ele = padInner.contents().find(key);
     var y = ele[0].offsetTop;
-    $('iframe[name="ace_outer"]').contents().find('#comments').contents().find('#newComment').css("top", y+"px").show();
+    self.showNewCommentForm();
     // scroll new comment form to focus
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop(y); // Works in Chrome
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
@@ -441,7 +460,7 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
 ep_comments.prototype.insertComment = function(commentId, comment, index, isNew){
   var template          = (isNew === true) ? 'newCommentTemplate' : 'commentsTemplate';
   var content           = null;
-  var container         = this.container;
+  var container         = (isNew === true) ? this.newCommentContainer : this.container;
   var commentAfterIndex = container.find('.sidebar-comment').eq(index);
 
   comment.commentId = commentId;
@@ -489,7 +508,7 @@ ep_comments.prototype.localize = function(element) {
 };
 
 ep_comments.prototype.localizeNewCommentForm = function() {
-  var newCommentForm = this.container.find('#newComment');
+  var newCommentForm = this.newCommentContainer.find('#newComment');
   if (newCommentForm.length !== 0) this.localize(newCommentForm);
 };
 
@@ -585,7 +604,7 @@ ep_comments.prototype.deleteComment = function(commentId){
       // Note that this is the correct way of doing it, instead of there being
       // a commentId we now flag it as "comment-deleted"
     },'deleteCommentedSelection', true);
-   
+
   });
 }
 
@@ -619,7 +638,7 @@ ep_comments.prototype.addComment = function (callback){
 
   _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
      // rep looks like -- starts at line 2, character 1, ends at line 4 char 1
-     /* 
+     /*
      {
         rep.selStart[2,0],
         rep.selEnd[4,2]
@@ -648,7 +667,7 @@ ep_comments.prototype.addComment = function (callback){
   });
 
   // Set the top of the form
-  $('iframe[name="ace_outer"]').contents().find('#comments').find('#newComment').css("top", $('#editorcontainer').css("top"));
+  self.newCommentContainer.find('#newComment').css("top", $('#editorcontainer').css("top"));
   // TODO This doesn't appear to get the Y right for the input field...
 
   this.insertNewComment(data, function (comment, index){
@@ -804,7 +823,7 @@ function getRepFromSelector(selector, container){
   // However what we actually need to do is find each selection that includes
   // this comment and remove it.  This is because content can be pasted
   // Mid comment which would mean a remove selection could have unexpected consequences
-  
+
   $.each(elements, function(index, span){
     // create a rep array container we can push to..
     var rep = [[],[]];
@@ -817,21 +836,21 @@ function getRepFromSelector(selector, container){
 
     // We can set beginning of rep Y (lineNumber)
     rep[0][0] = lineNumber;
- 
+
     // We can also update the end rep Y
     rep[1][0] = lineNumber;
 
     // Given the comment span, how many characters are before it?
-    
+
     // All we need to know is the number of characters before .foo
     /*
 
     <div id="boo">
-      hello 
+      hello
       <span class='nope'>
-        world 
+        world
       </span>
-      are you 
+      are you
       <span class='foo'>
         here?
       </span>

@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Comentário",
   "ep_comments_page.comments" : "Comentários",
   "ep_comments_page.add_comment.title" : "Adicionar novo comentário ao texto selecionado",
+  "ep_comments_page.delete_comment.title" : "Apagar este comentário",
   "ep_comments_page.show_comments" : "Mostrar Comentários",
   "ep_comments_page.comments_template.suggested_change" : "Alteração Sugerida:",
   "ep_comments_page.comments_template.accept_change.value" : "Aceitar Sugestão",
