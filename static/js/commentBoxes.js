@@ -67,9 +67,17 @@ var adjustTopOf = function(commentId, baseTop) {
   return commentElement;
 }
 
+// Indicates if comment is on the expected position (baseTop-5)
+var isOnTop = function(commentId, baseTop) {
+  var commentElement = getPadOuter().find('#'+commentId);
+  var expectedTop = (baseTop - 5) + "px";
+  return commentElement.css("top") === expectedTop;
+}
+
 exports.showComment = showComment;
 exports.hideComment = hideComment;
 exports.hideOpenedComments = hideOpenedComments;
 exports.hideAllComments = hideAllComments;
 exports.highlightComment = highlightComment;
 exports.adjustTopOf = adjustTopOf;
+exports.isOnTop = isOnTop;

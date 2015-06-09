@@ -110,6 +110,23 @@ ep_comments.prototype.init = function(){
     self.localizeNewCommentForm();
   });
 
+  // When screen size changes (user changes device orientation, for example),
+  // we need to make sure all sidebar comments are on the correct place
+  this.waitForResizeToFinishThenCall(function() {
+    commentIcons.adjustIconsForNewScreenSize();
+
+    // We try increasing timeouts, to make sure user gets the response as fast as we can
+    setTimeout(function() {
+      if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+      setTimeout(function() {
+        if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+        setTimeout(function() {
+          if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+        }, 1000);
+      }, 500);
+    }, 250);
+  });
+
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
     e.preventDefault(); // stops focus from being lost
@@ -519,6 +536,47 @@ ep_comments.prototype.setYofComments = function(){
     commentEle.show();
   });
 };
+
+// Some browsers trigger resize several times while resizing the window, so
+// we need to make sure resize is done to avoid calling the callback multiple
+// times.
+// Based on: https://css-tricks.com/snippets/jquery/done-resizing-event/
+ep_comments.prototype.waitForResizeToFinishThenCall = function(callback){
+  var resizeTimer;
+  $(window).on("resize", function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(callback, 200);
+  });
+}
+
+// Adjusts position on the screen for sidebar comments and comment icons
+ep_comments.prototype.adjustCommentPositions = function(){
+  commentIcons.adjustIconsForNewScreenSize();
+  this.setYofComments();
+}
+
+// Indicates if all comments are on the correct Y position, and don't need to
+// be adjusted
+ep_comments.prototype.allCommentsOnCorrectYPosition = function(){
+  // for each comment in the pad
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var inlineComments = padInner.contents().find(".comment");
+  var allCommentsAreCorrect = true;
+
+  $.each(inlineComments, function(){
+    var y = this.offsetTop;
+    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
+    if(commentId) {
+      if (!commentBoxes.isOnTop(commentId[1], y)) { // found one comment on the incorrect place
+        allCommentsAreCorrect = false;
+        return false; // to break loop
+      }
+    }
+  });
+
+  return allCommentsAreCorrect;
+}
 
 ep_comments.prototype.localize = function(element) {
   html10n.translateElement(html10n.translations, element.get(0));

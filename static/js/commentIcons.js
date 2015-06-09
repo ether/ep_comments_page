@@ -2,18 +2,18 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
-// Criteria to display (or not) comment as icons
+// Indicates if Etherpad is configured to display icons
 var displayIcons = function() {
-  var shouldDisplayIcons = false;
-  if (clientVars.displayCommentAsIcon) {
-    // we will only display icons if right margin has some space
-    var firstElementOnPad      = getPadInner().contents().find("#innerdocbody > div").first();
-    var rightMargin            = firstElementOnPad.css("margin-right");
-    var hasSpaceToDisplayIcons = rightMargin !== "0px";
-    shouldDisplayIcons         = hasSpaceToDisplayIcons;
-  }
+  return clientVars.displayCommentAsIcon
+}
 
-  return shouldDisplayIcons;
+// Indicates if screen has enough space on right margin to display icons
+var screenHasSpaceForIcons = function() {
+  var firstElementOnPad      = getPadInner().contents().find("#innerdocbody > div").first();
+  var rightMargin            = firstElementOnPad.css("margin-right");
+  var hasSpaceToDisplayIcons = rightMargin !== "0px";
+
+  return hasSpaceToDisplayIcons;
 }
 
 // Easier access to outer pad
@@ -100,6 +100,7 @@ var insertContainer = function() {
 
   getPadInner().before('<div id="commentIcons"></div>');
 
+  adjustIconsForNewScreenSize();
   addListeners();
 }
 
@@ -119,7 +120,7 @@ var addIcon = function(commentId, comment){
 // Hide comment icons from container
 var hideIcons = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
+  if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
   getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
@@ -130,7 +131,7 @@ var hideIcons = function() {
 // height of the pad text associated to the comment, and return the affected icon
 var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
+  if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
   var icon = getPadOuter().find('#icon-'+commentId);
   var targetTop = baseTop+5;
@@ -148,7 +149,7 @@ var adjustTopOf = function(commentId, baseTop) {
 // comment icon.
 var isCommentOpenedByClickOnIcon = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return false;
+  if (!displayIcons() || !screenHasSpaceForIcons()) return false;
 
   var iconClicked = getPadOuter().find('#commentIcons').find(".comment-icon.active");
   var commentOpenedByClickOnIcon = iconClicked.length !== 0;
@@ -167,20 +168,31 @@ var commentHasReply = function(commentId) {
   iconForComment.addClass("with-reply");
 }
 
-// Indicate if comment should be shown, checking if it had the characteristics
+// Indicate if sidebar comment should be shown, checking if it had the characteristics
 // of a comment that was being displayed on the screen
-var shouldShow = function(commentElement) {
+var shouldShow = function(sidebarComent) {
   var shouldShowComment = false;
 
-  if (!displayIcons()) {
+  if (!displayIcons() || !screenHasSpaceForIcons()) {
     // if icons are not being displayed, we always show comments
     shouldShowComment = true;
-  } else if (commentElement.hasClass("mouseover")) {
+  } else if (sidebarComent.hasClass("mouseover")) {
     // if icons are being displayed, we only show comments clicked by user
     shouldShowComment = true;
   }
 
   return shouldShowComment;
+}
+
+var adjustIconsForNewScreenSize = function() {
+  // we're only doing something if icons will be displayed at all
+  if (!displayIcons()) return;
+
+  if (screenHasSpaceForIcons()) {
+    getPadOuter().find('#commentIcons').show();
+  } else {
+    getPadOuter().find('#commentIcons').hide();
+  }
 }
 
 exports.insertContainer = insertContainer;
@@ -190,3 +202,4 @@ exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
 exports.commentHasReply = commentHasReply;
 exports.shouldShow = shouldShow;
+exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
