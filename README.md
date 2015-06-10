@@ -10,6 +10,19 @@ cd node_modules/ep_comments_page
 npm install
 ```
 
+## Alternative comment display
+The plugin also provides an alternative way to display comments. Instead of having all comments visible on the right of the page, you can have just an icon on the right margin of the page. Comment details are displayed when user clicks on the comment icon:
+
+![Screen shot](http://i.imgur.com/cEo7PdL.png)
+
+To use this way of displaying comments, add the following to your `settings.json`:
+```
+// Display comments as icons, not boxes
+"ep_comments_page": {
+  "displayCommentAsIcon": true,
+},
+```
+
 ## Creating comment via API
 If you need to add a comment to a pad:
 
