@@ -35,15 +35,13 @@
   font-weight:bold;
 }
 
-.sidebar-comment:hover .comment-delete-container{
-  display:block;
-}
-
+.sidebar-comment:hover .comment-delete-container,
 .sidebar-comment.mouseover .comment-delete-container{
   display:block;
 }
 
-.sidebar-comment:hover .comment-text{
+.sidebar-comment:hover .comment-text,
+.sidebar-comment.mouseover .comment-text{
   height:auto;
   white-space:normal;
   text-overflow:auto;
@@ -53,13 +51,15 @@
   line-height:24px;
 }
 
-.sidebar-comment:hover{
+.sidebar-comment:hover,
+.sidebar-comment.mouseover{
   height:auto;
   white-space:normal;
   text-overflow:auto;
 }
 
-.sidebar-comment:hover .comment-reply-button {
+.sidebar-comment:hover .comment-reply-button,
+.sidebar-comment.mouseover .comment-reply-button {
   display:block;
 }
 
@@ -169,7 +169,8 @@
   padding:2px;
 }
 
-.sidebar-comment:hover{
+.sidebar-comment:hover,
+.sidebar-comment.mouseover{
   z-index:999;
 }
 
