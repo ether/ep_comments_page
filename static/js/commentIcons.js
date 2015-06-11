@@ -98,7 +98,7 @@ var insertContainer = function() {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
-  getPadInner().before('<div id="commentIcons"></div>');
+  getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
   adjustIconsForNewScreenSize();
   addListeners();

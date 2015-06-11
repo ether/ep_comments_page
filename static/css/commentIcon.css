@@ -1,8 +1,13 @@
 #commentIcons {
-  position: relative;
   display: block;
   z-index: 1;
-  left: 760px;
+  margin-left: 760px;
+  padding-left: 25px;
+}
+
+/* when line numbers are not visible, we need to move icons to the left */
+#sidediv.sidedivhidden ~ #commentIcons {
+  padding-left: 0px;
 }
 
 .comment-icon-line {
