@@ -20,6 +20,7 @@
         "eejsBlock_scripts": "ep_comments_page/index",
         "eejsBlock_mySettings": "ep_comments_page/index",
         "eejsBlock_styles": "ep_comments_page/index",
+        "clientVars": "ep_comments_page/index",
         "handleMessageSecurity": "ep_comments_page/index"
       }
     }
