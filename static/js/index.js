@@ -500,8 +500,6 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
 
   // insert icon
   if (!isNew) commentIcons.addIcon(commentId, comment);
-
-  this.setYofComments();
 };
 
 // Set all comments to be inline with their target REP
