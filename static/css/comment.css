@@ -78,14 +78,13 @@
   line-height:24px;
 }
 
-.comment-modal input{
-  display:none;
-}
-
 .comment-changeTo-approve{
   margin:0px 0px 10px 0px;
 }
 
+/* hide comment elements when displayed on modal, not on sidebar */
+.comment-modal .reply-comment-suggest,
+.comment-modal input,
 .comment-modal .comment-changeTo-approve{
   display:none;
 }
