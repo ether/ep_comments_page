@@ -8,12 +8,18 @@ var displayIcons = function() {
 }
 
 // Indicates if screen has enough space on right margin to display icons
+var screenHasSpaceToDisplayIcons;
 var screenHasSpaceForIcons = function() {
-  var firstElementOnPad      = getPadInner().contents().find("#innerdocbody > div").first();
-  var rightMargin            = firstElementOnPad.css("margin-right");
-  var hasSpaceToDisplayIcons = rightMargin !== "0px";
+  if (screenHasSpaceToDisplayIcons === undefined) calculateIfScreenHasSpaceForIcons();
 
-  return hasSpaceToDisplayIcons;
+  return screenHasSpaceToDisplayIcons;
+}
+
+var calculateIfScreenHasSpaceForIcons = function() {
+  var firstElementOnPad = getPadInner().contents().find("#innerdocbody > div").first();
+  var rightMargin       = firstElementOnPad.css("margin-right");
+
+  screenHasSpaceToDisplayIcons = rightMargin !== "0px";
 }
 
 // Easier access to outer pad
@@ -187,6 +193,10 @@ var shouldShow = function(sidebarComent) {
 var adjustIconsForNewScreenSize = function() {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
+
+  // now that screen has a different size, we need to force calculation
+  // of flag used by screenHasSpaceForIcons() before calling the function
+  calculateIfScreenHasSpaceForIcons();
 
   if (screenHasSpaceForIcons()) {
     getPadOuter().find('#commentIcons').show();
