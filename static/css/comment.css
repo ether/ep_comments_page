@@ -145,6 +145,22 @@
   color:#000;
 }
 
+.comment-reply, .suggestion{
+  font-weight:bold;
+  color:#555
+}
+.reply-suggestion .reply-comment-suggest-from, .suggestion .comment-suggest-from, .comment-changeTo-value{
+  font-weight: normal;
+  color: black;
+  padding-left: 0.5em;
+  border-left: 2px solid #DDD;
+  max-height: 5em;
+  width: 178px;
+  overflow-y: auto;
+  white-space: normal;
+  line-height: 1.3em;
+}
+
 .sidebar-comment {
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -308,3 +324,4 @@
   margin-bottom:10px;
 /*  margin-left:40px; */
 }
+
