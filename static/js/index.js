@@ -206,25 +206,28 @@ ep_comments.prototype.init = function(){
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
     var data = self.getCommentData();
-
-    // Are we reverting a change?
-    var submitButton = $(this).contents().find("input[type='submit']");
-    var isRevert = submitButton.hasClass("revert");
-    if(isRevert){
-console.log("Is Revert!");
-      var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
-    }else{
-      var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
-    }
     data.commentId = $(this).parent()[0].id;
+
+ 
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
+    var submitButton = $(this).contents().find("input[type='submit']");
+
+
+    // Are we reverting a change?
+    var isRevert = submitButton.hasClass("revert");
+    if(isRevert){
+      var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
+    }else{
+      var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+    }
+
 
     // Nuke all that aren't first lines of this comment
     padInner.contents().find("."+data.commentId+":not(:first)").html("");
 
     var padCommentContent = padInner.contents().find("."+data.commentId).first();
-    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
+    newString = newString.replace(/(?:\r\n|\r)/g, '<br />');
 
     // Write the new pad contents
     $(padCommentContent).html(newString);
@@ -233,7 +236,11 @@ console.log("Is Revert!");
     self.socket.emit('acceptChange', data, function (){});
 
     // Update our own comments container with the accepted change
-    self.showChangeAsAccepted(data.commentId);
+    if(isRevert){
+      self.showChangeAsReverted(data.commentId);
+    }else{
+      self.showChangeAsAccepted(data.commentId);
+    }
   });
 
   // TODO is this even used?
@@ -243,7 +250,6 @@ console.log("Is Revert!");
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
     data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
-console.log("USED");
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -471,7 +477,6 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
     var form = $(this);
     var text = form.find('.comment-content').val();
     var changeFrom = form.find('.comment-suggest-from').val();
-console.log("changeFrom1", changeFrom);
     var changeTo = form.find('.comment-suggest-to').val() || null;
     var comment = {};
     comment.text = text;
@@ -778,7 +783,6 @@ ep_comments.prototype.addComment = function (callback){
       data.comment.changeFrom = comment.changeFrom;
       data.comment.changeTo = comment.changeTo;
     }
-console.log("changeFrom2", data.comment.changeFrom);
     data.comment.text = comment.text;
 
     // Save comment
@@ -807,10 +811,9 @@ ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
   socket.on('pushAddCommentReply', function (replyId, reply, changeTo, changeFrom){
-    console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
+    // console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
     // callback(replyId, reply);
     // self.collectCommentReplies();
-console.log("replies", replies);
     self.getCommentReplies(function (replies){
       if (!$.isEmptyObject(replies)){
         // console.log("collecting comment replies");
@@ -823,7 +826,6 @@ console.log("replies", replies);
 
 };
 
-// Show a comment as being accepted
 ep_comments.prototype.showChangeAsAccepted = function(commentId){
   var self = this;
 
@@ -833,6 +835,14 @@ ep_comments.prototype.showChangeAsAccepted = function(commentId){
   comment.find("input[type='submit']").addClass("revert");
 }
 
+ep_comments.prototype.showChangeAsReverted = function(commentId){
+  var self = this;
+
+  // Get the comment
+  var comment = self.container.find("#"+commentId);
+  comment.find("input[type='submit']").val("Accept");
+  comment.find("input[type='submit']").removeClass("revert");
+}
 
 // Push comment from collaborators
 ep_comments.prototype.pushComment = function(eventType, callback){
@@ -986,3 +996,4 @@ function getRepFromSelector(selector, container){
   });
   return repArr;
 }
+
