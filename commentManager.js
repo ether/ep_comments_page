@@ -126,3 +126,50 @@ exports.addCommentReply = function(padId, data, callback){
   });
 };
 
+exports.changeAcceptedState = function(padId, commentId, state, callback){
+  // Given a comment we update that comment to say the change was accepted or reverted
+
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  //get the entry
+  db.get("comments:" + padId, function(err, comments){
+
+    if(ERR(err, callback)) return;
+
+    //add the entry for this pad
+    var comment = comments[commentId];
+    if(state){
+      comment.changeAccepted = true;
+    }else{
+      comment.changeReverted = true;
+    }
+
+    console.warn(comments);
+    comments.comment = comment;
+
+    //save the new element back
+    db.set("comments:" + padId, comments);
+
+    callback(null, commentId, comment);
+  });
+}
+
+exports.revertChange = function(padId, commentId, callback){
+  // Given a comment we update that comment to say the change was reverted
+
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+
+}

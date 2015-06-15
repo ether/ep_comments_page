@@ -1,4 +1,4 @@
-var _, $, jQuery;
+#var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');

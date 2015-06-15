@@ -64,16 +64,18 @@ exports.socketio = function (hook_name, args, cb){
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
-      socket.broadcast.to(padId).emit('changeReverted', data.commentId);
-      // Next we need to update the comments in the database
+      commentManager.changeAcceptedState(padId, data.commentId, false, function(){
+        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
+      });
     });
 
     socket.on('acceptChange', function(data, callback) {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
-      socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-      // Next we need to update the comments in the database
+      commentManager.changeAcceptedState(padId, data.commentId, true, function(){
+        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+      });
     });
 
     socket.on('addCommentReply', function (data, callback) {
