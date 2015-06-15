@@ -281,8 +281,8 @@ ep_comments.prototype.hideNewCommentForm = function(){
   this.newCommentContainer.find('#newComment').removeClass("visible").addClass("hidden");
   // we need to give some time for the animation of #newComment to finish
   window.setTimeout(function() {
-     self.newCommentContainer.removeClass("active");
-   }, 500);
+    self.newCommentContainer.removeClass("active");
+  }, 500);
 }
 
 // Collect Comments and link text content to the comments div
