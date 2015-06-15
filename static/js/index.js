@@ -179,6 +179,7 @@ ep_comments.prototype.init = function(){
   this.container.on("click", ".comment-reply-changeTo-approve", function(e){
     e.preventDefault();
     var commentId = $(this).parent().parent().parent().parent()[0].id;
+    var replyId = $(this).parent().parent()[0].id;
     var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -190,13 +191,31 @@ ep_comments.prototype.init = function(){
 
     // Write the new pad contents
     $(padCommentContent).html(newString);
+
+    // Tell all users this change was accepted
+    var data = self.getCommentData();
+    data.replyId = replyId; // Can either be a comment ID or reply ID
+    data.commentId = commentId; // Can either be a comment ID or reply ID
+    console.log("emit", data.replyId);
+    self.socket.emit('acceptChange', data, function (){
+      console.log("Go you..");
+    });
   });
 
   // User accepts a change
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
     var data = self.getCommentData();
-    var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+
+    // Are we reverting a change?
+    var submitButton = $(this).contents().find("input[type='submit']");
+    var isRevert = submitButton.hasClass("revert");
+    if(isRevert){
+console.log("Is Revert!");
+      var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+    }else{
+      var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
+    }
     data.commentId = $(this).parent()[0].id;
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -209,6 +228,12 @@ ep_comments.prototype.init = function(){
 
     // Write the new pad contents
     $(padCommentContent).html(newString);
+
+    // Tell all users this change was accepted
+    self.socket.emit('acceptChange', data, function (){});
+
+    // Update our own comments container with the accepted change
+    self.showChangeAsAccepted(data.commentId);
   });
 
   // TODO is this even used?
@@ -218,6 +243,7 @@ ep_comments.prototype.init = function(){
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
     data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
+console.log("USED");
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -389,7 +415,7 @@ ep_comments.prototype.collectComments = function(callback){
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function(callback){
-  // console.warn("collectCommentReplies", this.commentReplies);
+  console.warn("collectCommentReplies", this.commentReplies);
   var self        = this;
   var container   = this.container;
   var commentReplies = this.commentReplies;
@@ -444,10 +470,13 @@ ep_comments.prototype.insertNewComment = function(comment, callback){
   this.newCommentContainer.find('#newComment').submit(function(){
     var form = $(this);
     var text = form.find('.comment-content').val();
-    var changeTo = form.find('.comment-suggest-to').val();
+    var changeFrom = form.find('.comment-suggest-from').val();
+console.log("changeFrom1", changeFrom);
+    var changeTo = form.find('.comment-suggest-to').val() || null;
     var comment = {};
     comment.text = text;
     if(changeTo){
+      comment.changeFrom = changeFrom;
       comment.changeTo = changeTo;
     }
     if (text.length != 0) {
@@ -746,8 +775,10 @@ ep_comments.prototype.addComment = function (callback){
 
   this.insertNewComment(data, function (comment, index){
     if(comment.changeTo){
+      data.comment.changeFrom = comment.changeFrom;
       data.comment.changeTo = comment.changeTo;
     }
+console.log("changeFrom2", data.comment.changeFrom);
     data.comment.text = comment.text;
 
     // Save comment
@@ -775,10 +806,11 @@ ep_comments.prototype.addComment = function (callback){
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply, changeTo){
-    console.warn("pAcR response", replyId, reply, changeTo);
+  socket.on('pushAddCommentReply', function (replyId, reply, changeTo, changeFrom){
+    console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
     // callback(replyId, reply);
     // self.collectCommentReplies();
+console.log("replies", replies);
     self.getCommentReplies(function (replies){
       if (!$.isEmptyObject(replies)){
         // console.log("collecting comment replies");
@@ -788,13 +820,29 @@ ep_comments.prototype.commentRepliesListen = function(){
       }
     });
   });
+
 };
 
+// Show a comment as being accepted
+ep_comments.prototype.showChangeAsAccepted = function(commentId){
+  var self = this;
+
+  // Get the comment
+  var comment = self.container.find("#"+commentId);
+  comment.find("input[type='submit']").val("Revert");
+  comment.find("input[type='submit']").addClass("revert");
+}
 
 
 // Push comment from collaborators
 ep_comments.prototype.pushComment = function(eventType, callback){
   var socket = this.socket;
+  var self = this;
+
+  socket.on('changeAccepted', function(commentId){
+    self.showChangeAsAccepted(commentId);
+    console.log("change was accepted", commentId);
+  });
 
 //  console.error("eventType", eventType);
 

@@ -8,6 +8,10 @@
         <p class="comment-text">${text}</p>
         {{if changeTo}}
         <form class="comment-changeTo-form">
+            <p class="comment-changeFrom">
+                <span class="comment-changeFrom-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">From:</span>
+                <span class="comment-changeFrom-value">${changeFrom}</span>
+            </p>
             <p class="comment-changeTo">
                 <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change">Suggested Change:</span>
                 <span class="comment-changeTo-value">${changeTo}</span>

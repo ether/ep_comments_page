@@ -60,14 +60,26 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('acceptChange', function(data, callback) {
+      console.warn("user accepted a change..");
+      // Broadcast to all other users that this change was accepted.
+      // Note that commentId here can either be the commentId or replyId..
+      var padId = data.padId;
+      socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+
+      // Next we need to update the comments in the database
+    });
+
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
       var content = data.reply;
       var changeTo = data.changeTo || null;
+      var changeFrom = data.changeFrom || null;
+console.warn("changeFrom1", data.changeFrom);
       var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo){
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom);
         callback(replyId, reply);
       });
     });
@@ -142,8 +154,11 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         author: "empty",
         name: fields.name,
         text: fields.text,
-        changeTo: fields.changeTo
+        changeTo: fields.changeTo,
+        changeFrom: fields.changeFrom
       };
+
+console.warn("changeFrom2", fields.changeFrom);
 
       comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
         if(err) {

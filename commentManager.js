@@ -51,6 +51,7 @@ exports.addComment = function(padId, data, callback)
       "name": data.name, 
       "text": data.text, 
       "changeTo": data.changeTo,
+      "changeFrom": data.changeFrom,
       "timestamp": new Date().getTime()
     };
 
@@ -110,6 +111,7 @@ exports.addCommentReply = function(padId, data, callback){
       "commentId": data.commentId,
       "text": data.reply,
       "changeTo": data.changeTo || null,
+      "changeFrom": data.changeFrom || null,
       "author": metadata.author,
       "name": metadata.name,
       "timestamp": new Date().getTime()
