@@ -177,21 +177,45 @@ ep_comments.prototype.init = function(){
     .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
 
   // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
-  this.container.on("click", ".comment-reply-changeTo-approve", function(e){
+  this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
+console.log("here");
     e.preventDefault();
-    var commentId = $(this).parent().parent().parent().parent()[0].id;
-    var replyId = $(this).parent().parent()[0].id;
-    var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
+    var data = {};
+    data.commentId = $(this).parent().parent().parent().parent().parent()[0].id;
+    data.padId = clientVars.padId;
+    var replyId = $(this).parent().parent().parent()[0].id;
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
 
+    // Are we reverting a change?
+    var submitButton = $(this).contents().find("input[type='submit']");
+    var isRevert = submitButton.hasClass("revert");
+    if(isRevert){
+      var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html(); // cake
+    }else{
+      var newString = $(this).parent().parent().parent().contents().find(".comment-changeTo-value").html(); // cake
+    }
+
     // Nuke all that aren't first lines of this comment
-    padInner.contents().find("."+commentId+":not(:first)").html("");
-    var padCommentContent = padInner.contents().find("."+commentId).first();
+    padInner.contents().find("."+data.commentId+":not(:first)").html("");
+    var padCommentContent = padInner.contents().find("."+data.commentId).first();
     newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
 
     // Write the new pad contents
     $(padCommentContent).html(newString);
+
+    if(isRevert){
+      // Tell all users this change was reverted
+      self.socket.emit('revertChange', data, function (){});
+      self.showChangeAsReverted(data.commentId);
+    }else{
+      // Tell all users this change was accepted
+      self.socket.emit('acceptChange', data, function (){});
+
+      // Update our own comments container with the accepted change
+      self.showChangeAsAccepted(data.commentId);
+    }
+
   });
 
   // User accepts a change
@@ -199,21 +223,17 @@ ep_comments.prototype.init = function(){
     e.preventDefault();
     var data = self.getCommentData();
     data.commentId = $(this).parent()[0].id;
-
- 
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
-    var submitButton = $(this).contents().find("input[type='submit']");
-
 
     // Are we reverting a change?
+    var submitButton = $(this).contents().find("input[type='submit']");
     var isRevert = submitButton.hasClass("revert");
     if(isRevert){
       var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
     }else{
       var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
     }
-
 
     // Nuke all that aren't first lines of this comment
     padInner.contents().find("."+data.commentId+":not(:first)").html("");

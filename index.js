@@ -73,6 +73,7 @@ exports.socketio = function (hook_name, args, cb){
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
+console.warn(data);
       commentManager.changeAcceptedState(padId, data.commentId, true, function(){
         socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
       });
