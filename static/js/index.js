@@ -164,7 +164,7 @@ ep_comments.prototype.init = function(){
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-      $(this).parent().parent().find(".reply-comment-suggest-from").html(currentString);
+      $(this).parent().parent().find(".reply-comment-changeFrom-value").html(currentString);
       $(this).parent().parent().find('.reply-suggestion').show();
     }else{
       $(this).parent().parent().find('.reply-suggestion').hide();
@@ -178,7 +178,6 @@ ep_comments.prototype.init = function(){
 
   // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
   this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
-console.log("here");
     e.preventDefault();
     var data = {};
     data.commentId = $(this).parent().parent().parent().parent().parent()[0].id;
@@ -264,6 +263,7 @@ console.log("here");
     data.commentId = $(this).parent()[0].id;
     data.reply = $(this).find(".comment-reply-input").val();
     data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
+    data.changeFrom = $(this).find(".reply-comment-changeFrom-value").text() || null;
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -461,8 +461,6 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     if(existsAlready) return;
 
     replies.replyId = replyId;
-
-console.log(replies);
 
     var content = $("#replyTemplate").tmpl(replies);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
