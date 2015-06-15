@@ -83,10 +83,12 @@ exports.socketio = function (hook_name, args, cb){
       var content = data.reply;
       var changeTo = data.changeTo || null;
       var changeFrom = data.changeFrom || null;
+      var changeAccepted = data.changeAccepted || null;
+      var changeReverted = data.changeReverted || null;
       var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom){
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
         callback(replyId, reply);
       });
     });
@@ -162,7 +164,9 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         name: fields.name,
         text: fields.text,
         changeTo: fields.changeTo,
-        changeFrom: fields.changeFrom
+        changeFrom: fields.changeFrom,
+        changeAccepted: fields.changeAccepted,
+        changeReverted: fields.changeReverted
       };
 
       comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {

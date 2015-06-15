@@ -1,4 +1,4 @@
-#var _, $, jQuery;
+var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
@@ -12,6 +12,7 @@ var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/sta
 /************************************************************************/
 /*                         ep_comments Plugin                           */
 /************************************************************************/
+
 // Container
 function ep_comments(context){
   this.container           = null;
@@ -322,6 +323,7 @@ ep_comments.prototype.collectComments = function(callback){
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
+
     if(!commentId){
       // console.log("returning due to no comment id, probably due to a deleted comment");
       return;
@@ -336,6 +338,7 @@ ep_comments.prototype.collectComments = function(callback){
     }
     var commentId   = classCommentId[1];
     var commentElm  = container.find('#'+ commentId);
+
     var comment     = comments[commentId];
     if(comment){
       if (comment !== null) {
@@ -343,6 +346,7 @@ ep_comments.prototype.collectComments = function(callback){
         if (commentElm.length == 0) {
           self.insertComment(commentId, comment.data, it);
           commentElm = container.find('#'+ commentId);
+
           $(this).on('click', function(){
             markerTop = $(this).position().top;
             commentTop = commentElm.position().top;
@@ -368,6 +372,14 @@ ep_comments.prototype.collectComments = function(callback){
     }
 
     commentElm.css({ 'top': commentPos });
+
+    // Should we show "Revert" instead of "Accept"
+    var showRevert = comments[commentId].data.changeAccepted;
+
+    if(showRevert){
+      self.showChangeAsAccepted(commentId);
+    }
+
   });
   // now if we apply a class such as mouseover to the editor it will go shitty
   // so what we need to do is add CSS for the specific ID to the document...
@@ -429,6 +441,9 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     if(existsAlready) return;
 
     replies.replyId = replyId;
+
+console.log(replies);
+
     var content = $("#replyTemplate").tmpl(replies);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
   });

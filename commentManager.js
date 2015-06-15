@@ -146,11 +146,12 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
     var comment = comments[commentId];
     if(state){
       comment.changeAccepted = true;
+      comment.changeReverted = false;
     }else{
+      comment.changeAccepted = false;
       comment.changeReverted = true;
     }
 
-    console.warn(comments);
     comments.comment = comment;
 
     //save the new element back
