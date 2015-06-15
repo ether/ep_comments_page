@@ -210,7 +210,7 @@
   display:inline;
 }
 
-.comment-changeTo-label{
+.comment-changeTo-label, .comment-changeFrom-label{
   color: #555;
   font-weight:bold;
   font-size: 1em;
