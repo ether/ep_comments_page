@@ -191,15 +191,6 @@ ep_comments.prototype.init = function(){
 
     // Write the new pad contents
     $(padCommentContent).html(newString);
-
-    // Tell all users this change was accepted
-    var data = self.getCommentData();
-    data.replyId = replyId; // Can either be a comment ID or reply ID
-    data.commentId = commentId; // Can either be a comment ID or reply ID
-    console.log("emit", data.replyId);
-    self.socket.emit('acceptChange', data, function (){
-      console.log("Go you..");
-    });
   });
 
   // User accepts a change
@@ -232,13 +223,15 @@ ep_comments.prototype.init = function(){
     // Write the new pad contents
     $(padCommentContent).html(newString);
 
-    // Tell all users this change was accepted
-    self.socket.emit('acceptChange', data, function (){});
-
-    // Update our own comments container with the accepted change
     if(isRevert){
+      // Tell all users this change was reverted
+      self.socket.emit('revertChange', data, function (){});
       self.showChangeAsReverted(data.commentId);
     }else{
+      // Tell all users this change was accepted
+      self.socket.emit('acceptChange', data, function (){});
+
+      // Update our own comments container with the accepted change
       self.showChangeAsAccepted(data.commentId);
     }
   });
@@ -851,10 +844,11 @@ ep_comments.prototype.pushComment = function(eventType, callback){
 
   socket.on('changeAccepted', function(commentId){
     self.showChangeAsAccepted(commentId);
-    console.log("change was accepted", commentId);
   });
 
-//  console.error("eventType", eventType);
+  socket.on('changeReverted', function(commentId){
+    self.showChangeAsReverted(commentId);
+  });
 
   // On collaborator add a comment in the current pad
   if (eventType == 'add'){

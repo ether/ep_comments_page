@@ -60,13 +60,19 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('revertChange', function(data, callback) {
+      // Broadcast to all other users that this change was accepted.
+      // Note that commentId here can either be the commentId or replyId..
+      var padId = data.padId;
+      socket.broadcast.to(padId).emit('changeReverted', data.commentId);
+      // Next we need to update the comments in the database
+    });
+
     socket.on('acceptChange', function(data, callback) {
-      console.warn("user accepted a change..");
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
       socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-
       // Next we need to update the comments in the database
     });
 
@@ -75,7 +81,6 @@ exports.socketio = function (hook_name, args, cb){
       var content = data.reply;
       var changeTo = data.changeTo || null;
       var changeFrom = data.changeFrom || null;
-console.warn("changeFrom1", data.changeFrom);
       var commentId = data.commentId;
       commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom){
         reply.replyId = replyId;
@@ -157,8 +162,6 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         changeTo: fields.changeTo,
         changeFrom: fields.changeFrom
       };
-
-console.warn("changeFrom2", fields.changeFrom);
 
       comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
         if(err) {
