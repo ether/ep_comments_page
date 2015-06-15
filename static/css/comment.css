@@ -153,6 +153,7 @@
   font-weight: normal;
   color: black;
   padding-left: 0.5em;
+  border:none;
   border-left: 2px solid #DDD;
   max-height: 5em;
   width: 178px;
