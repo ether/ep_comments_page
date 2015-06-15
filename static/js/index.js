@@ -271,8 +271,9 @@ ep_comments.prototype.showNewCommentForm = function(){
   this.newCommentContainer.addClass("active");
   // we need to set a timeout otherwise the animation to show #newComment won't be visible
   window.setTimeout(function() {
-     self.newCommentContainer.find('#newComment').removeClass("hidden").addClass("visible");
-   }, 0);
+    $('iframe[name="ace_outer"]').contents().find('.suggestion').hide(); // Hides suggestion in case of a cancel
+    self.newCommentContainer.find('#newComment').removeClass("hidden").addClass("visible");
+  }, 0);
 }
 
 ep_comments.prototype.hideNewCommentForm = function(){
