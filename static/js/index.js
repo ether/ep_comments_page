@@ -191,9 +191,9 @@ ep_comments.prototype.init = function(){
     var submitButton = $(this);
     var isRevert = submitButton.hasClass("revert");
     if(isRevert){
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html(); // cake
+      var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html();
     }else{
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeTo-value").html(); // cake
+      var newString = $(this).parent().parent().parent().contents().find(".comment-changeTo-value").html();
     }
 
     // Nuke all that aren't first lines of this comment
@@ -205,7 +205,6 @@ ep_comments.prototype.init = function(){
     $(padCommentContent).html(newString);
 
     // We change commentId to replyId in the data object so it's properly processed by the server..  This is hacky
-console.warn("data.replyId", data.replyId);
     data.commentId = data.replyId;
 
     if(isRevert){
@@ -217,7 +216,7 @@ console.warn("data.replyId", data.replyId);
       self.socket.emit('acceptChange', data, function (){});
 
       // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.replyIdId);
+      self.showChangeAsAccepted(data.replyId);
     }
 
   });
@@ -399,6 +398,7 @@ ep_comments.prototype.collectComments = function(callback){
     commentElm.css({ 'top': commentPos });
 
     // Should we show "Revert" instead of "Accept"
+    // Comment Replies are NOT handled here..
     if(comments[commentId]){
       var showRevert = comments[commentId].data.changeAccepted;
     }
@@ -471,6 +471,13 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     var content = $("#replyTemplate").tmpl(replies);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
+
+    // Should we show "Revert" instead of "Accept"
+    // Comment Replies ARE handled here..
+    if(replies.changeAccepted){
+      self.showChangeAsAccepted(replyId);
+    }
+
   });
 };
 
