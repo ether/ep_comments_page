@@ -217,7 +217,7 @@ ep_comments.prototype.init = function(){
     $(padCommentContent).html(newString);
   });
 
-  // TODO is this even used?
+  // is this even used? - Yes, it is!
   this.container.on("submit", ".comment-reply", function(e){
     e.preventDefault();
     var data = self.getCommentData();
@@ -227,14 +227,14 @@ ep_comments.prototype.init = function(){
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
-      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
+      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > form.comment-reply  .comment-reply-input').val("");
       self.getCommentReplies(function(replies){
         self.commentReplies = replies;
         self.collectCommentReplies();
       });
     });
     if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox").click();
+      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click(); //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
     }
   });
 
@@ -269,7 +269,7 @@ ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   this.padOuter = padOuter;
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
-  this.outerBody = padOuter.find('#outerdocbody')
+  this.outerBody = padOuter.find('#outerdocbody');
 };
 
 ep_comments.prototype.showNewCommentForm = function(){
@@ -394,6 +394,7 @@ ep_comments.prototype.collectComments = function(callback){
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function(callback){
+    debugger;
   // console.warn("collectCommentReplies", this.commentReplies);
   var self        = this;
   var container   = this.container;
@@ -411,11 +412,10 @@ ep_comments.prototype.collectCommentReplies = function(callback){
         return;
     }
 
-    debugger;
 
     replies.replyId = replyId;
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' comment-reply-input-label').before(content); //TODO: .before inserts content, specified by the parameter, before each element in the set of matched elements; change this and change in the corresponding template, so that the input control  is input.comment-reply-input while the label is label.comment-reply-input
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content); //TODO: .before inserts content, specified by the parameter, before each element in the set of matched elements; change this and change in the corresponding template, so that the input control  is input.comment-reply-input while the label is label.comment-reply-input
   });
 };
 
