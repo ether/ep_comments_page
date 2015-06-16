@@ -1,13 +1,19 @@
 <script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
+
+<!-- Used to view comments not change them -->
 <script id="commentsTemplate" type="text/html">
     <div id="${commentId}" class="sidebar-comment" title="${date}">
         <p class="comment-delete-container">
-          <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
+            <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
         </p>
         <p class="comment-author-name">${name}:</p>
         <p class="comment-text">${text}</p>
         {{if changeTo}}
         <form class="comment-changeTo-form">
+            <p class="comment-changeFrom">
+                <span class="comment-changeFrom-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">From:</span>
+                <span class="comment-changeFrom-value">${changeFrom}</span>
+            </p>
             <p class="comment-changeTo">
                 <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change">Suggested Change:</span>
                 <span class="comment-changeTo-value">${changeTo}</span>
@@ -27,9 +33,9 @@
                 <label for="reply-suggestion-checkbox-${commentId}" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
             </p>
             <span class="reply-suggestion">
-                <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest change From:</p>
+                <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">From:</p>
                 <p class="reply-comment-suggest-from-p">
-                    <textarea class="reply-comment-suggest-from" disabled="disabled"></textarea>
+                    <span class="reply-comment-changeFrom-value">${changeFrom}</span>
                 </p>
                 <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
                 <p class="reply-comment-suggest-to-p">
@@ -40,20 +46,21 @@
     </div>
 </script>
 
+<!-- Used to add a new comment -->
 <script id="newCommentTemplate" type="text/html">
     <form id="newComment" class="sidebar-comment">
     	<p class="comment-author-name">${name}</p>
         <p data-l10n-id="ep_comments_page.comment">Comment</p>
     	<p class="comment-text">
-          <textarea class="comment-content" autofocus></textarea>
-      </p>
+            <textarea class="comment-content" autofocus></textarea>
+        </p>
 
         <p class="comment-suggest">
             <input type="checkbox" id="suggestion-checkbox">
             <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
         </p>
         <span class="suggestion">
-            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest change From:</p>
+            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest Change From:</p>
             <p class="comment-suggest-from-p">
                 <textarea class="comment-suggest-from" disabled="disabled"></textarea>
             </p>
@@ -70,6 +77,7 @@
     </form>
 </script>
 
+<!-- Used to add a new comment reply -->
 <script id="replyTemplate" type="text/html">
     <div id="${replyId}" class="sidebar-comment-reply">
         <p class="comment-author-name">${name}:</p>
@@ -77,7 +85,11 @@
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeTo">
-                <span class="comment-changeTo-label">Suggested Change:</span>
+                <span class="comment-changeTo-label">Suggested Change From:</span>
+                <p class="reply-comment-suggest-from-p">
+                  <span class="comment-changeFrom-value">${changeFrom}</span>
+                </p>
+                <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
                 <span class="comment-changeTo-value">${changeTo}</span>
             </p>
             <p class="comment-reply-changeTo-approve">

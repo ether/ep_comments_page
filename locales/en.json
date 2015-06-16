@@ -5,6 +5,7 @@
   "ep_comments_page.delete_comment.title" : "Delete this comment",
   "ep_comments_page.show_comments" : "Show Comments",
   "ep_comments_page.comments_template.suggested_change" : "Suggested Change:",
+  "ep_comments_page.comments_template.suggested_change_from" : "From:",
   "ep_comments_page.comments_template.accept_change.value" : "Accept Change",
   "ep_comments_page.comments_template.suggest_change_from" : "Suggest change From:",
   "ep_comments_page.comments_template.to" : "To:",

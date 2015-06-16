@@ -51,6 +51,7 @@ exports.addComment = function(padId, data, callback)
       "name": data.name, 
       "text": data.text, 
       "changeTo": data.changeTo,
+      "changeFrom": data.changeFrom,
       "timestamp": new Date().getTime()
     };
 
@@ -110,6 +111,7 @@ exports.addCommentReply = function(padId, data, callback){
       "commentId": data.commentId,
       "text": data.reply,
       "changeTo": data.changeTo || null,
+      "changeFrom": data.changeFrom || null,
       "author": metadata.author,
       "name": metadata.name,
       "timestamp": new Date().getTime()
@@ -123,4 +125,46 @@ exports.addCommentReply = function(padId, data, callback){
     callback(null, replyId, reply);
   });
 };
+
+exports.changeAcceptedState = function(padId, commentId, state, callback){
+  // Given a comment we update that comment to say the change was accepted or reverted
+
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  // If we're dealing with comment replies we need to a different query
+  var prefix = "comments:";
+  if(commentId.substring(0,7) === "c-reply"){
+    prefix = "comment-replies:";
+  }
+
+  //get the entry
+  db.get(prefix + padId, function(err, comments){
+
+    if(ERR(err, callback)) return;
+
+    //add the entry for this pad
+    var comment = comments[commentId];
+
+    if(state){
+      comment.changeAccepted = true;
+      comment.changeReverted = false;
+    }else{
+      comment.changeAccepted = false;
+      comment.changeReverted = true;
+    }
+
+    comments[commentId] = comment;
+
+    //save the new element back
+    db.set(prefix + padId, comments);
+
+    callback(null, commentId, comment);
+  });
+}
 
