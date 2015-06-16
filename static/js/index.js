@@ -1,9 +1,6 @@
 /* TODO:
-- Dont use a textarea to show current text when suggesting change
 - lable reply textarea
 - Make the chekbox appear above the suggested changes even when activated
-
-
 */
 
 
@@ -56,7 +53,7 @@ ep_comments.prototype.init = function(){
 
   // Init prerequisite
   this.findContainers();
-  this.insertContainers();
+  this.insertContainers(); // Insert comment containers in sidebar
 
   // Init icons container
   commentIcons.insertContainer();
@@ -405,15 +402,20 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   $.each(this.commentReplies, function(replyId, replies){
     var commentId = replies.commentId;
 
+
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
 
     var existsAlready = $('iframe[name="ace_outer"]').contents().find('#'+replyId).length;
-    if(existsAlready) return;
+    if(existsAlready){
+        return;
+    }
+
+    debugger;
 
     replies.replyId = replyId;
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content); //TODO: .before Insert content, specified by the parameter, before each element in the set of matched elements; change this and change in the corresponding template, so that the input control  is input.comment-reply-input while the label is label.comment-reply-input
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' comment-reply-input-label').before(content); //TODO: .before inserts content, specified by the parameter, before each element in the set of matched elements; change this and change in the corresponding template, so that the input control  is input.comment-reply-input while the label is label.comment-reply-input
   });
 };
 
