@@ -724,7 +724,7 @@ ep_comments.prototype.getCommentData = function (){
   data.padId              = this.padId;
   data.comment            = {};
   data.comment.author     = clientVars.userId;
-  data.comment.name       = clientVars.userName;
+  data.comment.name       = pad.myUserInfo.name;
   data.comment.timestamp  = new Date().getTime();
 
   // Si le client est Anonyme
