@@ -120,18 +120,16 @@ ep_comments.prototype.init = function(){
   // When screen size changes (user changes device orientation, for example),
   // we need to make sure all sidebar comments are on the correct place
   this.waitForResizeToFinishThenCall(function() {
-    commentIcons.adjustIconsForNewScreenSize();
+    self.editorResized();
+  });
 
-    // We try increasing timeouts, to make sure user gets the response as fast as we can
-    setTimeout(function() {
-      if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-      setTimeout(function() {
-        if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-        setTimeout(function() {
-          if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-        }, 1000);
-      }, 500);
-    }, 250);
+  // When Page View is enabled/disabled, we need to recalculate position of comments
+  $('#options-pageview').on('click', function(e) {
+    self.editorResized();
+  });
+  // When Page Breaks are enabled/disabled, we need to recalculate position of comments
+  $('#options-pagebreaks').on('click', function(e) {
+    self.editorResized();
   });
 
   // On click comment icon toolbar
@@ -627,6 +625,25 @@ ep_comments.prototype.waitForResizeToFinishThenCall = function(callback){
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(callback, 200);
   });
+}
+
+// Make the adjustments after editor is resized (due to a window resize or
+// enabling/disabling Page View)
+ep_comments.prototype.editorResized = function() {
+  var self = this;
+
+  commentIcons.adjustIconsForNewScreenSize();
+
+  // We try increasing timeouts, to make sure user gets the response as fast as we can
+  setTimeout(function() {
+    if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+    setTimeout(function() {
+      if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+      setTimeout(function() {
+        if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
+      }, 1000);
+    }, 500);
+  }, 250);
 }
 
 // Adjusts position on the screen for sidebar comments and comment icons
