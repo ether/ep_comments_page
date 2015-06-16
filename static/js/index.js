@@ -182,12 +182,13 @@ ep_comments.prototype.init = function(){
     var data = {};
     data.commentId = $(this).parent().parent().parent().parent().parent()[0].id;
     data.padId = clientVars.padId;
-    var replyId = $(this).parent().parent().parent()[0].id;
+
+    data.replyId = $(this).parent().parent().parent()[0].id;
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
 
     // Are we reverting a change?
-    var submitButton = $(this).contents().find("input[type='submit']");
+    var submitButton = $(this);
     var isRevert = submitButton.hasClass("revert");
     if(isRevert){
       var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html(); // cake
@@ -203,16 +204,20 @@ ep_comments.prototype.init = function(){
     // Write the new pad contents
     $(padCommentContent).html(newString);
 
+    // We change commentId to replyId in the data object so it's properly processed by the server..  This is hacky
+console.warn("data.replyId", data.replyId);
+    data.commentId = data.replyId;
+
     if(isRevert){
       // Tell all users this change was reverted
       self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.commentId);
+      self.showChangeAsReverted(data.replyId);
     }else{
       // Tell all users this change was accepted
       self.socket.emit('acceptChange', data, function (){});
 
       // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.commentId);
+      self.showChangeAsAccepted(data.replyIdId);
     }
 
   });
@@ -394,7 +399,9 @@ ep_comments.prototype.collectComments = function(callback){
     commentElm.css({ 'top': commentPos });
 
     // Should we show "Revert" instead of "Accept"
-    var showRevert = comments[commentId].data.changeAccepted;
+    if(comments[commentId]){
+      var showRevert = comments[commentId].data.changeAccepted;
+    }
 
     if(showRevert){
       self.showChangeAsAccepted(commentId);

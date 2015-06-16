@@ -149,7 +149,7 @@
   font-weight:bold;
   color:#555
 }
-.reply-suggestion .reply-comment-suggest-from, .suggestion .comment-suggest-from, .comment-changeTo-value{
+.reply-suggestion .reply-comment-suggest-from, .suggestion .comment-suggest-from, .comment-changeTo-value, .comment-changeFrom-value{
   font-weight: normal;
   color: black;
   padding-left: 0.5em;
