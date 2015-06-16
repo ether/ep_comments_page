@@ -1,3 +1,9 @@
+/* TODO:
+- lable reply textarea
+- Make the chekbox appear above the suggested changes even when activated
+*/
+
+
 var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
@@ -48,7 +54,7 @@ ep_comments.prototype.init = function(){
 
   // Init prerequisite
   this.findContainers();
-  this.insertContainers();
+  this.insertContainers(); // Insert comment containers in sidebar
 
   // Init icons container
   commentIcons.insertContainer();
@@ -260,7 +266,7 @@ ep_comments.prototype.init = function(){
     }
   });
 
-  // TODO is this even used?
+  // is this even used? - Yes, it is!
   this.container.on("submit", ".comment-reply", function(e){
     e.preventDefault();
     var data = self.getCommentData();
@@ -271,14 +277,14 @@ ep_comments.prototype.init = function(){
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
-      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > .comment-reply > .comment-reply-input').val("");
+      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > form.comment-reply  .comment-reply-input').val("");
       self.getCommentReplies(function(replies){
         self.commentReplies = replies;
         self.collectCommentReplies();
       });
     });
     if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox").click();
+      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click(); //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
     }
   });
 
@@ -313,7 +319,7 @@ ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   this.padOuter = padOuter;
   this.padInner = padOuter.find('iframe[name="ace_inner"]');
-  this.outerBody = padOuter.find('#outerdocbody')
+  this.outerBody = padOuter.find('#outerdocbody');
 };
 
 ep_comments.prototype.showNewCommentForm = function(){
@@ -461,23 +467,25 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   $.each(this.commentReplies, function(replyId, replies){
     var commentId = replies.commentId;
 
+
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
 
     var existsAlready = $('iframe[name="ace_outer"]').contents().find('#'+replyId).length;
-    if(existsAlready) return;
+    if(existsAlready){
+        return;
+    }
+
 
     replies.replyId = replyId;
 
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
-
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
     // Should we show "Revert" instead of "Accept"
     // Comment Replies ARE handled here..
     if(replies.changeAccepted){
       self.showChangeAsAccepted(replyId);
     }
-
   });
 };
 
@@ -1041,4 +1049,3 @@ function getRepFromSelector(selector, container){
   });
   return repArr;
 }
-
