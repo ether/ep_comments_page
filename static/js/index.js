@@ -990,11 +990,10 @@ function getRepFromSelector(selector, container){
     var rep = [[],[]];
 
     // span not be the div so we have to go to parents until we find a div
-    var parentDiv = $(span).parent("div");
+    var parentDiv = $(span).closest("div");
     // line Number is obviously relative to entire document
     // So find out how many elements before in this parent?
     var lineNumber = $(parentDiv).prevAll("div").length;
-
     // We can set beginning of rep Y (lineNumber)
     rep[0][0] = lineNumber;
 
