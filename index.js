@@ -60,14 +60,35 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('revertChange', function(data, callback) {
+      // Broadcast to all other users that this change was accepted.
+      // Note that commentId here can either be the commentId or replyId..
+      var padId = data.padId;
+      commentManager.changeAcceptedState(padId, data.commentId, false, function(){
+        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
+      });
+    });
+
+    socket.on('acceptChange', function(data, callback) {
+      // Broadcast to all other users that this change was accepted.
+      // Note that commentId here can either be the commentId or replyId..
+      var padId = data.padId;
+      commentManager.changeAcceptedState(padId, data.commentId, true, function(){
+        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+      });
+    });
+
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
       var content = data.reply;
       var changeTo = data.changeTo || null;
+      var changeFrom = data.changeFrom || null;
+      var changeAccepted = data.changeAccepted || null;
+      var changeReverted = data.changeReverted || null;
       var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo){
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
         callback(replyId, reply);
       });
     });
@@ -142,7 +163,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         author: "empty",
         name: fields.name,
         text: fields.text,
-        changeTo: fields.changeTo
+        changeTo: fields.changeTo,
+        changeFrom: fields.changeFrom,
+        changeAccepted: fields.changeAccepted,
+        changeReverted: fields.changeReverted
       };
 
       comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
