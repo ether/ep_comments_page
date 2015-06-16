@@ -459,7 +459,6 @@ ep_comments.prototype.collectComments = function(callback){
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function(callback){
-  console.warn("collectCommentReplies", this.commentReplies);
   var self        = this;
   var container   = this.container;
   var commentReplies = this.commentReplies;
