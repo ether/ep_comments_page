@@ -1024,6 +1024,11 @@ function getRepFromSelector(selector, container){
     // Is the correct container however if block elements are registered
     // It's plausable that attributes are not maintained :(
     var leftOffset = 0;
+
+    // If the line has a lineAttribute then leftOffset should be +1
+    var hasLineAttribute =  $(span).parent("li, ul");
+    if(hasLineAttribute.length !== 0) leftOffset++;
+
     $(span).prevAll("span").each(function(){
       var spanOffset = $(this).text().length;
       leftOffset += spanOffset;
