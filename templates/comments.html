@@ -18,8 +18,10 @@
         </form>
         {{/if}}
         <form class='comment-reply'>
-            <input class='comment-reply-input'>
-
+            <label class='comment-reply-input-label'>
+                <span data-l10n-id="ep_comments_page.comments_template.reply_input_label">Your Reply (hit ENTER to send)</span>
+                <input class='comment-reply-input'>
+            </label>
             <span class="reply-suggestion">
                 <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest change From:</p>
                 <p class="reply-comment-suggest-from-p">
@@ -46,6 +48,10 @@
           <textarea class="comment-content" autofocus></textarea>
       </p>
 
+        <p class="comment-suggest">
+            <input type="checkbox" id="suggestion-checkbox">
+            <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
+        </p>
         <span class="suggestion">
             <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest change From:</p>
             <p class="comment-suggest-from-p">
@@ -56,10 +62,7 @@
                 <textarea class="comment-suggest-to"></textarea>
             </p>
         </span>
-        <p class="comment-suggest">
-            <input type="checkbox" id="suggestion-checkbox">
-            <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
-        </p>
+
         <p class="comment-buttons">
             <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
             <input type="reset" id="comment-reset" value="Cancel" data-l10n-id="ep_comments_page.comments_template.cancel.value" />
@@ -84,4 +87,3 @@
         {{/if}}
     </div>
 </script>
-

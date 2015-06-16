@@ -1,3 +1,12 @@
+/* TODO:
+- Dont use a textarea to show current text when suggesting change
+- lable reply textarea
+- Make the chekbox appear above the suggested changes even when activated
+
+
+*/
+
+
 var _, $, jQuery;
 
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
@@ -404,7 +413,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     replies.replyId = replyId;
     var content = $("#replyTemplate").tmpl(replies);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content);
+    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input').before(content); //TODO: .before Insert content, specified by the parameter, before each element in the set of matched elements; change this and change in the corresponding template, so that the input control  is input.comment-reply-input while the label is label.comment-reply-input
   });
 };
 
