@@ -71,7 +71,7 @@ var toggleActiveCommentIcon = function(target) {
   target.toggleClass("active").toggleClass("inactive");
 }
 
-var addListeners = function() {
+var addListenersToCommentIcons = function() {
   getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
     var commentId = targetCommentIdOf(e);
     highlightTargetTextOf(commentId);
@@ -97,6 +97,18 @@ var addListeners = function() {
   });
 }
 
+// Listen to Page View enabling/disabling, to adjust #commentIcons position
+var addListenersToPageView = function() {
+  $("#options-pageview").on("click", function() {
+    getPadOuter().find('#commentIcons').toggleClass("pageView");
+  });
+
+  // add class if Page View is on already
+  if($('#options-pageview').is(':checked')) {
+    getPadOuter().find('#commentIcons').addClass("pageView");
+  }
+}
+
 /* ***** Public methods: ***** */
 
 // Create container to hold comment icons
@@ -107,7 +119,8 @@ var insertContainer = function() {
   getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
   adjustIconsForNewScreenSize();
-  addListeners();
+  addListenersToCommentIcons();
+  addListenersToPageView();
 }
 
 // Create a new comment icon

@@ -10,6 +10,18 @@
   padding-left: 0px;
 }
 
+/* when page view is disabled, we need to move icons to the left */
+#commentIcons:not(.pageView) {
+  margin-left: calc(100% - 100px);
+}
+
+/* this is the point where #comments will be visible (check media queries on comment.css) */
+@media (min-width: 955px) {
+  #commentIcons:not(.pageView) {
+    margin-left: calc(100% - 300px);
+  }
+}
+
 .comment-icon-line {
   position: absolute;
 }
