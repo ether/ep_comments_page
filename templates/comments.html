@@ -77,9 +77,10 @@
 </script>
 
 <script id="replyTemplate" type="text/html">
-    <div id="${replyId}" class="sidebar-comment-reply">
-        <p class="comment-author-name">${name}:</p>
-        <p class="comment-text">${text}</p>
+    <note id="${replyId}" class="sidebar-comment-reply">
+        <address class="comment-author-name">${name}:</address>
+        <section class="comment-text">${text}</section>
+        <time datetime="${formattedDate}">${date}</time>
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeTo">
@@ -95,5 +96,5 @@
             </p>
         </form>
         {{/if}}
-    </div>
+    </note>
 </script>
