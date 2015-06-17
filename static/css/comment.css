@@ -1,3 +1,8 @@
+note{
+  display:block;
+  width:100%;
+}
+
 .comment {
   background: #FFFACD !important;
   border-radius: 0px;
