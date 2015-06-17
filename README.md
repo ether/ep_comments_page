@@ -19,7 +19,7 @@ To use this way of displaying comments, add the following to your `settings.json
 ```
 // Display comments as icons, not boxes
 "ep_comments_page": {
-  "displayCommentAsIcon": true,
+  "displayCommentAsIcon": true
 },
 ```
 
