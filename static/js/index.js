@@ -466,9 +466,8 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   var container   = this.container;
   var commentReplies = this.commentReplies;
   var padComment  = this.padInner.contents().find('.comment');
-  $.each(this.commentReplies, function(replyId, replies){
-    var commentId = replies.commentId;
-
+  $.each(this.commentReplies, function(replyId, reply){
+    var commentId = reply.commentId;
 
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
@@ -478,14 +477,14 @@ ep_comments.prototype.collectCommentReplies = function(callback){
         return;
     }
 
+    reply.replyId = replyId;
+    reply.formattedDate = new Date(reply.timestamp).toISOString();
 
-    replies.replyId = replyId;
-
-    var content = $("#replyTemplate").tmpl(replies);
+    var content = $("#replyTemplate").tmpl(reply);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
     // Should we show "Revert" instead of "Accept"
     // Comment Replies ARE handled here..
-    if(replies.changeAccepted){
+    if(reply.changeAccepted){
       self.showChangeAsAccepted(replyId);
     }
   });
