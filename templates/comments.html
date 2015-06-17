@@ -1,13 +1,13 @@
 <script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
 
-<!-- Used to view comments not change them -->
 <script id="commentsTemplate" type="text/html">
-    <div id="${commentId}" class="sidebar-comment" title="${date}">
+    <note id="${commentId}" class="sidebar-comment" title="${date}">
         <p class="comment-delete-container">
             <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
         </p>
-        <p class="comment-author-name">${name}:</p>
-        <p class="comment-text">${text}</p>
+        <address class="comment-author-name">${name}:</address>
+        <section class="comment-text">${text}</section>
+        <time datetime="${formattedDate}">${date}</time>
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeFrom">
@@ -46,7 +46,6 @@
     </div>
 </script>
 
-<!-- Used to add a new comment -->
 <script id="newCommentTemplate" type="text/html">
     <form id="newComment" class="sidebar-comment">
     	<p class="comment-author-name">${name}</p>
@@ -77,11 +76,11 @@
     </form>
 </script>
 
-<!-- Used to add a new comment reply -->
 <script id="replyTemplate" type="text/html">
-    <div id="${replyId}" class="sidebar-comment-reply">
-        <p class="comment-author-name">${name}:</p>
-        <p class="comment-text">${text}</p>
+    <note id="${replyId}" class="sidebar-comment-reply">
+        <address class="comment-author-name">${name}:</address>
+        <section class="comment-text">${text}</section>
+        <time datetime="${formattedDate}">${date}</time>
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeTo">
@@ -97,5 +96,5 @@
             </p>
         </form>
         {{/if}}
-    </div>
+    </note>
 </script>

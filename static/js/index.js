@@ -283,8 +283,11 @@ ep_comments.prototype.init = function(){
         self.collectCommentReplies();
       });
     });
+
+    // On submit we should hide this suggestion no?
     if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click(); //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
+      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click(); 
+      //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
     }
   });
 
@@ -686,6 +689,7 @@ ep_comments.prototype.localizeExistingComments = function() {
       self.localize(commentElm);
       // ... and update its date
       comment.data.date = prettyDate(comment.data.timestamp);
+      comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
       commentElm.attr('title', comment.data.date);
     }
   });
@@ -702,6 +706,7 @@ ep_comments.prototype.setComments = function(comments){
 ep_comments.prototype.setComment = function(commentId, comment){
   var comments = this.comments;
   comment.date = prettyDate(comment.timestamp);
+  comment.formattedDate = new Date(comment.timestamp).toISOString();
   if (comments[commentId] == null) comments[commentId] = {};
   comments[commentId].data = comment;
 };

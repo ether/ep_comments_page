@@ -27,6 +27,10 @@
   font-family: "fontawesome-etherpad";
 }
 
+time{
+  display:none;
+}
+
 .comment-delete:before{
   content: "\e82a";
 }
@@ -47,7 +51,7 @@
   text-overflow:auto;
 }
 
-.sidebar-comment p{
+.sidebar-comment{
   line-height:24px;
 }
 
