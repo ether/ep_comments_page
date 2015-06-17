@@ -302,12 +302,21 @@ time{
   width:1050px;
 }
 
+/* if Page View is disabled, we use the full width. (This is only changed
+  by commentIcons.js) */
+#outerdocbody.pageViewDisabled{
+  width:100%;
+}
+
 /* dont display comments at < 955px wide */
 @media (max-width: 955px) {
   #outerdocbody{
     width:100%;
     padding-right:0px;
   }
+}
+/* #innerdocbody is inside of another iframe, so needs a new media query */
+@media (max-width: 947px) { /* 955 - 8 (8 is #innerdocbody left position) */
   #innerdocbody{
     margin-right:0px;
   }
@@ -318,11 +327,12 @@ time{
   #comments.active{
     display:block;
   }
-
+}
+/* #innerdocbody is inside of another iframe, so needs a new media query */
+@media (min-width: 947px) { /* 955 - 8 (8 is #innerdocbody left position) */
   #innerdocbody.comments:not(.innerPV){
     margin-right:200px;
   }
-
 }
 
 .suggestion, .reply-suggestion{

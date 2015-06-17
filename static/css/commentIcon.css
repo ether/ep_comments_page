@@ -10,6 +10,18 @@
   padding-left: 0px;
 }
 
+/* when page view is disabled, we need to move icons to the left */
+#outerdocbody.pageViewDisabled #commentIcons {
+  margin-left: calc(100% - 90px);
+}
+
+/* this is the point where #comments will be visible (check media queries on comment.css) */
+@media (min-width: 955px) {
+  #outerdocbody.pageViewDisabled #commentIcons {
+    margin-left: calc(100% - 290px);
+  }
+}
+
 .comment-icon-line {
   position: absolute;
 }
