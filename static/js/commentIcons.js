@@ -100,12 +100,12 @@ var addListenersToCommentIcons = function() {
 // Listen to Page View enabling/disabling, to adjust #commentIcons position
 var addListenersToPageView = function() {
   $("#options-pageview").on("click", function() {
-    getPadOuter().find('#commentIcons').toggleClass("pageView");
+    getPadOuter().find('#outerdocbody').toggleClass("pageViewDisabled");
   });
 
-  // add class if Page View is on already
-  if($('#options-pageview').is(':checked')) {
-    getPadOuter().find('#commentIcons').addClass("pageView");
+  // add class if Page View is disabled already
+  if(!$('#options-pageview').is(':checked')) {
+    getPadOuter().find('#outerdocbody').addClass("pageViewDisabled");
   }
 }
 

@@ -291,12 +291,19 @@
 }
 
 #outerdocbody{
+  width:1050px;
+}
+
+/* if Page View is disabled, we use the full width. (This is only changed
+  by commentIcons.js) */
+#outerdocbody.pageViewDisabled{
   width:100%;
 }
 
 /* dont display comments at < 955px wide */
 @media (max-width: 955px) {
   #outerdocbody{
+    width:100%;
     padding-right:0px;
   }
 }
