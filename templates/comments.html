@@ -11,7 +11,7 @@
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeFrom">
-                <span class="comment-changeFrom-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">From:</span>
+                <span class="comment-changeFrom-label" data-l10n-id="ep_comments_page.comments_template.from">From:</span>
                 <span class="comment-changeFrom-value">${changeFrom}</span>
             </p>
             <p class="comment-changeTo">
@@ -33,7 +33,7 @@
                 <label for="reply-suggestion-checkbox-${commentId}" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
             </p>
             <span class="reply-suggestion">
-                <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">From:</p>
+                <p data-l10n-id="ep_comments_page.comments_template.from">From:</p>
                 <p class="reply-comment-suggest-from-p">
                     <span class="reply-comment-changeFrom-value">${changeFrom}</span>
                 </p>
@@ -84,7 +84,7 @@
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <p class="comment-changeTo">
-                <span class="comment-changeTo-label">Suggested Change From:</span>
+                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From:</span>
                 <p class="reply-comment-suggest-from-p">
                   <span class="comment-changeFrom-value">${changeFrom}</span>
                 </p>
@@ -92,7 +92,7 @@
                 <span class="comment-changeTo-value">${changeTo}</span>
             </p>
             <p class="comment-reply-changeTo-approve">
-                <input type="Submit" value="Accept Change">
+                <input type="Submit" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
             </p>
         </form>
         {{/if}}
