@@ -55,6 +55,7 @@ var highlightComment = function(commentId, e){
     var containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
     var modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
     var targetLeft = e.clientX;
+    var targetTop = $(e.target).offset().top;
     // if positioning modal on target left will make part of the modal to be
     // out of screen, we place it closer to the middle of the screen
     if (targetLeft + modalWitdh > containerWidth) {
@@ -62,7 +63,7 @@ var highlightComment = function(commentId, e){
     }
     getPadOuter().find('.comment-modal').show().css({
       left: targetLeft +"px",
-      top: e.clientY + 25 +"px"
+      top: targetTop + 25 +"px"
     });
   }
 }
