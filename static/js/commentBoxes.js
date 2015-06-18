@@ -25,14 +25,14 @@ var hideComment = function(commentId, hideCommentTitle) {
   // hide even the comment title
   if (hideCommentTitle) commentElm.hide();
 
-  getPadOuter().contents().find('.comment-modal').hide();
+  getPadOuter().find('.comment-modal').hide();
 };
 
 var hideOpenedComments = function() {
   var openedComments = getCommentsContainer().find('.mouseover');
   openedComments.removeClass('mouseover').hide();
 
-  getPadOuter().contents().find('.comment-modal').hide();
+  getPadOuter().find('.comment-modal').hide();
 }
 
 var hideAllComments = function() {
@@ -48,12 +48,22 @@ var highlightComment = function(commentId, e){
     commentElm.addClass('mouseover');
   } else {
     var commentElm = container.find('#'+ commentId);
-    getPadOuter().contents().find('.comment-modal').show().css({
-      left: e.clientX +"px",
+    // hovering comment view
+    getPadOuter().find('.comment-modal-comment').html(commentElm.html());
+
+    // get modal position
+    var containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
+    var modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
+    var targetLeft = e.clientX;
+    // if positioning modal on target left will make part of the modal to be
+    // out of screen, we place it closer to the middle of the screen
+    if (targetLeft + modalWitdh > containerWidth) {
+      targetLeft = containerWidth - modalWitdh - 2;
+    }
+    getPadOuter().find('.comment-modal').show().css({
+      left: targetLeft +"px",
       top: e.clientY + 25 +"px"
     });
-    // hovering comment view
-    getPadOuter().contents().find('.comment-modal-comment').html(commentElm.html());
   }
 }
 
