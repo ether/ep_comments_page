@@ -284,7 +284,8 @@ ep_comments.prototype.init = function(){
 
     // On submit we should hide this suggestion no?
     if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click();
+      $(this).parent().parent().find(".reply-suggestion-checkbox:checked").click();
+      $(this).parent().parent().find(".reply-comment-suggest-to").val("");
       //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
     }
   });
