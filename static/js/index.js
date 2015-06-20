@@ -769,19 +769,23 @@ ep_comments.prototype.deleteComment = function(commentId){
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
   var selector = "."+commentId;
-  var repArr = getRepFromSelector(selector, padInner);
-  // rep is an array of reps..  I will need to iterate over each to do something meaningful..
   var ace = this.ace;
-  $.each(repArr, function(index, rep){
+  ace.callWithAce(function(aceTop){
+    var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+    // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+    $.each(repArr, function(index, rep){
+      // I don't think we need this nested call
+      ace.callWithAce(function (ace){
+        ace.ace_performSelectionChange(rep[0],rep[1],true);
+        ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+        // Note that this is the correct way of doing it, instead of there being
+        // a commentId we now flag it as "comment-deleted"
+      });
+    });
+  },'deleteCommentedSelection', true);
 
-    ace.callWithAce(function (ace){
-      ace.ace_performSelectionChange(rep[0],rep[1],true);
-      ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
-      // Note that this is the correct way of doing it, instead of there being
-      // a commentId we now flag it as "comment-deleted"
-    },'deleteCommentedSelection', true);
-
-  });
+//  });
+//  }, 'getRep');
 }
 
 // Add a pad comment
@@ -1004,8 +1008,10 @@ exports.aceEditEvent          = hooks.aceEditEvent;
 */
 // Alas we follow the Etherpad convention of using tuples here.
 function getRepFromSelector(selector, container){
+  var attributeManager = this.documentAttributeManager;
 
   var repArr = [];
+
   // first find the element
   var elements = container.contents().find(selector);
   // One might expect this to be a rep for the entire document
@@ -1054,8 +1060,13 @@ function getRepFromSelector(selector, container){
     var leftOffset = 0;
 
     // If the line has a lineAttribute then leftOffset should be +1
-    var hasLineAttribute =  $(span).parent("li, ul");
-    if(hasLineAttribute.length !== 0) leftOffset++;
+    // Get each line Attribute on this line..
+    var hasLineAttribute = false;
+    var attrArr = attributeManager.getAttributesOnLine(lineNumber);
+    $.each(attrArr, function(attrK, value){
+      if(value[0] === "lmkr") hasLineAttribute = true;
+    });
+    if(hasLineAttribute) leftOffset++;
 
     $(span).prevAll("span").each(function(){
       var spanOffset = $(this).text().length;
@@ -1064,8 +1075,17 @@ function getRepFromSelector(selector, container){
     rep[0][1] = leftOffset;
 
     // All we need to know is span text length and it's left offset in chars
+    var spanLength = $(span).text().length;
+
     rep[1][1] = rep[0][1] + $(span).text().length; // Easy!
     repArr.push(rep);
   });
   return repArr;
 }
+
+// Once ace is initialized, we set ace_doInsertHeading and bind it to the context
+exports.aceInitialized = function(hook, context){
+  var editorInfo = context.editorInfo;
+  editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
+}
+
