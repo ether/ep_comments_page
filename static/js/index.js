@@ -284,7 +284,7 @@ ep_comments.prototype.init = function(){
 
     // On submit we should hide this suggestion no?
     if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click(); 
+      $(this).parent().parent().find(".reply-suggestion-checkbox:clicked").click();
       //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
     }
   });
@@ -479,6 +479,8 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     reply.formattedDate = new Date(reply.timestamp).toISOString();
 
     var content = $("#replyTemplate").tmpl(reply);
+    // localize comment reply
+    self.localize(content);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
     // Should we show "Revert" instead of "Accept"
     // Comment Replies ARE handled here..
@@ -903,8 +905,10 @@ ep_comments.prototype.showChangeAsAccepted = function(commentId){
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  comment.find("input[type='submit']").val("Revert");
-  comment.find("input[type='submit']").addClass("revert");
+  var button = comment.find("input[type='submit']");
+  button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
+  button.addClass("revert");
+  self.localize(button);
 }
 
 ep_comments.prototype.showChangeAsReverted = function(commentId){
@@ -912,8 +916,10 @@ ep_comments.prototype.showChangeAsReverted = function(commentId){
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  comment.find("input[type='submit']").val("Accept");
-  comment.find("input[type='submit']").removeClass("revert");
+  var button = comment.find("input[type='submit']");
+  button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
+  button.removeClass("revert");
+  self.localize(button);
 }
 
 // Push comment from collaborators
