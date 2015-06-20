@@ -52,7 +52,6 @@ function createComment(callback) {
 
   // wait until comment is created and comment id is set
   helper.waitFor(function() {
-    console.log("HERE");
     return getCommentId() !== null;
   })
   .done(callback);
@@ -67,7 +66,6 @@ function deleteComment(callback){
   $deleteButton.click();
 
   helper.waitFor(function() {
-console.log(chrome$(".sidebar-comment").is(":visible") === false)
     return chrome$(".sidebar-comment").is(":visible") === false;
   })
   .done(callback);
