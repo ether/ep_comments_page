@@ -169,9 +169,9 @@ ep_comments.prototype.init = function(){
 
       var currentString = padInner.contents().find("."+commentId).html();
       $(this).parent().parent().find(".reply-comment-changeFrom-value").html(currentString);
-      $(this).parent().parent().find('.reply-suggestion').show();
+      $(this).parent().parent().find('.reply-suggestion').addClass("active");
     }else{
-      $(this).parent().parent().find('.reply-suggestion').hide();
+      $(this).parent().parent().find('.reply-suggestion').removeClass("active");
     }
   });
 

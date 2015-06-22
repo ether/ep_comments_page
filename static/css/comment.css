@@ -90,9 +90,14 @@ time{
   margin:0px 0px 10px 0px;
 }
 
+.reply-suggestion.active {
+  display: block;
+}
+
 /* hide comment elements when displayed on modal, not on sidebar */
 .comment-modal .reply-comment-suggest,
 .comment-modal .comment-reply-input-label,
+.comment-modal .reply-suggestion,
 .comment-modal input,
 .comment-modal .comment-changeTo-approve{
   display:none;
@@ -101,6 +106,7 @@ time{
 .sidebar-comment-reply{
   padding-top:5px;
   padding-left:10px;
+  margin-bottom: 5px;
 }
 
 .sidebar-comment-reply:nth-child(even){
