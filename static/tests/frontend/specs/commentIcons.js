@@ -2,9 +2,21 @@ describe("Comment icons", function() {
   //create a new pad with comment before each test run
   beforeEach(function(cb){
     helper.newPad(function() {
-      createComment(cb);
+      // make sure Etherpad has enough space to display comment icons
+      enlargeScreen(function() {
+        // force sidebar comments to be shown
+        chooseToShowComments(true, function() {
+          createComment(cb);
+        });
+      });
     });
     this.timeout(60000);
+  });
+
+  after(function(cb) {
+    // undo frame resize that was done on before()
+    $('#iframe-container iframe').css("max-width", "");
+    cb();
   });
 
   it("adds a comment icon on the same height of commented text", function(done) {
@@ -97,86 +109,96 @@ describe("Comment icons", function() {
     });
   });
 
-  it("shows comment modal when user clicks on comment icon", function(done) {
+  it("shows comment when user clicks on comment icon", function(done) {
     // we only run test if icons are enabled
     finishTestIfIconsAreNotEnabled(done, function(){
-      // force modal to be displayed, otherwise tests will fail on very large screens
-      chooseToShowComments(false, function() {
-        var inner$ = helper.padInner$;
-        var outer$ = helper.padOuter$;
-        var commentId = getCommentId();
+      var outer$ = helper.padOuter$;
+      var commentId = getCommentId();
 
-        // click on the icon
-        var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
-        $commentIcon.click();
+      // click on the icon
+      var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
+      $commentIcon.click();
 
-        // check modal is visible
-        var $commentModal = outer$(".comment-modal");
-        expect($commentModal.is(":visible")).to.be(true);
+      // check sidebar comment is visible
+      var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
+      expect($openedSidebarComments.length).to.be(1);
 
-        done();
-      });
+      done();
     });
   });
 
-  it("hides comment modal when user clicks on comment icon twice", function(done) {
+  it("hides comment when user clicks on comment icon twice", function(done) {
     // we only run test if icons are enabled
     finishTestIfIconsAreNotEnabled(done, function(){
-      // force modal to be displayed, otherwise tests will fail on very large screens
-      chooseToShowComments(false, function() {
-        var inner$ = helper.padInner$;
-        var outer$ = helper.padOuter$;
-        var commentId = getCommentId();
+      var outer$ = helper.padOuter$;
+      var commentId = getCommentId();
 
-        // click on the icon to open, then click again to close
-        var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
-        $commentIcon.click();
-        $commentIcon.click();
+      // click on the icon to open, then click again to close
+      var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
+      $commentIcon.click();
+      $commentIcon.click();
 
-        // check modal is not visible
-        var $commentModal = outer$(".comment-modal");
-        expect($commentModal.is(":visible")).to.be(false);
+      // check sidebar comment is not visible
+      var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
+      expect($openedSidebarComments.length).to.be(0);
 
-        done();
-      });
+      done();
+    });
+  });
+
+  it("hides comment when user clicks outside of comment box", function(done) {
+    // we only run test if icons are enabled
+    finishTestIfIconsAreNotEnabled(done, function(){
+      var outer$ = helper.padOuter$;
+      var commentId = getCommentId();
+
+      // click on the icon to open
+      var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
+      $commentIcon.click();
+
+      // click outside the comment to hide it
+      outer$("#outerdocbody").click();
+
+      // check sidebar comment is not visible
+      var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
+      expect($openedSidebarComments.length).to.be(0);
+
+      done();
     });
   });
 
   it("hides first comment and shows second comment when user clicks on one icon then on another icon", function(done) {
     // we only run test if icons are enabled
     finishTestIfIconsAreNotEnabled(done, function(){
-      // force modal to be displayed, otherwise tests will fail on very large screens
-      chooseToShowComments(false, function() {
-        var inner$ = helper.padInner$;
-        var outer$ = helper.padOuter$;
+      var inner$ = helper.padInner$;
+      var outer$ = helper.padOuter$;
 
-        // add a second line...
-        var $lastTextElement = inner$("div").last();
-        $lastTextElement.sendkeys('Second line');
+      // add a second line...
+      var $lastTextElement = inner$("div").last();
+      $lastTextElement.sendkeys('Second line{enter}');
 
-        // wait until the new line is split into a separated .ace-line
-        helper.waitFor(function() {
-          return inner$("div").length > 2;
-        })
-        .done(function() {
-          // ... then add a comment to second line
-          var $secondLine = inner$("div").eq(1);
-          $secondLine.sendkeys('{selectall}');
-          addComment("Second Comment", function() {
-            // click on the icon of first comment...
-            var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
-            $firstCommentIcon.click();
-            // ... then click on the icon of last comment
-            var $secondCommentIcon = outer$("#commentIcons #icon-"+getCommentId(1)).first();
-            $secondCommentIcon.click();
+      // wait until the new line is split into a separated .ace-line
+      helper.waitFor(function() {
+        return inner$("div").length > 2;
+      })
+      .done(function() {
+        // ... then add a comment to second line
+        var $secondLine = inner$("div").eq(1);
+        $secondLine.sendkeys('{selectall}');
+        addComment("Second Comment", function() {
+          // click on the icon of first comment...
+          var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
+          $firstCommentIcon.click();
+          // ... then click on the icon of last comment
+          var $secondCommentIcon = outer$("#commentIcons #icon-"+getCommentId(1)).first();
+          $secondCommentIcon.click();
 
-            // check modal is visible
-            var $commentModalText = outer$(".comment-modal .comment-text").text();
-            expect($commentModalText).to.be("Second Comment");
+          // check modal is visible
+          var $commentText = outer$("#comments .sidebar-comment:visible .comment-text").text();
+          expect($commentText).to.be("Second Comment");
 
-            done();
+          done();
 
-          });
         });
       });
     });
@@ -193,7 +215,7 @@ describe("Comment icons", function() {
     // simulate key presses to delete content
     $firstTextElement.sendkeys('{selectall}'); // select all
     $firstTextElement.sendkeys('{del}'); // clear the first line
-    $firstTextElement.sendkeys('This content will receive a comment'); // insert text
+    $firstTextElement.sendkeys('This content will receive a comment{enter}'); // insert text
     // wait until the two lines are split into two .ace-line's
     helper.waitFor(function() {
       return inner$("div").length > 1;
@@ -284,6 +306,11 @@ describe("Comment icons", function() {
     // hide settings again
     $settingsButton.click();
 
+    callback();
+  }
+
+  var enlargeScreen = function(callback) {
+    $('#iframe-container iframe').css("max-width", "1000px");
     callback();
   }
 
