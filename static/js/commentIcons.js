@@ -16,7 +16,7 @@ var screenHasSpaceForIcons = function() {
 }
 
 var calculateIfScreenHasSpaceForIcons = function() {
-  var firstElementOnPad = getPadInner().contents().find("#innerdocbody > div").first();
+  var firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
   var rightMargin       = firstElementOnPad.css("margin-right");
 
   screenHasSpaceToDisplayIcons = rightMargin !== "0px";
@@ -32,7 +32,7 @@ var getPadOuter = function() {
 // Easier access to inner pad
 var padInner;
 var getPadInner = function() {
-  padInner = padInner || getPadOuter().find('iframe[name="ace_inner"]');
+  padInner = padInner || getPadOuter().find('iframe[name="ace_inner"]').contents();
   return padInner;
 }
 
@@ -59,11 +59,11 @@ var targetCommentIdOf = function(e) {
 }
 
 var highlightTargetTextOf = function(commentId) {
-  getPadInner().contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+  getPadInner().find("head").append("<style>."+commentId+"{ color:orange }</style>");
 }
 
 var removeHighlightOfTargetTextOf = function(commentId) {
-  getPadInner().contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
+  getPadInner().find("head").append("<style>."+commentId+"{ color:black }</style>");
   // TODO this could potentially break ep_font_color
 }
 
@@ -109,6 +109,45 @@ var addListenersToPageView = function() {
   }
 }
 
+// Listen to clicks on the page to be able to close comment when clicking
+// outside of it
+var addListenersToCloseOpenedComment = function() {
+  // we need to add listeners to the different iframes of the page
+  $(document).on("click", function(e){
+    closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+  getPadOuter().find('html').on("click", function(e){
+    closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+  getPadInner().find('html').on("click", function(e){
+    closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+}
+
+// Close comment if event target was outside of comment or on a comment icon
+var closeOpenedCommentIfNotOnSelectedElements = function(e) {
+  // Don't do anything if clicked on the following elements:
+  if ($(e.target).closest('.comment-icon').length // any of the comment icons
+    || $(e.target).closest('.sidebar-comment').length // a comment box
+    || $(e.target).closest('.comment-modal').length) { // the comment modal
+    return;
+  }
+
+  // All clear, can close the comment
+  var openedComment = findOpenedComment();
+  if (openedComment) {
+    toggleActiveCommentIcon($(openedComment));
+
+    var commentId = openedComment.getAttribute("data-commentid")
+    commentBoxes.hideComment(commentId, true);
+  }
+}
+
+// Search on the page for an opened comment
+var findOpenedComment = function() {
+  return getPadOuter().find('#commentIcons .comment-icon.active').get(0);
+}
+
 /* ***** Public methods: ***** */
 
 // Create container to hold comment icons
@@ -120,6 +159,7 @@ var insertContainer = function() {
 
   adjustIconsForNewScreenSize();
   addListenersToCommentIcons();
+  addListenersToCloseOpenedComment();
   addListenersToPageView();
 }
 
@@ -128,7 +168,7 @@ var addIcon = function(commentId, comment){
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
-  var inlineComment = getPadInner().contents().find(".comment."+commentId);
+  var inlineComment = getPadInner().find(".comment."+commentId);
   var top = inlineComment.get(0).offsetTop + 5;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
   var icon = $('#commentIconTemplate').tmpl(comment);

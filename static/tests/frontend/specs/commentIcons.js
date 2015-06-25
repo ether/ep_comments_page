@@ -109,7 +109,7 @@ describe("Comment icons", function() {
     });
   });
 
-  it("shows comment modal when user clicks on comment icon", function(done) {
+  it("shows comment when user clicks on comment icon", function(done) {
     // we only run test if icons are enabled
     finishTestIfIconsAreNotEnabled(done, function(){
       var outer$ = helper.padOuter$;
@@ -127,7 +127,7 @@ describe("Comment icons", function() {
     });
   });
 
-  it("hides comment modal when user clicks on comment icon twice", function(done) {
+  it("hides comment when user clicks on comment icon twice", function(done) {
     // we only run test if icons are enabled
     finishTestIfIconsAreNotEnabled(done, function(){
       var outer$ = helper.padOuter$;
@@ -137,6 +137,27 @@ describe("Comment icons", function() {
       var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
       $commentIcon.click();
       $commentIcon.click();
+
+      // check sidebar comment is not visible
+      var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
+      expect($openedSidebarComments.length).to.be(0);
+
+      done();
+    });
+  });
+
+  it("hides comment when user clicks outside of comment box", function(done) {
+    // we only run test if icons are enabled
+    finishTestIfIconsAreNotEnabled(done, function(){
+      var outer$ = helper.padOuter$;
+      var commentId = getCommentId();
+
+      // click on the icon to open
+      var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
+      $commentIcon.click();
+
+      // click outside the comment to hide it
+      outer$("#outerdocbody").click();
 
       // check sidebar comment is not visible
       var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
