@@ -906,7 +906,7 @@ ep_comments.prototype.showChangeAsAccepted = function(commentId){
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']");
+  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
   button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
   button.addClass("revert");
   self.localize(button);
@@ -917,7 +917,7 @@ ep_comments.prototype.showChangeAsReverted = function(commentId){
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']");
+  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
   button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
   button.removeClass("revert");
   self.localize(button);
