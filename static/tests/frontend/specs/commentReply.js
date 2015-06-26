@@ -48,6 +48,44 @@ describe("Comment Reply", function(){
     });
   });
 
+  it("Replaces the original text with reply suggestion", function(done) {
+    createReply(true, function(){
+      var inner$ = helper.padInner$;
+      var outer$ = helper.padOuter$;
+
+      // click to accept suggested change of the reply
+      var $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']");
+      $replyAcceptChangeButton.click();
+
+      // check the pad text
+      var $firstTextElement = inner$("div").first();
+      expect($firstTextElement.text()).to.be("My suggestion");
+
+      done();
+    });
+  });
+
+  it("Replaces the original text with reply suggestion after replacing original text with comment suggestion", function(done) {
+    createReply(true, function(){
+      var inner$ = helper.padInner$;
+      var outer$ = helper.padOuter$;
+
+      // click to accept suggested change of the original comment
+      var $commentAcceptChangeButton = outer$(".sidebar-comment .comment-changeTo-form input[type='submit']").first();
+      $commentAcceptChangeButton.click();
+
+      // click to accept suggested change of the reply
+      var $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']");
+      $replyAcceptChangeButton.click();
+
+      // check the pad text
+      var $firstTextElement = inner$("div").first();
+      expect($firstTextElement.text()).to.be("My suggestion");
+
+      done();
+    });
+  });
+
   var createComment = function(callback) {
     var inner$ = helper.padInner$;
     var outer$ = helper.padOuter$;
