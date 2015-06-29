@@ -48,6 +48,7 @@ time{
   display:block;
 }
 
+.comment-modal .comment-text,
 .sidebar-comment:hover .comment-text,
 .sidebar-comment.mouseover .comment-text{
   height:auto;
@@ -74,6 +75,7 @@ time{
 .comment-modal{
   position:absolute;
   min-width:20px;
+  max-width:50%;
   min-height:10px;
   background-color:#fff;
   z-index:99999;
@@ -114,7 +116,6 @@ time{
 }
 
 .comment-reply{
-  max-width:190px;
   margin-bottom:5px;
 }
 
