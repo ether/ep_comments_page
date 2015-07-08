@@ -142,6 +142,14 @@ ep_comments.prototype.init = function(){
     // console.log("setting focus to .comment-content");
     self.showNewCommentForm();
     $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
+
+    // fix for iOS: when opening #newComment, we need to force focus on padOuter
+    // contentWindow, otherwise keyboard will be displayed but text input made by
+    // the user won't be added to textarea
+    var outerIframe = $('iframe[name="ace_outer"]').get(0);
+    if (outerIframe && outerIframe.contentWindow) {
+      outerIframe.contentWindow.focus();
+    }
   });
 
   // Listen for include suggested change toggle
