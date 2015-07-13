@@ -85,6 +85,15 @@ var isOnTop = function(commentId, baseTop) {
   return commentElement.css("top") === expectedTop;
 }
 
+// Indicates if event was on one of the elements that does not close comment
+var shouldNotCloseComment = function(e) {
+  if ($(e.target).closest('.sidebar-comment').length // a comment box
+    || $(e.target).closest('.comment-modal').length) { // the comment modal
+    return true;
+  }
+  return false;
+}
+
 exports.showComment = showComment;
 exports.hideComment = hideComment;
 exports.hideOpenedComments = hideOpenedComments;
@@ -92,3 +101,4 @@ exports.hideAllComments = hideAllComments;
 exports.highlightComment = highlightComment;
 exports.adjustTopOf = adjustTopOf;
 exports.isOnTop = isOnTop;
+exports.shouldNotCloseComment = shouldNotCloseComment;

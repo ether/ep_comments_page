@@ -113,13 +113,16 @@ var addListenersToPageView = function() {
 // outside of it
 var addListenersToCloseOpenedComment = function() {
   // we need to add listeners to the different iframes of the page
-  $(document).on("click", function(e){
+  $(document).on("touchstart click", function(e){
+    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  getPadOuter().find('html').on("click", function(e){
+  getPadOuter().find('html').on("touchstart click", function(e){
+    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  getPadInner().find('html').on("click", function(e){
+  getPadInner().find('html').on("touchstart click", function(e){
+    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
 }
@@ -127,9 +130,8 @@ var addListenersToCloseOpenedComment = function() {
 // Close comment if event target was outside of comment or on a comment icon
 var closeOpenedCommentIfNotOnSelectedElements = function(e) {
   // Don't do anything if clicked on the following elements:
-  if ($(e.target).closest('.comment-icon').length // any of the comment icons
-    || $(e.target).closest('.sidebar-comment').length // a comment box
-    || $(e.target).closest('.comment-modal').length) { // the comment modal
+  if (shouldNotCloseComment(e) // any of the comment icons
+    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
     return;
   }
 
@@ -138,7 +140,7 @@ var closeOpenedCommentIfNotOnSelectedElements = function(e) {
   if (openedComment) {
     toggleActiveCommentIcon($(openedComment));
 
-    var commentId = openedComment.getAttribute("data-commentid")
+    var commentId = openedComment.getAttribute("data-commentid");
     commentBoxes.hideComment(commentId, true);
   }
 }
@@ -258,6 +260,11 @@ var adjustIconsForNewScreenSize = function() {
   }
 }
 
+// Indicates if event was on one of the elements that does not close comment (any of the comment icons)
+var shouldNotCloseComment = function(e) {
+  return $(e.target).closest('.comment-icon').length !== 0;
+}
+
 exports.insertContainer = insertContainer;
 exports.addIcon = addIcon;
 exports.hideIcons = hideIcons;
@@ -266,3 +273,4 @@ exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
 exports.commentHasReply = commentHasReply;
 exports.shouldShow = shouldShow;
 exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
+exports.shouldNotCloseComment = shouldNotCloseComment;
