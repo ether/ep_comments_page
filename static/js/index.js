@@ -455,17 +455,49 @@ ep_comments.prototype.collectComments = function(callback){
   this.padInner.contents().on("mouseleave", ".comment", function(e){
     var commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
 
-    // only hides comment if it was not opened by a click on the icon
+    // only closes comment if it was not opened by a click on the icon
     if (!commentOpenedByClickOnIcon) {
-      var cls             = e.currentTarget.classList;
-      var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-      var commentId       = (classCommentId) ? classCommentId[1] : null;
-
-      commentBoxes.hideComment(commentId);
+      self.closeOpenedComment(e);
     }
   });
+
+  self.addListenersToCloseOpenedComment();
+
   self.setYofComments();
 };
+
+ep_comments.prototype.addListenersToCloseOpenedComment = function() {
+  var self = this;
+
+  // we need to add listeners to the different iframes of the page
+  $(document).on("touchstart", function(e){
+    self.closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+  this.padOuter.find('html').on("touchstart", function(e){
+    self.closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+  this.padInner.contents().find('html').on("touchstart", function(e){
+    self.closeOpenedCommentIfNotOnSelectedElements(e);
+  });
+}
+
+// Close comment that is opened
+ep_comments.prototype.closeOpenedComment = function(e) {
+  var commentId = this.commentIdOf(e);
+  commentBoxes.hideComment(commentId);
+}
+
+// Close comment if event target was outside of comment or on a comment icon
+ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
+  // Don't do anything if clicked on the allowed elements:
+  if (commentIcons.shouldNotCloseComment(e) // any of the comment icons
+    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
+    return;
+  }
+
+  // All clear, can close the comment
+  this.closeOpenedComment(e);
+}
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function(callback){
