@@ -345,6 +345,10 @@ ep_comments.prototype.showNewCommentForm = function(){
 ep_comments.prototype.hideNewCommentForm = function(){
   var self = this;
   this.newCommentContainer.find('#newComment').removeClass("visible").addClass("hidden");
+
+  // force focus to be lost, so virtual keyboard is hidden on mobile devices
+  this.newCommentContainer.find(':focus').blur();
+
   // we need to give some time for the animation of #newComment to finish
   window.setTimeout(function() {
     self.newCommentContainer.removeClass("active");
