@@ -12,6 +12,8 @@ var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 var commentIcons = require('ep_comments_page/static/js/commentIcons');
+var newComment = require('ep_comments_page/static/js/newComment');
+var commentL10n = require('ep_comments_page/static/js/commentL10n');
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
@@ -21,11 +23,10 @@ var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/sta
 
 // Container
 function ep_comments(context){
-  this.container           = null;
-  this.padOuter            = null;
-  this.padInner            = null;
-  this.newCommentContainer = null;
-  this.ace                 = context.ace;
+  this.container = null;
+  this.padOuter  = null;
+  this.padInner  = null;
+  this.ace       = context.ace;
 
   // Required for instances running on weird ports
   // This probably needs some work for instances running on root or not on /p/
@@ -114,7 +115,7 @@ ep_comments.prototype.init = function(){
   // all templates are localized
   html10n.bind('localized', function() {
     self.localizeExistingComments();
-    self.localizeNewCommentForm();
+    newComment.localizeNewCommentForm();
   });
 
   // When screen size changes (user changes device orientation, for example),
@@ -135,30 +136,7 @@ ep_comments.prototype.init = function(){
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
     e.preventDefault(); // stops focus from being lost
-    // If a new comment box doesn't already exist
-    // Add a new comment and link it to the selection
-    // $('iframe[name="ace_outer"]').contents().find('#sidediv').removeClass('sidedivhidden');
-    if (self.newCommentContainer.find('#newComment').length == 0) self.addComment();
-    // console.log("setting focus to .comment-content");
-    self.showNewCommentForm();
-    $('iframe[name="ace_outer"]').contents().find('.comment-content').focus();
-
-    // fix for iOS: when opening #newComment, we need to force focus on padOuter
-    // contentWindow, otherwise keyboard will be displayed but text input made by
-    // the user won't be added to textarea
-    var outerIframe = $('iframe[name="ace_outer"]').get(0);
-    if (outerIframe && outerIframe.contentWindow) {
-      outerIframe.contentWindow.focus();
-    }
-  });
-
-  // Listen for include suggested change toggle
-  this.newCommentContainer.on("change", '#suggestion-checkbox', function(){
-    if($(this).is(':checked')){
-      $('iframe[name="ace_outer"]').contents().find('.suggestion').show();
-    }else{
-      $('iframe[name="ace_outer"]').contents().find('.suggestion').hide();
-    }
+    self.displayNewCommentForm();
   });
 
   // Listen for events to delete a comment
@@ -332,29 +310,6 @@ ep_comments.prototype.findContainers = function(){
   this.outerBody = padOuter.find('#outerdocbody');
 };
 
-ep_comments.prototype.showNewCommentForm = function(){
-  var self = this;
-  this.newCommentContainer.addClass("active");
-  // we need to set a timeout otherwise the animation to show #newComment won't be visible
-  window.setTimeout(function() {
-    $('iframe[name="ace_outer"]').contents().find('.suggestion').hide(); // Hides suggestion in case of a cancel
-    self.newCommentContainer.find('#newComment').removeClass("hidden").addClass("visible");
-  }, 0);
-}
-
-ep_comments.prototype.hideNewCommentForm = function(){
-  var self = this;
-  this.newCommentContainer.find('#newComment').removeClass("visible").addClass("hidden");
-
-  // force focus to be lost, so virtual keyboard is hidden on mobile devices
-  this.newCommentContainer.find(':focus').blur();
-
-  // we need to give some time for the animation of #newComment to finish
-  window.setTimeout(function() {
-    self.newCommentContainer.removeClass("active");
-  }, 500);
-}
-
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectComments = function(callback){
   var self        = this;
@@ -400,7 +355,7 @@ ep_comments.prototype.collectComments = function(callback){
         }
 
         // localize comment element
-        self.localize(commentElm);
+        commentL10n.localize(commentElm);
       }
     }
     var prevCommentElm = commentElm.prev();
@@ -525,7 +480,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     var content = $("#replyTemplate").tmpl(reply);
     // localize comment reply
-    self.localize(content);
+    commentL10n.localize(content);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
     // Should we show "Revert" instead of "Accept"
     // Comment Replies ARE handled here..
@@ -551,70 +506,19 @@ ep_comments.prototype.insertContainers = function(){
   this.container = this.padOuter.find('#comments');
 
   // Add newComments
-  target.prepend('<div id="newComments"></div>');
-  this.newCommentContainer = this.padOuter.find('#newComments');
-};
-
-// Insert new Comment Form
-ep_comments.prototype.insertNewComment = function(comment, callback){
-  var ace = this.ace;
-  var index = 0;
-  var self = this;
-
-  this.insertComment("", comment, index, true);
-
-  this.newCommentContainer.find('#newComment #comment-reset').on('click',function(){
-    self.hideNewCommentForm();
-  });
-
-  this.newCommentContainer.find('#newComment').submit(function(){
-    var form = $(this);
-    var text = form.find('.comment-content').val();
-    var changeFrom = form.find('.comment-suggest-from').val();
-    var changeTo = form.find('.comment-suggest-to').val() || null;
-    var comment = {};
-    comment.text = text;
-    if(changeTo){
-      comment.changeFrom = changeFrom;
-      comment.changeTo = changeTo;
-    }
-    if (text.length != 0) {
-      form.remove();
-      self.hideNewCommentForm();
-      // console.log("calling back", text, index);
-      callback(comment, index);
-    }
-    return false;
-  });
-
-  // Set the top of the form to be the same Y as the target Rep
-  ace.callWithAce(function (ace){
-    var rep = ace.ace_getRep();
-    // console.log("rep", rep); // doesn't fire twice
-    var line = rep.lines.atIndex(rep.selStart[0]);
-    var key = "#"+line.key;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-    var ele = padInner.contents().find(key);
-    var y = ele[0].offsetTop;
-    self.showNewCommentForm();
-    // scroll new comment form to focus
-    $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop(y); // Works in Chrome
-    $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
-  },'getYofRep', true);
+  newComment.insertContainers(target);
 };
 
 // Insert a comment node
-ep_comments.prototype.insertComment = function(commentId, comment, index, isNew){
-  var template          = (isNew === true) ? 'newCommentTemplate' : 'commentsTemplate';
+ep_comments.prototype.insertComment = function(commentId, comment, index){
   var content           = null;
-  var container         = (isNew === true) ? this.newCommentContainer : this.container;
+  var container         = this.container;
   var commentAfterIndex = container.find('.sidebar-comment').eq(index);
 
   comment.commentId = commentId;
-  content = $('#'+ template).tmpl(comment);
+  content = $('#commentsTemplate').tmpl(comment);
 
-  this.localize(content);
+  commentL10n.localize(content);
 
   // position doesn't seem to be relative to rep
 
@@ -628,7 +532,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index, isNew)
   }
 
   // insert icon
-  if (!isNew) commentIcons.addIcon(commentId, comment);
+  commentIcons.addIcon(commentId, comment);
 };
 
 // Set all comments to be inline with their target REP
@@ -724,15 +628,6 @@ ep_comments.prototype.allCommentsOnCorrectYPosition = function(){
   return allCommentsAreCorrect;
 }
 
-ep_comments.prototype.localize = function(element) {
-  html10n.translateElement(html10n.translations, element.get(0));
-};
-
-ep_comments.prototype.localizeNewCommentForm = function() {
-  var newCommentForm = this.newCommentContainer.find('#newComment');
-  if (newCommentForm.length !== 0) this.localize(newCommentForm);
-};
-
 ep_comments.prototype.localizeExistingComments = function() {
   var self        = this;
   var padComments = this.padInner.contents().find('.comment');
@@ -749,7 +644,7 @@ ep_comments.prototype.localizeExistingComments = function() {
       var comment     = comments[commentId];
 
       // localize comment element...
-      self.localize(commentElm);
+      commentL10n.localize(commentElm);
       // ... and update its date
       comment.data.date = prettyDate(comment.data.timestamp);
       comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
@@ -802,8 +697,7 @@ ep_comments.prototype.getCommentData = function (){
   data.comment.name       = pad.myUserInfo.name;
   data.comment.timestamp  = new Date().getTime();
 
-  // Si le client est Anonyme
-  // In English please? :P
+  // If client is anonymous
   if(data.comment.name === undefined){
     data.comment.name = clientVars.userAgent;
   }
@@ -835,31 +729,81 @@ ep_comments.prototype.deleteComment = function(commentId){
 //  }, 'getRep');
 }
 
-// Add a pad comment
-ep_comments.prototype.addComment = function (callback){
-  var socket  = this.socket;
-  var data    = this.getCommentData();
-  var ace     = this.ace;
-  var self    = this;
-  var rep     = {};
+ep_comments.prototype.displayNewCommentForm = function() {
+  var self = this;
+  var rep = {};
+  var ace = this.ace;
 
-  ace.callWithAce(function (ace){
+  ace.callWithAce(function(ace) {
     var saveRep = ace.ace_getRep();
-    rep.lines = saveRep.lines;
+
+    rep.lines    = saveRep.lines;
     rep.selStart = saveRep.selStart;
-    rep.selEnd = saveRep.selEnd;
+    rep.selEnd   = saveRep.selEnd;
   },'saveCommentedSelection', true);
 
-  // If we don't have a selection then return nothing
-  if (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]) {
+  // If we don't have a selection then we do nothing
+  var noTextSelected = self.checkNoTextSelected(rep);
+  if (noTextSelected) {
     return;
   }
 
-  var firstLine, lastLine;
-  firstLine = rep.selStart[0];
-  lastLine = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
-  var totalNumberOfLines = 0;
-  $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").html("");
+  var selectedText = self.getSelectedText(rep);
+
+  self.createNewCommentFormIfDontExist(rep);
+
+  // Write the text to the changeFrom form
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  padOuter.find(".comment-suggest-from").val(selectedText);
+
+  // Display form
+  newComment.showNewCommentForm();
+
+  // Set the top of the form to be the same Y as the target Rep
+  var y = self.getYofFirstSelectedLine();
+  padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
+  padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+
+  // Adjust focus on the form
+  padOuter.find('.comment-content').focus();
+
+  // fix for iOS: when opening #newComment, we need to force focus on padOuter
+  // contentWindow, otherwise keyboard will be displayed but text input made by
+  // the user won't be added to textarea
+  var outerIframe = $('iframe[name="ace_outer"]').get(0);
+  if (outerIframe && outerIframe.contentWindow) {
+    outerIframe.contentWindow.focus();
+  }
+}
+
+// Indicates if user selected some text on editor
+ep_comments.prototype.checkNoTextSelected = function(rep) {
+  var noTextSelected = (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]);
+
+  return noTextSelected;
+}
+
+// Create form to add comment
+ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
+  var data = this.getCommentData();
+  var self = this;
+
+  // If a new comment box doesn't already exist, create one
+  newComment.insertNewCommentFormIfDontExist(data, function(comment, index) {
+    if(comment.changeTo){
+      data.comment.changeFrom = comment.changeFrom;
+      data.comment.changeTo = comment.changeTo;
+    }
+    data.comment.text = comment.text;
+
+    self.saveComment(data, rep);
+  });
+};
+
+// Get a string representation of the text selected on the editor
+ep_comments.prototype.getSelectedText = function(rep) {
+  var firstLine = rep.selStart[0];
+  var lastLine  = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
 
   var selectedText = "";
 
@@ -893,37 +837,45 @@ ep_comments.prototype.addComment = function (callback){
      selectedText += lineText + "\n";
   });
 
-  // Set the top of the form
-  self.newCommentContainer.find('#newComment').css("top", $('#editorcontainer').css("top"));
-  // TODO This doesn't appear to get the Y right for the input field...
+  return selectedText;
+}
 
-  this.insertNewComment(data, function (comment, index){
-    if(comment.changeTo){
-      data.comment.changeFrom = comment.changeFrom;
-      data.comment.changeTo = comment.changeTo;
-    }
-    data.comment.text = comment.text;
+// Save comment
+ep_comments.prototype.saveComment = function(data, rep) {
+  var self = this;
 
-    // Save comment
-    socket.emit('addComment', data, function (commentId, comment){
-      comment.commentId = commentId;
+  self.socket.emit('addComment', data, function (commentId, comment){
+    comment.commentId = commentId;
 
-      //callback(commentId);
-      ace.callWithAce(function (ace){
-        // console.log('addComment :: ', commentId);
-        ace.ace_performSelectionChange(rep.selStart,rep.selEnd,true);
-        ace.ace_setAttributeOnSelection('comment', commentId);
-      },'insertComment', true);
+    self.ace.callWithAce(function (ace){
+      // console.log('addComment :: ', commentId);
+      ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
+      ace.ace_setAttributeOnSelection('comment', commentId);
+    },'insertComment', true);
 
-      self.setComment(commentId, comment);
-      self.collectComments();
-    });
+    self.setComment(commentId, comment);
+    self.collectComments();
   });
+}
 
-  // Write the text to the changeFrom form
-  $('iframe[name="ace_outer"]').contents().find(".comment-suggest-from").val(selectedText);
+// Get position of the first line of the selected text on the editor
+ep_comments.prototype.getYofFirstSelectedLine = function() {
+  var y;
 
-};
+  this.ace.callWithAce(function(ace) {
+    var rep = ace.ace_getRep();
+    // console.log("rep", rep); // doesn't fire twice
+    var line = rep.lines.atIndex(rep.selStart[0]);
+    var key = "#"+line.key;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
+    var ele = padInner.find(key);
+
+    y = ele[0].offsetTop;
+  },'getYofRep', true);
+
+  return y;
+}
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
@@ -953,7 +905,7 @@ ep_comments.prototype.showChangeAsAccepted = function(commentId){
   var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
   button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
   button.addClass("revert");
-  self.localize(button);
+  commentL10n.localize(button);
 }
 
 ep_comments.prototype.showChangeAsReverted = function(commentId){
@@ -964,7 +916,7 @@ ep_comments.prototype.showChangeAsReverted = function(commentId){
   var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
   button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
   button.removeClass("revert");
-  self.localize(button);
+  commentL10n.localize(button);
 }
 
 // Push comment from collaborators
