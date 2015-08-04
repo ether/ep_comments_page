@@ -120,7 +120,7 @@ ep_comments.prototype.init = function(){
 
   // When screen size changes (user changes device orientation, for example),
   // we need to make sure all sidebar comments are on the correct place
-  this.waitForResizeToFinishThenCall(function() {
+  newComment.waitForResizeToFinishThenCall(200, function() {
     self.editorResized();
   });
 
@@ -567,18 +567,6 @@ ep_comments.prototype.setYofComments = function(){
     commentEle.show();
   });
 };
-
-// Some browsers trigger resize several times while resizing the window, so
-// we need to make sure resize is done to avoid calling the callback multiple
-// times.
-// Based on: https://css-tricks.com/snippets/jquery/done-resizing-event/
-ep_comments.prototype.waitForResizeToFinishThenCall = function(callback){
-  var resizeTimer;
-  $(window).on("resize", function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(callback, 200);
-  });
-}
 
 // Make the adjustments after editor is resized (due to a window resize or
 // enabling/disabling Page View)
