@@ -16,7 +16,7 @@ describe("Comment Localization", function(){
   });
 
   it("uses default values when language was not localized yet", function(done) {
-    changeEtherpadLanguageTo('de', function(){
+    changeEtherpadLanguageTo('oc', function(){
       var chrome$ = helper.padChrome$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
@@ -107,7 +107,7 @@ describe("Comment Localization", function(){
     var boldTitles = {
       'en' : 'Bold (Ctrl+B)',
       'pt-br' : 'Negrito (Ctrl-B)',
-      'de' : 'Fett (Strg-B)'
+      'oc' : 'Gras (Ctrl-B)'
     };
     var chrome$ = helper.padChrome$;
 
