@@ -60,6 +60,45 @@ var submitNewComment = function(form, callback) {
   return false;
 }
 
+var fixFlyingToobarOnIOS = function() {
+  if (browser.ios) {
+    var shouldPlaceMenuRightOnBottom = $(".toolbar ul.menu_right").css('bottom') !== "auto";
+
+    getNewCommentContainer().find('input, textarea')
+    .on("focus", function() {
+      fixToolbarPosition();
+      if (shouldPlaceMenuRightOnBottom) placeMenuRightOnBottom();
+    })
+    .on("blur", function() {
+      revertFixToToolbarPosition();
+      if (shouldPlaceMenuRightOnBottom) revertPlacingMenuRightOnBottom();
+    });
+
+    // When user changes orientation, we need to re-position menu_right
+    if (shouldPlaceMenuRightOnBottom) {
+      waitForResizeToFinishThenCall(500, function() {
+        var needToUpdateTop = $(".toolbar ul.menu_right").css("top") !== "";
+        if (needToUpdateTop) placeMenuRightOnBottom();
+      });
+    }
+
+  }
+}
+
+var fixToolbarPosition = function() {
+  $(".toolbar ul.menu_left, .toolbar ul.menu_right").css("position", "absolute");
+}
+var revertFixToToolbarPosition = function() {
+  $(".toolbar ul.menu_left, .toolbar ul.menu_right").css("position", "");
+}
+
+var placeMenuRightOnBottom = function() {
+  $(".toolbar ul.menu_right").css("top", $(document).outerHeight());
+}
+var revertPlacingMenuRightOnBottom = function() {
+  $(".toolbar ul.menu_right").css("top", "");
+}
+
 /* ***** Public methods: ***** */
 
 var localizeNewCommentForm = function() {
@@ -93,6 +132,10 @@ var insertNewCommentFormIfDontExist = function(comment, callback) {
     newCommentForm.find('#comment-reset').on('click', function() {
       cancelNewComment();
     });
+
+    // Hack to avoid "flying" toolbars on iOS
+    fixFlyingToobarOnIOS();
+
   } else {
     // Reset form to make sure it is all clear
     newCommentForm.get(0).reset();
@@ -101,7 +144,7 @@ var insertNewCommentFormIfDontExist = function(comment, callback) {
     newCommentForm.off("submit");
   }
 
-  // Listen to comment confirmation
+  // Listen to comment confirmation (needs to be outside of if/else to be able to update the callback)
   newCommentForm.submit(function() {
     var form = $(this);
     return submitNewComment(form, callback);
@@ -131,8 +174,21 @@ var hideNewCommentForm = function() {
   }, 500);
 }
 
+// Some browsers trigger resize several times while resizing the window, so
+// we need to make sure resize is done to avoid calling the callback multiple
+// times.
+// Based on: https://css-tricks.com/snippets/jquery/done-resizing-event/
+var waitForResizeToFinishThenCall = function(timeout, callback){
+  var resizeTimer;
+  $(window).on("resize", function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(callback, timeout);
+  });
+}
+
 exports.localizeNewCommentForm = localizeNewCommentForm;
 exports.insertNewCommentFormIfDontExist = insertNewCommentFormIfDontExist;
 exports.showNewCommentForm = showNewCommentForm;
 exports.hideNewCommentForm = hideNewCommentForm;
 exports.insertContainers = insertContainers;
+exports.waitForResizeToFinishThenCall = waitForResizeToFinishThenCall;
