@@ -13,6 +13,49 @@ commentRepliesEndPointFor = utils.commentRepliesEndPointFor,
                 codeToBe4 = utils.codeToBe4,
                       api = supertest(appUrl);
 
+
+describe('get comments replies', function(){
+  var padID;
+  //create a new pad before each test run
+  beforeEach(function(done){
+    padID = createPad(done);
+  });
+
+  it('return code 4 if apikey is missing', function(done){
+    api.get(listCommentRepliesEndPointFor(padID))
+    .expect(codeToBe4)
+    .expect('Content-Type',/json/)
+    .expect(401, done)
+  });
+
+  it('returns code 4 if apikey is wrong', function(done){
+    api.get(listCommentRepliesEndPointFor(padID,"wrongApiKey"))
+    .expect(codeToBe4)
+    .expect('Content-Type',/json/)
+    .expect(401, done)
+  })
+
+  it ('returns code 0 if apiKey is right', function(done){
+    api.get(listCommentRepliesEndPointFor(padID, apiKey))
+    .expect(codeToBe0)
+    .expect('Content-Type',/json/)
+    .expect(200, done)
+  })
+  it('returns a list of comment replies', function(done){
+    // add a comment to a pad
+    createComment(pad, function(err, comment) {
+      createCommentReply(pad, comment, function(err, replyId){
+        api.get(listCommentRepliesEndPointFor(padID, apiKey))
+        .expect(function(res){
+          if(res.body.data.replies === undefined) throw new Error("Response expected to have a list of comment replies")
+          var replies = Object.keys(res.body.data.replies);
+          if(replies.length !==1) throw new Error("Response expected to have one reply")
+        }).end(done);
+      })
+    });
+  })
+})
+
 describe('create comment reply API', function() {
   var padID;
   var commentID;
@@ -162,3 +205,11 @@ describe('create comment reply API broadcast', function() {
     });
   });
 });
+
+var listCommentRepliesEndPointFor = function(padID, apiKey) {
+  var extraParams = "";
+  if(apiKey) {
+    extraParams = "?apikey=" + apiKey;
+  }
+  return commentRepliesEndPointFor(padID) + extraParams;
+}

@@ -91,7 +91,7 @@ var createCommentReply = function(pad, comment, done) {
         'apikey': apiKey,
         'commentId': comment,
         'name': 'John Doe',
-        'text': 'This is a comment',
+        'text': 'This is a reply',
     } },
     function(error, res, body) {
       if(error) {

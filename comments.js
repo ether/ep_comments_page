@@ -19,6 +19,16 @@ exports.getPadComments = function(padID, callback)
   });
 };
 
+exports.getPadCommentReplies = function(padID, callback)
+{
+  commentManager.getCommentReplies(padID, function (err, padCommentReplies)
+  {
+    if(ERR(err, callback)) return;
+
+    if(padCommentReplies !== null) callback(null, padCommentReplies);
+  });
+};
+
 exports.addPadComment = function(padID, data, callback)
 {
   commentManager.addComment(padID, data, function (err, commentID, comment)
