@@ -11,6 +11,53 @@ var       supertest = require('ep_etherpad-lite/node_modules/supertest'),
 commentsEndPointFor = utils.commentsEndPointFor,
                 api = supertest(appUrl);
 
+describe('get comments API', function() {
+  var padID;
+
+  //create a new pad before each test run
+  beforeEach(function(done){
+    padID = createPad(done);
+  });
+
+  it('returns code 4 if API key is missing', function(done) {
+    api.get(listCommentsEndPointFor(padID))
+    .expect(codeToBe4)
+    .expect('Content-Type', /json/)
+    .expect(401, done)
+  });
+
+  it('returns code 4 if API key is wrong', function(done) {
+    api.get(listCommentsEndPointFor(padID, 'wrongApiKey'))
+    .expect(codeToBe4)
+    .expect('Content-Type', /json/)
+    .expect(401, done)
+  });
+
+  it('returns code 0 when all required fields are provided', function(done) {
+    api.get(listCommentsEndPointFor(padID, apiKey))
+    .expect(codeToBe0)
+    .expect('Content-Type', /json/)
+    .expect(200, done)
+  });
+
+  it('returns comment list when all required fields are provided', function(done) {
+    // creates first comment...
+    createComment(pad, function(err, comment) {
+      // ... creates second comment...
+      createComment(pad, function(err, comment) {
+        // ... and finally checks if comments are returned
+        api.get(listCommentsEndPointFor(padID, apiKey))
+        .expect(function(res){
+          if(res.body.data.comments === undefined) throw new Error("Response should have list of comments.");
+          var commentIds = Object.keys(res.body.data.comments);
+          if(commentIds.length !== 2) throw new Error("Response should have two comments.");
+        })
+        .end(done);
+      });
+    });
+  });
+});
+
 describe('create comment API', function(){
   var padID;
 
@@ -133,3 +180,11 @@ describe('create comment API broadcast', function(){
   });
 
 })
+
+var listCommentsEndPointFor = function(padID, apiKey) {
+  var extraParams = "";
+  if(apiKey) {
+    extraParams = "?apikey=" + apiKey;
+  }
+  return commentsEndPointFor(padID) + extraParams;
+}
