@@ -180,6 +180,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         author: "empty",
         name: fields.name,
         text: fields.text,
+        timestamp: fields.timestamp,
         changeTo: fields.changeTo,
         changeFrom: fields.changeFrom,
         changeAccepted: fields.changeAccepted,
@@ -235,7 +236,8 @@ exports.expressCreateServer = function (hook_name, args, callback) {
         author: "empty",
         commentId: fields.commentId,
         reply: fields.text,
-        comment: comment
+        comment: comment,
+        timestamp: fields.timestamp
       };
 
       comments.addPadCommentReply(padIdReceived, data, function(err, replyId, reply) {

@@ -33,18 +33,18 @@ describe('get comments API', function() {
     .expect(401, done)
   });
 
-  it('returns code 0 when all required fields are provided', function(done) {
+  it('returns code 0 when API key is provided', function(done) {
     api.get(listCommentsEndPointFor(padID, apiKey))
     .expect(codeToBe0)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
-  it('returns comment list when all required fields are provided', function(done) {
+  it('returns comment list when API key is provided', function(done) {
     // creates first comment...
-    createComment(pad, function(err, comment) {
+    createComment(pad, {},function(err, comment) {
       // ... creates second comment...
-      createComment(pad, function(err, comment) {
+      createComment(pad, {},function(err, comment) {
         // ... and finally checks if comments are returned
         api.get(listCommentsEndPointFor(padID, apiKey))
         .expect(function(res){
@@ -55,6 +55,18 @@ describe('get comments API', function() {
         .end(done);
       });
     });
+  });
+
+  it('returns comments timestamp', function(done){
+    var expectedTimestamp = 1440671727068;
+    createComment(pad, {"timestamp": expectedTimestamp}, function(err, commentId){
+      api.get(listCommentsEndPointFor(padID, apiKey))
+      .expect(function(res){
+        var comment_data = res.body.data.comments[commentId];
+        if(comment_data.timestamp != expectedTimestamp) throw new Error("Wrong timestamp. Expected: " + expectedTimestamp + ", got:" + comment_data.timestamp);
+      })
+      .end(done);
+    })
   });
 });
 
@@ -123,6 +135,7 @@ describe('create comment API', function(){
     })
     .end(done)
   });
+
 })
 
 describe('create comment API broadcast', function(){
@@ -152,7 +165,7 @@ describe('create comment API broadcast', function(){
   });
 
   it('broadcasts comment creation to other clients of same pad', function(done) {
-    createComment(padID, function(err, commentId) {
+    createComment(padID,{}, function(err, commentId) {
       if(err) throw err;
       if(!commentId) throw new Error("Comment should had been created");
 
@@ -167,7 +180,7 @@ describe('create comment API broadcast', function(){
     // creates another pad...
     createPad(function(err, otherPadId) {
       // ... and add comment to it:
-      createComment(otherPadId, function(err, commentId) {
+      createComment(otherPadId, {}, function(err, commentId) {
         if(err) throw err;
         if(!commentId) throw new Error("Comment should had been created");
 
