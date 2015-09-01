@@ -52,7 +52,7 @@ exports.addComment = function(padId, data, callback)
       "text": data.text,
       "changeTo": data.changeTo,
       "changeFrom": data.changeFrom,
-      "timestamp": data.timestamp || new Date().getTime()
+      "timestamp": parseInt(data.timestamp) || new Date().getTime()
     };
     //add the entry for this pad
     comments[commentId] = comment;
@@ -113,7 +113,7 @@ exports.addCommentReply = function(padId, data, callback){
       "changeFrom": data.changeFrom || null,
       "author": metadata.author,
       "name": metadata.name,
-      "timestamp": data.timestamp || new Date().getTime()
+      "timestamp": parseInt(data.timestamp) || new Date().getTime()
     };
 
     //add the entry for this pad
