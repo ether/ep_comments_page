@@ -55,8 +55,10 @@ var createPad = function(done) {
 }
 
 // Creates a comment and calls the callback when finished.
-var createComment = function(pad, done) {
+var createComment = function(pad, commentData, done ) {
   var commentId;
+  commentData = commentData || {};
+  var timestamp = commentData["timestamp"];
 
   var url = appUrl + commentsEndPointFor(pad);
   request.post(url,
@@ -64,6 +66,7 @@ var createComment = function(pad, done) {
         'apikey': apiKey,
         'name': 'John Doe',
         'text': 'This is a comment',
+        'timestamp': timestamp,
     } },
     function(error, res, body) {
       if(error) {
@@ -82,16 +85,17 @@ var createComment = function(pad, done) {
 }
 
 // Creates a comment reply and calls the callback when finished.
-var createCommentReply = function(pad, comment, done) {
+var createCommentReply = function(pad, comment, replyData, done) {
   var replyId;
-
+  var timestamp = replyData["timestamp"];
   var url = appUrl + commentRepliesEndPointFor(pad);
   request.post(url,
     { form: {
         'apikey': apiKey,
         'commentId': comment,
         'name': 'John Doe',
-        'text': 'This is a comment',
+        'text': 'This is a reply',
+        'timestamp': timestamp,
     } },
     function(error, res, body) {
       if(error) {
