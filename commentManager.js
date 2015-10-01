@@ -1,3 +1,4 @@
+var _ = require('ep_etherpad-lite/static/js/underscore');
 var db = require('ep_etherpad-lite/node/db/DB').db;
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
@@ -61,6 +62,49 @@ exports.addComment = function(padId, data, callback)
     db.set("comments:" + padId, comments);
 
     callback(null, commentId, comment);
+  });
+};
+
+exports.bulkAddComments = function(padId, data, callback)
+{
+ // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  //get the entry
+  db.get("comments:" + padId, function(err, comments) {
+    if(ERR(err, callback)) return;
+
+    // the entry doesn't exist so far, let's create it
+    if(comments == null) comments = {};
+
+    var commentIds = _.map(data, function(commentData) {
+      //create the new comment
+      var commentId = "c-" + randomString(16);
+
+      var comment = {
+        "author": commentData.author || "empty",
+        "name": commentData.name,
+        "text": commentData.text,
+        "changeTo": commentData.changeTo,
+        "changeFrom": commentData.changeFrom,
+        "timestamp": parseInt(commentData.timestamp) || new Date().getTime()
+      };
+
+      //add the entry for this pad
+      comments[commentId] = comment;
+
+      return commentId;
+    });
+
+    //save the new element back
+    db.set("comments:" + padId, comments);
+
+    callback(null, commentIds, comments);
   });
 };
 
@@ -166,4 +210,3 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
     callback(null, commentId, comment);
   });
 }
-

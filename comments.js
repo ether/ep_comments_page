@@ -39,6 +39,16 @@ exports.addPadComment = function(padID, data, callback)
   });
 };
 
+exports.bulkAddPadComments = function(padID, data, callback)
+{
+  commentManager.bulkAddComments(padID, data, function (err, commentIDs, comments)
+  {
+    if(ERR(err, callback)) return;
+
+    if(commentIDs !== null) callback(null, commentIDs, comments);
+  });
+};
+
 exports.addPadCommentReply = function(padID, data, callback)
 {
   commentManager.addCommentReply(padID, data, function (err, replyID, reply)

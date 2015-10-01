@@ -94,12 +94,14 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     // comment added via API
-    socket.on('apiAddComment', function (data) {
+    socket.on('apiAddComments', function (data) {
       var padId = data.padId;
-      var commentId = data.commentId;
-      var comment = data.comment;
+      var commentIds = data.commentIds;
+      var comments = data.comments;
 
-      socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
+      for (var i = 0, len = commentIds.length; i < len; i++) {
+        socket.broadcast.to(padId).emit('pushAddComment', commentIds[i], comments[i]);
+      };
     });
 
     // comment reply added via API
@@ -170,31 +172,26 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       if(!apiUtils.validateApiKey(fields, res)) return;
 
       // check required fields from comment data
-      if(!apiUtils.validateRequiredFields(fields, ['name', 'text'], res)) return;
+      if(!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
 
       // sanitize pad id before continuing
       var padIdReceived = apiUtils.sanitizePadId(req);
 
       // create data to hold comment information:
-      var data = {
-        author: "empty",
-        name: fields.name,
-        text: fields.text,
-        timestamp: fields.timestamp,
-        changeTo: fields.changeTo,
-        changeFrom: fields.changeFrom,
-        changeAccepted: fields.changeAccepted,
-        changeReverted: fields.changeReverted
-      };
+      try {
+        var data = JSON.parse(fields.data);
 
-      comments.addPadComment(padIdReceived, data, function(err, commentId, comment) {
-        if(err) {
-          res.json({code: 2, message: "internal error", data: null});
-        } else {
-          broadcastCommentAdded(padIdReceived, commentId, comment);
-          res.json({code: 0, commentId: commentId});
-        }
-      });
+        comments.bulkAddPadComments(padIdReceived, data, function(err, commentIds, comments) {
+          if(err) {
+            res.json({code: 2, message: "internal error", data: null});
+          } else {
+            broadcastCommentsAdded(padIdReceived, commentIds, comments);
+            res.json({code: 0, commentIds: commentIds});
+          }
+        });
+      } catch(e) {
+        res.json({code: 1, message: "data must be a JSON", data: null});
+      }
     });
   });
 
@@ -253,16 +250,16 @@ exports.expressCreateServer = function (hook_name, args, callback) {
 
 }
 
-var broadcastCommentAdded = function(padId, commentId, comment) {
+var broadcastCommentsAdded = function(padId, commentIds, comments) {
   var socket = clientIO.connect(broadcastUrl);
 
   var data = {
     padId: padId,
-    commentId: commentId,
-    comment: comment
+    commentIds: commentIds,
+    comments: comments
   };
 
-  socket.emit('apiAddComment', data);
+  socket.emit('apiAddComments', data);
 }
 
 var broadcastCommentReplyAdded = function(padId, replyId, reply) {

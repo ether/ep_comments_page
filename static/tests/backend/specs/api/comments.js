@@ -70,7 +70,7 @@ describe('get comments API', function() {
   });
 });
 
-describe('create comment API', function(){
+describe('create comments API', function(){
   var padID;
 
   //create a new pad before each test run
@@ -78,19 +78,18 @@ describe('create comment API', function(){
     padID = createPad(done);
   });
 
-  it('returns code 1 if name is missing', function(done) {
+  it('returns code 1 if data is missing', function(done) {
     api.post(commentsEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('text', 'This is a comment')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
-  it('returns code 1 if text is missing', function(done) {
+  it('returns code 1 if data is not a JSON', function(done) {
     api.post(commentsEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('name', 'John Doe')
+    .field('data', 'not a JSON')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
@@ -98,8 +97,7 @@ describe('create comment API', function(){
 
   it('returns code 4 if API key is missing', function(done) {
     api.post(commentsEndPointFor(padID))
-    .field('name', 'John Doe')
-    .field('text', 'This is a comment')
+    .field('data', commentsData())
     .expect(codeToBe4)
     .expect('Content-Type', /json/)
     .expect(401, done)
@@ -108,8 +106,7 @@ describe('create comment API', function(){
   it('returns code 4 if API key is wrong', function(done) {
     api.post(commentsEndPointFor(padID))
     .field('apikey', 'wrongApiKey')
-    .field('name', 'John Doe')
-    .field('text', 'This is a comment')
+    .field('data', commentsData())
     .expect(codeToBe4)
     .expect('Content-Type', /json/)
     .expect(401, done)
@@ -118,35 +115,50 @@ describe('create comment API', function(){
   it('returns code 0 when comment is successfully added', function(done) {
     api.post(commentsEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('name', 'John Doe')
-    .field('text', 'This is a comment')
+    .field('data', commentsData())
     .expect(codeToBe0)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
-  it('returns comment id when comment is successfully added', function(done) {
+  it('returns comment ids when comment is successfully added', function(done) {
+    var twoComments = commentsData([commentData(), commentData()]);
     api.post(commentsEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('name', 'John Doe')
-    .field('text', 'This is a comment')
+    .field('data', twoComments)
     .expect(function(res){
-      if(res.body.commentId === undefined) throw new Error("Response should have commentId.")
+      if(res.body.commentIds === undefined) throw new Error("Response should have commentIds.");
+      if(res.body.commentIds.length !== 2) throw new Error("Response should have two comment ids.");
     })
     .end(done)
   });
 
+  context('when pad already have comments', function() {
+    it('returns only the new comment ids', function(done) {
+      createComment(padID, {}, function(err, touch) {
+        var twoComments = commentsData([commentData(), commentData()]);
+        api.post(commentsEndPointFor(padID))
+        .field('apikey', apiKey)
+        .field('data', twoComments)
+        .expect(function(res) {
+          if(res.body.commentIds === undefined) throw new Error("Response should have commentIds.");
+          if(res.body.commentIds.length !== 2) throw new Error("Response should have two comment ids.");
+        })
+        .end(done)
+      });
+    });
+  });
 })
 
 describe('create comment API broadcast', function(){
   var padID;
-  var messageReceived;
+  var timesMessageWasReceived;
 
   // NOTE: this hook will timeout if you don't run your Etherpad in
   // loadTest mode. Be sure to adjust your settings.json when running
   // this test suite
   beforeEach(function(done){
-    messageReceived = false
+    timesMessageWasReceived = 0;
 
     //create a new pad before each test run...
     padID = createPad(function(err, pad) {
@@ -156,7 +168,7 @@ describe('create comment API broadcast', function(){
       // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
       socket.emit('getComments', req, function (res){
         socket.on('pushAddComment', function(data) {
-          messageReceived = true;
+          ++timesMessageWasReceived;
         });
 
         done();
@@ -165,14 +177,22 @@ describe('create comment API broadcast', function(){
   });
 
   it('broadcasts comment creation to other clients of same pad', function(done) {
+    // create first comment...
     createComment(padID,{}, function(err, commentId) {
       if(err) throw err;
       if(!commentId) throw new Error("Comment should had been created");
 
-      setTimeout(function() { //give it some time to process the message on the client
-        if(!messageReceived) throw new Error("Message should had been received");
-        done();
-      }, 100);
+      // ... create second comment...
+      createComment(padID,{}, function(err, commentId) {
+        if(err) throw err;
+        if(!commentId) throw new Error("Comment should had been created");
+
+        // ... then check if both messages were received
+        setTimeout(function() { //give it some time to process the messages on the client
+          if(timesMessageWasReceived !== 2) throw new Error("Message should had been received");
+          done();
+        }, 100);
+      });
     });
   });
 
@@ -185,7 +205,7 @@ describe('create comment API broadcast', function(){
         if(!commentId) throw new Error("Comment should had been created");
 
         setTimeout(function() { //give it some time to process the message on the client
-          if(messageReceived) throw new Error("Message should had been received only for pad " + padID);
+          if(timesMessageWasReceived !== 0) throw new Error("Message should had been received only for pad " + padID);
           done();
         }, 100);
       });
@@ -196,8 +216,18 @@ describe('create comment API broadcast', function(){
 
 var listCommentsEndPointFor = function(padID, apiKey) {
   var extraParams = "";
-  if(apiKey) {
+  if (apiKey) {
     extraParams = "?apikey=" + apiKey;
   }
   return commentsEndPointFor(padID) + extraParams;
+}
+
+var commentsData = function(comments) {
+  if (!comments) comments = [commentData()];
+
+  return JSON.stringify(comments);
+}
+
+var commentData = function() {
+  return { name: 'The Author', text: 'The Comment Text' };
 }

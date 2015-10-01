@@ -24,19 +24,19 @@ To use this way of displaying comments, **make sure you have installed [ep_page_
 ```
 
 ## Creating comment via API
-If you need to add a comment to a pad:
+If you need to add comments to a pad:
 
-* Call this route to create the comment on Etherpad and get the comment id:
+* Call this route to create the comments on Etherpad and get the comment ids:
   ```
-  curl -X POST http://localhost:9001/p/THE_PAD_ID/comments -d "apikey=YOUR_API_KEY" -d "name=AUTHOR" -d "text=COMMENT"
+  curl -X POST http://localhost:9001/p/THE_PAD_ID/comments -d "apikey=YOUR_API_KEY" -d 'data=[{"name":"AUTHOR","text":"COMMENT"}, {"name":"ANOTHER_AUTHOR","text":"ANOTHER_COMMENT"}]'
   ```
 
   The response will be:
   ```
-  {"code":0,"commentId":"c-VEtzKolgD5krJOVU"}
+  {"code":0,"commentIds":["c-VEtzKolgD5krJOVU","c-B8MEmAT0NJ9usUwc"]}
   ```
 
-* Use the returned commentId to set the pad HTML [via API](http://etherpad.org/doc/v1.5.6/#index_sethtml_padid_html):
+* Use the returned comment ids to set the pad HTML [via API](http://etherpad.org/doc/v1.5.6/#index_sethtml_padid_html):
   ```
   My comment goes <span class="comment c-VEtzKolgD5krJOVU">here<span>.
   ```

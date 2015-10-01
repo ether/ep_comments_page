@@ -61,12 +61,15 @@ var createComment = function(pad, commentData, done ) {
   var timestamp = commentData["timestamp"];
 
   var url = appUrl + commentsEndPointFor(pad);
+  var comment = {
+    'name': 'John Doe',
+    'text': 'This is a comment',
+    'timestamp': timestamp,
+  };
   request.post(url,
     { form: {
         'apikey': apiKey,
-        'name': 'John Doe',
-        'text': 'This is a comment',
-        'timestamp': timestamp,
+        'data': JSON.stringify([comment]),
     } },
     function(error, res, body) {
       if(error) {
@@ -77,7 +80,10 @@ var createComment = function(pad, commentData, done ) {
       }
       else {
         json = JSON.parse(body);
-        commentId = json.commentId;
+        if (json.code !== 0) {
+          throw new Error("Failed on calling API. Response was: " + res.body);
+        }
+        commentId = json.commentIds[0];
         done(null, commentId);
       }
     }
