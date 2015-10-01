@@ -58,18 +58,14 @@ var createPad = function(done) {
 var createComment = function(pad, commentData, done ) {
   var commentId;
   commentData = commentData || {};
-  var timestamp = commentData["timestamp"];
+  commentData['name'] = commentData['name'] || 'John Doe';
+  commentData['text'] = commentData['text'] || 'This is a comment';
 
   var url = appUrl + commentsEndPointFor(pad);
-  var comment = {
-    'name': 'John Doe',
-    'text': 'This is a comment',
-    'timestamp': timestamp,
-  };
   request.post(url,
     { form: {
         'apikey': apiKey,
-        'data': JSON.stringify([comment]),
+        'data': JSON.stringify([commentData]),
     } },
     function(error, res, body) {
       if(error) {
