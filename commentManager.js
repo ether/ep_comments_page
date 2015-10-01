@@ -28,40 +28,12 @@ exports.getComments = function (padId, callback)
 
 exports.addComment = function(padId, data, callback)
 {
- // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
-
-  //create the new comment
-  var commentId = "c-" + randomString(16);
-
-  //get the entry
-  db.get("comments:" + padId, function(err, comments){
-
+  exports.bulkAddComments(padId, [data], function(err, commentIds, comments) {
     if(ERR(err, callback)) return;
 
-    // the entry doesn't exist so far, let's create it
-    if(comments == null) comments = {};
-
-    var comment = {
-      "author": data.author,
-      "name": data.name,
-      "text": data.text,
-      "changeTo": data.changeTo,
-      "changeFrom": data.changeFrom,
-      "timestamp": parseInt(data.timestamp) || new Date().getTime()
-    };
-    //add the entry for this pad
-    comments[commentId] = comment;
-
-    //save the new element back
-    db.set("comments:" + padId, comments);
-
-    callback(null, commentId, comment);
+    if(commentIds && commentIds.length > 0 && comments && comments.length > 0) {
+      callback(null, commentIds[0], comments[0]);
+    }
   });
 };
 
@@ -82,6 +54,7 @@ exports.bulkAddComments = function(padId, data, callback)
     // the entry doesn't exist so far, let's create it
     if(comments == null) comments = {};
 
+    var newComments = [];
     var commentIds = _.map(data, function(commentData) {
       //create the new comment
       var commentId = "c-" + randomString(16);
@@ -98,13 +71,14 @@ exports.bulkAddComments = function(padId, data, callback)
       //add the entry for this pad
       comments[commentId] = comment;
 
+      newComments.push(comment);
       return commentId;
     });
 
     //save the new element back
     db.set("comments:" + padId, comments);
 
-    callback(null, commentIds, comments);
+    callback(null, commentIds, newComments);
   });
 };
 
