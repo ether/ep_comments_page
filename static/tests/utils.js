@@ -54,6 +54,15 @@ var createPad = function(done) {
   return pad;
 }
 
+var readOnlyId = function(padID, callback) {
+  api.get('/api/'+apiVersion+'/getReadOnlyID?apikey='+apiKey+"&padID="+padID)
+  .end(function(err, res){
+    if(err || (res.body.code !== 0)) callback(new Error("Unable to get read only id"));
+
+    callback(null, res.body.data.readOnlyID);
+  });
+}
+
 // Creates a comment and calls the callback when finished.
 var createComment = function(pad, commentData, done ) {
   var commentId;
@@ -123,6 +132,7 @@ var createCommentReply = function(pad, comment, replyData, done) {
 exports.appUrl = appUrl;
 exports.apiKey = apiKey;
 exports.createPad = createPad;
+exports.readOnlyId = readOnlyId;
 exports.createComment = createComment;
 exports.createCommentReply = createCommentReply;
 exports.codeToBe0 = codeToBe0;

@@ -2,6 +2,7 @@ var       supertest = require('ep_etherpad-lite/node_modules/supertest'),
                  io = require('socket.io-client'),
               utils = require('../../../utils'),
           createPad = utils.createPad,
+         readOnlyId = utils.readOnlyId,
       createComment = utils.createComment,
              appUrl = utils.appUrl,
              apiKey = utils.apiKey,
@@ -82,6 +83,23 @@ describe('get comments API', function() {
       })
       .end(done);
     })
+  });
+
+  it('returns same data for read-write and read-only pad ids', function(done){
+    createComment(pad, {}, function(err, commentId){
+      api.get(listCommentsEndPointFor(padID, apiKey))
+      .end(function(err, res) {
+        var rwData = JSON.stringify(res.body.data);
+        readOnlyId(pad, function(err, roPadId) {
+          api.get(listCommentsEndPointFor(roPadId, apiKey))
+          .expect(function(res){
+            var roData = JSON.stringify(res.body.data);
+            if(roData != rwData) throw new Error("Read-only and read-write data don't match. Read-only data: " + roData + ", read-write data: " + rwData);
+          })
+          .end(done);
+        });
+      });
+    });
   });
 });
 
