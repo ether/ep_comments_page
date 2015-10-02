@@ -103,43 +103,12 @@ exports.getCommentReplies = function (padId, callback){
 
 
 exports.addCommentReply = function(padId, data, callback){
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
-
-  //create the new reply replyid
-  var replyId = "c-reply-" + randomString(16);
-
-  //get the entry
-  db.get("comment-replies:" + padId, function(err, replies){
-
+  exports.bulkAddCommentReplies(padId, [data], function(err, replyIds, replies) {
     if(ERR(err, callback)) return;
 
-    // the entry doesn't exist so far, let's create it
-    if(replies == null) replies = {};
-
-    metadata = data.comment;
-
-    var reply = {
-      "commentId": data.commentId,
-      "text": data.reply,
-      "changeTo": data.changeTo || null,
-      "changeFrom": data.changeFrom || null,
-      "author": metadata.author,
-      "name": metadata.name,
-      "timestamp": parseInt(data.timestamp) || new Date().getTime()
-    };
-
-    //add the entry for this pad
-    replies[replyId] = reply;
-    //save the new element back
-    db.set("comment-replies:" + padId, replies);
-
-    callback(null, replyId, reply);
+    if(replyIds && replyIds.length > 0 && replies && replies.length > 0) {
+      callback(null, replyIds[0], replies[0]);
+    }
   });
 };
 
