@@ -143,6 +143,53 @@ exports.addCommentReply = function(padId, data, callback){
   });
 };
 
+exports.bulkAddCommentReplies = function(padId, data, callback){
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  //get the entry
+  db.get("comment-replies:" + padId, function(err, replies){
+    if(ERR(err, callback)) return;
+
+    // the entry doesn't exist so far, let's create it
+    if(replies == null) replies = {};
+
+    var newReplies = [];
+    var replyIds = _.map(data, function(replyData) {
+      //create the new reply id
+      var replyId = "c-reply-" + randomString(16);
+
+      metadata = replyData.comment || {};
+
+      var reply = {
+        "commentId"  : replyData.commentId,
+        "text"       : replyData.reply               || replyData.text,
+        "changeTo"   : replyData.changeTo            || null,
+        "changeFrom" : replyData.changeFrom          || null,
+        "author"     : metadata.author               || "empty",
+        "name"       : metadata.name                 || replyData.name,
+        "timestamp"  : parseInt(replyData.timestamp) || new Date().getTime()
+      };
+
+      //add the entry for this pad
+      replies[replyId] = reply;
+
+      newReplies.push(reply);
+      return replyId;
+    });
+
+    //save the new element back
+    db.set("comment-replies:" + padId, replies);
+
+    callback(null, replyIds, newReplies);
+  });
+};
+
 exports.changeAcceptedState = function(padId, commentId, state, callback){
   // Given a comment we update that comment to say the change was accepted or reverted
 

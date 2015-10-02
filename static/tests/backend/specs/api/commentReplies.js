@@ -44,8 +44,8 @@ describe('get comments replies', function(){
 
   it('returns a list of comment replies', function(done){
     // add a comment to a pad
-    createComment(pad, {},function(err, comment) {
-      createCommentReply(pad, comment, {},function(err, replyId){
+    createComment(pad, {}, function(err, comment) {
+      createCommentReply(pad, comment, {}, function(err, replyId){
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
         .expect(function(res){
           if(res.body.data.replies === undefined) throw new Error("Response expected to have a list of comment replies")
@@ -56,21 +56,38 @@ describe('get comments replies', function(){
     });
   })
 
-  it('returns comment replies timestamp', function(done){
-    createComment(pad,{}, function(err,comment){
-      var expectedTimestamp = 1440671727068;
-      createCommentReply(pad,comment,{"timestamp": expectedTimestamp}, function(err, replyId){
+  it('returns comment replies data', function(done){
+    createComment(pad, {}, function(err, comment){
+      var text       = "text";
+      var changeTo   = "changeTo";
+      var changeFrom = "changeFrom";
+      var name       = "name";
+      var timestamp  = 1440671727068;
+      var data = {
+        commentId: comment,
+        reply: text,
+        changeTo: changeTo,
+        changeFrom: changeFrom,
+        name: name,
+        timestamp: timestamp,
+      };
+      createCommentReply(pad, comment, data, function(err, replyId){
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
         .expect(function(res){
           var comment_reply_data = res.body.data.replies[replyId];
-          if(comment_reply_data.timestamp != expectedTimestamp ) throw new Error("Wrong timestamp. Expected: " + expectedTimestamp + ", got:" + comment_reply_data.timestamp)
+          if(comment_reply_data.commentId  != comment   )  throw new Error("Wrong commentId. Expected: "  + comment    + ", got: " + comment_reply_data.commentId)
+          if(comment_reply_data.text       != text )       throw new Error("Wrong text. Expected: "       + text       + ", got: " + comment_reply_data.text)
+          if(comment_reply_data.changeTo   != changeTo )   throw new Error("Wrong changeTo. Expected: "   + changeTo   + ", got: " + comment_reply_data.changeTo)
+          if(comment_reply_data.changeFrom != changeFrom ) throw new Error("Wrong changeFrom. Expected: " + changeFrom + ", got: " + comment_reply_data.changeFrom)
+          if(comment_reply_data.name       != name )       throw new Error("Wrong name. Expected: "       + name       + ", got: " + comment_reply_data.name)
+          if(comment_reply_data.timestamp  != timestamp )  throw new Error("Wrong timestamp. Expected: "  + timestamp  + ", got: " + comment_reply_data.timestamp)
         }).end(done);
       })
     })
   });
 })
 
-describe('create comment reply API', function() {
+describe('create comment replies API', function() {
   var padID;
   var commentID;
 
@@ -78,38 +95,25 @@ describe('create comment reply API', function() {
     // creates a new pad...
     padID = createPad(function(err, pad) {
       // ... and a comment before each test run
-      createComment(pad, {},function(err, comment) {
+      createComment(pad, {}, function(err, comment) {
         commentID = comment;
         done(err);
       });
     });
   });
 
-  it('returns code 1 if commentId is missing', function(done) {
+  it('returns code 1 if data is missing', function(done) {
     api.post(commentRepliesEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('name', 'John Doe')
-    .field('text', 'This is a reply')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
-  it('returns code 1 if name is missing', function(done) {
+  it('returns code 1 if data is not a JSON', function(done) {
     api.post(commentRepliesEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('commentId', commentID)
-    .field('text', 'This is a reply')
-    .expect(codeToBe1)
-    .expect('Content-Type', /json/)
-    .expect(200, done)
-  });
-
-  it('returns code 1 if text is missing', function(done) {
-    api.post(commentRepliesEndPointFor(padID))
-    .field('apikey', apiKey)
-    .field('commentId', commentID)
-    .field('name', 'John Doe')
+    .field('data', 'not a JSON')
     .expect(codeToBe1)
     .expect('Content-Type', /json/)
     .expect(200, done)
@@ -133,36 +137,50 @@ describe('create comment reply API', function() {
   it('returns code 0 when reply is successfully added', function(done) {
     api.post(commentRepliesEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('commentId', commentID)
-    .field('name', 'John Doe')
-    .field('text', 'This is a reply')
+    .field('data', repliesData(commentID))
     .expect(codeToBe0)
     .expect('Content-Type', /json/)
     .expect(200, done)
   });
 
-  it('returns reply id when reply is successfully added', function(done) {
+  it('returns reply ids when replies are successfully added', function(done) {
+    var twoReplies = repliesData([replyData(), replyData()]);
     api.post(commentRepliesEndPointFor(padID))
     .field('apikey', apiKey)
-    .field('commentId', commentID)
-    .field('name', 'John Doe')
-    .field('text', 'This is a reply')
+    .field('data', twoReplies)
     .expect(function(res){
-      if(res.body.replyId === undefined) throw new Error("Response should have replyId.")
+      if(res.body.replyIds === undefined) throw new Error("Response should have replyIds.");
+      if(res.body.replyIds.length !== 2) throw new Error("Response should have two reply ids.");
     })
     .end(done)
+  });
+
+  context('when pad already have replies', function() {
+    it('returns only the new reply ids', function(done) {
+      createCommentReply(padID, commentID, {}, function(err, touch) {
+        var twoReplies = repliesData([replyData(), replyData()]);
+        api.post(commentRepliesEndPointFor(padID))
+        .field('apikey', apiKey)
+        .field('data', twoReplies)
+        .expect(function(res) {
+          if(res.body.replyIds === undefined) throw new Error("Response should have replyIds.");
+          if(res.body.replyIds.length !== 2) throw new Error("Response should have two reply ids.");
+        })
+        .end(done)
+      });
+    });
   });
 });
 
 describe('create comment reply API broadcast', function() {
   var padID;
-  var messageReceived;
+  var timesMessageWasReceived;
 
   // NOTE: this hook will timeout if you don't run your Etherpad in
   // loadTest mode. Be sure to adjust your settings.json when running
   // this test suite
   beforeEach(function(done){
-    messageReceived = false
+    timesMessageWasReceived = 0;
 
     // creates a new pad...
     padID = createPad(function(err, pad) {
@@ -176,7 +194,7 @@ describe('create comment reply API broadcast', function() {
         // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
         socket.emit('getComments', req, function (res){
           socket.on('pushAddCommentReply', function(data) {
-            messageReceived = true;
+            ++timesMessageWasReceived;
           });
 
           done();
@@ -186,14 +204,22 @@ describe('create comment reply API broadcast', function() {
   });
 
   it('broadcasts comment reply creation to other clients of same pad', function(done) {
-    createCommentReply(padID, commentID, function(err, replyId) {
+    // create first reply...
+    createCommentReply(padID, commentID, {}, function(err, replyId) {
       if(err) throw err;
       if(!replyId) throw new Error("Reply should had been created");
 
-      setTimeout(function() { //give it some time to process the message on the client
-        if(!messageReceived) throw new Error("Message should had been received");
-        done();
-      }, 100);
+      // ... create second reply...
+      createCommentReply(padID, commentID, {}, function(err, replyId) {
+        if(err) throw err;
+        if(!replyId) throw new Error("Reply should had been created");
+
+        // ... then check if both messages were received
+        setTimeout(function() { //give it some time to process the message on the client
+          if(timesMessageWasReceived !== 2) throw new Error("Message should had been received");
+          done();
+        }, 100);
+      });
     });
   });
 
@@ -206,12 +232,12 @@ describe('create comment reply API broadcast', function() {
         if(!otherCommentId) throw new Error("Comment should had been created");
 
         // ... and adds comment reply to it:
-        createCommentReply(otherPadId, otherCommentId, function(err, replyId) {
+        createCommentReply(otherPadId, otherCommentId, {}, function(err, replyId) {
           if(err) throw err;
           if(!replyId) throw new Error("Reply should had been created");
 
           setTimeout(function() { //give it some time to process the message on the client
-            if(messageReceived) throw new Error("Message should had been received only for pad " + padID);
+            if(timesMessageWasReceived !== 0) throw new Error("Message should had been received only for pad " + padID);
             done();
           }, 100);
         });
@@ -226,4 +252,14 @@ var listCommentRepliesEndPointFor = function(padID, apiKey) {
     extraParams = "?apikey=" + apiKey;
   }
   return commentRepliesEndPointFor(padID) + extraParams;
+}
+
+var repliesData = function(replies) {
+  if (!replies) replies = [replyData()];
+
+  return JSON.stringify(replies);
+}
+
+var replyData = function(commentId) {
+  return { commentId: commentId, name: 'The Author', text: 'The Comment Text' };
 }

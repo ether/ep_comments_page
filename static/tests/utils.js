@@ -89,15 +89,15 @@ var createComment = function(pad, commentData, done ) {
 // Creates a comment reply and calls the callback when finished.
 var createCommentReply = function(pad, comment, replyData, done) {
   var replyId;
-  var timestamp = replyData["timestamp"];
+  replyData = replyData || {};
+  replyData['commentId'] = comment;
+  replyData['name'] = replyData['name'] || 'John Doe';
+  replyData['text'] = replyData['text'] || 'This is a reply';
   var url = appUrl + commentRepliesEndPointFor(pad);
   request.post(url,
     { form: {
         'apikey': apiKey,
-        'commentId': comment,
-        'name': 'John Doe',
-        'text': 'This is a reply',
-        'timestamp': timestamp,
+        'data': JSON.stringify([replyData]),
     } },
     function(error, res, body) {
       if(error) {
@@ -108,7 +108,10 @@ var createCommentReply = function(pad, comment, replyData, done) {
       }
       else {
         json = JSON.parse(body);
-        replyId = json.replyId;
+        if (json.code !== 0) {
+          throw new Error("Failed on calling API. Response was: " + res.body);
+        }
+        replyId = json.replyIds[0];
         done(null, replyId);
       }
     }

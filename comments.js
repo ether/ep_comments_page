@@ -29,16 +29,6 @@ exports.getPadCommentReplies = function(padID, callback)
   });
 };
 
-exports.addPadComment = function(padID, data, callback)
-{
-  commentManager.addComment(padID, data, function (err, commentID, comment)
-  {
-    if(ERR(err, callback)) return;
-
-    if(commentID !== null) callback(null, commentID, comment);
-  });
-};
-
 exports.bulkAddPadComments = function(padID, data, callback)
 {
   commentManager.bulkAddComments(padID, data, function (err, commentIDs, comments)
@@ -49,12 +39,12 @@ exports.bulkAddPadComments = function(padID, data, callback)
   });
 };
 
-exports.addPadCommentReply = function(padID, data, callback)
+exports.bulkAddPadCommentReplies = function(padID, data, callback)
 {
-  commentManager.addCommentReply(padID, data, function (err, replyID, reply)
+  commentManager.bulkAddCommentReplies(padID, data, function (err, replyIDs, replies)
   {
     if(ERR(err, callback)) return;
 
-    if(replyID !== null) callback(null, replyID, reply);
+    if(replyIDs !== null) callback(null, replyIDs, replies);
   });
 };
