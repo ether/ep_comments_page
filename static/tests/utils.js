@@ -54,19 +54,27 @@ var createPad = function(done) {
   return pad;
 }
 
+var readOnlyId = function(padID, callback) {
+  api.get('/api/'+apiVersion+'/getReadOnlyID?apikey='+apiKey+"&padID="+padID)
+  .end(function(err, res){
+    if(err || (res.body.code !== 0)) callback(new Error("Unable to get read only id"));
+
+    callback(null, res.body.data.readOnlyID);
+  });
+}
+
 // Creates a comment and calls the callback when finished.
 var createComment = function(pad, commentData, done ) {
   var commentId;
   commentData = commentData || {};
-  var timestamp = commentData["timestamp"];
+  commentData['name'] = commentData['name'] || 'John Doe';
+  commentData['text'] = commentData['text'] || 'This is a comment';
 
   var url = appUrl + commentsEndPointFor(pad);
   request.post(url,
     { form: {
         'apikey': apiKey,
-        'name': 'John Doe',
-        'text': 'This is a comment',
-        'timestamp': timestamp,
+        'data': JSON.stringify([commentData]),
     } },
     function(error, res, body) {
       if(error) {
@@ -77,7 +85,10 @@ var createComment = function(pad, commentData, done ) {
       }
       else {
         json = JSON.parse(body);
-        commentId = json.commentId;
+        if (json.code !== 0) {
+          throw new Error("Failed on calling API. Response was: " + res.body);
+        }
+        commentId = json.commentIds[0];
         done(null, commentId);
       }
     }
@@ -87,15 +98,15 @@ var createComment = function(pad, commentData, done ) {
 // Creates a comment reply and calls the callback when finished.
 var createCommentReply = function(pad, comment, replyData, done) {
   var replyId;
-  var timestamp = replyData["timestamp"];
+  replyData = replyData || {};
+  replyData['commentId'] = comment;
+  replyData['name'] = replyData['name'] || 'John Doe';
+  replyData['text'] = replyData['text'] || 'This is a reply';
   var url = appUrl + commentRepliesEndPointFor(pad);
   request.post(url,
     { form: {
         'apikey': apiKey,
-        'commentId': comment,
-        'name': 'John Doe',
-        'text': 'This is a reply',
-        'timestamp': timestamp,
+        'data': JSON.stringify([replyData]),
     } },
     function(error, res, body) {
       if(error) {
@@ -106,7 +117,10 @@ var createCommentReply = function(pad, comment, replyData, done) {
       }
       else {
         json = JSON.parse(body);
-        replyId = json.replyId;
+        if (json.code !== 0) {
+          throw new Error("Failed on calling API. Response was: " + res.body);
+        }
+        replyId = json.replyIds[0];
         done(null, replyId);
       }
     }
@@ -118,6 +132,7 @@ var createCommentReply = function(pad, comment, replyData, done) {
 exports.appUrl = appUrl;
 exports.apiKey = apiKey;
 exports.createPad = createPad;
+exports.readOnlyId = readOnlyId;
 exports.createComment = createComment;
 exports.createCommentReply = createCommentReply;
 exports.codeToBe0 = codeToBe0;
