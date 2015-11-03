@@ -128,7 +128,8 @@ var createCommentReply = function(pad, comment, replyData, done) {
 }
 
 /* ********** Available functions/values: ********** */
-
+exports.apiVersion = apiVersion;
+exports.api  = api;
 exports.appUrl = appUrl;
 exports.apiKey = apiKey;
 exports.createPad = createPad;
