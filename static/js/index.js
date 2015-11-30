@@ -730,13 +730,12 @@ ep_comments.prototype.displayNewCommentForm = function() {
     rep.selEnd   = saveRep.selEnd;
   },'saveCommentedSelection', true);
 
-  // If we don't have a selection then we do nothing
-  var noTextSelected = self.checkNoTextSelected(rep);
+  var selectedText = self.getSelectedText(rep);
+  // we have nothing selected, do nothing
+  var noTextSelected = (selectedText.length === 0);
   if (noTextSelected) {
     return;
   }
-
-  var selectedText = self.getSelectedText(rep);
 
   self.createNewCommentFormIfDontExist(rep);
 
@@ -764,13 +763,6 @@ ep_comments.prototype.displayNewCommentForm = function() {
   }
 }
 
-// Indicates if user selected some text on editor
-ep_comments.prototype.checkNoTextSelected = function(rep) {
-  var noTextSelected = (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]);
-
-  return noTextSelected;
-}
-
 // Create form to add comment
 ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
   var data = this.getCommentData();
@@ -791,8 +783,7 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
 // Get a string representation of the text selected on the editor
 ep_comments.prototype.getSelectedText = function(rep) {
   var firstLine = rep.selStart[0];
-  var lastLine  = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
-
+  var lastLine = getLastLine(firstLine, rep);
   var selectedText = "";
 
   _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
@@ -804,7 +795,6 @@ ep_comments.prototype.getSelectedText = function(rep) {
      }
      */
      var line = rep.lines.atIndex(lineNumber);
-
      // If we span over multiple lines
      if(rep.selStart[0] === lineNumber){
        // Is this the first line?
@@ -822,10 +812,65 @@ ep_comments.prototype.getSelectedText = function(rep) {
        }
      }
      var lineText = line.text.substring(posStart, posEnd);
-     selectedText += lineText + "\n";
+     // When it has a selection with more than one line we select at least the beginning
+     // of the next line after the first line. As it is not possible to select the beginning
+     // of the first line, we skip it.
+     if(lineNumber > firstLine){
+      var hasALineMarker = lineHasMarker(line);
+      lineText = removeLineMarkerFromLine(hasALineMarker, lineText);
+      lineText = '\n' + lineText;
+     }
+     selectedText += lineText;
   });
-
   return selectedText;
+}
+
+function getLastLine(firstLine, rep){
+  var lastRowSelection = rep.selEnd[0];
+  var lastColumnSelection = rep.selEnd[1];
+  var lastLine = firstLine;
+  var targetLine = rep.lines.atIndex(lastRowSelection);
+
+  if (lastRowSelection > firstLine){
+    lastLine = lastRowSelection;
+    // to avoid consider line break without any text as a new line, we check if the last line
+    // selected has something.
+    // check if there is anything selected in the last line or just the *
+    if(lastLineSelectionEmpty(targetLine, lastColumnSelection)){
+      lastLine --;
+    }
+  }
+  return lastLine;
+}
+
+function lastLineSelectionEmpty(line, lastColumnSelection){
+
+  // when we've a line with line attribute, the first char line position
+  // in a line is 1 because of the *, otherwise is 0
+  var firstCharLinePosition = lineHasMarker(line) ? 1 : 0;
+  var lastLineSelectionEmpty = false;
+
+  if (lastColumnSelection === firstCharLinePosition){
+    lastLineSelectionEmpty = true;
+  }
+  return lastLineSelectionEmpty;
+}
+
+function lineHasMarker(line){
+  var hasMarker = false;
+  if(line.lineMarker === 1){
+    hasMarker = true;
+  }
+  return hasMarker;
+}
+
+function removeLineMarkerFromLine(hasALineMarker, lineText){
+  // if the selection takes the beginning of line, when rep.selStart[0] === 0 and
+  // the element has lineMarker, it means we select the * as well
+  if(hasALineMarker){
+    lineText = lineText.substring(1);
+  }
+  return lineText;
 }
 
 // Save comment

@@ -7,11 +7,16 @@ describe("Comment Suggestion", function(){
 
   it("Fills suggestion Change From field when adding a comment with suggestion", function(done) {
     var outer$ = helper.padOuter$;
+    // As in the function openCommentFormWithSuggestion we send all the text and call 'selectall',
+    // we select the beginning of line as well. This situation does not happen in the browser, it's not possible
+    // to select the beginning of first line of a selection. To fix this we add a first text without line attribute,
+    // in this case  a <span>, to avoid select a '*'
+    var targetText = "<span>A</span><ul><li> text with</li><li> line attributes</li></ul>";
 
-    openCommentFormWithSuggestion('This content will receive a comment');
+    openCommentFormWithSuggestion(targetText);
 
     var $suggestionFrom = outer$(".comment-suggest-from");
-    expect($suggestionFrom.val()).to.be('This content will receive a comment\n');
+    expect($suggestionFrom.val()).to.be("A\n text with\n line attributes");
     done();
   });
 
@@ -30,10 +35,10 @@ describe("Comment Suggestion", function(){
       return outer$('#newComments.active').length === 0;
     })
     .done(function() {
-      openCommentFormWithSuggestion('New target for comment\n');
+      openCommentFormWithSuggestion('New target for comment');
 
       var $suggestionFrom = outer$(".comment-suggest-from");
-      expect($suggestionFrom.val()).to.be('New target for comment\n');
+      expect($suggestionFrom.val()).to.be('New target for comment');
       done();
     });
   });
@@ -51,10 +56,10 @@ function openCommentFormWithSuggestion(targetText) {
   // simulate key presses to delete content
   $firstTextElement.sendkeys('{selectall}'); // select all
   $firstTextElement.sendkeys('{del}'); // clear the first line
-  $firstTextElement.sendkeys(targetText); // insert text
+  // to simulate a selection with more than one line we have to send the sendkeys selectall
+  // at the same line. The sendkeys will be run before the line break.
+  $firstTextElement.html(targetText).sendkeys("{selectall}");
 
-  // get the comment button and click it
-  $firstTextElement.sendkeys('{selectall}'); // needs to select content to add comment to
   var $commentButton = chrome$(".addComment");
   $commentButton.click();
 
@@ -62,3 +67,4 @@ function openCommentFormWithSuggestion(targetText) {
   var $hasSuggestion = outer$("#suggestion-checkbox");
   $hasSuggestion.click();
 }
+
