@@ -782,8 +782,9 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
 
 // Get a string representation of the text selected on the editor
 ep_comments.prototype.getSelectedText = function(rep) {
+  var self = this;
   var firstLine = rep.selStart[0];
-  var lastLine = getLastLine(firstLine, rep);
+  var lastLine = self.getLastLine(firstLine, rep);
   var selectedText = "";
 
   _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
@@ -816,8 +817,9 @@ ep_comments.prototype.getSelectedText = function(rep) {
      // of the next line after the first line. As it is not possible to select the beginning
      // of the first line, we skip it.
      if(lineNumber > firstLine){
-      var hasALineMarker = lineHasMarker(line);
-      lineText = removeLineMarkerFromLine(hasALineMarker, lineText);
+      // if the selection takes the very beginning of line, and the element has a lineMarker,
+      // it means we select the * as well, so we need to clean it from the text selected
+      lineText = self.cleanLine(line, lineText);
       lineText = '\n' + lineText;
      }
      selectedText += lineText;
@@ -825,48 +827,34 @@ ep_comments.prototype.getSelectedText = function(rep) {
   return selectedText;
 }
 
-function getLastLine(firstLine, rep){
-  var lastRowSelection = rep.selEnd[0];
-  var lastColumnSelection = rep.selEnd[1];
-  var lastLine = firstLine;
-  var targetLine = rep.lines.atIndex(lastRowSelection);
+ep_comments.prototype.getLastLine = function(firstLine, rep){
+  var lastLineSelected = rep.selEnd[0];
 
-  if (lastRowSelection > firstLine){
-    lastLine = lastRowSelection;
-    // to avoid consider line break without any text as a new line, we check if the last line
-    // selected has something.
-    // check if there is anything selected in the last line or just the *
-    if(lastLineSelectionEmpty(targetLine, lastColumnSelection)){
-      lastLine --;
+  if (lastLineSelected > firstLine){
+    // Ignore last line if the selected text of it it is empty
+    if(this.lastLineSelectedIsEmpty(rep, lastLineSelected)){
+      lastLineSelected--;
     }
   }
-  return lastLine;
+  return lastLineSelected;
 }
 
-function lastLineSelectionEmpty(line, lastColumnSelection){
-
+ep_comments.prototype.lastLineSelectedIsEmpty = function(rep, lastLineSelected){
+  var line = rep.lines.atIndex(lastLineSelected);
   // when we've a line with line attribute, the first char line position
   // in a line is 1 because of the *, otherwise is 0
-  var firstCharLinePosition = lineHasMarker(line) ? 1 : 0;
-  var lastLineSelectionEmpty = false;
+  var firstCharLinePosition = this.lineHasMarker(line) ? 1 : 0;
+  var lastColumnSelected = rep.selEnd[1];
 
-  if (lastColumnSelection === firstCharLinePosition){
-    lastLineSelectionEmpty = true;
-  }
-  return lastLineSelectionEmpty;
+  return lastColumnSelected === firstCharLinePosition;
 }
 
-function lineHasMarker(line){
-  var hasMarker = false;
-  if(line.lineMarker === 1){
-    hasMarker = true;
-  }
-  return hasMarker;
+ep_comments.prototype.lineHasMarker = function(line){
+  return line.lineMarker === 1;
 }
 
-function removeLineMarkerFromLine(hasALineMarker, lineText){
-  // if the selection takes the beginning of line, when rep.selStart[0] === 0 and
-  // the element has lineMarker, it means we select the * as well
+ep_comments.prototype.cleanLine = function(line, lineText){
+  var hasALineMarker = this.lineHasMarker(line);
   if(hasALineMarker){
     lineText = lineText.substring(1);
   }
