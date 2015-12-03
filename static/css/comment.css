@@ -2,13 +2,13 @@ note{
   display:block;
 }
 
-.pre-selected-comment {
-  background: #FFE168 !important;
-}
-
 .comment {
   background: #FFFACD !important;
   border-radius: 0px;
+}
+
+.pre-selected-comment {
+  background: #FFE168 !important;
 }
 
 .comment-delete-container{
