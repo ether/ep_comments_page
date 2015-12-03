@@ -160,6 +160,9 @@ var showNewCommentForm = function() {
     getPadOuter().find('.suggestion').hide(); // Hides suggestion in case of a cancel
     getNewCommentContainer().find('#newComment').removeClass("hidden").addClass("visible");
   }, 0);
+
+  // mark selected text, so it is clear to user which text range the comment is being applied to
+  pad.plugins.ep_comments_page.preCommentMarker.markSelectedText();
 }
 
 var hideNewCommentForm = function() {
@@ -172,6 +175,9 @@ var hideNewCommentForm = function() {
   window.setTimeout(function() {
     getNewCommentContainer().removeClass("active");
   }, 500);
+
+  // unmark selected text, as now there is no text being commented
+  pad.plugins.ep_comments_page.preCommentMarker.unmarkSelectedText();
 }
 
 // Some browsers trigger resize several times while resizing the window, so
