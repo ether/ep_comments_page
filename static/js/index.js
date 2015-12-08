@@ -747,10 +747,16 @@ ep_comments.prototype.displayNewCommentForm = function() {
   // Display form
   newComment.showNewCommentForm();
 
-  // Set the top of the form to be the same Y as the target Rep
-  var y = self.getYofFirstSelectedLine();
-  padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
-  padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+  // Check if the first element selected is visible in the viewport
+  var $firstSelectedElementID = self.getIdFromFirstElementSelected();
+  var firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElementID);
+
+  if(!firstSelectedElementInViewport){
+    // Set the top of the form to be the same Y as the target Rep
+    var y = $firstSelectedElementID.offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
+    padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+  }
 
   // Adjust focus on the form
   padOuter.find('.comment-content').focus();
@@ -762,6 +768,49 @@ ep_comments.prototype.displayNewCommentForm = function() {
   if (outerIframe && outerIframe.contentWindow) {
     outerIframe.contentWindow.focus();
   }
+}
+
+ep_comments.prototype.isElementInViewport = function(ele) {
+  var rect = ele.getBoundingClientRect();
+  var scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop();
+  // this line does not work in firefox
+  var scrolltop = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop() || scrollTopFirefox;
+  // position relative to the current viewport
+  var elemPositionTop = rect.top - scrolltop;
+  var elemPositionBottom = rect.bottom - scrolltop;
+
+  var $editorcontainer = $("#editorcontainer");
+  var editorcontainerHeight = $editorcontainer.height();
+  var editorcontainerPositionTop = this.getIntValueOfCSSProperty($editorcontainer, "position-top") || 0;
+
+  var clientHeight = editorcontainerHeight - editorcontainerPositionTop;
+
+  return elemPositionTop >= 0 && elemPositionBottom <= clientHeight;
+}
+
+ep_comments.prototype.getIntValueOfCSSProperty = function($element, property){
+  var valueString = $element.css(property);
+  // media query for mobile has no position top
+  if (valueString !== undefined){
+    var valueInt = valueString.replace(/[^-\d\.]/g, '');
+    return parseInt(valueInt);
+  }
+}
+
+ep_comments.prototype.getIdFromFirstElementSelected = function(){
+  var element;
+
+  this.ace.callWithAce(function(ace) {
+    var rep = ace.ace_getRep();
+    var line = rep.lines.atIndex(rep.selStart[0]);
+    var key = "#"+line.key;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
+    element = padInner.find(key);
+
+  },'getIdFromFirstElementSelected', true);
+
+  return element[0];
 }
 
 // Indicates if user selected some text on editor
@@ -844,25 +893,6 @@ ep_comments.prototype.saveComment = function(data, rep) {
     self.setComment(commentId, comment);
     self.collectComments();
   });
-}
-
-// Get position of the first line of the selected text on the editor
-ep_comments.prototype.getYofFirstSelectedLine = function() {
-  var y;
-
-  this.ace.callWithAce(function(ace) {
-    var rep = ace.ace_getRep();
-    // console.log("rep", rep); // doesn't fire twice
-    var line = rep.lines.atIndex(rep.selStart[0]);
-    var key = "#"+line.key;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
-    var ele = padInner.find(key);
-
-    y = ele[0].offsetTop;
-  },'getYofRep', true);
-
-  return y;
 }
 
 // Listen for comment replies
