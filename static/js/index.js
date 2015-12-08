@@ -749,14 +749,11 @@ ep_comments.prototype.displayNewCommentForm = function() {
   newComment.showNewCommentForm();
 
   // Check if the first element selected is visible in the viewport
-  var $firstSelectedElementID = self.getIdFromFirstElementSelected();
-  var firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElementID);
+  var $firstSelectedElement = self.getFirstElementSelected();
+  var firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElement);
 
   if(!firstSelectedElementInViewport){
-    // Set the top of the form to be the same Y as the target Rep
-    var y = $firstSelectedElementID.offsetTop;
-    padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
-    padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+    self.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
   }
 
   // Adjust focus on the form
@@ -771,34 +768,40 @@ ep_comments.prototype.displayNewCommentForm = function() {
   }
 }
 
-ep_comments.prototype.isElementInViewport = function(ele) {
-  var rect = ele.getBoundingClientRect();
-  var scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop();
-  // this line does not work in firefox
+ep_comments.prototype.scrollViewportIfSelectedTextIsNotVisible = function($firstSelectedElement){
+  // Set the top of the form to be the same Y as the target Rep
+    var y = $firstSelectedElement.offsetTop;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
+    padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+}
+
+ep_comments.prototype.isElementInViewport = function(element) {
+  var elementPosition = element.getBoundingClientRect();
+  var scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(); // works only on firefox
   var scrolltop = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop() || scrollTopFirefox;
   // position relative to the current viewport
-  var elemPositionTop = rect.top - scrolltop;
-  var elemPositionBottom = rect.bottom - scrolltop;
+  var elementPositionTopOnViewport = elementPosition.top - scrolltop;
+  var elementPositionBottomOnViewport = elementPosition.bottom - scrolltop;
 
-  var $editorcontainer = $("#editorcontainer");
-  var editorcontainerHeight = $editorcontainer.height();
-  var editorcontainerPositionTop = this.getIntValueOfCSSProperty($editorcontainer, "position-top") || 0;
+  var $ace_outer = $('iframe[name="ace_outer"]');
+  var ace_outerHeight = $ace_outer.height();
+  var ace_outerPaddingTop = this.getIntValueOfCSSProperty($ace_outer, "padding-top");
 
-  var clientHeight = editorcontainerHeight - editorcontainerPositionTop;
+  var clientHeight = ace_outerHeight - ace_outerPaddingTop;
 
-  return elemPositionTop >= 0 && elemPositionBottom <= clientHeight;
+  var elementAboveViewportTop = elementPositionTopOnViewport < 0;
+  var elementBelowViewportBottom = elementPositionBottomOnViewport > clientHeight;
+
+  return !(elementAboveViewportTop || elementBelowViewportBottom);
 }
 
 ep_comments.prototype.getIntValueOfCSSProperty = function($element, property){
   var valueString = $element.css(property);
-  // media query for mobile has no position top
-  if (valueString !== undefined){
-    var valueInt = valueString.replace(/[^-\d\.]/g, '');
-    return parseInt(valueInt);
-  }
+  return parseInt(valueString) || 0;
 }
 
-ep_comments.prototype.getIdFromFirstElementSelected = function(){
+ep_comments.prototype.getFirstElementSelected = function(){
   var element;
 
   this.ace.callWithAce(function(ace) {
@@ -809,7 +812,7 @@ ep_comments.prototype.getIdFromFirstElementSelected = function(){
     var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
     element = padInner.find(key);
 
-  },'getIdFromFirstElementSelected', true);
+  },'getFirstElementSelected', true);
 
   return element[0];
 }
