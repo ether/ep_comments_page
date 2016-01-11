@@ -10,8 +10,11 @@ cd node_modules/ep_comments_page
 npm install
 ```
 
-## Alternative comment display
-The plugin also provides an alternative way to display comments. Instead of having all comments visible on the right of the page, you can have just an icon on the right margin of the page. Comment details are displayed when user clicks on the comment icon:
+## Extra settings
+This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
+
+### Alternative comment display
+There is an alternative way to display comments. Instead of having all comments visible on the right of the page, you can have just an icon on the right margin of the page. Comment details are displayed when user clicks on the comment icon:
 
 ![Screen shot](http://i.imgur.com/cEo7PdL.png)
 
@@ -22,6 +25,20 @@ To use this way of displaying comments, **make sure you have installed [ep_page_
   "displayCommentAsIcon": true
 },
 ```
+
+### Highlight selected text when creating a comment
+It is also possible to mark the text originally selected when user adds a comment:
+![Screen shot](http://i.imgur.com/AhaVgRZ.png)
+
+To enable this feature, add the following code to your `settings.json`:
+```
+// Highlight selected text when adding comment
+"ep_comments_page": {
+  "highlightSelectedText": true
+},
+```
+
+**Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
 ## Creating comment via API
 If you need to add comments to a pad:
