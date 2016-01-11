@@ -149,7 +149,11 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 
 exports.clientVars = function (hook, context, cb) {
   var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
-  return cb({ "displayCommentAsIcon": displayCommentAsIcon });
+  var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  return cb({
+    "displayCommentAsIcon": displayCommentAsIcon,
+    "highlightSelectedText": highlightSelectedText,
+  });
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {

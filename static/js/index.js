@@ -13,6 +13,7 @@ var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 var commentIcons = require('ep_comments_page/static/js/commentIcons');
 var newComment = require('ep_comments_page/static/js/newComment');
+var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 var commentL10n = require('ep_comments_page/static/js/commentL10n');
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
@@ -39,6 +40,7 @@ function ep_comments(context){
   this.comments   = [];
   this.commentReplies = {};
   this.init();
+  this.preCommentMarker = preCommentMark.init(this.ace);
 
   // If we're on a read only pad then hide the ability to attempt to merge a suggestion
   if(clientVars.readonly){
@@ -956,6 +958,14 @@ var hooks = {
   },
 
   aceEditEvent: function(hook, context){
+    // first check if some text is being marked/unmarked to add comment to it
+    var eventType = context.callstack.editEvent.eventType;
+    if(eventType === "unmarkPreSelectedTextToComment") {
+      pad.plugins.ep_comments_page.preCommentMarker.handleUnmarkText(context);
+    } else if(eventType === "markPreSelectedTextToComment") {
+      pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
+    }
+
     // var padOuter = $('iframe[name="ace_outer"]').contents();
     // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(!context.callstack.docTextChanged) return;
@@ -969,7 +979,13 @@ var hooks = {
 
   // Insert comments classes
   aceAttribsToClasses: function(hook, context){
-    if(context.key == 'comment' && context.value !== "comment-deleted") return ['comment', context.value];
+    if(context.key === 'comment' && context.value !== "comment-deleted") {
+      return ['comment', context.value];
+    }
+    // only read marks made by current user
+    if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
+      return [preCommentMark.MARK_CLASS, context.value];
+    }
   },
 
   aceEditorCSS: function(){
