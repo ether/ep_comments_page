@@ -748,10 +748,13 @@ ep_comments.prototype.displayNewCommentForm = function() {
   // Display form
   newComment.showNewCommentForm();
 
-  // Set the top of the form to be the same Y as the target Rep
-  var y = self.getYofFirstSelectedLine();
-  padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
-  padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+  // Check if the first element selected is visible in the viewport
+  var $firstSelectedElement = self.getFirstElementSelected();
+  var firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElement);
+
+  if(!firstSelectedElementInViewport){
+    self.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
+  }
 
   // Adjust focus on the form
   padOuter.find('.comment-content').focus();
@@ -763,6 +766,62 @@ ep_comments.prototype.displayNewCommentForm = function() {
   if (outerIframe && outerIframe.contentWindow) {
     outerIframe.contentWindow.focus();
   }
+}
+
+ep_comments.prototype.scrollViewportIfSelectedTextIsNotVisible = function($firstSelectedElement){
+  // Set the top of the form to be the same Y as the target Rep
+    var y = $firstSelectedElement.offsetTop;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
+    padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
+}
+
+ep_comments.prototype.isElementInViewport = function(element) {
+  var elementPosition = element.getBoundingClientRect();
+  var scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(); // works only on firefox
+  var scrolltop = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop() || scrollTopFirefox;
+  // position relative to the current viewport
+  var elementPositionTopOnViewport = elementPosition.top - scrolltop;
+  var elementPositionBottomOnViewport = elementPosition.bottom - scrolltop;
+
+  var $ace_outer = $('iframe[name="ace_outer"]');
+  var ace_outerHeight = $ace_outer.height();
+  var ace_outerPaddingTop = this.getIntValueOfCSSProperty($ace_outer, "padding-top");
+
+  var clientHeight = ace_outerHeight - ace_outerPaddingTop;
+
+  var elementAboveViewportTop = elementPositionTopOnViewport < 0;
+  var elementBelowViewportBottom = elementPositionBottomOnViewport > clientHeight;
+
+  return !(elementAboveViewportTop || elementBelowViewportBottom);
+}
+
+ep_comments.prototype.getIntValueOfCSSProperty = function($element, property){
+  var valueString = $element.css(property);
+  return parseInt(valueString) || 0;
+}
+
+ep_comments.prototype.getFirstElementSelected = function(){
+  var element;
+
+  this.ace.callWithAce(function(ace) {
+    var rep = ace.ace_getRep();
+    var line = rep.lines.atIndex(rep.selStart[0]);
+    var key = "#"+line.key;
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
+    element = padInner.find(key);
+
+  },'getFirstElementSelected', true);
+
+  return element[0];
+}
+
+// Indicates if user selected some text on editor
+ep_comments.prototype.checkNoTextSelected = function(rep) {
+  var noTextSelected = (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]);
+
+  return noTextSelected;
 }
 
 // Create form to add comment
@@ -879,25 +938,6 @@ ep_comments.prototype.saveComment = function(data, rep) {
     self.setComment(commentId, comment);
     self.collectComments();
   });
-}
-
-// Get position of the first line of the selected text on the editor
-ep_comments.prototype.getYofFirstSelectedLine = function() {
-  var y;
-
-  this.ace.callWithAce(function(ace) {
-    var rep = ace.ace_getRep();
-    // console.log("rep", rep); // doesn't fire twice
-    var line = rep.lines.atIndex(rep.selStart[0]);
-    var key = "#"+line.key;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
-    var ele = padInner.find(key);
-
-    y = ele[0].offsetTop;
-  },'getYofRep', true);
-
-  return y;
 }
 
 // Listen for comment replies
