@@ -15,6 +15,8 @@ var commentIcons = require('ep_comments_page/static/js/commentIcons');
 var newComment = require('ep_comments_page/static/js/newComment');
 var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 var commentL10n = require('ep_comments_page/static/js/commentL10n');
+var events = require('ep_comments_page/static/js/copyPasteEvents');
+var getCommentIdOnSelection = events.getCommentIdOnSelection;
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
@@ -302,7 +304,27 @@ ep_comments.prototype.init = function(){
     self.container.addClass("active");
   }
 
+  // Init copy, cut, paste events
+  if(self.browserIsChrome()){
+    self.padInner.contents().on("copy", function(e) {
+      events.addTextOnClipboard(e, self.ace, self.padInner);
+    });
+
+    self.padInner.contents().on("cut", function(e) {
+      events.addTextOnClipboard(e, self.ace, self.padInner);
+      // remove the selected text
+      self.padInner.contents()[0].execCommand("delete");
+    });
+
+    self.padInner.contents().on("paste", function(e) {
+      events.addCommentClasses(e);
+    });
+  }
 };
+
+ep_comments.prototype.browserIsChrome = function(){
+  return navigator.userAgent.match(/chrome/i)!= null;
+}
 
 // Insert comments container on element use for linenumbers
 ep_comments.prototype.findContainers = function(){
@@ -1162,10 +1184,10 @@ function getRepFromSelector(selector, container){
   });
   return repArr;
 }
-
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
+  editorInfo.ace_getCommentIdOnSelection = _(getCommentIdOnSelection).bind(context);
 }
 
