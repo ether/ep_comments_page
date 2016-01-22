@@ -85,7 +85,7 @@ exports.addCommentClasses = function(e){
   var commentId = e.originalEvent.clipboardData.getData('text/copyCommentId');
   var target = e.target;
   if (commentId) {
-    // we need to wait the paste process finishes completely, otherwise we will not have the target to add the necessaries classes
+    // we need to wait the paste process finishes completely, otherwise we will not have the target to add the necessary classes
     setTimeout(function() {
       addCommentClassesOnline(target, commentId);
     }, 0);
@@ -93,9 +93,9 @@ exports.addCommentClasses = function(e){
 };
 
 var addCommentClassesOnline = function (target, commentId) {
-  var emptyLine = pasteOnEmptyLine(target);
+  var pastingOnEmptyLine = isEmptyLine(target);
   var targetElement;
-  if (emptyLine){
+  if (pastingOnEmptyLine){
     targetElement = $(target).parent();
   }else{
     targetElement = getTargetOnLineWithContent();
@@ -112,7 +112,7 @@ var getTargetOnLineWithContent = function() {
 };
 
 // an empty line has only a <br>
-var pasteOnEmptyLine = function(target) {
+var isEmptyLine = function(target) {
   return $(target).is("br");
 };
 

@@ -17,6 +17,8 @@ var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 var commentL10n = require('ep_comments_page/static/js/commentL10n');
 var events = require('ep_comments_page/static/js/copyPasteEvents');
 var getCommentIdOnSelection = events.getCommentIdOnSelection;
+var browser = require('ep_etherpad-lite/static/js/browser');
+
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
@@ -304,8 +306,14 @@ ep_comments.prototype.init = function(){
     self.container.addClass("active");
   }
 
-  // Init copy, cut, paste events
-  if(self.browserIsChrome()){
+  // Override  copy, cut, paste events on Google chrome.
+  // When an user copies a comment and selects only the span, or part of it, Google chrome
+  // does not copy the classes only the styles, for example:
+  // <comment><span>text to be copied</span></comment>
+  // As the comment classes are not only used for styling we have to add these classes when it pastes the content
+  // The same does not occur when the user selects more than the span, for example:
+  // text<comment><span>to be copied</span></comment>
+  if(browser.chrome){
     self.padInner.contents().on("copy", function(e) {
       events.addTextOnClipboard(e, self.ace, self.padInner);
     });
@@ -321,10 +329,6 @@ ep_comments.prototype.init = function(){
     });
   }
 };
-
-ep_comments.prototype.browserIsChrome = function(){
-  return navigator.userAgent.match(/chrome/i)!= null;
-}
 
 // Insert comments container on element use for linenumbers
 ep_comments.prototype.findContainers = function(){
