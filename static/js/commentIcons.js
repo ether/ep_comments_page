@@ -114,15 +114,12 @@ var addListenersToPageView = function() {
 var addListenersToCloseOpenedComment = function() {
   // we need to add listeners to the different iframes of the page
   $(document).on("touchstart click", function(e){
-    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
   getPadOuter().find('html').on("touchstart click", function(e){
-    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
   getPadInner().find('html').on("touchstart click", function(e){
-    e.stopImmediatePropagation(); // to avoid trying to close a comment on both touch and click
     closeOpenedCommentIfNotOnSelectedElements(e);
   });
 }
