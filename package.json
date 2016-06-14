@@ -1,7 +1,7 @@
 {
   "description": "Adds comments on sidebar and link it to the text.  Support for Page View, requires ep_page_view",
   "name": "ep_comments_page",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "author": {
     "name": "Nicolas Lescop",
     "email": "limplementeur@gmail.com"
@@ -29,6 +29,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/JohnMcLear/ep_comments"
+    "url": "https://github.com/ether/ep_comments"
   }
 }
