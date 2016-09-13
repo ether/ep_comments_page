@@ -79,8 +79,8 @@ ep_comments.prototype.init = function(){
       // console.log("collecting comment replies");
       self.commentReplies = replies;
       self.collectCommentReplies();
-      self.commentRepliesListen();
     }
+    self.commentRepliesListen();
   });
 
   // Init add push event
