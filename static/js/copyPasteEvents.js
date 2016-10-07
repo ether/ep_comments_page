@@ -1,4 +1,4 @@
-exports.addTextOnClipboardAndRemoveSelectionIfNecessary = function(e, ace, padInner){
+exports.addTextOnClipboard = function(e, ace, padInner, removeSelection){
   var commentIdOnSelection;
   ace.callWithAce(function(ace) {
     commentIdOnSelection = ace.ace_getCommentIdOnSelection();
@@ -20,7 +20,7 @@ exports.addTextOnClipboardAndRemoveSelectionIfNecessary = function(e, ace, padIn
     e.preventDefault();
 
     // if it is a cut event we have to remove the selection
-    if(e.type === "cut"){
+    if(removeSelection){
       padInner.contents()[0].execCommand("delete");
     }
   }
