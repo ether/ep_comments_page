@@ -327,7 +327,7 @@ ep_comments.prototype.init = function(){
   // text<comment class='comment'><span>to be copied</span></comment>
   if(browser.chrome){
     self.padInner.contents().on("copy", function(e) {
-      events.addTextOnClipboard(e, self.ace, self.padInner, false, allComments, self.commentReplies);
+      events.addTextOnClipboard(e, self.ace, self.padInner, false, self.comments, self.commentReplies);
     });
 
     self.padInner.contents().on("cut", function(e) {
