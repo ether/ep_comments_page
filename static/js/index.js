@@ -315,13 +315,11 @@ ep_comments.prototype.init = function(){
   // text<comment><span>to be copied</span></comment>
   if(browser.chrome){
     self.padInner.contents().on("copy", function(e) {
-      events.addTextOnClipboard(e, self.ace, self.padInner);
+      events.addTextOnClipboard(e, self.ace, self.padInner, false);
     });
 
     self.padInner.contents().on("cut", function(e) {
-      events.addTextOnClipboard(e, self.ace, self.padInner);
-      // remove the selected text
-      self.padInner.contents()[0].execCommand("delete");
+      events.addTextOnClipboard(e, self.ace, self.padInner, true);
     });
 
     self.padInner.contents().on("paste", function(e) {
