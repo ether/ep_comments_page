@@ -1,4 +1,4 @@
-describe("Pre-comment text mark", function() {
+describe("ep_comments_page - Pre-comment text mark", function() {
   var padId;
 
   //create a new pad before each test run

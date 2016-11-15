@@ -1,4 +1,4 @@
-describe("Comment Localization", function(){
+describe("ep_comments_page - Comment Localization", function(){
   //create a new pad with comment before each test run
   beforeEach(function(cb){
     helper.newPad(function() {
