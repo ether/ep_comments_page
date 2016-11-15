@@ -1,7 +1,7 @@
 var prettyDate;
 
-describe("Time Formatting", function() {
-  _.each({'en': 'English', 'de': 'a language not localized yet'}, function(description, lang) {
+describe("ep_comments_page - Time Formatting", function() {
+  _.each({'en': 'English', 'af': 'a language not localized yet'}, function(description, lang) {
     describe("in " + description, function(){
       before(function(cb) {
         loadPrettyDate(function() {
@@ -387,7 +387,7 @@ describe("Time Formatting", function() {
     var boldTitles = {
       'en' : 'Bold (Ctrl+B)',
       'pt-br' : 'Negrito (Ctrl-B)',
-      'de' : 'Fett (Strg-B)'
+      'af' : 'Vet (Ctrl-B)'
     };
     var chrome$ = helper.padChrome$;
 
