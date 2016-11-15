@@ -1,4 +1,4 @@
-describe("Comment Suggestion", function(){
+describe("ep_comments_page - Comment Suggestion", function(){
   //create a new pad before each test run
   beforeEach(function(cb){
     helper.newPad(cb);

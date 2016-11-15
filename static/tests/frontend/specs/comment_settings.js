@@ -1,4 +1,4 @@
-describe("Comment settings", function() {
+describe("ep_comments_page - Comment settings", function() {
   describe("when user unchecks 'Show Comments'", function() {
     // create a new pad and check "Show Comments" checkbox
     before(function(cb){
