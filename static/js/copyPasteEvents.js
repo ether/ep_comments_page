@@ -1,3 +1,5 @@
+var _ = require("ep_etherpad-lite/static/js/underscore");
+
 exports.addTextOnClipboard = function(e, ace, padInner, removeSelection){
   var commentIdOnSelection;
   ace.callWithAce(function(ace) {
