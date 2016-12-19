@@ -19,8 +19,9 @@ var events = require('ep_comments_page/static/js/copyPasteEvents');
 var getCommentIdOnSelection = events.getCommentIdOnSelection;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
-
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
+
+var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
 /************************************************************************/
 /*                         ep_comments Plugin                           */
@@ -136,6 +137,11 @@ ep_comments.prototype.init = function(){
   });
   // When Page Breaks are enabled/disabled, we need to recalculate position of comments
   $('#options-pagebreaks').on('click', function(e) {
+    self.editorResized();
+  });
+
+  // Allow recalculating the comments position by event
+  this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, function(e){
     self.editorResized();
   });
 
