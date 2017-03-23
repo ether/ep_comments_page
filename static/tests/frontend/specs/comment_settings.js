@@ -9,6 +9,7 @@ describe("ep_comments_page - Comment settings", function() {
     });
 
     it("sidebar comments should not be visible when opening a new pad", function(done) {
+      this.timeout(60000);
       // force to create a new pad, so validation would be on brand new pads
       helper.newPad(function() {
         var outer$ = helper.padOuter$;
@@ -18,6 +19,7 @@ describe("ep_comments_page - Comment settings", function() {
     });
 
     it("sidebar comments should not be visible when adding a new comment to a new pad", function(done) {
+      this.timeout(60000);
       // force to create a new pad, so validation would be on brand new pads
       helper.newPad(function() {
         createComment(function() {
