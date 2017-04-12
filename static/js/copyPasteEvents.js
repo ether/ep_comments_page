@@ -178,13 +178,11 @@ exports.saveCommentsAndReplies = function(e){
   var replies = e.originalEvent.clipboardData.getData('text/objectReply');
 
   if(comments && replies) {
-    setTimeout(function(){
-      comments = JSON.parse(comments);
-      replies = JSON.parse(replies);
-      saveComment(comments, function(){
-        saveReplies(replies);
-      })
-    },0)
+    comments = JSON.parse(comments);
+    replies = JSON.parse(replies);
+    saveComment(comments, function(){
+      saveReplies(replies);
+    });
   }
 };
 

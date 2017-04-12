@@ -1008,19 +1008,18 @@ ep_comments.prototype.saveComment = function(data, rep) {
 }
 
 ep_comments.prototype.saveCommentWithoutSelection = function (data) {
-  var self = this;
   var fakeCommentId = data.comment.commentId;
-  var newCommentId =  self.generateCommentId();
-  self.mapFakeComments[fakeCommentId] = newCommentId;
+  var newCommentId =  this.generateCommentId();
+  this.mapFakeComments[fakeCommentId] = newCommentId;
   var originalCommentId = data.comment.originalCommentId;
-  self.mapOriginalCommentsId[originalCommentId] = newCommentId;
+  this.mapOriginalCommentsId[originalCommentId] = newCommentId;
   data.comment.commentId = newCommentId;
-  self.socket.emit('addComment', data, function (commentId, comment){});
+  this.socket.emit('addComment', data, function (commentId, comment){});
 
   var commentId = data.comment.commentId;
   var comment = data.comment;
-  self.setComment(commentId, comment);
-  self.shouldCollectComment = true;
+  this.setComment(commentId, comment);
+  this.shouldCollectComment = true;
 }
 
  ep_comments.prototype.generateCommentId = function(){
