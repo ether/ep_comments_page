@@ -96,8 +96,12 @@ ep_comments.prototype.init = function(){
     // console.log('pushComment', comment);
     window.setTimeout(function() {
       self.collectComments();
+
       var count_comments=0;
       for(var key in self.comments)  {count_comments++;}
+      var padOuter = $('iframe[name="ace_outer"]').contents();
+      this.padOuter = padOuter;
+      this.padInner = padOuter.find('iframe[name="ace_inner"]');
       var padComment  = this.padInner.contents().find('.comment');
       if( count_comments > padComment.length ) {
          window.setTimeout(function() {
@@ -710,8 +714,10 @@ ep_comments.prototype.setComment = function(commentId, comment){
   var comments = this.comments;
   comment.date = prettyDate(comment.timestamp);
   comment.formattedDate = new Date(comment.timestamp).toISOString();
+
   if (comments[commentId] == null) comments[commentId] = {};
   comments[commentId].data = comment;
+
 };
 
 ep_comments.prototype.setCommentReply = function(commentReply){
@@ -881,7 +887,7 @@ ep_comments.prototype.getFirstElementSelected = function(){
 
 // Indicates if user selected some text on editor
 ep_comments.prototype.checkNoTextSelected = function(rep) {
-  var noTextSelected = (rep.selStart[0] == rep.selEnd[0] && rep.selStart[1] == rep.selEnd[1]);
+  var noTextSelected = ((rep.selStart[0] == rep.selEnd[0]) && (rep.selStart[1] == rep.selEnd[1]));
 
   return noTextSelected;
 }
@@ -1009,11 +1015,12 @@ ep_comments.prototype.saveCommentWithoutSelection = function (data) {
   var originalCommentId = data.comment.originalCommentId;
   self.mapOriginalCommentsId[originalCommentId] = newCommentId;
   data.comment.commentId = newCommentId;
-  self.socket.emit('addComment', data, function (commentId, comment){
-    comment.commentId = commentId;
-    self.setComment(commentId, comment);
-    self.shouldCollectComment = true;
-  });
+  self.socket.emit('addComment', data, function (commentId, comment){});
+
+  var commentId = data.comment.commentId;
+  var comment = data.comment;
+  self.setComment(commentId, comment);
+  self.shouldCollectComment = true;
 }
 
  ep_comments.prototype.generateCommentId = function(){
@@ -1162,7 +1169,7 @@ var hooks = {
     var commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
     var domClean = context.callstack.domClean;
     // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
-    if(commentWasPasted && domClean == true){
+    if(commentWasPasted && domClean){
       pad.plugins.ep_comments_page.collectComments(function(){
         pad.plugins.ep_comments_page.collectCommentReplies();
         pad.plugins.ep_comments_page.shouldCollectComment = false;

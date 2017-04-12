@@ -1,4 +1,4 @@
-describe('Comment copy and paste', function () {
+describe('ep_comments_page - Comment copy and paste', function () {
   var helperFunctions, event;
 
   var FIRST_LINE = 0;
