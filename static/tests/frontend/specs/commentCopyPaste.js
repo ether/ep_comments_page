@@ -4,32 +4,31 @@ describe('ep_comments_page - Comment copy and paste', function () {
   var FIRST_LINE = 0;
   var SECOND_LINE = 1;
 
-  before(function(cb){
+  before(function(){
     helperFunctions = ep_comments_page_test_helper.copyAndPaste;
-    helperFunctions.createPad(this, cb);
   });
 
   context('when user copies a text with a comment', function(){
     var commentText = 'My comment';
     var replyText = 'A reply';
     before(function (cb) {
-      helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
-        event = helperFunctions.copyLine();
-        cb();
+      helperFunctions.createPad(this, function(){
+        helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
+          event = helperFunctions.copyLine();
+          cb();
+        });
       });
-    });
-
-    // create a new pad after the tests of paste run
-    after(function(cb) {
-      helperFunctions.createPad(this, cb);
+      this.timeout(10000);
     });
 
     it('keeps the text copied on the buffer', function (done) {
       var dataFromGetData = event.originalEvent.clipboardData.getData('text/html');
       var $dataFromGetData = $(dataFromGetData);
       var textCopied = helperFunctions.cleanText($dataFromGetData.text());
-      var hasCopiedSpanTag = $dataFromGetData.filter('span').length === 1;
-      expect(textCopied).to.be('something ');
+
+      // we create two spans to avoid error on paste on chrome, when we copy only a text without tags
+      var hasCopiedSpanTag = $dataFromGetData.filter('span').length === 2;
+      expect(textCopied).to.be('something');
       expect(hasCopiedSpanTag).to.be(true);
       done();
     });
@@ -37,9 +36,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
     it('generates a fake comment class', function(done) {
       var dataFromGetData = event.originalEvent.clipboardData.getData('text/html');
       var $dataFromGetData = $(dataFromGetData);
-      var classes = $dataFromGetData.attr('class');
-      var hasFakerCommentClass = classes.match(/(fakecomment-)([a-zA-Z0-9]{16}$)/).length > 0;
-      expect(hasFakerCommentClass).to.be(true);
+      var fakeCommentClass = $dataFromGetData.attr('class');
+      expect(fakeCommentClass).to.match(/(fakecomment-)([a-zA-Z0-9]{16}$)/);
       done();
     });
 
@@ -61,24 +59,12 @@ describe('ep_comments_page - Comment copy and paste', function () {
     });
 
     it('has the fields required to build a comment', function(done) {
-      var commentDataValues = helperFunctions.getCommentDataValues(event);
-      var keys = _.keys(commentDataValues);
-      var keysLength = keys.length;
-      var keysRequired = ["author", "name", "text", "timestamp", "commentId", "date", "formattedDate", "originalCommentId"];
-      var containsAllKeys = _.difference(keys, keysRequired).length === 0;
-      expect(keysLength).to.be(8);
-      expect(containsAllKeys).to.be(true);
+      helperFunctions.testIfHasAllFieldsNecessaryToCreateAComment(event);
       done();
     });
 
     it('has the fields required to build a comment reply', function(done) {
-      var commentReplyDataValues = helperFunctions.getCommentReplyDataValues(event);
-      var keys = _.keys(commentReplyDataValues);
-      var keysLength = keys.length;
-      var keysRequired = ["commentId", "text", "changeTo", "changeFrom", "author", "name", "timestamp", "replyId", "formattedDate"];
-      var containsAllKeys = _.difference(keys, keysRequired).length === 0;
-      expect(keysLength).to.be(9);
-      expect(containsAllKeys).to.be(true);
+      helperFunctions.testIfHasAllFieldsNecessaryToCreateACommementReply(event);
       done();
     });
   });
@@ -87,13 +73,16 @@ describe('ep_comments_page - Comment copy and paste', function () {
     var commentText = 'My comment 2';
     var replyText = 'Reply 2';
     before(function (cb) {
-      helperFunctions.enlargeScreen(function(){
-        helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
-          event = helperFunctions.copyLine();
-          helperFunctions.pasteTextOnLine(event, SECOND_LINE);
-          cb();
+      helperFunctions.createPad(this, function(){
+        helperFunctions.enlargeScreen(function(){
+          helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
+            event = helperFunctions.copyLine();
+            helperFunctions.pasteTextOnLine(event, SECOND_LINE);
+            cb();
+          });
         });
       });
+      this.timeout(10000);
     });
 
     it('generates a different comment id for the comment pasted', function (done) {
@@ -104,8 +93,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
         commentIdLinePasted = helperFunctions.getCommentIdOfLine(SECOND_LINE);
         return commentIdLinePasted !== null;
       }).done(function(){
-        var commentsHasDifferentIds = commentIdOriginal !== commentIdLinePasted;
-        expect(commentsHasDifferentIds).to.be(true);
+        expect(commentIdLinePasted).to.not.be(commentIdOriginal);
         done();
       });
     });
@@ -115,7 +103,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
         helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
           var outer$ = helper.padOuter$;
 
-          // for some reason appears a comment reply icon on top
+          // 2 = the original comment and the pasted one
           var $commentIcon = outer$('.comment-icon');
           expect($commentIcon.length).to.be(2);
           done();
@@ -123,7 +111,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
       });
     });
 
-    it('keeps the comment text', function(done) {
+    it('creates the comment text field with the same text of the one copied', function(done) {
       helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
         var commentPastedText = helperFunctions.getTextOfCommentFromLine(SECOND_LINE);
         expect(commentPastedText).to.be(commentText);
@@ -131,7 +119,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
       });
     });
 
-    it('keeps the comment reply text', function(done) {
+    it('creates the comment reply text field with the same text of the one copied', function(done) {
       helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
         var commentReplyText = helperFunctions.getTextOfCommentReplyFromLine(SECOND_LINE);
         expect(commentReplyText).to.be(replyText);
@@ -142,13 +130,11 @@ describe('ep_comments_page - Comment copy and paste', function () {
     context('when user removes the original comment', function(){
 
       it('does not remove the comment pasted', function (done) {
-        helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
-          helperFunctions.removeCommentFromLine(FIRST_LINE, function(){
-            var inner$ = helper.padInner$;
-            var commentsLength = inner$('.comment').length;
-            expect(commentsLength).to.be(1);
-            done();
-          });
+        helperFunctions.removeCommentFromLine(FIRST_LINE, function(){
+          var inner$ = helper.padInner$;
+          var commentsLength = inner$('.comment').length;
+          expect(commentsLength).to.be(1);
+          done();
         });
       });
     });
@@ -160,14 +146,32 @@ ep_comments_page_test_helper.copyAndPaste = {
   createPad: function(test, cb) {
     var self = this;
     helper.newPad(function(){
-      self.createPadText();
-      cb();
+      self.createOrResetPadText(cb);
     });
     test.timeout(60000);
   },
-  createPadText: function() {
+  cleanPad: function(callback) {
     var inner$ = helper.padInner$;
-    inner$('div').first().sendkeys('something \n');
+    var $padContent = inner$("#innerdocbody");
+    $padContent.html("");
+
+    // wait for Etherpad to re-create first line
+    helper.waitFor(function(){
+      var lineNumber = inner$("div").length;
+      return lineNumber === 1;
+    }, 2000).done(callback);
+  },
+  createOrResetPadText: function(cb) {
+    this.cleanPad(function(){
+      var inner$ = helper.padInner$;
+      inner$('div').first().sendkeys('something\n anything');
+      helper.waitFor(function(){
+        var inner$ = helper.padInner$;
+        var lineLength = inner$('div').length;
+
+        return lineLength > 1;
+      }).done(cb);
+    });
   },
   addComentAndReplyToLine: function(line, textOfComment, textOfReply, callback) {
     var self = this;
@@ -210,7 +214,8 @@ ep_comments_page_test_helper.copyAndPaste = {
 
     // wait for the reply to be saved
     helper.waitFor(function() {
-      return outer$(".sidebar-comment-reply").length === existingReplies + 1;
+      var hasSavedReply = outer$(".sidebar-comment-reply").length === existingReplies + 1;
+      return hasSavedReply;
     }).done(callback);
   },
   commentIconsEnabled: function() {
@@ -368,5 +373,22 @@ ep_comments_page_test_helper.copyAndPaste = {
     }else{
       theTest(done);
     }
+  },
+  testIfHasAllFieldsNecessaryToCreateACommementReply: function(event) {
+    var commentReplyDataValues = this.getCommentReplyDataValues(event);
+    var keys = _.keys(commentReplyDataValues);
+    var keysRequired = ["commentId", "text", "changeTo", "changeFrom", "author", "name", "timestamp", "replyId", "formattedDate"];
+    this.checkIfHasAllKeys(keysRequired, keys);
+  },
+  testIfHasAllFieldsNecessaryToCreateAComment(event) {
+    var commentDataValues = this.getCommentDataValues(event);
+    var keys = _.keys(commentDataValues);
+    var keysRequired = ["author", "name", "text", "timestamp", "commentId", "date", "formattedDate", "originalCommentId"];
+    this.checkIfHasAllKeys(keysRequired, keys);
+  },
+  checkIfHasAllKeys: function(keysRequired, keys) {
+    _.each(keysRequired, function(keyRequired){
+      expect(keys).to.contain(keyRequired);
+    });
   },
 };

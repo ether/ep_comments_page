@@ -3,6 +3,7 @@ var db = require('ep_etherpad-lite/node/db/DB').db;
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
+var shared = require('./static/js/shared');
 
 exports.getComments = function (padId, callback)
 {
@@ -56,8 +57,8 @@ exports.bulkAddComments = function(padId, data, callback)
 
     var newComments = [];
     var commentIds = _.map(data, function(commentData) {
-      //if it's the comment was copied it already have a commentID so we don't need create one
-      var commentId = commentData.commentId || "c-" + randomString(16) ;
+      //if the comment was copied it already has a commentID, so we don't need create one
+      var commentId = commentData.commentId || shared.generateCommentId();
 
       var comment = {
         "author": commentData.author || "empty",

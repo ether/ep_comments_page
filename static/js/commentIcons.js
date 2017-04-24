@@ -17,22 +17,19 @@ var screenHasSpaceForIcons = function() {
 
 var calculateIfScreenHasSpaceForIcons = function() {
   var $firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
-  var firstElementOnPadLeftEdge = getElementRightEdge($firstElementOnPad);
+  var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
 
-  screenHasSpaceToDisplayIcons = firstElementOnPadLeftEdge !== 0;
+  screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
 }
 
-// In the default page view plugin, we define if it has space to show the comment icon
-// when the line(div) has padding-left different from 0. As it's possible to use another
-// plugin to handle pages and this one can be apply instead of padding, border or margin
-// we extend to check all the right edge of the element.
-var getElementRightEdge = function($element) {
+// The space available can be anything like padding, margin or border
+var getSpaceAvailableOnTheRightSide = function($element) {
   var rightPadding      = parseInt($element.css("padding-right"), 10);
   var rightBorder       = parseInt($element.css("border-right-width"), 10);
   var rightMargin       = parseInt($element.css("margin-right"), 10);
 
-  var elementRightEdge = rightPadding + rightBorder + rightMargin;
-  return elementRightEdge;
+  var rightEdgeSpace = rightPadding + rightBorder + rightMargin;
+  return rightEdgeSpace;
 }
 
 // Easier access to outer pad

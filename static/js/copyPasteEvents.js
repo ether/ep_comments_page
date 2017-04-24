@@ -2,10 +2,10 @@ var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
 exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comments, replies){
-  var commentIdOnSelection;
+  var commentIdOnFirstPositionSelected;
   var hasCommentOnSelection;
   ace.callWithAce(function(ace) {
-    commentIdOnSelection = ace.ace_getCommentIdOnSelection();
+    commentIdOnFirstPositionSelected = ace.ace_getCommentIdOnFirstPositionSelected();
     hasCommentOnSelection = ace.ace_hasCommentOnSelection();
   });
 
@@ -15,13 +15,14 @@ exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comment
     var rawHtml = createHiddenDiv(range);
     var html = rawHtml;
     var onlyTextIsSelected = selectionHasOnlyText(rawHtml);
+
     // when the range selection is fully inside a tag, 'rawHtml' will have no HTML tag, so we have to
     // build it. Ex: if we have '<span>ab<b>cdef</b>gh</span>" and user selects 'de', the value of
     //'rawHtml' will be 'de', not '<b>de</b>'. As it is not possible to have two comments in the same text
-    // commentIdOnSelection is the commentId in this partial selection
+    // commentIdOnFirstPositionSelected is the commentId in this partial selection
     if (onlyTextIsSelected) {
       var textSelected = rawHtml[0].outerText;
-      html = buildHtmlToCopy(textSelected, range, commentIdOnSelection);
+      html = buildHtmlToCopyWhenSelectionHasOnlyText(textSelected, range, commentIdOnFirstPositionSelected);
     }
     var commentIds = getCommentIds(html);
     commentsData = buildCommentsData(html, comments);
@@ -31,6 +32,7 @@ exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comment
     replyData = JSON.stringify(replyData);
     e.originalEvent.clipboardData.setData('text/objectReply', replyData);
     e.originalEvent.clipboardData.setData('text/objectComment', commentsData);
+
     // here we override the default copy behavior
     e.originalEvent.clipboardData.setData('text/html', htmlToCopy);
     e.preventDefault();
@@ -60,18 +62,18 @@ var getRepliesFromCommentId = function(replies, commentId){
   return repliesFromCommentID;
 };
 
-var mapCommentIdToFakeId = function(commentsData){
-  var commmentsDataInverted = {};
+var buildCommentIdToFakeIdMap = function(commentsData){
+  var commentIdToFakeId = {};
   _.each(commentsData, function(comment, fakeCommentId){
     var commentId = comment.data.originalCommentId;
-    commmentsDataInverted[commentId] = fakeCommentId;
+    commentIdToFakeId[commentId] = fakeCommentId;
   });
-  return commmentsDataInverted;
+  return commentIdToFakeId;
 };
 
 var replaceCommentIdsWithFakeIds = function(commentsData, html){
-  var commmentsDataInverted =  mapCommentIdToFakeId(commentsData);
-  _.each(commmentsDataInverted, function(fakeCommentId, commentId){
+  var commentIdToFakeId =  buildCommentIdToFakeIdMap(commentsData);
+  _.each(commentIdToFakeId, function(fakeCommentId, commentId){
     $(html).find("." + commentId).removeClass(commentId).addClass(fakeCommentId);
   });
   var htmlWithFakeCommentIds = getHtml(html);
@@ -81,14 +83,12 @@ var replaceCommentIdsWithFakeIds = function(commentsData, html){
 var buildCommentsData = function(html, comments){
   var commentsData = {};
   var originalCommentIds = getCommentIds(html);
-  if(originalCommentIds.length){
-    _.each(originalCommentIds, function(originalCommentId){
-      var fakeCommentId = generateFakeCommentId();
-      var comment = comments[originalCommentId];
-      comment.data.originalCommentId = originalCommentId;
-      commentsData[fakeCommentId] = comment;
-    });
-  }
+  _.each(originalCommentIds, function(originalCommentId){
+    var fakeCommentId = generateFakeCommentId();
+    var comment = comments[originalCommentId];
+    comment.data.originalCommentId = originalCommentId;
+    commentsData[fakeCommentId] = comment;
+  });
   return commentsData;
 };
 
@@ -98,13 +98,12 @@ var generateFakeCommentId = function(){
 };
 
 var getCommentIds = function(html){
-  var commentId = null;
   var allSpans = $(html).find("span");
   var commentIds = [];
   _.each(allSpans, function(span){
     var cls = $(span).attr('class');
     var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    commentId = (classCommentId) ? classCommentId[1] : false;
+    var commentId = (classCommentId) ? classCommentId[1] : false;
     if(commentId){
       commentIds.push(commentId);
     }
@@ -131,17 +130,38 @@ var selectionHasOnlyText = function(rawHtml){
   return htmlDecoded === text;
 };
 
-var buildHtmlToCopy = function(html, range, commentId) {
+var buildHtmlToCopyWhenSelectionHasOnlyText = function(text, range, commentId) {
+  var htmlWithSpans = buildHtmlWithTwoSpanTags(text, commentId);
+  var html = buildHtmlWithFormattingTagsOfSelection(htmlWithSpans, range);
+
+  var htmlToCopy = $.parseHTML("<div>" + html + "</div>");
+  return htmlToCopy;
+};
+
+var buildHtmlWithFormattingTagsOfSelection = function(html, range) {
   var htmlOfParentNode = range.commonAncestorContainer.parentNode;
   var tags = getTagsInSelection(htmlOfParentNode);
+
   // this case happens when we got a selection with one or more styling (bold, italic, underline, strikethrough)
   // applied in all selection in the same range. For example, <b><i><u>text</u></i></b>
   if(tags){
     html = buildOpenTags(tags) + html + buildCloseTags(tags);
   }
-  var htmlToCopy = $.parseHTML("<div><span class='comment " + commentId + "'>" + html + "</span></br></div>");
-  return htmlToCopy;
-};
+
+  return html;
+}
+
+// This is a hack to preserve the comment classes when user pastes a comment. When user pastes a span like this
+// <span class='comment c-124'>thing</span>, chrome removes the classes and keeps only the style of the class. With comments
+// chrome keeps the background-color. To avoid this we create two spans. The first one, <span class='comment c-124'>thi</span>
+// has the text until the last but one character and second one with the last character <span class='comment c-124'>g</span>.
+// Etherpad does a good job joining the two spans into one after the paste is triggered.
+var buildHtmlWithTwoSpanTags = function(text, commentId) {
+  var firstSpan = '<span class="comment ' + commentId + '">'+ text.slice(0, -1) + '</span>'; // text until before last char
+  var secondSpan = '<span class="comment ' + commentId + '">'+ text.slice(-1) + '</span>'; // last char
+
+  return firstSpan + secondSpan;
+}
 
 var buildOpenTags = function(tags){
   var openTags = "";
@@ -209,12 +229,12 @@ var saveReplies = function(replies){
 
 var buildCommentData = function(comment, fakeCommentId){
   var commentData = {};
-  commentData.comment = {};
   commentData.padId = clientVars.padId;
   commentData.comment = comment.data;
   commentData.comment.commentId = fakeCommentId;
   return commentData;
 };
+
 // copied from https://css-tricks.com/snippets/javascript/unescape-html-in-js/
 var htmlDecode = function(input) {
   var e = document.createElement('div');
@@ -222,7 +242,13 @@ var htmlDecode = function(input) {
   return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 };
 
-exports.getCommentIdOnSelection = function() {
+// here we find the comment id on a position [line, column]. This function is used to get the comment id
+// of one line when there is ONLY text selected. E.g In the line with comment, <span class='comment...'>something</span>,
+// and user copies the text 'omethin'. The span tags are not copied only the text. So as the comment is
+// applied on the selection we get the commentId using the first position selected of the line.
+// P.S: It's not possible to have two or more comments when there is only text selected, because for each comment
+// created it's generated a <span> and to copy only the text it MUST NOT HAVE any tag on the selection
+exports.getCommentIdOnFirstPositionSelected = function() {
   var attributeManager = this.documentAttributeManager;
   var rep = this.rep;
   var commentId = _.object(attributeManager.getAttributesOnPosition(rep.selStart[0], rep.selStart[1])).comment;

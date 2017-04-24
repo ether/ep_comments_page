@@ -6,6 +6,7 @@
 
 var _, $, jQuery;
 
+var shared = require('./shared');
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
@@ -16,7 +17,7 @@ var newComment = require('ep_comments_page/static/js/newComment');
 var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 var commentL10n = require('ep_comments_page/static/js/commentL10n');
 var events = require('ep_comments_page/static/js/copyPasteEvents');
-var getCommentIdOnSelection = events.getCommentIdOnSelection;
+var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 var hasCommentOnSelection = events.hasCommentOnSelection;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
@@ -1009,12 +1010,14 @@ ep_comments.prototype.saveComment = function(data, rep) {
 
 ep_comments.prototype.saveCommentWithoutSelection = function (data) {
   var fakeCommentId = data.comment.commentId;
-  var newCommentId =  this.generateCommentId();
+  var newCommentId = shared.generateCommentId();
   this.mapFakeComments[fakeCommentId] = newCommentId;
   var originalCommentId = data.comment.originalCommentId;
   this.mapOriginalCommentsId[originalCommentId] = newCommentId;
   data.comment.commentId = newCommentId;
-  this.socket.emit('addComment', data, function (commentId, comment){});
+
+  // we don't need to wait for a commentId to save because the comment is already saved
+  this.socket.emit('addComment', data, function (){});
 
   var commentId = data.comment.commentId;
   var comment = data.comment;
@@ -1022,18 +1025,14 @@ ep_comments.prototype.saveCommentWithoutSelection = function (data) {
   this.shouldCollectComment = true;
 }
 
- ep_comments.prototype.generateCommentId = function(){
-   var commentId = "c-" + randomString(16);
-   return commentId;
- }
-
  ep_comments.prototype.getMapfakeComments = function(){
    return this.mapFakeComments;
  }
 
+ // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
  ep_comments.prototype.saveCommentReplies = function(padId, commentReplyData){
    var self = this;
-   var data = self.createCommentReplies(commentReplyData);
+   var data = self.buildCommentReplies(commentReplyData);
    self.socket.emit('bulkAddCommentReplies', padId, data, function (replies){
     _.each(replies,function(reply){
       self.setCommentReply(reply);
@@ -1042,15 +1041,16 @@ ep_comments.prototype.saveCommentWithoutSelection = function (data) {
    });
  }
 
- ep_comments.prototype.createCommentReplies = function(repliesData){
+ ep_comments.prototype.buildCommentReplies = function(repliesData){
   var self = this;
   var replies = _.map(repliesData, function(replyData){
-    return self.createCommentReply(replyData);
+    return self.buildCommentReply(replyData);
   });
   return replies;
  }
 
- ep_comments.prototype.createCommentReply = function(replyData){
+ // take a replyData and add more fields necessary. E.g. 'padId'
+ ep_comments.prototype.buildCommentReply = function(replyData){
    var data = this.getCommentData();
    data.commentId = replyData.commentId;
    data.text = replyData.text;
@@ -1292,7 +1292,7 @@ function getRepFromSelector(selector, container){
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
-  editorInfo.ace_getCommentIdOnSelection = _(getCommentIdOnSelection).bind(context);
+  editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
 }
 
