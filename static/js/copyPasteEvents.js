@@ -21,7 +21,7 @@ exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comment
     //'rawHtml' will be 'de', not '<b>de</b>'. As it is not possible to have two comments in the same text
     // commentIdOnFirstPositionSelected is the commentId in this partial selection
     if (onlyTextIsSelected) {
-      var textSelected = rawHtml[0].outerText;
+      var textSelected = rawHtml[0].textContent;
       html = buildHtmlToCopyWhenSelectionHasOnlyText(textSelected, range, commentIdOnFirstPositionSelected);
     }
     var commentIds = getCommentIds(html);

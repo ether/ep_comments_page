@@ -14,6 +14,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
     before(function (cb) {
       helperFunctions.createPad(this, function(){
         helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
+          var $firstLine = helper.padInner$('div').eq(0);
+          helper.selectLines($firstLine, $firstLine, 1, 8); //'omethin'
           event = helperFunctions.copyLine();
           cb();
         });
@@ -28,7 +30,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
       // we create two spans to avoid error on paste on chrome, when we copy only a text without tags
       var hasCopiedSpanTag = $dataFromGetData.filter('span').length === 2;
-      expect(textCopied).to.be('something');
+      expect(textCopied).to.be('omethin');
       expect(hasCopiedSpanTag).to.be(true);
       done();
     });
@@ -82,7 +84,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
           });
         });
       });
-      this.timeout(10000);
+      this.timeout(20000);
     });
 
     it('generates a different comment id for the comment pasted', function (done) {
@@ -295,7 +297,7 @@ ep_comments_page_test_helper.copyAndPaste = {
     // the event and then insert the html.
     this.placeCaretOnLine(line, function(){
       var copiedHTML = event.originalEvent.clipboardData.getData('text/html');
-      helper.padInner$.document.execCommand('insertHTML', true, copiedHTML);
+      helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
     });
   },
   placeCaretOnLine: function(lineNum, cb) {

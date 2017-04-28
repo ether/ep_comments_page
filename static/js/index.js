@@ -330,7 +330,7 @@ ep_comments.prototype.init = function(){
   // As the comment classes are not only used for styling we have to add these classes when it pastes the content
   // The same does not occur when the user selects more than the span, for example:
   // text<comment class='comment'><span>to be copied</span></comment>
-  if(browser.chrome){
+  if(browser.chrome || browser.firefox){
     self.padInner.contents().on("copy", function(e) {
       events.addTextOnClipboard(e, self.ace, self.padInner, false, self.comments, self.commentReplies);
     });
@@ -365,7 +365,6 @@ ep_comments.prototype.collectComments = function(callback){
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
-
     if(!commentId){
       // console.log("returning due to no comment id, probably due to a deleted comment");
       return;
