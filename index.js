@@ -106,6 +106,18 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('commentTextUpdated', function(data, callback) {
+      // Broadcast to all other users that the comment text was changed.
+      // Note that commentId here can either be the commentId or replyId..
+      var padId = data.padId;
+      var commentId = data.commentId;
+      var commentText = data.commentText;
+      commentManager.changeCommentText(padId, commentId, commentText, function() {
+        socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+        callback();
+      });
+    });
+
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
       var content = data.reply;

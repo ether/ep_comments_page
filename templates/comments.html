@@ -5,6 +5,9 @@
         <p class="comment-delete-container">
             <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
         </p>
+        <p class="comment-edit-container">
+            <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title"></span>
+        </p>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
         <time datetime="${formattedDate}">${date}</time>
@@ -98,4 +101,14 @@
         </form>
         {{/if}}
     </note>
+</script>
+
+<script id="editCommentTemplate" type="text/html">
+  <div class="comment-edit-form">
+    <textarea class="comment-edit-text"></textarea>
+    <p>
+      <button class="comment-edit-submit">save</button>
+      <button class="comment-edit-cancel">cancel</button>
+    </p>
+  </div>
 </script>

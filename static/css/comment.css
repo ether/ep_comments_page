@@ -13,8 +13,37 @@ note{
   background: #FFE168 !important;
 }
 
+.comment-edit-container{
+  height: 15px;
+  float: right;
+  margin-right: 5px;
+  background-color:#c6c6c6;
+  text-align:center;
+  line-height:14px;
+  color:#666;
+  display:none;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+
+  /* Rules below not implemented in browsers yet */
+  -o-user-select: none;
+  user-select: none;
+}
+
+.comment-edit{
+  cursor:pointer;
+  line-height:14px;
+  display:inline-block;
+  font-family: "fontawesome-etherpad";
+}
+
+.comment-edit:before{
+  content: "edit";
+}
+
 .comment-delete-container{
-  margin-left:160px;
+  float: right;
   height: 15px;
   background-color:#c6c6c6;
   text-align:center;
@@ -33,7 +62,7 @@ note{
 .comment-delete{
   cursor:pointer;
   line-height:14px;
-  display:block;
+  display:inline-block;
   font-family: "fontawesome-etherpad";
 }
 
@@ -49,6 +78,8 @@ time{
   font-weight:bold;
 }
 
+.sidebar-comment:hover .comment-edit-container,
+.sidebar-comment.mouseover .comment-edit-container,
 .sidebar-comment:hover .comment-delete-container,
 .sidebar-comment.mouseover .comment-delete-container{
   display:block;

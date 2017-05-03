@@ -251,3 +251,39 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
     callback(null, commentId, comment);
   });
 }
+
+exports.changeCommentText = function(padId, commentId, commentText, callback){
+  // Given a comment we update the comment text
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    readOnlyManager.getPadId(padId, function(err, rwPadId){
+      padId = rwPadId;
+    });
+  };
+
+  // If we're dealing with comment replies we need to a different query
+  var prefix = "comments:";
+  if(commentId.substring(0,7) === "c-reply"){
+    prefix = "comment-replies:";
+  }
+
+  //get the entry
+  db.get(prefix + padId, function(err, comments){
+    if(ERR(err, callback)) return;
+
+    //add the entry for this pad
+    var comment = comments[commentId];
+
+    if(commentText){
+      comment.text = commentText;
+    }
+
+    comments[commentId] = comment;
+
+    //save the new element back
+    db.set(prefix + padId, comments);
+
+    callback(null, comment);
+  });
+}
