@@ -45,5 +45,7 @@
   "ep_comments_page.time.one_century.past" : "last century",
   "ep_comments_page.time.one_century.future" : "next century",
   "ep_comments_page.time.centuries.past" : "{{count}} centuries ago",
-  "ep_comments_page.time.centuries.future" : "{{count}} centuries from now"
+  "ep_comments_page.time.centuries.future" : "{{count}} centuries from now",
+  "ep_comments_page.comments_template.edit_comment.save" : "save",
+  "ep_comments_page.comments_template.edit_comment.cancel" :"cancel"
 }

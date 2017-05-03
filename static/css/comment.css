@@ -38,6 +38,11 @@ note{
   font-family: "fontawesome-etherpad";
 }
 
+.comment-edit-cancel, .comment-edit-submit {
+  padding: 1px 8px;
+  font-size: 12px;
+}
+
 .comment-edit:before{
   content: "edit";
 }

@@ -1,5 +1,5 @@
 describe('ep_comments_page - Comment Edit', function(){
-  var helperFunctions, padId;
+  var helperFunctions;
   var FIRST_LINE = 0;
 
   // create pad with a comment and a reply
