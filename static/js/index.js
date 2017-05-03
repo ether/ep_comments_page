@@ -157,10 +157,12 @@ ep_comments.prototype.init = function(){
     data.padId = clientVars.padId;
     data.commentText = commentText;
 
-    self.socket.emit('commentTextUpdated', data, function (){
-      $commentBox.children('.comment-edit-form').remove();
-      $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
-      self.updateCommentBoxText(commentId, commentText);
+    self.socket.emit('commentTextUpdated', data, function (err){
+      if(!err) {
+        $commentBox.children('.comment-edit-form').remove();
+        $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
+        self.updateCommentBoxText(commentId, commentText);
+      }
     });
   });
 
