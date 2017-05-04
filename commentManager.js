@@ -252,7 +252,7 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
   });
 }
 
-exports.changeCommentText = function(padId, commentId, commentText, err){
+exports.changeCommentText = function(padId, commentId, commentText, callback){
   // Given a comment we update the comment text
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
@@ -282,9 +282,9 @@ exports.changeCommentText = function(padId, commentId, commentText, err){
       //save the new element back
       db.set(prefix + padId, comments);
 
-      err(null);
+      callback(null);
     });
   }else{ // don't save comment text blank
-    err(true);
+    callback(true);
   }
 }

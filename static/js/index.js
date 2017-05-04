@@ -133,14 +133,19 @@ ep_comments.prototype.init = function(){
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
   this.container.on("click", ".comment-delete", function(){
-    var commentId = $(this).parent().parent()[0].id;
+    var commentId = $(this).closest('note')[0].id;
     self.deleteComment(commentId);
   });
 
   // Listen for events to edit a comment
   // Here, it adds a form to edit the comment text
   this.container.on("click", ".comment-edit", function(){
-    var $commentBox = $(this).parent().parent();
+    var $commentBox = $(this).closest('note');
+
+    // hide the option window when it show the edit form
+    var $commentOptions = $commentBox.children('.comment-options'); // edit, delete actions
+    $commentOptions.addClass('hidden');
+    $commentBox.children('.comment-options-button').removeClass('comment-options-selected');
 
     // hide the comment author name and the comment text
     $commentBox.children('.comment-author-name, .comment-text').addClass('hidden');
@@ -149,7 +154,7 @@ ep_comments.prototype.init = function(){
 
   // submit the edition on the text and update the comment text
   this.container.on("click", ".comment-edit-submit", function(){
-    var $commentBox = $(this).parent().parent().parent();
+    var $commentBox = $(this).closest('note');
     var commentId = $commentBox[0].id;
     var commentText = $commentBox.find('.comment-edit-text')[0].value;
     var data = {};
@@ -166,11 +171,26 @@ ep_comments.prototype.init = function(){
     });
   });
 
+  this.container.on("click", ".comment-options-button", function(){ // three dots button
+    // if it exists any other comment option window open, hide them
+    var $padOuter = $('iframe[name="ace_outer"]').contents();
+    var $thisCommentOption = $(this).siblings('.comment-options');
+    $padOuter.find('.comment-options').not($thisCommentOption).addClass('hidden');
+
+    // unselect any other three dots selected
+    $thisThreeDotsClicked = $(this);
+    $padOuter.find('.comment-options-button').not($thisThreeDotsClicked).removeClass('comment-options-selected');
+
+    $(this).siblings('.comment-options').toggleClass('hidden');
+    var threeDotsButtonIsSelected = $(this).siblings('.comment-options').hasClass('hidden') === false;
+    $(this).toggleClass('comment-options-selected', threeDotsButtonIsSelected);
+  });
+
   // hide the edit form and make the comment author and text visible again
   this.container.on("click", ".comment-edit-cancel", function(e){
     e.preventDefault();
     e.stopPropagation();
-    var $commentBox = $(this).parent().parent().parent();
+    var $commentBox = $(this).closest('note');
     $commentBox.children('.comment-edit-form').remove();
     $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
   });

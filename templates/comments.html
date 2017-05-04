@@ -2,12 +2,17 @@
 
 <script id="commentsTemplate" type="text/html">
     <note id="${commentId}" class="sidebar-comment" title="${date}">
-        <p class="comment-delete-container">
-            <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
-        </p>
-        <p class="comment-edit-container">
-            <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title"></span>
-        </p>
+        <span class="comment-options-button">
+          <span class="comment-options-button--icon"></span>
+        </span>
+        <div class="comment-options hidden">
+          <p data-l10n-id="ep_comments_page.delete_comment.title" class="comment-delete-container">
+              <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title">delete</span>
+          </p>
+          <p class="comment-edit-container">
+              <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
+          </p>
+        </div>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
         <time datetime="${formattedDate}">${date}</time>
@@ -82,6 +87,14 @@
 
 <script id="replyTemplate" type="text/html">
     <note id="${replyId}" class="sidebar-comment-reply">
+        <span class="comment-options-button">
+          <span class="comment-options-button--icon"></span>
+        </span>
+        <div class="comment-options hidden">
+          <p class="comment-edit-container">
+              <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
+          </p>
+        </div>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
         <time datetime="${formattedDate}">${date}</time>
