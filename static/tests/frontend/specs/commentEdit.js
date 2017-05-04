@@ -12,7 +12,7 @@ describe('ep_comments_page - Comment Edit', function(){
     });
   });
 
-  context('when user presses edit button', function(){
+  context('when user presses the button edit on a comment', function(){
     before(function () {
       helperFunctions.clickEditCommentButton();
     });
@@ -93,7 +93,53 @@ describe('ep_comments_page - Comment Edit', function(){
     });
   });
 
-  // TODO add tests to comment reply as well
+  context('when user presses the button edit on a comment reply', function(){
+    before(function () {
+      helperFunctions.clickEditCommentReplyButton();
+    });
+
+    it('should show the edit form', function (done) {
+      helperFunctions.checkIfOneFormEditWasAdded();
+      done();
+    });
+
+    context('and user writes a new comment reply text', function(){
+      var updatedText = 'comment reply edited';
+      context('and presses save', function(){
+        before(function () {
+          helperFunctions.writeCommentText(updatedText);
+          helperFunctions.pressSave();
+        });
+
+        it('should update the comment text', function (done) {
+          helper.waitFor(function () {
+            var outer$ = helper.padOuter$;
+            var commentReplyText = outer$('section.comment-text').last().text();
+            return commentReplyText.length;
+          }).done(function(){
+            var outer$ = helper.padOuter$;
+            var commentReplyText = outer$('section.comment-text').last().text();
+            expect(commentReplyText).to.be(updatedText);
+            done();
+          });
+        });
+
+        context('and reloads the page', function(){
+          before(function (done) {
+            helperFunctions.reloadPad(done);
+            this.timeout(10000);
+          });
+
+          it('should update the comment text', function(done){
+            var outer$ = helper.padOuter$;
+            var commentReplyText = outer$('section.comment-text').last().text();
+            expect(commentReplyText).to.be(updatedText);
+            done();
+          });
+        });
+      });
+    });
+  });
 });
 
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
@@ -143,7 +189,7 @@ ep_comments_page_test_helper.commentEdit = {
     }, 2000).done(callback);
   },
   enlargeScreen: function(callback) {
-    $('#iframe-container iframe').css("max-width", "1000px");
+    $('#iframe-container iframe').css("max-width", "3000px");
     callback();
   },
   addComentAndReplyToLine: function(line, textOfComment, textOfReply, callback) {
@@ -220,7 +266,14 @@ ep_comments_page_test_helper.commentEdit = {
   },
   clickEditCommentButton: function () {
     var outer$ = helper.padOuter$;
-    var $editButton = outer$(".comment-edit");
+    var $editButton = outer$(".comment-edit").first();
+    $editButton.click();
+  },
+  clickEditCommentReplyButton: function () {
+    var outer$ = helper.padOuter$;
+    var $threeDots = outer$('.comment-options-button').last();
+    $threeDots.click();
+    var $editButton = outer$(".comment-edit").last();
     $editButton.click();
   },
   getEditForm: function () {

@@ -153,7 +153,9 @@ ep_comments.prototype.init = function(){
   });
 
   // submit the edition on the text and update the comment text
-  this.container.on("click", ".comment-edit-submit", function(){
+  this.container.on("click", ".comment-edit-submit", function(e){
+    e.preventDefault();
+    e.stopPropagation();
     var $commentBox = $(this).closest('note');
     var commentId = $commentBox[0].id;
     var commentText = $commentBox.find('.comment-edit-text')[0].value;
