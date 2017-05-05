@@ -1,13 +1,13 @@
 describe('ep_comments_page - Comment Edit', function(){
   var helperFunctions;
+  var textOfComment = 'original comment';
+  var textOfReply = 'original reply';
   var FIRST_LINE = 0;
 
   // create pad with a comment and a reply
   before(function (done) {
     helperFunctions = ep_comments_page_test_helper.commentEdit;
     helperFunctions.createPad(this, function(){
-      var textOfComment = 'original comment';
-      var textOfReply = 'original reply';
       helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
     });
   });
@@ -25,6 +25,12 @@ describe('ep_comments_page - Comment Edit', function(){
     it('should hide the author and the comment text', function (done) {
       helperFunctions.checkIfCommentFieldIsHidden('comment-author-name')
       helperFunctions.checkIfCommentFieldIsHidden('comment-author-text')
+      done();
+    });
+
+    it('should show the original comment text on the edit form', function (done) {
+      var editFormText = helperFunctions.getEditForm().find('.comment-edit-text').text();
+      expect(editFormText).to.be(textOfComment);
       done();
     });
 
@@ -100,6 +106,12 @@ describe('ep_comments_page - Comment Edit', function(){
 
     it('should show the edit form', function (done) {
       helperFunctions.checkIfOneFormEditWasAdded();
+      done();
+    });
+
+    it('should show the original comment reply text on the edit form', function (done) {
+      var editFormText = helperFunctions.getEditForm().find('.comment-edit-text').text();
+      expect(editFormText).to.be(textOfReply);
       done();
     });
 

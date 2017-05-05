@@ -150,6 +150,10 @@ ep_comments.prototype.init = function(){
     // hide the comment author name and the comment text
     $commentBox.children('.comment-author-name, .comment-text').addClass('hidden');
     self.addCommentEditFormIfDontExist($commentBox);
+
+    // place original text on the edit form
+    var originalText = $commentBox.children('.comment-text').text();
+    $commentBox.find('.comment-edit-text').text(originalText);
   });
 
   // submit the edition on the text and update the comment text
