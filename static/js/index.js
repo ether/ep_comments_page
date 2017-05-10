@@ -266,6 +266,12 @@ ep_comments.prototype.init = function(){
 
   });
 
+  this.container.on("mouseleave", ".comment-options-wrapper", function(){
+    var $padOuter = $('iframe[name="ace_outer"]').contents();
+    $padOuter.find('.comment-options-button').removeClass('comment-options-selected');
+    $padOuter.find('.comment-options').addClass('hidden');
+  });
+
   // User accepts a change
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
