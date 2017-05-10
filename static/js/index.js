@@ -1035,8 +1035,8 @@ ep_comments.prototype.saveCommentWithoutSelection = function (data) {
    self.socket.emit('bulkAddCommentReplies', padId, data, function (replies){
     _.each(replies,function(reply){
       self.setCommentReply(reply);
-      // the comment reply is collected together with the comment
     });
+    self.shouldCollectComment = true; // force collect the comment replies saved
    });
  }
 
