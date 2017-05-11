@@ -15,7 +15,7 @@ var showComment = function(commentId, e) {
   var commentElm = getCommentsContainer().find('#'+ commentId);
   commentElm.show();
 
-  highlightComment(commentId, e);
+  highlightComment(commentId, e, false);
 };
 
 var hideComment = function(commentId, hideCommentTitle) {
@@ -39,7 +39,7 @@ var hideAllComments = function() {
   getCommentsContainer().children().hide();
 }
 
-var highlightComment = function(commentId, e){
+var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
   var container       = getCommentsContainer();
   var commentElm      = container.find('#'+ commentId);
   var commentsVisible = container.is(":visible");
@@ -47,9 +47,17 @@ var highlightComment = function(commentId, e){
     // sidebar view highlight
     commentElm.addClass('mouseover');
   } else {
-    var commentElm = container.find('#'+ commentId);
+    // make a full copy of the html, including listeners
+    var commentElm = container.find('#'+ commentId).parent().clone(true, true);
+
+    // before of appending it, we remove the classes that only makes sense on the side-bar
+    commentElm.children().attr('class', '');
+
     // hovering comment view
     getPadOuter().find('.comment-modal-comment').html(commentElm.html());
+
+    // if hideEditAndRemoveCommentWindow is true, it hides the comment edit/remove window
+    getPadOuter().find('.comment-options-wrapper').toggleClass('hidden', hideEditAndRemoveCommentWindow);
 
     // get modal position
     var containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);

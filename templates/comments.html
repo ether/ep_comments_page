@@ -1,7 +1,7 @@
 <script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
 
 <script id="commentsTemplate" type="text/html">
-    <note id="${commentId}" class="sidebar-comment" title="${date}">
+    <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
         <div class="comment-options-wrapper">
           <span class="comment-options-button">
             <span class="comment-options-button--icon"></span>
@@ -88,7 +88,7 @@
 </script>
 
 <script id="replyTemplate" type="text/html">
-    <note id="${replyId}" class="sidebar-comment-reply">
+    <note id="${replyId}" class="sidebar-comment-reply" data-commentid="${replyId}">
         <div class="comment-options-wrapper">
           <span class="comment-options-button">
             <span class="comment-options-button--icon"></span>
