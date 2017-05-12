@@ -253,38 +253,37 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
 }
 
 exports.changeCommentText = function(padId, commentId, commentText, callback){
-  // Given a comment we update the comment text
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
+  var commentTextIsNotEmpty = commentText.length > 0;
+  if(commentTextIsNotEmpty){
+    // Given a comment we update the comment text
+    // We need to change readOnly PadIds to Normal PadIds
+    var isReadOnly = padId.indexOf("r.") === 0;
+    if(isReadOnly){
+      readOnlyManager.getPadId(padId, function(err, rwPadId){
+        padId = rwPadId;
+      });
+    };
 
-  // If we're dealing with comment replies we need to a different query
-  var prefix = "comments:";
-  if(commentId.substring(0,7) === "c-reply"){
-    prefix = "comment-replies:";
-  }
+    // If we're dealing with comment replies we need to a different query
+    var prefix = "comments:";
+    if(commentId.substring(0,7) === "c-reply"){
+      prefix = "comment-replies:";
+    }
 
-  var commentTextIsEmpty = commentText.length > 0;
-  if(commentTextIsEmpty){
+
     //get the entry
     db.get(prefix + padId, function(err, comments){
       if(ERR(err, callback)) return;
 
-      //add the entry for this pad
-      var comment = comments[commentId];
-      comment.text = commentText;
-      comments[commentId] = comment;
+      //update the comment text
+      comments[commentId].text = commentText;
 
-      //save the new element back
+      //save the comment updated back
       db.set(prefix + padId, comments);
 
       callback(null);
     });
-  }else{ // don't save comment text blank
+  }else{// don't save comment text blank
     callback(true);
   }
 }

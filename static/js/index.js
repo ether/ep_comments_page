@@ -168,7 +168,7 @@ ep_comments.prototype.init = function(){
     data.padId = clientVars.padId;
     data.commentText = commentText;
 
-    self.socket.emit('commentTextUpdated', data, function (err){
+    self.socket.emit('updateCommentText', data, function (err){
       if(!err) {
         $commentBox.children('.comment-edit-form').remove();
         $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
@@ -437,7 +437,7 @@ ep_comments.prototype.addCommentEditFormIfDontExist = function ($commentBox) {
     data.text = commentTextValue;
     var content = $("#editCommentTemplate").tmpl(data);
 
-    // localize comment reply
+    // localize the comment/reply edit form
     commentL10n.localize(content);
 
     // insert form
