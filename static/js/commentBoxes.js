@@ -50,6 +50,9 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
     // make a full copy of the html, including listeners
     var commentElm = container.find('#'+ commentId).parent().clone(true, true);
 
+    // clean styles
+    commentElm.children().removeAttr("style");
+
     // before of appending it, we remove the classes that only makes sense on the side-bar
     commentElm.children().attr('class', '');
 

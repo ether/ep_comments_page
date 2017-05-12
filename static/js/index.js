@@ -550,7 +550,7 @@ ep_comments.prototype.collectComments = function(callback){
   // click event
   this.padInner.contents().on("click", ".comment", function(e){
     var commentId = self.commentIdOf(e);
-    var hideEditAndRemoveCommentWindow = false;
+    var hideEditAndRemoveCommentWindow = true;
     commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
   });
 
