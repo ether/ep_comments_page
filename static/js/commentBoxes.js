@@ -53,6 +53,9 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
     // clean styles
     commentElm.children().removeAttr("style");
 
+    // only show the comment of the text selected
+    commentElm.find('note').not('#' + commentId).hide();
+
     // before of appending it, we remove the classes that only makes sense on the side-bar
     commentElm.children().attr('class', '');
 
