@@ -6,6 +6,12 @@ var commentManager = require('./commentManager');
 var comments = require('./comments');
 var apiUtils = require('./apiUtils');
 
+exports.padRemove = function(hook_name, context, callback) {
+  commentManager.deleteCommentReplies(context.padID, function() {
+    commentManager.deleteComments(context.padID, callback);
+  });
+}
+
 exports.handleMessageSecurity = function(hook_name, context, callback){
   if(context.message && context.message.data && context.message.data.apool){
     var apool = context.message.data.apool;

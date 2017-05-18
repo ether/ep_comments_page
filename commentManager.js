@@ -26,6 +26,15 @@ exports.getComments = function (padId, callback)
   });
 };
 
+exports.deleteComments = function (padId, callback)
+{
+  db.remove('comments:' + padId, function(err)
+  {
+    if(ERR(err, callback)) return;
+    callback(null);
+  });
+};
+
 exports.addComment = function(padId, data, callback)
 {
   exports.bulkAddComments(padId, [data], function(err, commentIds, comments) {
@@ -101,6 +110,13 @@ exports.getCommentReplies = function (padId, callback){
   });
 };
 
+exports.deleteCommentReplies = function (padId, callback){
+  db.remove('comment-replies:' + padId, function(err)
+  {
+    if(ERR(err, callback)) return;
+    callback(null);
+  });
+};
 
 exports.addCommentReply = function(padId, data, callback){
   exports.bulkAddCommentReplies(padId, [data], function(err, replyIds, replies) {
