@@ -19,7 +19,10 @@ describe('get comments replies', function(){
   var padID;
   //create a new pad before each test run
   beforeEach(function(done){
-    padID = createPad(done);
+    createPad(function(err, newPadID) {
+      padID = newPadID;
+      done(err);
+    });
   });
 
   it('return code 4 if apikey is missing', function(done){
@@ -45,8 +48,8 @@ describe('get comments replies', function(){
 
   it('returns a list of comment replies', function(done){
     // add a comment to a pad
-    createComment(pad, {}, function(err, comment) {
-      createCommentReply(pad, comment, {}, function(err, replyId){
+    createComment(padID, {}, function(err, comment) {
+      createCommentReply(padID, comment, {}, function(err, replyId){
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
         .expect(function(res){
           if(res.body.data.replies === undefined) throw new Error("Response expected to have a list of comment replies")
@@ -58,7 +61,7 @@ describe('get comments replies', function(){
   })
 
   it('returns comment replies data', function(done){
-    createComment(pad, {}, function(err, comment){
+    createComment(padID, {}, function(err, comment){
       var text       = "text";
       var changeTo   = "changeTo";
       var changeFrom = "changeFrom";
@@ -72,7 +75,7 @@ describe('get comments replies', function(){
         name: name,
         timestamp: timestamp,
       };
-      createCommentReply(pad, comment, data, function(err, replyId){
+      createCommentReply(padID, comment, data, function(err, replyId){
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
         .expect(function(res){
           var comment_reply_data = res.body.data.replies[replyId];
@@ -89,15 +92,15 @@ describe('get comments replies', function(){
 
   it('returns same data for read-write and read-only pad ids', function(done){
     // create comment
-    createComment(pad, {}, function(err, comment){
+    createComment(padID, {}, function(err, comment){
       // create reply
-      createCommentReply(pad, comment, {}, function(err, commentId){
+      createCommentReply(padID, comment, {}, function(err, commentId){
         // get r-w data
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
         .end(function(err, res) {
           var rwData = JSON.stringify(res.body.data);
           // get read-only pad id
-          readOnlyId(pad, function(err, roPadId) {
+          readOnlyId(padID, function(err, roPadId) {
             // get r-o data
             api.get(listCommentRepliesEndPointFor(roPadId, apiKey))
             .expect(function(res){
@@ -118,9 +121,12 @@ describe('create comment replies API', function() {
 
   beforeEach(function(done){
     // creates a new pad...
-    padID = createPad(function(err, pad) {
+    createPad(function(err, newPadID) {
+      if (err) throw err;
+      padID = newPadID;
+
       // ... and a comment before each test run
-      createComment(pad, {}, function(err, comment) {
+      createComment(padID, {}, function(err, comment) {
         commentID = comment;
         done(err);
       });
@@ -208,14 +214,17 @@ describe('create comment reply API broadcast', function() {
     timesMessageWasReceived = 0;
 
     // creates a new pad...
-    padID = createPad(function(err, pad) {
+    createPad(function(err, newPadID) {
+      if (err) throw err;
+      padID = newPadID;
+
       // ... and a comment before each test run, then...
-      createComment(pad, {},function(err, comment) {
+      createComment(padID, {},function(err, comment) {
         commentID = comment;
 
         // ... listens to the broadcast message:
         var socket = io.connect(appUrl + "/comment");
-        var req = { padId: pad };
+        var req = { padId: padID };
         // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
         socket.emit('getComments', req, function (res){
           socket.on('pushAddCommentReply', function(data) {
@@ -251,6 +260,8 @@ describe('create comment reply API broadcast', function() {
   it('does not broadcast comment reply creation to clients of different pad', function(done) {
     // creates another pad...
     createPad(function(err, otherPadId) {
+      if (err) throw err;
+
       // ... and another comment...
       createComment(otherPadId, {},function(err, otherCommentId) {
         if(err) throw err;
