@@ -13,6 +13,8 @@
         "aceInitialized": "ep_comments_page/static/js/index"
       },
       "hooks": {
+        "padRemove": "ep_comments_page/index",
+        "padCopy": "ep_comments_page/index",
         "socketio": "ep_comments_page/index",
         "expressCreateServer": "ep_comments_page/index",
         "collectContentPre": "ep_comments_page/static/js/shared",

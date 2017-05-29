@@ -26,6 +26,15 @@ exports.getComments = function (padId, callback)
   });
 };
 
+exports.deleteComments = function (padId, callback)
+{
+  db.remove('comments:' + padId, function(err)
+  {
+    if(ERR(err, callback)) return;
+    callback(null);
+  });
+};
+
 exports.addComment = function(padId, data, callback)
 {
   exports.bulkAddComments(padId, [data], function(err, commentIds, comments) {
@@ -82,6 +91,24 @@ exports.bulkAddComments = function(padId, data, callback)
   });
 };
 
+exports.copyComments = function(originalPadId, newPadID, callback)
+{
+  //get the comments of original pad
+  db.get('comments:' + originalPadId, function(err, originalComments) {
+    if(ERR(err, callback)) return;
+
+    var copiedComments = _.mapObject(originalComments, function(thisComment, thisCommentId) {
+      // make sure we have different copies of the comment between pads
+      return _.clone(thisComment);
+    });
+
+    //save the comments on new pad
+    db.set('comments:' + newPadID, copiedComments);
+
+    callback(null);
+  });
+};
+
 exports.getCommentReplies = function (padId, callback){
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
@@ -101,6 +128,13 @@ exports.getCommentReplies = function (padId, callback){
   });
 };
 
+exports.deleteCommentReplies = function (padId, callback){
+  db.remove('comment-replies:' + padId, function(err)
+  {
+    if(ERR(err, callback)) return;
+    callback(null);
+  });
+};
 
 exports.addCommentReply = function(padId, data, callback){
   exports.bulkAddCommentReplies(padId, [data], function(err, replyIds, replies) {
@@ -156,6 +190,23 @@ exports.bulkAddCommentReplies = function(padId, data, callback){
     db.set("comment-replies:" + padId, replies);
 
     callback(null, replyIds, newReplies);
+  });
+};
+
+exports.copyCommentReplies = function(originalPadId, newPadID, callback){
+  //get the replies of original pad
+  db.get('comment-replies:' + originalPadId, function(err, originalReplies){
+    if(ERR(err, callback)) return;
+
+    var copiedReplies = _.mapObject(originalReplies, function(thisReply, thisReplyId) {
+      // make sure we have different copies of the reply between pads
+      return _.clone(thisReply);
+    });
+
+    //save the comment replies on new pad
+    db.set('comment-replies:' + newPadID, copiedReplies);
+
+    callback(null);
   });
 };
 

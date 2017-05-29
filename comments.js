@@ -3,12 +3,6 @@ var commentManager = require('./commentManager');
 var padManager = require("ep_etherpad-lite/node/db/PadManager");
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 
-function padExists(padID){
-  padManager.doesPadExists(padID, function(err, exists){
-    return exists;
-  });
-}
-
 exports.getPadComments = function(padID, callback)
 {
   commentManager.getComments(padID, function (err, padComments)

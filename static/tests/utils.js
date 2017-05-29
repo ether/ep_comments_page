@@ -42,7 +42,7 @@ var commentRepliesEndPointFor = function(pad) {
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
 var createPad = function(done) {
-  pad = randomString(5);
+  var pad = randomString(5);
 
   api.get('/api/'+apiVersion+'/createPad?apikey='+apiKey+"&padID="+pad)
   .end(function(err, res){
@@ -50,8 +50,6 @@ var createPad = function(done) {
   })
 
   done(null, pad);
-
-  return pad;
 }
 
 var readOnlyId = function(padID, callback) {

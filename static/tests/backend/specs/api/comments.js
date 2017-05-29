@@ -17,7 +17,10 @@ describe('get comments API', function() {
 
   //create a new pad before each test run
   beforeEach(function(done){
-    padID = createPad(done);
+    createPad(function(err, newPadID) {
+      padID = newPadID;
+      done(err);
+    });
   });
 
   it('returns code 4 if API key is missing', function(done) {
@@ -43,9 +46,9 @@ describe('get comments API', function() {
 
   it('returns comment list when API key is provided', function(done) {
     // creates first comment...
-    createComment(pad, {},function(err, comment) {
+    createComment(padID, {},function(err, comment) {
       // ... creates second comment...
-      createComment(pad, {},function(err, comment) {
+      createComment(padID, {},function(err, comment) {
         // ... and finally checks if comments are returned
         api.get(listCommentsEndPointFor(padID, apiKey))
         .expect(function(res){
@@ -71,7 +74,7 @@ describe('get comments API', function() {
       changeTo: changeTo,
       changeFrom: changeFrom,
     };
-    createComment(pad, data, function(err, commentId){
+    createComment(padID, data, function(err, commentId){
       api.get(listCommentsEndPointFor(padID, apiKey))
       .expect(function(res){
         var comment_data = res.body.data.comments[commentId];
@@ -86,11 +89,11 @@ describe('get comments API', function() {
   });
 
   it('returns same data for read-write and read-only pad ids', function(done){
-    createComment(pad, {}, function(err, commentId){
+    createComment(padID, {}, function(err, commentId){
       api.get(listCommentsEndPointFor(padID, apiKey))
       .end(function(err, res) {
         var rwData = JSON.stringify(res.body.data);
-        readOnlyId(pad, function(err, roPadId) {
+        readOnlyId(padID, function(err, roPadId) {
           api.get(listCommentsEndPointFor(roPadId, apiKey))
           .expect(function(res){
             var roData = JSON.stringify(res.body.data);
@@ -108,7 +111,10 @@ describe('create comments API', function(){
 
   //create a new pad before each test run
   beforeEach(function(done){
-    padID = createPad(done);
+    createPad(function(err, newPadID) {
+      padID = newPadID;
+      done(err);
+    });
   });
 
   it('returns code 1 if data is missing', function(done) {
@@ -194,10 +200,13 @@ describe('create comment API broadcast', function(){
     timesMessageWasReceived = 0;
 
     //create a new pad before each test run...
-    padID = createPad(function(err, pad) {
+    createPad(function(err, newPadID) {
+      if (err) throw err;
+      padID = newPadID;
+
       // ... and listens to the broadcast message:
       var socket = io.connect(appUrl + "/comment");
-      var req = { padId: pad };
+      var req = { padId: padID };
       // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
       socket.emit('getComments', req, function (res){
         socket.on('pushAddComment', function(data) {
@@ -211,12 +220,12 @@ describe('create comment API broadcast', function(){
 
   it('broadcasts comment creation to other clients of same pad', function(done) {
     // create first comment...
-    createComment(padID,{}, function(err, commentId) {
+    createComment(padID, {}, function(err, commentId) {
       if(err) throw err;
       if(!commentId) throw new Error("Comment should had been created");
 
       // ... create second comment...
-      createComment(padID,{}, function(err, commentId) {
+      createComment(padID, {}, function(err, commentId) {
         if(err) throw err;
         if(!commentId) throw new Error("Comment should had been created");
 
@@ -232,6 +241,8 @@ describe('create comment API broadcast', function(){
   it('does not broadcast comment creation to clients of different pad', function(done) {
     // creates another pad...
     createPad(function(err, otherPadId) {
+      if(err) throw err;
+
       // ... and add comment to it:
       createComment(otherPadId, {}, function(err, commentId) {
         if(err) throw err;
