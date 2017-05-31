@@ -151,6 +151,7 @@ var buildHtmlWithFormattingTagsOfSelection = function(html, range) {
   return html;
 }
 
+// FIXME - Allow to copy a comment when user copies only one char
 // This is a hack to preserve the comment classes when user pastes a comment. When user pastes a span like this
 // <span class='comment c-124'>thing</span>, chrome removes the classes and keeps only the style of the class. With comments
 // chrome keeps the background-color. To avoid this we create two spans. The first one, <span class='comment c-124'>thi</span>
@@ -200,18 +201,16 @@ exports.saveCommentsAndReplies = function(e){
   if(comments && replies) {
     comments = JSON.parse(comments);
     replies = JSON.parse(replies);
-    saveComment(comments, function(){
-      saveReplies(replies);
-    });
+    saveComments(comments);
+    saveReplies(replies);
   }
 };
 
-var saveComment = function(comments, callback){
+var saveComments = function(comments){
   _.each(comments, function(comment, fakeCommentId){
     var commentData = buildCommentData(comment, fakeCommentId);
     pad.plugins.ep_comments_page.saveCommentWithoutSelection(commentData);
   });
-  callback();
 };
 
 var saveReplies = function(replies){
@@ -274,39 +273,41 @@ exports.hasCommentOnSelection = function() {
 };
 
 var hasCommentOnMultipleLineSelection = function(firstLineOfSelection, lastLineOfSelection, rep, attributeManager){
-  var line = firstLineOfSelection;
-  var multipleLineSelectionHasComment = false;
-  for (line; line <= lastLineOfSelection; line++) {
+  var foundLineWithComment = false;
+  for (var line = firstLineOfSelection; line <= lastLineOfSelection && !foundLineWithComment; line++) {
     var firstColumn = getFirstColumnOfSelection(line, rep, firstLineOfSelection);
     var lastColumn = getLastColumnOfSelection(line, rep, lastLineOfSelection);
-    var hasComment = hasCommentOnLine(line, firstColumn, lastColumn, attributeManager)
+    var hasComment = hasCommentOnLine(line, firstColumn, lastColumn, attributeManager);
     if (hasComment){
-      multipleLineSelectionHasComment = true;
+      foundLineWithComment = true;
     }
   }
-  return multipleLineSelectionHasComment;
-};
+  return foundLineWithComment;
+}
 
 var getFirstColumnOfSelection = function(line, rep, firstLineOfSelection){
   return line !== firstLineOfSelection ? 0 : rep.selStart[1];
 };
 
 var getLastColumnOfSelection = function(line, rep, lastLineOfSelection){
-  var lineLength = getLength(line, rep);
-  var positionOfLastCharacterSelected = rep.selEnd[1] - 1;
-  return line !== lastLineOfSelection ? lineLength : positionOfLastCharacterSelected;
+  var lastColumnOfSelection;
+  if (line !== lastLineOfSelection) {
+    lastColumnOfSelection = getLength(line, rep); // length of line
+  }else{
+    lastColumnOfSelection = rep.selEnd[1] - 1; //position of last character selected
+  }
+  return lastColumnOfSelection;
 };
 
 var hasCommentOnLine = function(lineNumber, firstColumn, lastColumn, attributeManager){
-  var column = firstColumn;
-  var hasComment = false;
-  for (column; column <= lastColumn; column++) {
-   var commentId = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).comment;
-   if (commentId !== undefined){
-    hasComment = true;
-   }
+  var foundCommentOnLine = false;
+  for (var column = firstColumn; column <= lastColumn && !foundCommentOnLine; column++) {
+    var commentId = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).comment;
+    if (commentId !== undefined){
+      foundCommentOnLine = true;
+    }
   }
-  return hasComment;
+  return foundCommentOnLine;
 };
 
 var hasMultipleLineSelected = function(firstLineOfSelection, lastLineOfSelection){

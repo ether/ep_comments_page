@@ -21,8 +21,6 @@ var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSele
 var hasCommentOnSelection = events.hasCommentOnSelection;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
-var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
 var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
@@ -323,7 +321,8 @@ ep_comments.prototype.init = function(){
     self.container.addClass("active");
   }
 
-  // Override  copy, cut, paste events on Google chrome.
+  // TODO - Implement to others browser like, Microsoft Edge, Opera, IE
+  // Override  copy, cut, paste events on Google chrome and Mozilla Firefox.
   // When an user copies a comment and selects only the span, or part of it, Google chrome
   // does not copy the classes only the styles, for example:
   // <comment class='comment'><span>text to be copied</span></comment>
@@ -720,10 +719,11 @@ ep_comments.prototype.setComment = function(commentId, comment){
 
 };
 
+// commentReply = ['c-reply-123', commentDataObject]
+// commentDataObject = {author:..., name:..., text:..., ...}
 ep_comments.prototype.setCommentReply = function(commentReply){
   var commentReplies = this.commentReplies;
   var replyId = commentReply[0];
-  if(commentReplies[replyId] == null) commentReplies[replyId] = {}
   commentReplies[replyId] = commentReply[1];
 };
 
@@ -1050,7 +1050,8 @@ ep_comments.prototype.saveCommentWithoutSelection = function (data) {
 
  // take a replyData and add more fields necessary. E.g. 'padId'
  ep_comments.prototype.buildCommentReply = function(replyData){
-   var data = this.getCommentData();
+   var data = {};
+   data.padId = this.padId;
    data.commentId = replyData.commentId;
    data.text = replyData.text;
    data.changeTo = replyData.changeTo
