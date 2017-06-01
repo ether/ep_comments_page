@@ -16,10 +16,20 @@ var screenHasSpaceForIcons = function() {
 }
 
 var calculateIfScreenHasSpaceForIcons = function() {
-  var firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
-  var rightMargin       = firstElementOnPad.css("margin-right");
+  var $firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
+  var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
 
-  screenHasSpaceToDisplayIcons = rightMargin !== "0px";
+  screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
+}
+
+// The space available can be anything like padding, margin or border
+var getSpaceAvailableOnTheRightSide = function($element) {
+  var rightPadding      = parseInt($element.css("padding-right"), 10);
+  var rightBorder       = parseInt($element.css("border-right-width"), 10);
+  var rightMargin       = parseInt($element.css("margin-right"), 10);
+
+  var rightEdgeSpace = rightPadding + rightBorder + rightMargin;
+  return rightEdgeSpace;
 }
 
 // Easier access to outer pad

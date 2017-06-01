@@ -3,10 +3,11 @@ note{
 }
 
 .comment {
-  /*WARNING: if you change this value, you need to change it too on copyPasteEvents.js, otherwise you'll break part of the copy/paste behavior"*/
+  /*WARNING - if you change this value, you need to change it too on copyPasteEvents.js, otherwise you'll break part of the copy/paste behavior"*/
   background: #FFFACD !important;
   border-radius: 0px;
 }
+
 
 .pre-selected-comment {
   background: #FFE168 !important;

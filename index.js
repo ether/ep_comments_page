@@ -5,6 +5,7 @@ var clientIO = require('socket.io-client');
 var commentManager = require('./commentManager');
 var comments = require('./comments');
 var apiUtils = require('./apiUtils');
+var _ = require('ep_etherpad-lite/static/js/underscore');
 
 exports.padRemove = function(hook_name, context, callback) {
   commentManager.deleteCommentReplies(context.padID, function() {
@@ -86,6 +87,22 @@ exports.socketio = function (hook_name, args, cb){
       var padId = data.padId;
       commentManager.changeAcceptedState(padId, data.commentId, true, function(){
         socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+      });
+    });
+
+    socket.on('bulkAddComment', function (padId, data, callback) {
+      commentManager.bulkAddComments(padId, data, function(error, commentsId, comments){
+        socket.broadcast.to(padId).emit('pushAddCommentInBulk');
+        var commentWithCommentId = _.object(commentsId, comments); // {c-123:data, c-124:data}
+        callback(commentWithCommentId)
+      });
+    });
+
+    socket.on('bulkAddCommentReplies', function(padId, data, callback){
+      commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
+        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
+        var repliesWithReplyId = _.zip(repliesId, replies);
+        callback(repliesWithReplyId);
       });
     });
 
