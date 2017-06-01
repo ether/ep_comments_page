@@ -388,7 +388,6 @@ ep_comments.prototype.init = function(){
   }
 };
 
-<<<<<<< HEAD
 // This function is useful to collect new comments on the collaborators
 ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {
   var self = this;
