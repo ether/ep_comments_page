@@ -79,6 +79,14 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('bulkAddComment', function (padId, data, callback) {
+      commentManager.bulkAddComments(padId, data, function(error, commentsId, comments){
+        socket.broadcast.to(padId).emit('pushAddCommentInBulk');
+        var commentWithCommentId = _.object(commentsId, comments); // {c-123:data, c-124:data}
+        callback(commentWithCommentId)
+      });
+    });
+
     socket.on('bulkAddCommentReplies', function(padId, data, callback){
       commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
         socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);

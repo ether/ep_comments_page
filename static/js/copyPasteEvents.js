@@ -1,5 +1,6 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var _ = require('ep_etherpad-lite/static/js/underscore');
+var shared = require('./shared');
 
 exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comments, replies){
   var commentIdOnFirstPositionSelected;
@@ -207,10 +208,21 @@ exports.saveCommentsAndReplies = function(e){
 };
 
 var saveComments = function(comments){
+  var commentsToSave = {};
+  var padId = clientVars.padId;
+
+  var mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
+  var mapFakeComments = pad.plugins.ep_comments_page.mapFakeComments;
+
   _.each(comments, function(comment, fakeCommentId){
     var commentData = buildCommentData(comment, fakeCommentId);
-    pad.plugins.ep_comments_page.saveCommentWithoutSelection(commentData);
+    var newCommentId = shared.generateCommentId();
+    mapFakeComments[fakeCommentId] = newCommentId;
+    var originalCommentId = comment.data.originalCommentId;
+    mapOriginalCommentsId[originalCommentId] = newCommentId;
+    commentsToSave[newCommentId] = comment;
   });
+  pad.plugins.ep_comments_page.saveCommentWithoutSelection(padId, commentsToSave);
 };
 
 var saveReplies = function(replies){

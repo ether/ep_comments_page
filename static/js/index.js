@@ -87,44 +87,14 @@ ep_comments.prototype.init = function(){
       self.collectCommentReplies();
     }
     self.commentRepliesListen();
+    self.commentListen();
   });
 
   // Init add push event
   this.pushComment('add', function (commentId, comment){
     self.setComment(commentId, comment);
     // console.log('pushComment', comment);
-    window.setTimeout(function() {
-      self.collectComments();
-
-      var count_comments=0;
-      for(var key in self.comments)  {count_comments++;}
-      var padOuter = $('iframe[name="ace_outer"]').contents();
-      this.padOuter = padOuter;
-      this.padInner = padOuter.find('iframe[name="ace_inner"]');
-      var padComment  = this.padInner.contents().find('.comment');
-      if( count_comments > padComment.length ) {
-         window.setTimeout(function() {
-            self.collectComments();
-            var count_comments=0;
-            for(var key in self.comments)  {count_comments++;}
-            var padComment  = this.padInner.contents().find('.comment');
-            if( count_comments > padComment.length ) {
-               window.setTimeout(function() {
-                  self.collectComments();
-                  var count_comments=0;
-                  for(var key in self.comments)  {count_comments++;}
-                  var padComment  = this.padInner.contents().find('.comment');
-                  if( count_comments > padComment.length ) {
-                     window.setTimeout(function() {
-                        self.collectComments();
-
-                      }, 9000);
-                  }
-                }, 3000);
-            }
-          }, 1000);
-      }
-    }, 300);
+    self.collectCommentsAfterSomeIntervalsOfTime();
   });
 
   // When language is changed, we need to reload the comments to make sure
@@ -343,6 +313,43 @@ ep_comments.prototype.init = function(){
     });
   }
 };
+
+// This function is useful to collect new comments on the collaborators
+ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {
+  var self = this;
+  window.setTimeout(function() {
+    self.collectComments();
+
+    var count_comments=0;
+    for(var key in self.comments)  {count_comments++;}
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    this.padOuter = padOuter;
+    this.padInner = padOuter.find('iframe[name="ace_inner"]');
+    var padComment  = this.padInner.contents().find('.comment');
+    if( count_comments > padComment.length ) {
+       window.setTimeout(function() {
+          self.collectComments();
+          var count_comments=0;
+          for(var key in self.comments)  {count_comments++;}
+          var padComment  = this.padInner.contents().find('.comment');
+          if( count_comments > padComment.length ) {
+             window.setTimeout(function() {
+                self.collectComments();
+                var count_comments=0;
+                for(var key in self.comments)  {count_comments++;}
+                var padComment  = this.padInner.contents().find('.comment');
+                if( count_comments > padComment.length ) {
+                   window.setTimeout(function() {
+                      self.collectComments();
+
+                    }, 9000);
+                }
+              }, 3000);
+          }
+        }, 1000);
+    }
+  }, 300);
+}
 
 // Insert comments container on element use for linenumbers
 ep_comments.prototype.findContainers = function(){
@@ -1007,61 +1014,98 @@ ep_comments.prototype.saveComment = function(data, rep) {
   });
 }
 
-ep_comments.prototype.saveCommentWithoutSelection = function (data) {
-  var fakeCommentId = data.comment.commentId;
-  var newCommentId = shared.generateCommentId();
-  this.mapFakeComments[fakeCommentId] = newCommentId;
-  var originalCommentId = data.comment.originalCommentId;
-  this.mapOriginalCommentsId[originalCommentId] = newCommentId;
-  data.comment.commentId = newCommentId;
-
-  // we don't need to wait for a commentId to save because the comment is already saved
-  this.socket.emit('addComment', data, function (){});
-
-  var commentId = data.comment.commentId;
-  var comment = data.comment;
-  this.setComment(commentId, comment);
-  this.shouldCollectComment = true;
+// commentData = {c-newCommentId123: data:{author:..., date:..., ...}, c-newCommentId124: data:{...}}
+ep_comments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
+  var self = this;
+  var data = self.buildComments(commentData);
+  self.socket.emit('bulkAddComment', padId, data, function (comments){
+    self.setComments(comments);
+    self.shouldCollectComment = true
+  });
 }
 
- ep_comments.prototype.getMapfakeComments = function(){
-   return this.mapFakeComments;
- }
+ep_comments.prototype.buildComments = function(commentsData){
+  var self = this;
+  var comments = _.map(commentsData, function(commentData, commentId){
+    return self.buildComment(commentId, commentData.data);
+  });
+  return comments;
+}
 
- // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
- ep_comments.prototype.saveCommentReplies = function(padId, commentReplyData){
-   var self = this;
-   var data = self.buildCommentReplies(commentReplyData);
-   self.socket.emit('bulkAddCommentReplies', padId, data, function (replies){
+// commentData = {c-newCommentId123: data:{author:..., date:..., ...}, ...
+ep_comments.prototype.buildComment = function(commentId, commentData){
+  var data = {};
+  data.padId = this.padId;
+  data.commentId = commentId;
+  data.text = commentData.text;
+  data.changeTo = commentData.changeTo
+  data.changeFrom = commentData.changeFrom;
+  data.name = commentData.name;
+  data.timestamp = parseInt(commentData.timestamp);
+
+  return data;
+}
+
+ep_comments.prototype.getMapfakeComments = function(){
+  return this.mapFakeComments;
+}
+
+// commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
+ep_comments.prototype.saveCommentReplies = function(padId, commentReplyData){
+  var self = this;
+  var data = self.buildCommentReplies(commentReplyData);
+  self.socket.emit('bulkAddCommentReplies', padId, data, function (replies){
     _.each(replies,function(reply){
       self.setCommentReply(reply);
     });
     self.shouldCollectComment = true; // force collect the comment replies saved
-   });
- }
+  });
+}
 
- ep_comments.prototype.buildCommentReplies = function(repliesData){
+ep_comments.prototype.buildCommentReplies = function(repliesData){
   var self = this;
   var replies = _.map(repliesData, function(replyData){
     return self.buildCommentReply(replyData);
   });
   return replies;
- }
+}
 
- // take a replyData and add more fields necessary. E.g. 'padId'
- ep_comments.prototype.buildCommentReply = function(replyData){
-   var data = {};
-   data.padId = this.padId;
-   data.commentId = replyData.commentId;
-   data.text = replyData.text;
-   data.changeTo = replyData.changeTo
-   data.changeFrom = replyData.changeFrom;
-   data.replyId = replyData.replyId;
-   data.name = replyData.name;
-   data.timestamp = parseInt(replyData.timestamp);
+// take a replyData and add more fields necessary. E.g. 'padId'
+ep_comments.prototype.buildCommentReply = function(replyData){
+  var data = {};
+  data.padId = this.padId;
+  data.commentId = replyData.commentId;
+  data.text = replyData.text;
+  data.changeTo = replyData.changeTo
+  data.changeFrom = replyData.changeFrom;
+  data.replyId = replyData.replyId;
+  data.name = replyData.name;
+  data.timestamp = parseInt(replyData.timestamp);
 
-   return data;
- }
+  return data;
+}
+
+// Listen for comment
+ep_comments.prototype.commentListen = function(){
+  var self = this;
+  var socket = this.socket;
+  socket.on('pushAddCommentInBulk', function (){
+    self.getComments(function (allComments){
+      if (!$.isEmptyObject(allComments)){
+        // we get the comments in this format {c-123:{author:...}, c-124:{author:...}}
+        // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
+        // in this.comments
+        var commentsProcessed = {};
+        _.map(allComments, function (comment, commentId) {
+          commentsProcessed[commentId] = {}
+          commentsProcessed[commentId].data = comment;
+        });
+        self.comments = commentsProcessed;
+        self.collectCommentsAfterSomeIntervalsOfTime(); // here we collect on the collaborators
+      }
+    });
+  });
+};
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
