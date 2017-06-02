@@ -3,6 +3,7 @@
   "ep_comments_page.comments" : "Comentários",
   "ep_comments_page.add_comment.title" : "Adicionar novo comentário ao texto selecionado",
   "ep_comments_page.delete_comment.title" : "Apagar este comentário",
+  "ep_comments_page.edit_comment.title" : "Editar este comentário",
   "ep_comments_page.show_comments" : "Mostrar Comentários",
   "ep_comments_page.comments_template.suggested_change" : "Alteração Sugerida:",
   "ep_comments_page.comments_template.from" : "De:",
@@ -44,5 +45,7 @@
   "ep_comments_page.time.one_century.past" : "século passado",
   "ep_comments_page.time.one_century.future" : "próximo século",
   "ep_comments_page.time.centuries.past" : "{{count}} séculos atrás",
-  "ep_comments_page.time.centuries.future" : "daqui a {{count}} séculos"
+  "ep_comments_page.time.centuries.future" : "daqui a {{count}} séculos",
+  "ep_comments_page.comments_template.edit_comment.save" : "salvar",
+  "ep_comments_page.comments_template.edit_comment.cancel" :"cancelar"
 }

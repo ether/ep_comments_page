@@ -132,15 +132,83 @@ ep_comments.prototype.init = function(){
 
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
-  this.container.on("click", ".comment-delete", function(){
-    var commentId = $(this).parent().parent()[0].id;
+  this.container.parent().on("click", ".comment-delete", function(){
+    var commentId = $(this).closest('note')[0].id;
     self.deleteComment(commentId);
-  })
+  });
+
+  // Listen for events to edit a comment
+  // Here, it adds a form to edit the comment text
+  this.container.parent().on("click", ".comment-edit", function(){
+    var $commentBox = $(this).closest('note');
+
+    // hide the option window when it show the edit form
+    var $commentOptions = $commentBox.children('.comment-options'); // edit, delete actions
+    $commentOptions.addClass('hidden');
+    $commentBox.children('.comment-options-button').removeClass('comment-options-selected');
+
+    // hide the comment author name and the comment text
+    $commentBox.children('.comment-author-name, .comment-text').addClass('hidden');
+    self.addCommentEditFormIfDontExist($commentBox);
+
+    // place original text on the edit form
+    var originalText = $commentBox.children('.comment-text').text();
+    $commentBox.find('.comment-edit-text').text(originalText);
+  });
+
+  // submit the edition on the text and update the comment text
+  this.container.parent().on("click", ".comment-edit-submit", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var $commentBox = $(this).closest('note');
+    var commentId = $commentBox.data('commentid');
+    var commentText = $commentBox.find('.comment-edit-text')[0].value;
+    var data = {};
+    data.commentId = commentId;
+    data.padId = clientVars.padId;
+    data.commentText = commentText;
+
+    self.socket.emit('updateCommentText', data, function (err){
+      if(!err) {
+        $commentBox.children('.comment-edit-form').remove();
+        $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
+        self.updateCommentBoxText(commentId, commentText);
+
+        // although the comment or reply was saved on the data base successfully, it needs
+        // to update the comment or comment reply variable with the new text saved
+        self.setCommentOrReplyNewText(commentId, commentText);
+      }
+    });
+  });
+
+  this.container.parent().on("click", ".comment-options-button", function(){ // three dots button
+    // if it exists any other comment option window open, hide them
+    var $padOuter = $('iframe[name="ace_outer"]').contents();
+    var $thisCommentOption = $(this).siblings('.comment-options');
+    $padOuter.find('.comment-options').not($thisCommentOption).addClass('hidden');
+
+    // unselect any other three dots selected
+    $thisThreeDotsClicked = $(this);
+    $padOuter.find('.comment-options-button').not($thisThreeDotsClicked).removeClass('comment-options-selected');
+
+    $(this).siblings('.comment-options').toggleClass('hidden');
+    var threeDotsButtonIsSelected = $(this).siblings('.comment-options').hasClass('hidden') === false;
+    $(this).toggleClass('comment-options-selected', threeDotsButtonIsSelected);
+  });
+
+  // hide the edit form and make the comment author and text visible again
+  this.container.parent().on("click", ".comment-edit-cancel", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var $commentBox = $(this).closest('note');
+    $commentBox.children('.comment-edit-form').remove();
+    $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
+  });
 
   // Listen for include suggested change toggle
   this.container.on("change", '.reply-suggestion-checkbox', function(){
     if($(this).is(':checked')){
-      var commentId = $(this).parent().parent().parent()[0].id;
+      var commentId = $(this).parent().parent().parent().data('commentid');
       var padOuter = $('iframe[name="ace_outer"]').contents();
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
@@ -202,11 +270,17 @@ ep_comments.prototype.init = function(){
 
   });
 
+  this.container.parent().on("mouseleave", ".comment-options-wrapper", function(){
+    var $padOuter = $('iframe[name="ace_outer"]').contents();
+    $padOuter.find('.comment-options-button').removeClass('comment-options-selected');
+    $padOuter.find('.comment-options').addClass('hidden');
+  });
+
   // User accepts a change
   this.container.on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
     var data = self.getCommentData();
-    data.commentId = $(this).parent()[0].id;
+    data.commentId = $(this).parent().data('commentid');
     var padOuter = $('iframe[name="ace_outer"]').contents();
     var padInner = padOuter.find('iframe[name="ace_inner"]');
 
@@ -245,7 +319,7 @@ ep_comments.prototype.init = function(){
   this.container.on("submit", ".comment-reply", function(e){
     e.preventDefault();
     var data = self.getCommentData();
-    data.commentId = $(this).parent()[0].id;
+    data.commentId = $(this).parent().data('commentid');
     data.reply = $(this).find(".comment-reply-input").val();
     data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
     data.changeFrom = $(this).find(".reply-comment-changeFrom-value").text() || null;
@@ -351,6 +425,25 @@ ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {
   }, 300);
 }
 
+ep_comments.prototype.addCommentEditFormIfDontExist = function ($commentBox) {
+  var hasEditForm = $commentBox.children(".comment-edit-form").length;
+  if (!hasEditForm) {
+    // get text from comment
+    var commentTextValue = $commentBox.find('.comment-text').text();
+
+    // add a form to edit the field
+    var data = {};
+    data.text = commentTextValue;
+    var content = $("#editCommentTemplate").tmpl(data);
+
+    // localize the comment/reply edit form
+    commentL10n.localize(content);
+
+    // insert form
+    $commentBox.children(".comment-text").after(content);
+  }
+}
+
 // Insert comments container on element use for linenumbers
 ep_comments.prototype.findContainers = function(){
   var padOuter = $('iframe[name="ace_outer"]').contents();
@@ -449,13 +542,15 @@ ep_comments.prototype.collectComments = function(callback){
   // hover event
   this.padInner.contents().on("mouseover", ".comment", function(e){
     var commentId = self.commentIdOf(e);
-    commentBoxes.highlightComment(commentId, e);
+    var hideEditAndRemoveCommentWindow = true;
+    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
   });
 
   // click event
   this.padInner.contents().on("click", ".comment", function(e){
     var commentId = self.commentIdOf(e);
-    commentBoxes.highlightComment(commentId, e);
+    var hideEditAndRemoveCommentWindow = true;
+    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
   });
 
   this.padInner.contents().on("mouseleave", ".comment", function(e){
@@ -732,6 +827,15 @@ ep_comments.prototype.setCommentReply = function(commentReply){
   var commentReplies = this.commentReplies;
   var replyId = commentReply[0];
   commentReplies[replyId] = commentReply[1];
+};
+
+// set the text of the comment or comment reply
+ep_comments.prototype.setCommentOrReplyNewText = function(commentOrReplyId, text){
+  if(this.comments[commentOrReplyId]){
+    this.comments[commentOrReplyId].data.text = text;
+  }else if(this.commentReplies[commentOrReplyId]){
+    this.commentReplies[commentOrReplyId].text = text;
+  }
 };
 
 // Get all comments
@@ -1126,6 +1230,11 @@ ep_comments.prototype.commentRepliesListen = function(){
 
 };
 
+ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
+  var $comment = this.container.parent().find("[data-commentid='" + commentId + "']");
+  $comment.children('.comment-text').text(commentText)
+}
+
 ep_comments.prototype.showChangeAsAccepted = function(commentId){
   var self = this;
 
@@ -1152,6 +1261,10 @@ ep_comments.prototype.showChangeAsReverted = function(commentId){
 ep_comments.prototype.pushComment = function(eventType, callback){
   var socket = this.socket;
   var self = this;
+
+  socket.on('textCommentUpdated', function (commentId, commentText) {
+    self.updateCommentBoxText(commentId, commentText);
+  })
 
   socket.on('changeAccepted', function(commentId){
     self.showChangeAsAccepted(commentId);

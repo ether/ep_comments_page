@@ -103,7 +103,7 @@ var addListenersToCommentIcons = function() {
     // activate/show only target comment
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
-    commentBoxes.showComment(commentId, e);
+    commentBoxes.showComment(commentId, e, true);
   });
 }
 

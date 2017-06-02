@@ -1,10 +1,20 @@
 <script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
 
 <script id="commentsTemplate" type="text/html">
-    <note id="${commentId}" class="sidebar-comment" title="${date}">
-        <p class="comment-delete-container">
-            <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title"></span>
-        </p>
+    <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
+        <div class="comment-options-wrapper">
+          <span class="comment-options-button">
+            <span class="comment-options-button--icon"></span>
+          </span>
+          <div class="comment-options hidden">
+            <p data-l10n-id="ep_comments_page.delete_comment.title" class="comment-delete-container">
+                <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title">delete</span>
+            </p>
+            <p class="comment-edit-container">
+                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
+            </p>
+          </div>
+        </div>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
         <time datetime="${formattedDate}">${date}</time>
@@ -78,7 +88,17 @@
 </script>
 
 <script id="replyTemplate" type="text/html">
-    <note id="${replyId}" class="sidebar-comment-reply">
+    <note id="${replyId}" class="sidebar-comment-reply" data-commentid="${replyId}">
+        <div class="comment-options-wrapper">
+          <span class="comment-options-button">
+            <span class="comment-options-button--icon"></span>
+          </span>
+          <div class="comment-options hidden">
+            <p class="comment-edit-container">
+                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
+            </p>
+          </div>
+        </div>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
         <time datetime="${formattedDate}">${date}</time>
@@ -98,4 +118,14 @@
         </form>
         {{/if}}
     </note>
+</script>
+
+<script id="editCommentTemplate" type="text/html">
+  <div class="comment-edit-form">
+    <textarea class="comment-edit-text"></textarea>
+    <p>
+      <button data-l10n-id="ep_comments_page.comments_template.edit_comment.save" class="comment-edit-submit"></button>
+      <button data-l10n-id="ep_comments_page.comments_template.edit_comment.cancel" class="comment-edit-cancel"></button>
+    </p>
+  </div>
 </script>
