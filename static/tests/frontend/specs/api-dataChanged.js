@@ -20,6 +20,10 @@ describe('ep_comments_page - api - "data changed" event', function() {
 
       expect(comments.length).to.be(1);
       expect(comments[0].text).to.be(textOfComment);
+      expect(comments[0].author).to.not.be(undefined);
+      expect(comments[0].commentId).to.not.be(undefined);
+      expect(comments[0].name).to.not.be(undefined);
+      expect(comments[0].timestamp).to.not.be(undefined);
 
       done();
     });
