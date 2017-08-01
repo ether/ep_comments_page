@@ -1,25 +1,20 @@
-/* TODO:
-- lable reply textarea
-- Make the chekbox appear above the suggested changes even when activated
-*/
-
-
-var _, $, jQuery;
-
-var shared = require('./shared');
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
-var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
-var commentIcons = require('ep_comments_page/static/js/commentIcons');
-var newComment = require('ep_comments_page/static/js/newComment');
-var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
-var commentL10n = require('ep_comments_page/static/js/commentL10n');
-var events = require('ep_comments_page/static/js/copyPasteEvents');
+var browser = require('ep_etherpad-lite/static/js/browser');
+
+var shared = require('./shared');
+var prettyDate = require('./timeFormat').prettyDate;
+var commentBoxes = require('./commentBoxes');
+var commentIcons = require('./commentIcons');
+var newComment = require('./newComment');
+var preCommentMark = require('./preCommentMark');
+var commentL10n = require('./commentL10n');
+var events = require('./copyPasteEvents');
+var api = require('./api');
+
 var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 var hasCommentOnSelection = events.hasCommentOnSelection;
-var browser = require('ep_etherpad-lite/static/js/browser');
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
@@ -563,6 +558,11 @@ ep_comments.prototype.collectComments = function(callback){
   });
 
   self.addListenersToCloseOpenedComment();
+
+  // self.comments is indexed by commentId, but we only need their values to send to api
+  var commentsValues = _(self.comments).values();
+  // each comment value is stored on a 'data' attribute, so pick that value
+  api.triggerDataChanged(_(commentsValues).pluck('data'));
 
   self.setYofComments();
   if(callback) callback();
@@ -1322,7 +1322,7 @@ var hooks = {
     // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
     if(context.callstack.docTextChanged) pad.plugins.ep_comments_page.setYofComments();
-    var commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
+    var commentWasPasted = pad.plugins && pad.plugins.ep_comments_page.shouldCollectComment;
     var domClean = context.callstack.domClean;
     // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
     if(commentWasPasted && domClean){
