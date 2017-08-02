@@ -29,14 +29,12 @@ ep_comments_page_test_helper.utils = {
   },
 
   _createOrResetPadText: function(done) {
-    this._cleanPad(function() {
-      var inner$ = helper.padInner$;
-      inner$('div').first().sendkeys('something\n anything');
+    var self = this;
+    self._cleanPad(function() {
+      self.getLine(0).html('something<br>anything');
       helper.waitFor(function() {
-        var inner$ = helper.padInner$;
-        var lineLength = inner$('div').length;
-
-        return lineLength > 1;
+        var secondLineText = self.getLine(1).text();
+        return secondLineText === 'anything';
       }).done(done);
     });
   },

@@ -1,3 +1,5 @@
+var _ = require('ep_etherpad-lite/static/js/underscore');
+
 var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
 
 /*
@@ -14,7 +16,9 @@ var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
     ]
   }
 */
-exports.triggerDataChanged = function(data) {
+exports.triggerDataChanged = function(commentsData, orderedCommentIds) {
+  var data = _buildSortedData(commentsData, orderedCommentIds);
+
   var message = {
     type: NEW_DATA_MESSAGE_TYPE,
     values: data,
@@ -22,6 +26,12 @@ exports.triggerDataChanged = function(data) {
 
 
   _triggerEvent(message);
+}
+
+var _buildSortedData = function(commentsData, orderedCommentIds) {
+  return _(orderedCommentIds).map(function(commentId) {
+    return commentsData[commentId].data;
+  });
 }
 
 var _triggerEvent = function _triggerEvent(message) {

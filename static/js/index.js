@@ -452,9 +452,9 @@ ep_comments.prototype.collectComments = function(callback){
   var self        = this;
   var container   = this.container;
   var comments    = this.comments;
-  var padComment  = this.padInner.contents().find('.comment');
+  var $commentsOnText = this.padInner.contents().find('.comment');
 
-  padComment.each(function(it){
+  $commentsOnText.each(function(it){
     var $this           = $(this);
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
@@ -559,10 +559,19 @@ ep_comments.prototype.collectComments = function(callback){
 
   self.addListenersToCloseOpenedComment();
 
-  // self.comments is indexed by commentId, but we only need their values to send to api
-  var commentsValues = _(self.comments).values();
-  // each comment value is stored on a 'data' attribute, so pick that value
-  api.triggerDataChanged(_(commentsValues).pluck('data'));
+  var orderedCommentIds = $commentsOnText.map(function() {
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
+    var commentId      = classCommentId && classCommentId[1];
+    return commentId;
+  });
+  // remove null and duplicate ids (this happens when comment is split
+  // into 2 parts -- by an overlapping comment, for example)
+  orderedCommentIds = _(orderedCommentIds)
+    .chain()
+    .compact()
+    .unique()
+    .value();
+  api.triggerDataChanged(self.comments, orderedCommentIds);
 
   self.setYofComments();
   if(callback) callback();
