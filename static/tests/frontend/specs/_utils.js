@@ -2,6 +2,10 @@ var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.utils = {
   padId: undefined,
 
+  undo: function() {
+    ep_script_elements_test_helper.utils.undo();
+  },
+
   _loadPad: function(test, done) {
     var self = this;
 

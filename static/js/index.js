@@ -12,6 +12,7 @@ var preCommentMark = require('./preCommentMark');
 var commentL10n = require('./commentL10n');
 var events = require('./copyPasteEvents');
 var api = require('./api');
+var smUtils = require('ep_script_scene_marks/static/js/utils');
 
 var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 var hasCommentOnSelection = events.hasCommentOnSelection;
@@ -559,6 +560,28 @@ ep_comments.prototype.collectComments = function(callback){
 
   self.addListenersToCloseOpenedComment();
 
+  // TODO organize this code when we're done removing stuff from plugin:
+
+  // fill scene number of comments to send on API
+  var $scenes = this.padInner.contents().find('div.withHeading');
+  $commentsOnText.each(function() {
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
+    var commentId      = classCommentId && classCommentId[1];
+
+    var $commentLine = $(this).closest('div');
+    var $headingOfSceneWhereCommentIs;
+    if ($commentLine.is('div.withHeading')) {
+      $headingOfSceneWhereCommentIs = $commentLine;
+    } else if (smUtils.checkIfHasSceneMark($commentLine)) {
+      $headingOfSceneWhereCommentIs = $commentLine.nextUntil('div.withHeading').addBack().last().next();
+    } else {
+      $headingOfSceneWhereCommentIs = $commentLine.prevUntil('div.withHeading').addBack().first().prev();
+    }
+
+    self.comments[commentId].data.scene = 1 + $scenes.index($headingOfSceneWhereCommentIs);
+  });
+
+  // get the order of comments to send on API
   var orderedCommentIds = $commentsOnText.map(function() {
     var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
     var commentId      = classCommentId && classCommentId[1];
