@@ -126,13 +126,6 @@ ep_comments.prototype.init = function(){
     self.displayNewCommentForm();
   });
 
-  // Listen for events to delete a comment
-  // All this does is remove the comment attr on the selection
-  this.container.parent().on("click", ".comment-delete", function(){
-    var commentId = $(this).closest('note')[0].id;
-    self.deleteComment(commentId);
-  });
-
   // Listen for events to edit a comment
   // Here, it adds a form to edit the comment text
   this.container.parent().on("click", ".comment-edit", function(){
@@ -906,30 +899,6 @@ ep_comments.prototype.getCommentData = function (){
   return data;
 }
 
-// Delete a pad comment
-ep_comments.prototype.deleteComment = function(commentId){
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
-  var selector = "."+commentId;
-  var ace = this.ace;
-  ace.callWithAce(function(aceTop){
-    var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
-    // rep is an array of reps..  I will need to iterate over each to do something meaningful..
-    $.each(repArr, function(index, rep){
-      // I don't think we need this nested call
-      ace.callWithAce(function (ace){
-        ace.ace_performSelectionChange(rep[0],rep[1],true);
-        ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
-        // Note that this is the correct way of doing it, instead of there being
-        // a commentId we now flag it as "comment-deleted"
-      });
-    });
-  },'deleteCommentedSelection', true);
-
-//  });
-//  }, 'getRep');
-}
-
 ep_comments.prototype.displayNewCommentForm = function() {
   var self = this;
   var rep = {};
@@ -1339,6 +1308,8 @@ var hooks = {
     if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
     pad.plugins.ep_comments_page = Comments;
+
+    api.initialize(context.ace);
   },
 
   aceEditEvent: function(hook, context){
@@ -1402,13 +1373,15 @@ exports.aceEditEvent          = hooks.aceEditEvent;
 1:...
 */
 // Alas we follow the Etherpad convention of using tuples here.
-function getRepFromSelector(selector, container){
+function getRepFromSelector(selector) {
   var attributeManager = this.documentAttributeManager;
+  var $padOuter = $('iframe[name="ace_outer"]').contents();
+  var $padInner = $padOuter.find('iframe[name="ace_inner"]').contents();
 
   var repArr = [];
 
   // first find the element
-  var elements = container.contents().find(selector);
+  var elements = $padInner.find(selector);
   // One might expect this to be a rep for the entire document
   // However what we actually need to do is find each selection that includes
   // this comment and remove it.  This is because content can be pasted
@@ -1484,4 +1457,3 @@ exports.aceInitialized = function(hook, context){
   editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
 }
-

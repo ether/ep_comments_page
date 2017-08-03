@@ -81,7 +81,7 @@ ep_comments_page_test_helper.utils = {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    this._createdCommentOnLine(line, done);
+    this._waitForCommentToBeCreatedOnLine(line, done);
   },
 
   addCommentReplyToLine: function(line, textOfReply, done) {
@@ -115,15 +115,15 @@ ep_comments_page_test_helper.utils = {
     return helper.padInner$('div:eq(' + lineNum + ')');
   },
 
-  _createdCommentOnLine: function(line, done) {
+  _waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
     helper.waitFor(function() {
       return self.getCommentIdOfLine(line) !== null;
     }).done(done);
   },
 
-  getCommentIdOfLine: function(line) {
-    var $line = this.getLine(line);
+  getCommentIdOfLine: function(lineNumber) {
+    var $line = this.getLine(lineNumber);
     var comment = $line.find('.comment');
     var cls = comment.attr('class');
     var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);

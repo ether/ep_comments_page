@@ -29,4 +29,17 @@ ep_comments_page_test_helper.apiUtils = {
   resetData: function() {
     this.lastDataSent = undefined;
   },
+
+  /**** DELETE_COMMENT_EVENT ****/
+  DELETE_COMMENT_EVENT: 'comments_delete',
+  simulateCallToDeleteComment: function(commentId) {
+    var message = {
+      type: this.DELETE_COMMENT_EVENT,
+      commentId: commentId,
+    };
+
+    var inboundApiEventsTarget = helper.padChrome$.window;
+    inboundApiEventsTarget.postMessage(message, '*');
+  },
+
 }

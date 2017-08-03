@@ -1,6 +1,25 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
+var commentDelete = require('./commentDelete');
+
 var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
+var DELETE_COMMENT_MESSAGE_TYPE = 'comments_delete';
+
+exports.initialize = function(ace) {
+  // listen to outbound calls of this API
+  window.addEventListener('message', function(e) {
+    _handleOutboundCalls(e, ace);
+  });
+}
+
+var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
+  if (e.data.type === DELETE_COMMENT_MESSAGE_TYPE) {
+    commentDelete.deleteComment(e.data.commentId, ace);
+
+    // TODO this should be replaced by a better method
+    pad.plugins.ep_comments_page.collectComments();
+  }
+}
 
 /*
   message: {
@@ -23,7 +42,6 @@ exports.triggerDataChanged = function(commentsData, orderedCommentIds) {
     type: NEW_DATA_MESSAGE_TYPE,
     values: data,
   };
-
 
   _triggerEvent(message);
 }

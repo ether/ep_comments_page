@@ -64,6 +64,30 @@ describe('ep_comments_page - api - "data changed" event', function() {
       });
     });
 
+    context('and one comment is deleted', function() {
+      before(function(done) {
+        // create one more comment, to have more comments as a starting point for the test
+        utils.addCommentToLine(0, textOfLastCreatedComment, function() {
+          var commentId = utils.getCommentIdOfLine(1);
+          apiUtils.simulateCallToDeleteComment(commentId);
+          done();
+        });
+      });
+      after(function() {
+        utils.undo(); // comment delete
+        utils.undo(); // comment creation
+      });
+
+      it('sends the list of comments without the removed one', function(done) {
+        var comments = apiUtils.getLastDataSent();
+
+        expect(comments.length).to.be(1);
+        expect(comments[0].text).to.be(textOfLastCreatedComment);
+
+        done();
+      });
+    });
+
     context('and pad has scenes', function() {
       var LINE_BEFORE_1ST_SCENE           = 1;
       var LINE_ON_HEADING_OF_1ST_SCENE    = LINE_BEFORE_1ST_SCENE + 3; // SMs + heading
