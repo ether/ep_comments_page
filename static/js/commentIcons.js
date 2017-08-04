@@ -1,5 +1,5 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
-var _ = require('ep_etherpad-lite/static/js/underscore');
+var api = require('ep_comments_page/static/js/api');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
 // Indicates if Etherpad is configured to display icons
@@ -16,7 +16,7 @@ var screenHasSpaceForIcons = function() {
 }
 
 var calculateIfScreenHasSpaceForIcons = function() {
-  var $firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
+  var $firstElementOnPad = getPadInner().find('#innerdocbody > div').first();
   var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
 
   screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
@@ -24,9 +24,9 @@ var calculateIfScreenHasSpaceForIcons = function() {
 
 // The space available can be anything like padding, margin or border
 var getSpaceAvailableOnTheRightSide = function($element) {
-  var rightPadding      = parseInt($element.css("padding-right"), 10);
-  var rightBorder       = parseInt($element.css("border-right-width"), 10);
-  var rightMargin       = parseInt($element.css("margin-right"), 10);
+  var rightPadding      = parseInt($element.css('padding-right'), 10);
+  var rightBorder       = parseInt($element.css('border-right-width'), 10);
+  var rightMargin       = parseInt($element.css('margin-right'), 10);
 
   var rightEdgeSpace = rightPadding + rightBorder + rightMargin;
   return rightEdgeSpace;
@@ -90,52 +90,38 @@ var addListenersToCommentIcons = function() {
     removeHighlightOfTargetTextOf(commentId);
   }).on("click", ".comment-icon.active", function(e){
     toggleActiveCommentIcon($(this));
-
     var commentId = targetCommentIdOf(e);
-    commentBoxes.hideComment(commentId, true);
+    api.triggerCommentDeactivation();
   }).on("click", ".comment-icon.inactive", function(e){
     // deactivate/hide other comment boxes that are opened, so we have only
     // one comment box opened at a time
-    commentBoxes.hideOpenedComments();
     var allActiveIcons = getPadOuter().find('#commentIcons').find(".comment-icon.active");
     toggleActiveCommentIcon(allActiveIcons);
 
     // activate/show only target comment
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
-    commentBoxes.showComment(commentId, e, true);
+    api.triggerCommentActivation(commentId);
   });
-}
-
-// Listen to Page View enabling/disabling, to adjust #commentIcons position
-var addListenersToPageView = function() {
-  $("#options-pageview").on("click", function() {
-    getPadOuter().find('#outerdocbody').toggleClass("pageViewDisabled");
-  });
-
-  // add class if Page View is disabled already
-  if(!$('#options-pageview').is(':checked')) {
-    getPadOuter().find('#outerdocbody').addClass("pageViewDisabled");
-  }
 }
 
 // Listen to clicks on the page to be able to close comment when clicking
 // outside of it
-var addListenersToCloseOpenedComment = function() {
+var addListenersToDeactivateComment = function() {
   // we need to add listeners to the different iframes of the page
   $(document).on("touchstart click", function(e){
-    closeOpenedCommentIfNotOnSelectedElements(e);
+    deactivateCommentIfNotOnSelectedElements(e);
   });
   getPadOuter().find('html').on("touchstart click", function(e){
-    closeOpenedCommentIfNotOnSelectedElements(e);
+    deactivateCommentIfNotOnSelectedElements(e);
   });
   getPadInner().find('html').on("touchstart click", function(e){
-    closeOpenedCommentIfNotOnSelectedElements(e);
+    deactivateCommentIfNotOnSelectedElements(e);
   });
 }
 
 // Close comment if event target was outside of comment or on a comment icon
-var closeOpenedCommentIfNotOnSelectedElements = function(e) {
+var deactivateCommentIfNotOnSelectedElements = function(e) {
   // Don't do anything if clicked on the following elements:
   if (shouldNotCloseComment(e) // any of the comment icons
     || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
@@ -146,9 +132,7 @@ var closeOpenedCommentIfNotOnSelectedElements = function(e) {
   var openedComment = findOpenedComment();
   if (openedComment) {
     toggleActiveCommentIcon($(openedComment));
-
-    var commentId = openedComment.getAttribute("data-commentid");
-    commentBoxes.hideComment(commentId, true);
+    api.triggerCommentDeactivation();
   }
 }
 
@@ -168,8 +152,7 @@ var insertContainer = function() {
 
   adjustIconsForNewScreenSize();
   addListenersToCommentIcons();
-  addListenersToCloseOpenedComment();
-  addListenersToPageView();
+  addListenersToDeactivateComment();
 }
 
 // Create a new comment icon

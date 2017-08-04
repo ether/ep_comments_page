@@ -2,8 +2,9 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 
 var commentDelete = require('./commentDelete');
 
+var COMMENT_ACTIVATED_MESSAGE_TYPE = 'comment_activated';
 var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
-var DELETE_COMMENT_MESSAGE_TYPE = 'comments_delete';
+var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
 
 exports.initialize = function(ace) {
   // listen to outbound calls of this API
@@ -23,13 +24,31 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
 
 /*
   message: {
+    type: 'comment_activated',
+    commentId: 'c-b4WEFBNt7Bxu6Dhr'
+  }
+*/
+exports.triggerCommentActivation = function(commentId) {
+  var message = {
+    type: COMMENT_ACTIVATED_MESSAGE_TYPE,
+    commentId: commentId,
+  };
+
+  _triggerEvent(message);
+}
+exports.triggerCommentDeactivation = function() {
+  this.triggerCommentActivation(undefined);
+}
+
+/*
+  message: {
     type: 'comments_data_changed',
     values: [
       {
-        author: "a.dG8CtEvWhEmR3cf5",
-        commentId: "c-b4WEFBNt7Bxu6Dhr",
-        name: "Author Name",
-        text: "the comment text",
+        author: 'a.dG8CtEvWhEmR3cf5',
+        commentId: 'c-b4WEFBNt7Bxu6Dhr',
+        name: 'Author Name',
+        text: 'the comment text',
         timestamp: 1501599806477,
       }
     ]

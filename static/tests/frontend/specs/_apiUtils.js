@@ -1,18 +1,21 @@
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.apiUtils = {
   DATA_CHANGED_EVENT: 'comments_data_changed',
+  COMMENT_ACTIVATED_EVENT: 'comment_activated',
 
-  lastDataSent: undefined,
+  lastDataSent: {},
 
   startListeningToApiEvents: function() {
     var self = this;
     var outboundApiEventsTarget = helper.padChrome$.window.parent;
 
     outboundApiEventsTarget.addEventListener('message', function(e) {
-      if (e.data.type === self.DATA_CHANGED_EVENT) {
-        self.lastDataSent = e.data.values;
-      }
+      self.lastDataSent[e.data.type] = e.data;
     });
+  },
+
+  resetData: function() {
+    this.lastDataSent = {};
   },
 
   waitForDataToBeSent: function(done) {
@@ -23,15 +26,14 @@ ep_comments_page_test_helper.apiUtils = {
   },
 
   getLastDataSent: function() {
-    return this.lastDataSent;
+    return this.lastDataSent[this.DATA_CHANGED_EVENT].values;
   },
-
-  resetData: function() {
-    this.lastDataSent = undefined;
+  getLastActivatedComment: function() {
+    return this.lastDataSent[this.COMMENT_ACTIVATED_EVENT].commentId;
   },
 
   /**** DELETE_COMMENT_EVENT ****/
-  DELETE_COMMENT_EVENT: 'comments_delete',
+  DELETE_COMMENT_EVENT: 'comment_delete',
   simulateCallToDeleteComment: function(commentId) {
     var message = {
       type: this.DELETE_COMMENT_EVENT,

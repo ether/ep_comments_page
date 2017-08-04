@@ -14,6 +14,7 @@ ep_comments_page_test_helper.utils = {
     this.padId = helper.newPad(function() {
       ep_comments_page_test_helper.apiUtils.startListeningToApiEvents();
       self._enlargeScreen();
+      self._chooseToShowComments();
       done();
     }, this.padId);
   },
@@ -57,6 +58,24 @@ ep_comments_page_test_helper.utils = {
 
   _enlargeScreen: function() {
     $('#iframe-container iframe').css('max-width', '3000px');
+  },
+  resetScreenSize: function() {
+    $('#iframe-container iframe').css('max-width', '');
+  },
+
+  _chooseToShowComments: function() {
+    var chrome$ = helper.padChrome$;
+
+    // click on the settings button to make settings visible
+    var $settingsButton = chrome$('.buttonicon-settings');
+    $settingsButton.click();
+
+    // check 'Show Comments'
+    var $showComments = chrome$('#options-comments')
+    if (!$showComments.is(':checked')) $showComments.click();
+
+    // hide settings again
+    $settingsButton.click();
   },
 
   addComentAndReplyToLine: function(line, textOfComment, textOfReply, done) {
