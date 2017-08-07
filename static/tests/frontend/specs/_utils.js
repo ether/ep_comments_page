@@ -78,6 +78,11 @@ ep_comments_page_test_helper.utils = {
     $settingsButton.click();
   },
 
+  clickOnCommentIcon: function(commentId) {
+    var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId).first();
+    $commentIcon.click();
+  },
+
   addComentAndReplyToLine: function(line, textOfComment, textOfReply, done) {
     var self = this;
     this.addCommentToLine(line, textOfComment, function() {
@@ -110,9 +115,7 @@ ep_comments_page_test_helper.utils = {
 
     // if comment icons are enabled, make sure we display the comment box:
     if (this.commentIconsEnabled()) {
-      // click on the icon
-      var $commentIcon = outer$('#commentIcons #icon-'+commentId).first();
-      $commentIcon.click();
+      this.clickOnCommentIcon(commentId);
     }
 
     // fill reply field

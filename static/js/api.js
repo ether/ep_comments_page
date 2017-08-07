@@ -2,9 +2,12 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 
 var commentDelete = require('./commentDelete');
 
+// messages sent to outside
 var COMMENT_ACTIVATED_MESSAGE_TYPE = 'comment_activated';
 var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
+// messages coming from outside
 var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
+var ACTIVATE_COMMENT_MESSAGE_TYPE = 'comment_activate';
 
 exports.initialize = function(ace) {
   // listen to outbound calls of this API
@@ -19,7 +22,14 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
 
     // TODO this should be replaced by a better method
     pad.plugins.ep_comments_page.collectComments();
+  } else if (e.data.type === ACTIVATE_COMMENT_MESSAGE_TYPE) {
+    onCommentActivation(e.data.commentId);
   }
+}
+
+var onCommentActivation = function() {};
+exports.setHandleCommentActivation = function(fn) {
+  onCommentActivation = fn;
 }
 
 /*
@@ -33,7 +43,6 @@ exports.triggerCommentActivation = function(commentId) {
     type: COMMENT_ACTIVATED_MESSAGE_TYPE,
     commentId: commentId,
   };
-
   _triggerEvent(message);
 }
 exports.triggerCommentDeactivation = function() {

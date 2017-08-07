@@ -1,17 +1,11 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
-var commentL10n = require('ep_comments_page/static/js/commentL10n');
-
-// Easier access to outer pad
-var padOuter;
-var getPadOuter = function() {
-  padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
-  return padOuter;
-}
+var utils = require('./utils');
+var commentL10n = require('./commentL10n');
 
 // Easier access to new comment container
 var newCommentContainer;
 var getNewCommentContainer = function() {
-  newCommentContainer = newCommentContainer || getPadOuter().find('#newComments');
+  newCommentContainer = newCommentContainer || utils.getPadOuter().find('#newComments');
   return newCommentContainer;
 }
 
@@ -113,9 +107,9 @@ var insertContainers = function(target) {
   // Listen for include suggested change toggle
   getNewCommentContainer().on("change", '#suggestion-checkbox', function() {
     if($(this).is(':checked')) {
-      getPadOuter().find('.suggestion').show();
+      utils.getPadOuter().find('.suggestion').show();
     } else {
-      getPadOuter().find('.suggestion').hide();
+      utils.getPadOuter().find('.suggestion').hide();
     }
   });
 }
@@ -157,7 +151,7 @@ var showNewCommentForm = function() {
   getNewCommentContainer().addClass("active");
   // we need to set a timeout otherwise the animation to show #newComment won't be visible
   window.setTimeout(function() {
-    getPadOuter().find('.suggestion').hide(); // Hides suggestion in case of a cancel
+    utils.getPadOuter().find('.suggestion').hide(); // Hides suggestion in case of a cancel
     getNewCommentContainer().find('#newComment').removeClass("hidden").addClass("visible");
   }, 0);
 

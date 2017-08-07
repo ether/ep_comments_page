@@ -1,12 +1,7 @@
-// Easier access to outter pad
-var padOuter;
-var getPadOuter = function() {
-  padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
-  return padOuter;
-}
+var utils = require('ep_comments_page/static/js/utils');
 
 var getCommentsContainer = function() {
-  return getPadOuter().find("#comments");
+  return utils.getPadOuter().find("#comments");
 }
 
 /* ***** Public methods: ***** */
@@ -25,14 +20,14 @@ var hideComment = function(commentId, hideCommentTitle) {
   // hide even the comment title
   if (hideCommentTitle) commentElm.hide();
 
-  getPadOuter().find('.comment-modal').hide();
+  utils.getPadOuter().find('.comment-modal').hide();
 };
 
 var hideOpenedComments = function() {
   var openedComments = getCommentsContainer().find('.mouseover');
   openedComments.removeClass('mouseover').hide();
 
-  getPadOuter().find('.comment-modal').hide();
+  utils.getPadOuter().find('.comment-modal').hide();
 }
 
 var hideAllComments = function() {
@@ -60,14 +55,14 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
     commentElm.children().attr('class', '');
 
     // hovering comment view
-    getPadOuter().find('.comment-modal-comment').html(commentElm.html());
+    utils.getPadOuter().find('.comment-modal-comment').html(commentElm.html());
 
     // if hideEditAndRemoveCommentWindow is true, it hides the comment edit/remove window
-    getPadOuter().find('.comment-options-wrapper').toggleClass('hidden', hideEditAndRemoveCommentWindow);
+    utils.getPadOuter().find('.comment-options-wrapper').toggleClass('hidden', hideEditAndRemoveCommentWindow);
 
     // get modal position
-    var containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
-    var modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
+    var containerWidth = utils.getPadOuter().find('#outerdocbody').outerWidth(true);
+    var modalWitdh = utils.getPadOuter().find('.comment-modal').outerWidth(true);
     var targetLeft = e.clientX;
     var targetTop = $(e.target).offset().top;
     // if positioning modal on target left will make part of the modal to be
@@ -75,7 +70,7 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
     if (targetLeft + modalWitdh > containerWidth) {
       targetLeft = containerWidth - modalWitdh - 2;
     }
-    getPadOuter().find('.comment-modal').show().css({
+    utils.getPadOuter().find('.comment-modal').show().css({
       left: targetLeft +"px",
       top: targetTop + 25 +"px"
     });
@@ -85,7 +80,7 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
 // Adjust position of the comment detail on the container, to be on the same
 // height of the pad text associated to the comment, and return the affected element
 var adjustTopOf = function(commentId, baseTop) {
-  var commentElement = getPadOuter().find('#'+commentId);
+  var commentElement = utils.getPadOuter().find('#'+commentId);
   var targetTop = baseTop - 5;
   commentElement.css("top", targetTop+"px");
 
@@ -94,7 +89,7 @@ var adjustTopOf = function(commentId, baseTop) {
 
 // Indicates if comment is on the expected position (baseTop-5)
 var isOnTop = function(commentId, baseTop) {
-  var commentElement = getPadOuter().find('#'+commentId);
+  var commentElement = utils.getPadOuter().find('#'+commentId);
   var expectedTop = (baseTop - 5) + "px";
   return commentElement.css("top") === expectedTop;
 }

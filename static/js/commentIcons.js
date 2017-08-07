@@ -1,4 +1,6 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
+
+var utils = require('ep_comments_page/static/js/utils');
 var api = require('ep_comments_page/static/js/api');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
@@ -16,7 +18,7 @@ var screenHasSpaceForIcons = function() {
 }
 
 var calculateIfScreenHasSpaceForIcons = function() {
-  var $firstElementOnPad = getPadInner().find('#innerdocbody > div').first();
+  var $firstElementOnPad = utils.getPadInner().find('#innerdocbody > div').first();
   var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
 
   screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
@@ -32,22 +34,8 @@ var getSpaceAvailableOnTheRightSide = function($element) {
   return rightEdgeSpace;
 }
 
-// Easier access to outer pad
-var padOuter;
-var getPadOuter = function() {
-  padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
-  return padOuter;
-}
-
-// Easier access to inner pad
-var padInner;
-var getPadInner = function() {
-  padInner = padInner || getPadOuter().find('iframe[name="ace_inner"]').contents();
-  return padInner;
-}
-
 var getOrCreateIconsContainerAt = function(top) {
-  var iconContainer = getPadOuter().find('#commentIcons');
+  var iconContainer = utils.getPadOuter().find('#commentIcons');
   var iconClass = "icon-at-"+top;
 
   // is this the 1st comment on that line?
@@ -69,11 +57,11 @@ var targetCommentIdOf = function(e) {
 }
 
 var highlightTargetTextOf = function(commentId) {
-  getPadInner().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+  utils.getPadInner().find("head").append("<style>."+commentId+"{ color:orange }</style>");
 }
 
 var removeHighlightOfTargetTextOf = function(commentId) {
-  getPadInner().find("head").append("<style>."+commentId+"{ color:black }</style>");
+  utils.getPadInner().find("head").append("<style>."+commentId+"{ color:black }</style>");
   // TODO this could potentially break ep_font_color
 }
 
@@ -82,7 +70,7 @@ var toggleActiveCommentIcon = function(target) {
 }
 
 var addListenersToCommentIcons = function() {
-  getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
+  utils.getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
     var commentId = targetCommentIdOf(e);
     highlightTargetTextOf(commentId);
   }).on("mouseout", ".comment-icon", function(e){
@@ -95,7 +83,7 @@ var addListenersToCommentIcons = function() {
   }).on("click", ".comment-icon.inactive", function(e){
     // deactivate/hide other comment boxes that are opened, so we have only
     // one comment box opened at a time
-    var allActiveIcons = getPadOuter().find('#commentIcons').find(".comment-icon.active");
+    var allActiveIcons = utils.getPadOuter().find('#commentIcons').find(".comment-icon.active");
     toggleActiveCommentIcon(allActiveIcons);
 
     // activate/show only target comment
@@ -112,10 +100,10 @@ var addListenersToDeactivateComment = function() {
   $(document).on("touchstart click", function(e){
     deactivateCommentIfNotOnSelectedElements(e);
   });
-  getPadOuter().find('html').on("touchstart click", function(e){
+  utils.getPadOuter().find('html').on("touchstart click", function(e){
     deactivateCommentIfNotOnSelectedElements(e);
   });
-  getPadInner().find('html').on("touchstart click", function(e){
+  utils.getPadInner().find('html').on("touchstart click", function(e){
     deactivateCommentIfNotOnSelectedElements(e);
   });
 }
@@ -138,7 +126,14 @@ var deactivateCommentIfNotOnSelectedElements = function(e) {
 
 // Search on the page for an opened comment
 var findOpenedComment = function() {
-  return getPadOuter().find('#commentIcons .comment-icon.active').get(0);
+  return utils.getPadOuter().find('#commentIcons .comment-icon.active').get(0);
+}
+
+// Handle when an external message asks for a comment to be activated. Click on its
+// icon, so the whole cycle is performed
+var handleCommentActivation = function(commentId) {
+  // ".inactive": comment is already active, don't need to do anything
+  utils.getPadOuter().find('#commentIcons .inactive#icon-' + commentId).click();
 }
 
 /* ***** Public methods: ***** */
@@ -148,11 +143,13 @@ var insertContainer = function() {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
-  getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
+  utils.getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
   adjustIconsForNewScreenSize();
   addListenersToCommentIcons();
   addListenersToDeactivateComment();
+
+  api.setHandleCommentActivation(handleCommentActivation);
 }
 
 // Create a new comment icon
@@ -160,7 +157,7 @@ var addIcon = function(commentId, comment){
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
-  var inlineComment = getPadInner().find(".comment."+commentId);
+  var inlineComment = utils.getPadInner().find(".comment."+commentId);
   var top = inlineComment.get(0).offsetTop + 5;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
   var icon = $('#commentIconTemplate').tmpl(comment);
@@ -173,7 +170,7 @@ var hideIcons = function() {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
-  getPadOuter().find('#commentIcons').children().children().each(function(){
+  utils.getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
   });
 }
@@ -184,7 +181,7 @@ var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
-  var icon = getPadOuter().find('#icon-'+commentId);
+  var icon = utils.getPadOuter().find('#icon-'+commentId);
   var targetTop = baseTop+5;
   var iconsAtLine = getOrCreateIconsContainerAt(targetTop);
 
@@ -202,7 +199,7 @@ var isCommentOpenedByClickOnIcon = function() {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons() || !screenHasSpaceForIcons()) return false;
 
-  var iconClicked = getPadOuter().find('#commentIcons').find(".comment-icon.active");
+  var iconClicked = utils.getPadOuter().find('#commentIcons').find(".comment-icon.active");
   var commentOpenedByClickOnIcon = iconClicked.length !== 0;
 
   return commentOpenedByClickOnIcon;
@@ -215,7 +212,7 @@ var commentHasReply = function(commentId) {
   if (!displayIcons()) return;
 
   // change comment icon
-  var iconForComment = getPadOuter().find('#commentIcons').find("#icon-"+commentId);
+  var iconForComment = utils.getPadOuter().find('#commentIcons').find("#icon-"+commentId);
   iconForComment.addClass("with-reply");
 }
 
@@ -244,9 +241,9 @@ var adjustIconsForNewScreenSize = function() {
   calculateIfScreenHasSpaceForIcons();
 
   if (screenHasSpaceForIcons()) {
-    getPadOuter().find('#commentIcons').show();
+    utils.getPadOuter().find('#commentIcons').show();
   } else {
-    getPadOuter().find('#commentIcons').hide();
+    utils.getPadOuter().find('#commentIcons').hide();
   }
 }
 

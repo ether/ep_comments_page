@@ -1,5 +1,6 @@
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.apiUtils = {
+  /**** messages sent to outside ****/
   DATA_CHANGED_EVENT: 'comments_data_changed',
   COMMENT_ACTIVATED_EVENT: 'comment_activated',
 
@@ -26,17 +27,28 @@ ep_comments_page_test_helper.apiUtils = {
   },
 
   getLastDataSent: function() {
-    return this.lastDataSent[this.DATA_CHANGED_EVENT].values;
+    return (this.lastDataSent[this.DATA_CHANGED_EVENT] || {}).values;
   },
   getLastActivatedComment: function() {
-    return this.lastDataSent[this.COMMENT_ACTIVATED_EVENT].commentId;
+    return (this.lastDataSent[this.COMMENT_ACTIVATED_EVENT] || {}).commentId;
   },
 
-  /**** DELETE_COMMENT_EVENT ****/
+  /**** messages coming from outside ****/
   DELETE_COMMENT_EVENT: 'comment_delete',
+  ACTIVATE_COMMENT_EVENT: 'comment_activate',
+
   simulateCallToDeleteComment: function(commentId) {
     var message = {
       type: this.DELETE_COMMENT_EVENT,
+      commentId: commentId,
+    };
+
+    var inboundApiEventsTarget = helper.padChrome$.window;
+    inboundApiEventsTarget.postMessage(message, '*');
+  },
+  simulateCallToActivateComment: function(commentId) {
+    var message = {
+      type: this.ACTIVATE_COMMENT_EVENT,
       commentId: commentId,
     };
 

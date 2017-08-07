@@ -123,7 +123,7 @@ describe('ep_comments_page - Comment icons', function() {
 
   context('when user clicks on comment icon - api - activate comment', function() {
     before(function() {
-      clickOnCommentIcon(commentId);
+      utils.clickOnCommentIcon(commentId);
     });
 
     it('sends the comment id on the API', function(done) {
@@ -134,11 +134,11 @@ describe('ep_comments_page - Comment icons', function() {
 
     context('and user clicks again on the icon', function() {
       before(function() {
-        clickOnCommentIcon(commentId);
+        utils.clickOnCommentIcon(commentId);
       });
       after(function() {
         // activate comment again, as on before() we've deactivated it
-        clickOnCommentIcon(commentId);
+        utils.clickOnCommentIcon(commentId);
       });
 
       it('sends an undefined comment id on the API', function(done) {
@@ -154,7 +154,7 @@ describe('ep_comments_page - Comment icons', function() {
       });
       after(function() {
         // activate comment again, as on before() we've deactivated it
-        clickOnCommentIcon(commentId);
+        utils.clickOnCommentIcon(commentId);
       });
 
       it('sends an undefined comment id on the API', function(done) {
@@ -166,11 +166,11 @@ describe('ep_comments_page - Comment icons', function() {
 
     context('and user clicks on another comment icon', function() {
       before(function() {
-        clickOnCommentIcon(anotherCommentId);
+        utils.clickOnCommentIcon(anotherCommentId);
       });
       after(function() {
         // activate original comment again, as on before() we've deactivated it
-        clickOnCommentIcon(commentId);
+        utils.clickOnCommentIcon(commentId);
       });
 
       it('sends the id of the last comment clicked on the API', function(done) {
@@ -180,9 +180,4 @@ describe('ep_comments_page - Comment icons', function() {
       });
     });
   });
-
-  var clickOnCommentIcon = function(commentId) {
-    var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId).first();
-    $commentIcon.click();
-  }
 });
