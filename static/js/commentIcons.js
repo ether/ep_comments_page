@@ -129,11 +129,28 @@ var findOpenedComment = function() {
   return utils.getPadOuter().find('#commentIcons .comment-icon.active').get(0);
 }
 
+var loadHelperLibs = function() {
+  // we must load this script on padOuter, otherwise it won't handle the scroll on
+  // padOuter.contentWindow, but on padChrome.window instead
+  var outerIframe = $('iframe[name="ace_outer"]').get(0);
+  var outerDoc = outerIframe.contentDocument;
+  var script = outerDoc.createElement('script');
+  script.type = 'text/javascript';
+  script.src = '../static/plugins/ep_comments_page/static/js/lib/scrollIntoView.min.js';
+  outerDoc.body.appendChild(script);
+}
+
 // Handle when an external message asks for a comment to be activated. Click on its
 // icon, so the whole cycle is performed
 var handleCommentActivation = function(commentId) {
-  // ".inactive": comment is already active, don't need to do anything
-  utils.getPadOuter().find('#commentIcons .inactive#icon-' + commentId).click();
+  var $commentIcon = utils.getPadOuter().find('#commentIcons #icon-' + commentId);
+
+  // make sure icon is visible on viewport
+  var outerIframe = $('iframe[name="ace_outer"]').get(0);
+  outerIframe.contentWindow.scrollIntoView($commentIcon.get(0));
+
+  // ".inactive": comment is already active, don't need to be activated
+  $commentIcon.filter('.inactive').click();
 }
 
 /* ***** Public methods: ***** */
@@ -148,6 +165,7 @@ var insertContainer = function() {
   adjustIconsForNewScreenSize();
   addListenersToCommentIcons();
   addListenersToDeactivateComment();
+  loadHelperLibs();
 
   api.setHandleCommentActivation(handleCommentActivation);
 }
