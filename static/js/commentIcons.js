@@ -140,9 +140,20 @@ var loadHelperLibs = function() {
   outerDoc.body.appendChild(script);
 }
 
-// Handle when an external message asks for a comment to be activated. Click on its
-// icon, so the whole cycle is performed
+// Handle when an external message asks for a comment to be activated.
 var handleCommentActivation = function(commentId) {
+  if (commentId) {
+    triggerCommentActivation(commentId);
+  } else {
+    triggerCommentDeactivation();
+  }
+}
+
+var triggerCommentDeactivation = function() {
+  utils.getPadOuter().find('#commentIcons .active').click();
+}
+// Click on comment icon, so the whole cycle of events is performed
+var triggerCommentActivation = function(commentId) {
   var $commentIcon = utils.getPadOuter().find('#commentIcons #icon-' + commentId);
 
   // make sure icon is visible on viewport

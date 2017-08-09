@@ -90,6 +90,25 @@ describe('ep_comments_page - api - activate comment', function() {
       expect(activatedComment).to.be(undefined);
       done();
     });
+
+    context('and no comment is provided on API call', function() {
+      before(function() {
+        apiUtils.resetData();
+        apiUtils.simulateCallToActivateComment(undefined);
+      });
+
+      it('deactivates all comment icons', function(done) {
+        var $activeCommentIcons = helper.padOuter$('#commentIcons .active');
+        expect($activeCommentIcons.length).to.be(0);
+        done();
+      });
+
+      it('sends an undefined comment id on the API', function(done) {
+        var activatedComment = apiUtils.getLastActivatedComment();
+        expect(activatedComment).to.be(undefined);
+        done();
+      });
+    });
   });
 
   // from https://stackoverflow.com/a/22480938/7884942
