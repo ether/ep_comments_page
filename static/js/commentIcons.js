@@ -69,6 +69,26 @@ var toggleActiveCommentIcon = function(target) {
   target.toggleClass("active").toggleClass("inactive");
 }
 
+var placeCaretAtBeginningOfTextOf = function(commentId) {
+  var beginningOfComment = utils.getPadInner().find('.comment.' + commentId).get(0);
+  var selection = utils.getPadInner().get(0).getSelection();
+  var range = selection.getRangeAt(0);
+
+  range.setStart(beginningOfComment, 0);
+  range.setEnd(beginningOfComment, 0);
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  // when user clicks on the icon, the editor (padInner) looses focus, so user cannot
+  // start typing right away. Force focus to be on editor to avoid that.
+  makeSureEditorHasTheFocus();
+}
+
+var makeSureEditorHasTheFocus = function() {
+  utils.getPadOuter().find('iframe[name="ace_inner"]').get(0).contentWindow.focus();
+}
+
 var addListenersToCommentIcons = function() {
   utils.getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
     var commentId = targetCommentIdOf(e);
@@ -89,6 +109,7 @@ var addListenersToCommentIcons = function() {
     // activate/show only target comment
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
+    placeCaretAtBeginningOfTextOf(commentId);
     api.triggerCommentActivation(commentId);
   });
 }

@@ -122,13 +122,26 @@ describe('ep_comments_page - Comment icons', function() {
   });
 
   context('when user clicks on comment icon - api - activate comment', function() {
-    before(function() {
-      utils.clickOnCommentIcon(commentId);
+    before(function(done) {
+      // place caret out of line with commented text
+      ep_script_elements_test_helper.utils.placeCaretOnLine(LINE_WITH_ANOTHER_COMMENT, function() {
+        utils.clickOnCommentIcon(commentId);
+        done();
+      });
     });
 
     it('sends the comment id on the API', function(done) {
       var activatedComment = apiUtils.getLastActivatedComment();
       expect(activatedComment).to.be(commentId);
+      done();
+    });
+
+    it('places the caret at beginning of commented text', function(done) {
+      var $lineWithComment = utils.getLine(LINE_WITH_COMMENT);
+      var $lineWithCaret = ep_script_elements_test_helper.utils.getLineWhereCaretIs();
+
+      expect($lineWithCaret.get(0)).to.be($lineWithComment.get(0));
+
       done();
     });
 
