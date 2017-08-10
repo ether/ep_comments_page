@@ -121,8 +121,13 @@ describe('ep_comments_page - Comment icons', function() {
     });
   });
 
-  context('when user clicks on comment icon - api - activate comment', function() {
+  context('when user clicks on comment icon', function() {
+    var nonHighlighted;
+
     before(function(done) {
+      // get original value for future comparison on the tests
+      nonHighlighted = utils.getBackgroundColorOf(commentId);
+
       // place caret out of line with commented text
       ep_script_elements_test_helper.utils.placeCaretOnLine(LINE_WITH_ANOTHER_COMMENT, function() {
         utils.clickOnCommentIcon(commentId);
@@ -145,6 +150,12 @@ describe('ep_comments_page - Comment icons', function() {
       done();
     });
 
+    it('highlights the comment on editor', function(done) {
+      var commentTextStyle = utils.getBackgroundColorOf(commentId);
+      expect(commentTextStyle).to.not.be(nonHighlighted);
+      done();
+    });
+
     context('and user clicks again on the icon', function() {
       before(function() {
         utils.clickOnCommentIcon(commentId);
@@ -157,6 +168,12 @@ describe('ep_comments_page - Comment icons', function() {
       it('sends an undefined comment id on the API', function(done) {
         var activatedComment = apiUtils.getLastActivatedComment();
         expect(activatedComment).to.be(undefined);
+        done();
+      });
+
+      it('removes the highlight of the comment on editor', function(done) {
+        var commentTextStyle = utils.getBackgroundColorOf(commentId);
+        expect(commentTextStyle).to.be(nonHighlighted);
         done();
       });
     });
@@ -175,6 +192,12 @@ describe('ep_comments_page - Comment icons', function() {
         expect(activatedComment).to.be(undefined);
         done();
       });
+
+      it('removes the highlight of the comment on editor', function(done) {
+        var commentTextStyle = utils.getBackgroundColorOf(commentId);
+        expect(commentTextStyle).to.be(nonHighlighted);
+        done();
+      });
     });
 
     context('and user clicks on another comment icon', function() {
@@ -189,6 +212,12 @@ describe('ep_comments_page - Comment icons', function() {
       it('sends the id of the last comment clicked on the API', function(done) {
         var activatedComment = apiUtils.getLastActivatedComment();
         expect(activatedComment).to.be(anotherCommentId);
+        done();
+      });
+
+      it('removes the highlight of the comment on editor', function(done) {
+        var commentTextStyle = utils.getBackgroundColorOf(commentId);
+        expect(commentTextStyle).to.be(nonHighlighted);
         done();
       });
     });

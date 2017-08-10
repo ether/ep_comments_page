@@ -137,6 +137,12 @@ ep_comments_page_test_helper.utils = {
     return helper.padInner$('div:eq(' + lineNum + ')');
   },
 
+  getBackgroundColorOf: function(commentId) {
+    var $commentedText = helper.padInner$('.' + commentId);
+    var style = helper.padInner$.window.getComputedStyle($commentedText.get(0), '');
+    return style.getPropertyValue('background-color');
+  },
+
   _waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
     helper.waitFor(function() {

@@ -2,13 +2,6 @@ note{
   display:block;
 }
 
-.comment {
-  /*WARNING - if you change this value, you need to change it too on copyPasteEvents.js, otherwise you'll break part of the copy/paste behavior"*/
-  background: #FFFACD !important;
-  border-radius: 0px;
-}
-
-
 .pre-selected-comment {
   background: #FFE168 !important;
 }
@@ -17,7 +10,6 @@ time{
   display:none;
 }
 
-.comment-modal .comment-text,
 .sidebar-comment:hover .comment-text,
 .sidebar-comment.mouseover .comment-text{
   height:auto;
@@ -41,37 +33,12 @@ time{
   display:block;
 }
 
-.comment-modal{
-  position:absolute;
-  min-width:20px;
-  max-width:50%;
-  min-height:10px;
-  background-color:#fff;
-  z-index:99999;
-  top:0;
-  left:0;
-  border:solid #ccc 1px;
-  display:none;
-  padding:10px 10px 0px 10px;
-  font-size:12px;
-  line-height:24px;
-}
-
 .comment-changeTo-approve{
   margin:0px 0px 10px 0px;
 }
 
 .reply-suggestion.active {
   display: block;
-}
-
-/* hide comment elements when displayed on modal, not on sidebar */
-.comment-modal .reply-comment-suggest,
-.comment-modal .comment-reply-input-label,
-.comment-modal .reply-suggestion,
-.comment-modal input,
-.comment-modal .comment-changeTo-approve{
-  display:none;
 }
 
 .sidebar-comment-reply{

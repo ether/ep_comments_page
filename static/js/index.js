@@ -209,11 +209,6 @@ ep_comments.prototype.init = function(){
     }
   });
 
-
-  // Create hover modal
-  $('iframe[name="ace_outer"]').contents().find("body")
-    .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
-
   // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
   this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
     e.preventDefault();
@@ -509,45 +504,6 @@ ep_comments.prototype.collectComments = function(callback){
 
     if(showRevert){
       self.showChangeAsAccepted(commentId);
-    }
-
-  });
-  // now if we apply a class such as mouseover to the editor it will go shitty
-  // so what we need to do is add CSS for the specific ID to the document...
-  // It's fucked up but that's how we do it..
-  var padInner = this.padInner;
-  this.container.on("mouseover", ".sidebar-comment", function(e){
-    var commentId = e.currentTarget.id;
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
-    inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
-    // on hover we should show the reply option
-  }).on("mouseout", ".sidebar-comment", function(e){
-    var commentId = e.currentTarget.id;
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
-    inner.contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
-    // TODO this could potentially break ep_font_color
-  });
-
-  // hover event
-  this.padInner.contents().on("mouseover", ".comment", function(e){
-    var commentId = self.commentIdOf(e);
-    var hideEditAndRemoveCommentWindow = true;
-    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
-  });
-
-  // click event
-  this.padInner.contents().on("click", ".comment", function(e){
-    var commentId = self.commentIdOf(e);
-    var hideEditAndRemoveCommentWindow = true;
-    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
-  });
-
-  this.padInner.contents().on("mouseleave", ".comment", function(e){
-    var commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
-
-    // only closes comment if it was not opened by a click on the icon
-    if (!commentOpenedByClickOnIcon) {
-      self.closeOpenedComment(e);
     }
   });
 

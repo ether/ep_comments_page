@@ -57,12 +57,13 @@ var targetCommentIdOf = function(e) {
 }
 
 var highlightTargetTextOf = function(commentId) {
-  utils.getPadInner().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+  utils.getPadInner().find("head").append("<style>."+commentId+"{ background: #FFFACD !important }</style>");
 }
-
 var removeHighlightOfTargetTextOf = function(commentId) {
-  utils.getPadInner().find("head").append("<style>."+commentId+"{ color:black }</style>");
-  // TODO this could potentially break ep_font_color
+  utils.getPadInner().find("head").append("<style>."+commentId+"{ background: none !important }</style>");
+}
+var removeHighlightOfAllComments = function() {
+  utils.getPadInner().find("head").append("<style>.comment{ background: none !important }</style>");
 }
 
 var toggleActiveCommentIcon = function(target) {
@@ -90,25 +91,28 @@ var makeSureEditorHasTheFocus = function() {
 }
 
 var addListenersToCommentIcons = function() {
-  utils.getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
+  utils.getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon.inactive", function(e){
     var commentId = targetCommentIdOf(e);
     highlightTargetTextOf(commentId);
-  }).on("mouseout", ".comment-icon", function(e){
+  }).on("mouseout", ".comment-icon.inactive", function(e){
     var commentId = targetCommentIdOf(e);
     removeHighlightOfTargetTextOf(commentId);
   }).on("click", ".comment-icon.active", function(e){
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
+    removeHighlightOfTargetTextOf(commentId);
     api.triggerCommentDeactivation();
   }).on("click", ".comment-icon.inactive", function(e){
     // deactivate/hide other comment boxes that are opened, so we have only
     // one comment box opened at a time
     var allActiveIcons = utils.getPadOuter().find('#commentIcons').find(".comment-icon.active");
     toggleActiveCommentIcon(allActiveIcons);
+    removeHighlightOfAllComments();
 
     // activate/show only target comment
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
+    highlightTargetTextOf(commentId);
     placeCaretAtBeginningOfTextOf(commentId);
     api.triggerCommentActivation(commentId);
   });
@@ -141,6 +145,7 @@ var deactivateCommentIfNotOnSelectedElements = function(e) {
   var openedComment = findOpenedComment();
   if (openedComment) {
     toggleActiveCommentIcon($(openedComment));
+    removeHighlightOfAllComments();
     api.triggerCommentDeactivation();
   }
 }
