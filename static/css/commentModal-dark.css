@@ -1,0 +1,42 @@
+/* add shadowed border */
+.theme-dark .ui-dialog {
+  background-color: #1E1E23; /* color 30 */
+
+  -webkit-box-shadow: 0px 2px 15px 5px #141419; /* color 20 */
+  -moz-box-shadow: 0px 2px 15px 5px #141419; /* color 20 */
+  box-shadow: 0px 2px 15px 5px #141419; /* color 20 */
+}
+
+/* font color */
+.theme-dark .ui-dialog-content,
+.theme-dark .ui-dialog-title,
+.theme-dark .ui-dialog-content textarea {
+  color: #A0A2A6; /* color 160 */
+}
+
+/* dialog sections separator */
+.theme-dark .ui-dialog-content > div:not(:last-child) {
+  border-bottom: 1px solid #323237; /* color 50 */
+}
+
+/* save button */
+.theme-dark input.comment-button--save {
+  box-shadow: 1px 1px 1px 1px #141419; /* color 20 */
+  background-color: #323237; /* color 50 */
+}
+.theme-dark input.comment-button--save:hover {
+  color: #A0A2A6; /* color 160 */
+}
+.theme-dark input.comment-button--save:active {
+  color: #FFFFFF; /* color 255 */
+}
+
+/* title bar */
+.theme-dark .ui-dialog .ui-dialog-titlebar {
+  background-color: #28282D; /* color 40 */
+}
+
+/* close button */
+.theme-dark .ui-dialog-titlebar-close:hover:not(:active) {
+  fill: #FFFFFF; /* color 255 */
+}

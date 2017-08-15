@@ -1,6 +1,9 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var utils = require('./utils');
 var commentL10n = require('./commentL10n');
+var preCommentMark = require('./preCommentMark');
+
+var SELECTED_TEXT = '.' + preCommentMark.MARK_CLASS;
 
 // Easier access to new comment container
 var newCommentContainer;
@@ -11,13 +14,36 @@ var getNewCommentContainer = function() {
 
 // Insert a comment node
 var createNewCommentForm = function(comment) {
-  var container = getNewCommentContainer();
+  var $container = getNewCommentContainer();
 
-  comment.commentId = "";
-  var content = $('#newCommentTemplate').tmpl(comment);
-  content.prependTo(container);
+  var $content = $('#newCommentTemplate').tmpl(comment);
+  $content.prependTo($container);
 
-  return content;
+  $content.dialog({
+    autoOpen: false,
+    resizable: false,
+    show: {
+      effect: "drop",
+      duration: 500
+    },
+    hide: {
+      effect: "drop",
+      duration: 500
+    },
+    // de-select text when modal is closed
+    close: hideNewCommentForm,
+  });
+  // the close button of $.dialog() cannot be customized as needed, so override it
+  var $closeButton = $('#closeButton').tmpl();
+  var $originalButtonContainer = utils.getPadOuter().find('.ui-dialog-titlebar-close');
+  $originalButtonContainer.html($closeButton.html());
+
+  // enable l10n of close button
+  $originalButtonContainer.attr('data-l10n-id', 'ep_comments_page.comments_template.close.title');
+
+  // enable l10n of dialog title
+  var $dialogTitle = utils.getPadOuter().find('.ui-dialog-title');
+  $dialogTitle.attr('data-l10n-id', 'ep_comments_page.comments_template.comment');
 };
 
 // Create a comment object with data filled on the given form
@@ -58,7 +84,7 @@ var fixFlyingToobarOnIOS = function() {
   if (browser.ios) {
     var shouldPlaceMenuRightOnBottom = $(".toolbar ul.menu_right").css('bottom') !== "auto";
 
-    getNewCommentContainer().find('input, textarea')
+    utils.getPadOuter().find('#newComments').find('input, textarea')
     .on("focus", function() {
       fixToolbarPosition();
       if (shouldPlaceMenuRightOnBottom) placeMenuRightOnBottom();
@@ -96,63 +122,81 @@ var revertPlacingMenuRightOnBottom = function() {
 /* ***** Public methods: ***** */
 
 var localizeNewCommentForm = function() {
-  var newCommentForm = getNewCommentContainer().find('#newComment');
-  if (newCommentForm.length !== 0) commentL10n.localize(newCommentForm);
+  var $newCommentContainer = utils.getPadOuter().find('.ui-dialog');
+  if ($newCommentContainer.length !== 0) commentL10n.localize($newCommentContainer);
 };
 
 // Create container to hold new comment form
 var insertContainers = function(target) {
   target.prepend('<div id="newComments"></div>');
 
-  // Listen for include suggested change toggle
-  getNewCommentContainer().on("change", '#suggestion-checkbox', function() {
-    if($(this).is(':checked')) {
-      utils.getPadOuter().find('.suggestion').show();
-    } else {
-      utils.getPadOuter().find('.suggestion').hide();
-    }
-  });
+  createNewCommentForm();
+
+  // Hack to avoid "flying" toolbars on iOS
+  fixFlyingToobarOnIOS();
 }
 
-// Insert new Comment Form
-var insertNewCommentFormIfDontExist = function(comment, callback) {
-  var newCommentForm = getNewCommentContainer().find('#newComment');
-  var formDoesNotExist = newCommentForm.length === 0;
-  if (formDoesNotExist) {
-    newCommentForm = createNewCommentForm(comment);
-    localizeNewCommentForm();
+// create an element on the exact same position of the selected text.
+// Use it as reference to display new comment modal later
+var createShadowOnPadOuterOfSelectedText = function() {
+  var $selectedText = utils.getPadInner().find(SELECTED_TEXT);
+  // there might have multiple <span>'s on selected text
+  var beginningOfSelectedText = $selectedText.first().get(0).getBoundingClientRect();
+  var endingOfSelectedText    = $selectedText.last().get(0).getBoundingClientRect();
 
-    // Listen to cancel
-    newCommentForm.find('#comment-reset').on('click', function() {
-      cancelNewComment();
-    });
+  var topOfSelectedText    = beginningOfSelectedText.top;
+  var bottomOfSelectedText = endingOfSelectedText.bottom;
+  var leftOfSelectedText   = Math.min(beginningOfSelectedText.left, endingOfSelectedText.left);
+  var rightOfSelectedText  = Math.max(beginningOfSelectedText.right, endingOfSelectedText.right);
 
-    // Hack to avoid "flying" toolbars on iOS
-    fixFlyingToobarOnIOS();
+  // get "ghost" position
+  var editor = utils.getPadOuter().find('iframe[name="ace_inner"]').offset();
+  var $ghost = $('<span id="ghost"></span>');
+  $ghost.css({
+    top: editor.top + topOfSelectedText,
+    left: editor.left + leftOfSelectedText,
+    width: rightOfSelectedText - leftOfSelectedText,
+    height: bottomOfSelectedText - topOfSelectedText,
+    position: 'absolute',
+  });
+  $ghost.insertAfter(getNewCommentContainer());
 
-  } else {
-    // Reset form to make sure it is all clear
-    newCommentForm.get(0).reset();
+  return $ghost;
+}
 
-    // Detach current "submit" handler to be able to call the updated callback
-    newCommentForm.off("submit");
-  }
+var showNewCommentForm = function(comment, callback) {
+  localizeNewCommentForm();
 
-  // Listen to comment confirmation (needs to be outside of if/else to be able to update the callback)
-  newCommentForm.submit(function() {
-    var form = $(this);
-    return submitNewComment(form, callback);
+  // TODO do we need this??
+  comment.commentId = "";
+
+  var $newCommentForm = utils.getPadOuter().find('#newComment');
+
+  // Reset form to make sure it is all clear
+  $newCommentForm.get(0).reset();
+
+  // Detach current "submit" handler to be able to call the updated callback
+  $newCommentForm.off("submit").submit(function() {
+    return submitNewComment($(this), callback);
   });
 
-  return newCommentForm;
-};
-
-var showNewCommentForm = function() {
-  getNewCommentContainer().addClass("active");
-  // we need to set a timeout otherwise the animation to show #newComment won't be visible
+  // we need to set a timeout to make sure selected text was marked and $ghost can be
+  // created at the correct position
   window.setTimeout(function() {
-    utils.getPadOuter().find('.suggestion').hide(); // Hides suggestion in case of a cancel
-    getNewCommentContainer().find('#newComment').removeClass("hidden").addClass("visible");
+    var $ghost = createShadowOnPadOuterOfSelectedText();
+
+    $newCommentForm.dialog('option', 'position', {
+      my: 'left top',
+      at: 'left bottom+3',
+      of: $ghost,
+      // make sure dialog positioning takes into account the amount of scroll editor has
+      within: utils.getPadOuter(),
+    }).dialog('open');
+    $ghost.remove();
+
+    // TODO scroll if necessary
+    // var outerIframe = $('iframe[name="ace_outer"]').get(0);
+    // outerIframe.contentWindow.scrollIntoView(utils.getPadOuter().find('#newComment').get(0));
   }, 0);
 
   // mark selected text, so it is clear to user which text range the comment is being applied to
@@ -160,15 +204,11 @@ var showNewCommentForm = function() {
 }
 
 var hideNewCommentForm = function() {
-  getNewCommentContainer().find('#newComment').removeClass("visible").addClass("hidden");
+  var $newCommentForm = utils.getPadOuter().find('#newComment');
+  $newCommentForm.dialog('close');
 
   // force focus to be lost, so virtual keyboard is hidden on mobile devices
-  getNewCommentContainer().find(':focus').blur();
-
-  // we need to give some time for the animation of #newComment to finish
-  window.setTimeout(function() {
-    getNewCommentContainer().removeClass("active");
-  }, 500);
+  utils.getPadOuter().find(':focus').blur();
 
   // unmark selected text, as now there is no text being commented
   pad.plugins.ep_comments_page.preCommentMarker.unmarkSelectedText();
@@ -187,8 +227,6 @@ var waitForResizeToFinishThenCall = function(timeout, callback){
 }
 
 exports.localizeNewCommentForm = localizeNewCommentForm;
-exports.insertNewCommentFormIfDontExist = insertNewCommentFormIfDontExist;
 exports.showNewCommentForm = showNewCommentForm;
-exports.hideNewCommentForm = hideNewCommentForm;
 exports.insertContainers = insertContainers;
 exports.waitForResizeToFinishThenCall = waitForResizeToFinishThenCall;

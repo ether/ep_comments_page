@@ -17,7 +17,15 @@ var smUtils = require('ep_script_scene_marks/static/js/utils');
 var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 var hasCommentOnSelection = events.hasCommentOnSelection;
 
-var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
+var cssFiles = [
+  '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
+  '//fonts.googleapis.com/css?family=Roboto:100,300,400', // light, regular, bold
+  'ep_comments_page/static/css/comment.css',
+  'ep_comments_page/static/css/commentIcon.css',
+  'ep_comments_page/static/css/commentModal.css',
+  'ep_comments_page/static/css/commentModal-light.css',
+  'ep_comments_page/static/css/commentModal-dark.css',
+];
 
 var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
@@ -875,14 +883,11 @@ ep_comments.prototype.displayNewCommentForm = function() {
     return;
   }
 
-  self.createNewCommentFormIfDontExist(rep);
-
   // Write the text to the changeFrom form
   var padOuter = $('iframe[name="ace_outer"]').contents();
   padOuter.find(".comment-suggest-from").val(selectedText);
 
-  // Display form
-  newComment.showNewCommentForm();
+  self.showNewCommentForm(rep);
 
   // Check if the first element selected is visible in the viewport
   var $firstSelectedElement = self.getFirstElementSelected();
@@ -961,12 +966,11 @@ ep_comments.prototype.checkNoTextSelected = function(rep) {
 }
 
 // Create form to add comment
-ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
+ep_comments.prototype.showNewCommentForm = function(rep) {
   var data = this.getCommentData();
   var self = this;
 
-  // If a new comment box doesn't already exist, create one
-  newComment.insertNewCommentFormIfDontExist(data, function(comment, index) {
+  newComment.showNewCommentForm(data, function(comment, index) {
     if(comment.changeTo){
       data.comment.changeFrom = comment.changeFrom;
       data.comment.changeTo = comment.changeTo;

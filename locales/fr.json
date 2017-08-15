@@ -12,6 +12,7 @@
   "ep_comments_page.comments_template.suggest_change_from" : "Proposer une modification de :",
   "ep_comments_page.comments_template.to" : "Par :",
   "ep_comments_page.comments_template.include_suggestion" : "Proposer une modification",
+  "ep_comments_page.comments_template.comment" : "Annotation",
   "ep_comments_page.comments_template.comment.value" : "Annotation",
   "ep_comments_page.comments_template.cancel.value" : "Annuler",
   "ep_comments_page.comments_template.reply_input_label":"Votre réponse (pressez ENTRÉE pour valider)",

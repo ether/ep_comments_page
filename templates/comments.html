@@ -1,4 +1,9 @@
 <script src="../static/plugins/ep_comments_page/static/js/lib/jquery.tmpl.min.js"></script>
+<script
+  src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous">
+</script>
 
 <script id="commentsTemplate" type="text/html">
     <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
@@ -58,33 +63,27 @@
     </div>
 </script>
 
+<script id="closeButton" type="text/html">
+  <span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 9.9 9.9">
+      <polygon points="6.9 2.3 5 4.2 3 2.3 2.3 3 4.2 5 2.3 6.9 3 7.6 5 5.7 6.9 7.6 7.6 6.9 5.7 5 7.6 3 "/>
+    </svg>
+  </span>
+</script>
+
 <script id="newCommentTemplate" type="text/html">
-    <form id="newComment" class="sidebar-comment">
-        <p data-l10n-id="ep_comments_page.comment">Comment</p>
-        <p class="comment-text">
-            <textarea class="comment-content" autofocus></textarea>
-        </p>
-
-        <p class="comment-suggest">
-            <input type="checkbox" id="suggestion-checkbox">
-            <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
-        </p>
-        <span class="suggestion">
-            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest Change From:</p>
-            <p class="comment-suggest-from-p">
-                <textarea class="comment-suggest-from" disabled="disabled"></textarea>
-            </p>
-            <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
-            <p class="comment-suggest-to-p">
-                <textarea class="comment-suggest-to"></textarea>
-            </p>
-        </span>
-
-        <p class="comment-buttons">
-            <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
-            <input type="reset" id="comment-reset" value="Cancel" data-l10n-id="ep_comments_page.comments_template.cancel.value" />
-        </p>
-    </form>
+  <form id="newComment">
+    <div class="comment-author">
+      <authoricon>TK</authoricon>
+      <authorname>Luiza Figueiredo Pagliari Luiza Figueiredo Pagliari</authorname>
+    </div>
+    <div class="comment-text">
+      <textarea class="comment-content" autofocus placeholder="write here your comment" data-l10n-id="ep_comments_page.comments_template.comment.placeholder"></textarea>
+    </div>
+    <div class="comment-buttons">
+      <input class="comment-button--save" type="submit" value="Save" data-l10n-id="ep_comments_page.comments_template.save.value" />
+    </div>
+  </form>
 </script>
 
 <script id="replyTemplate" type="text/html">

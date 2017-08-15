@@ -13,7 +13,9 @@
   "ep_comments_page.comments_template.suggest_change_from" : "Sugerir alteração de:",
   "ep_comments_page.comments_template.to" : "Para:",
   "ep_comments_page.comments_template.include_suggestion" : "Incluir alteração sugerida",
+  "ep_comments_page.comments_template.comment" : "Comentário",
   "ep_comments_page.comments_template.comment.value" : "Comentário",
+  "ep_comments_page.comments_template.comment.placeholder" : "escreva seu comentário",
   "ep_comments_page.comments_template.cancel.value" : "Cancelar",
   "ep_comments_page.comments_template.reply_input_label":"Sua Resposta (clique ENTER para enviar)",
   "ep_comments_page.time.seconds.past" : "{{count}} segundos atrás",
@@ -46,6 +48,8 @@
   "ep_comments_page.time.one_century.future" : "próximo século",
   "ep_comments_page.time.centuries.past" : "{{count}} séculos atrás",
   "ep_comments_page.time.centuries.future" : "daqui a {{count}} séculos",
+  "ep_comments_page.comments_template.save.value" : "salvar",
+  "ep_comments_page.comments_template.close.title" : "Fechar",
   "ep_comments_page.comments_template.edit_comment.save" : "salvar",
   "ep_comments_page.comments_template.edit_comment.cancel" :"cancelar"
 }

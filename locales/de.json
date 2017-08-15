@@ -12,6 +12,7 @@
   "ep_comments_page.comments_template.suggest_change_from" : "von:",
   "ep_comments_page.comments_template.to" : "zu:",
   "ep_comments_page.comments_template.include_suggestion" : "Änderung vorschlagen",
+  "ep_comments_page.comments_template.comment" : "Kommentar",
   "ep_comments_page.comments_template.comment.value" : "Kommentar",
   "ep_comments_page.comments_template.cancel.value" : "Abbrechen",
   "ep_comments_page.comments_template.reply_input_label":"antworten: (mit ENTER)",
