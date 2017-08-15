@@ -17,7 +17,7 @@
 .ui-dialog {
   padding: 0;
   font-family: 'Roboto', sans-serif;
-  font-weight: 300; /* Roboto Regular */
+  font-weight: 400; /* Roboto Regular */
 }
 
 /* remove external border of the dialog */
@@ -42,7 +42,7 @@
   border: none;
 
   text-transform: uppercase;
-  font-weight: 400; /* Roboto Bold */
+  font-weight: 400; /* Roboto Regular */
   font-size: 10px;
 }
 
@@ -102,8 +102,12 @@ authorname {
 
   caret-color: currentColor;
   font-family: 'Roboto', sans-serif;
-  font-weight: 100; /* Roboto Light */
-  font-size: 12px;
+  font-weight: 300; /* Roboto Light */
+  font-size: 11px;
+}
+
+.comment-text textarea::placeholder {
+  font-style: italic;
 }
 
 .comment-buttons {
@@ -116,7 +120,7 @@ input.comment-button--save {
 
   font-family: inherit; /* avoid jQueryUI from overwriting the font */
   font-size: 11px;
-  font-weight: 100; /* Roboto Light */
+  font-weight: 300; /* Roboto Light */
   text-transform: lowercase;
 
   color: #808286; /* color 130 */

@@ -18,7 +18,7 @@ var hasCommentOnSelection = events.hasCommentOnSelection;
 
 var cssFiles = [
   '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
-  '//fonts.googleapis.com/css?family=Roboto:100,300,400', // light, regular, bold
+  '//fonts.googleapis.com/css?family=Roboto:300,400', // light, regular
   'ep_comments_page/static/css/comment.css',
   'ep_comments_page/static/css/commentIcon.css',
   'ep_comments_page/static/css/commentModal.css',
