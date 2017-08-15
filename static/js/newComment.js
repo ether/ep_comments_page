@@ -48,18 +48,8 @@ var createNewCommentForm = function(comment) {
 
 // Create a comment object with data filled on the given form
 var buildCommentFrom = function(form) {
-  var text       = form.find('.comment-content').val();
-  var changeFrom = form.find('.comment-suggest-from').val();
-  var changeTo   = form.find('.comment-suggest-to').val() || null;
-  var comment    = {};
-
-  comment.text = text;
-  if(changeTo){
-    comment.changeFrom = changeFrom;
-    comment.changeTo = changeTo;
-  }
-
-  return comment;
+  var text = form.find('.comment-content').val();
+  return { text: text };
 }
 
 // Callback for new comment Cancel

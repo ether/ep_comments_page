@@ -379,7 +379,7 @@ ep_comments_page_test_helper.copyAndPaste = {
   testIfHasAllFieldsNecessaryToCreateACommementReply: function(event) {
     var commentReplyDataValues = this.getCommentReplyDataValues(event);
     var keys = _.keys(commentReplyDataValues);
-    var keysRequired = ["commentId", "text", "changeTo", "changeFrom", "author", "name", "timestamp", "replyId", "formattedDate"];
+    var keysRequired = ["commentId", "text", "author", "name", "timestamp", "replyId", "formattedDate"];
     this.checkIfHasAllKeys(keysRequired, keys);
   },
   testIfHasAllFieldsNecessaryToCreateAComment(event) {

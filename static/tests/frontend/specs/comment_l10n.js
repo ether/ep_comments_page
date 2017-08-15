@@ -89,10 +89,6 @@ describe("ep_comments_page - Comment Localization", function(){
     // fill the comment form and submit it
     var $commentField = outer$("textarea.comment-content");
     $commentField.val("My comment");
-    var $hasSuggestion = outer$("#suggestion-checkbox");
-    $hasSuggestion.click();
-    var $suggestionField = outer$("textarea.comment-suggest-to");
-    $suggestionField.val("Change to this suggestion");
     var $submittButton = outer$("input[type=submit]");
     $submittButton.click();
 

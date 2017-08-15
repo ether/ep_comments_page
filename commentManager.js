@@ -73,8 +73,6 @@ exports.bulkAddComments = function(padId, data, callback)
         "author": commentData.author || "empty",
         "name": commentData.name,
         "text": commentData.text,
-        "changeTo": commentData.changeTo,
-        "changeFrom": commentData.changeFrom,
         "timestamp": parseInt(commentData.timestamp) || new Date().getTime()
       };
       //add the entry for this pad
@@ -172,8 +170,6 @@ exports.bulkAddCommentReplies = function(padId, data, callback){
       var reply = {
         "commentId"  : replyData.commentId,
         "text"       : replyData.reply               || replyData.text,
-        "changeTo"   : replyData.changeTo            || null,
-        "changeFrom" : replyData.changeFrom          || null,
         "author"     : metadata.author               || "empty",
         "name"       : metadata.name                 || replyData.name,
         "timestamp"  : parseInt(replyData.timestamp) || new Date().getTime()
@@ -209,48 +205,6 @@ exports.copyCommentReplies = function(originalPadId, newPadID, callback){
     callback(null);
   });
 };
-
-exports.changeAcceptedState = function(padId, commentId, state, callback){
-  // Given a comment we update that comment to say the change was accepted or reverted
-
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
-
-  // If we're dealing with comment replies we need to a different query
-  var prefix = "comments:";
-  if(commentId.substring(0,7) === "c-reply"){
-    prefix = "comment-replies:";
-  }
-
-  //get the entry
-  db.get(prefix + padId, function(err, comments){
-
-    if(ERR(err, callback)) return;
-
-    //add the entry for this pad
-    var comment = comments[commentId];
-
-    if(state){
-      comment.changeAccepted = true;
-      comment.changeReverted = false;
-    }else{
-      comment.changeAccepted = false;
-      comment.changeReverted = true;
-    }
-
-    comments[commentId] = comment;
-
-    //save the new element back
-    db.set(prefix + padId, comments);
-
-    callback(null, commentId, comment);
-  });
-}
 
 exports.changeCommentText = function(padId, commentId, commentText, callback){
   var commentTextIsNotEmpty = commentText.length > 0;

@@ -4,7 +4,6 @@ var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
 var shared = require('./shared');
-var prettyDate = require('./timeFormat').prettyDate;
 var commentBoxes = require('./commentBoxes');
 var commentIcons = require('./commentIcons');
 var newComment = require('./newComment');
@@ -55,13 +54,6 @@ function ep_comments(context){
   this.shouldCollectComment = false;
   this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
-
-  // If we're on a read only pad then hide the ability to attempt to merge a suggestion
-  if(clientVars.readonly){
-    this.padInner.append(
-        "<style>.comment-changeTo-approve," +
-               ".comment-reply-changeTo-approve{display:none;}</style>");
-  }
 }
 
 // Init Etherpad plugin comment pads
@@ -202,109 +194,10 @@ ep_comments.prototype.init = function(){
     $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
   });
 
-  // Listen for include suggested change toggle
-  this.container.on("change", '.reply-suggestion-checkbox', function(){
-    if($(this).is(':checked')){
-      var commentId = $(this).parent().parent().parent().data('commentid');
-      var padOuter = $('iframe[name="ace_outer"]').contents();
-      var padInner = padOuter.find('iframe[name="ace_inner"]');
-
-      var currentString = padInner.contents().find("."+commentId).html();
-      $(this).parent().parent().find(".reply-comment-changeFrom-value").html(currentString);
-      $(this).parent().parent().find('.reply-suggestion').addClass("active");
-    }else{
-      $(this).parent().parent().find('.reply-suggestion').removeClass("active");
-    }
-  });
-
-  // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
-  this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
-    e.preventDefault();
-    var data = {};
-    data.commentId = $(this).parent().parent().parent().parent().parent()[0].id;
-    data.padId = clientVars.padId;
-
-    data.replyId = $(this).parent().parent().parent()[0].id;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-
-    // Are we reverting a change?
-    var submitButton = $(this);
-    var isRevert = submitButton.hasClass("revert");
-    if(isRevert){
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html();
-    }else{
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeTo-value").html();
-    }
-
-    // Nuke all that aren't first lines of this comment
-    padInner.contents().find("."+data.commentId+":not(:first)").html("");
-    var padCommentContent = padInner.contents().find("."+data.commentId).first();
-    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
-
-    // Write the new pad contents
-    $(padCommentContent).html(newString);
-
-    // We change commentId to replyId in the data object so it's properly processed by the server..  This is hacky
-    data.commentId = data.replyId;
-
-    if(isRevert){
-      // Tell all users this change was reverted
-      self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.replyId);
-    }else{
-      // Tell all users this change was accepted
-      self.socket.emit('acceptChange', data, function (){});
-
-      // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.replyId);
-    }
-
-  });
-
   this.container.parent().on("mouseleave", ".comment-options-wrapper", function(){
     var $padOuter = $('iframe[name="ace_outer"]').contents();
     $padOuter.find('.comment-options-button').removeClass('comment-options-selected');
     $padOuter.find('.comment-options').addClass('hidden');
-  });
-
-  // User accepts a change
-  this.container.on("submit", ".comment-changeTo-form", function(e){
-    e.preventDefault();
-    var data = self.getCommentData();
-    data.commentId = $(this).parent().data('commentid');
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-
-    // Are we reverting a change?
-    var submitButton = $(this).contents().find("input[type='submit']");
-    var isRevert = submitButton.hasClass("revert");
-    if(isRevert){
-      var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
-    }else{
-      var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
-    }
-
-    // Nuke all that aren't first lines of this comment
-    padInner.contents().find("."+data.commentId+":not(:first)").html("");
-
-    var padCommentContent = padInner.contents().find("."+data.commentId).first();
-    newString = newString.replace(/(?:\r\n|\r)/g, '<br />');
-
-    // Write the new pad contents
-    $(padCommentContent).html(newString);
-
-    if(isRevert){
-      // Tell all users this change was reverted
-      self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.commentId);
-    }else{
-      // Tell all users this change was accepted
-      self.socket.emit('acceptChange', data, function (){});
-
-      // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.commentId);
-    }
   });
 
   // is this even used? - Yes, it is!
@@ -313,8 +206,6 @@ ep_comments.prototype.init = function(){
     var data = self.getCommentData();
     data.commentId = $(this).parent().data('commentid');
     data.reply = $(this).find(".comment-reply-input").val();
-    data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
-    data.changeFrom = $(this).find(".reply-comment-changeFrom-value").text() || null;
     self.socket.emit('addCommentReply', data, function (){
       // Append the reply to the comment
       // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
@@ -324,13 +215,6 @@ ep_comments.prototype.init = function(){
         self.collectCommentReplies();
       });
     });
-
-    // On submit we should hide this suggestion no?
-    if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox:checked").click();
-      $(this).parent().parent().find(".reply-comment-suggest-to").val("");
-      //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
-    }
   });
 
   // Enable and handle cookies
@@ -503,16 +387,6 @@ ep_comments.prototype.collectComments = function(callback){
     }
 
     commentElm.css({ 'top': commentPos });
-
-    // Should we show "Revert" instead of "Accept"
-    // Comment Replies are NOT handled here..
-    if(comments[commentId]){
-      var showRevert = comments[commentId].data.changeAccepted;
-    }
-
-    if(showRevert){
-      self.showChangeAsAccepted(commentId);
-    }
   });
 
   self.addListenersToCloseOpenedComment();
@@ -613,11 +487,6 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     // localize comment reply
     commentL10n.localize(content);
     $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
-    // Should we show "Revert" instead of "Accept"
-    // Comment Replies ARE handled here..
-    if(reply.changeAccepted){
-      self.showChangeAsAccepted(replyId);
-    }
   });
 };
 
@@ -782,12 +651,8 @@ ep_comments.prototype.localizeExistingComments = function() {
       var commentElm  = self.container.find('#'+ commentId);
       var comment     = comments[commentId];
 
-      // localize comment element...
+      // localize comment element
       commentL10n.localize(commentElm);
-      // ... and update its date
-      comment.data.date = prettyDate(comment.data.timestamp);
-      comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
-      commentElm.attr('title', comment.data.date);
     }
   });
 };
@@ -802,7 +667,7 @@ ep_comments.prototype.setComments = function(comments){
 // Set comment data
 ep_comments.prototype.setComment = function(commentId, comment){
   var comments = this.comments;
-  comment.date = prettyDate(comment.timestamp);
+  comment.date = comment.timestamp;
   comment.formattedDate = new Date(comment.timestamp).toISOString();
 
   if (comments[commentId] == null) comments[commentId] = {};
@@ -883,10 +748,6 @@ ep_comments.prototype.displayNewCommentForm = function() {
     return;
   }
 
-  // Write the text to the changeFrom form
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  padOuter.find(".comment-suggest-from").val(selectedText);
-
   self.showNewCommentForm(rep);
 
   // Check if the first element selected is visible in the viewport
@@ -898,6 +759,7 @@ ep_comments.prototype.displayNewCommentForm = function() {
   }
 
   // Adjust focus on the form
+  var padOuter = $('iframe[name="ace_outer"]').contents();
   padOuter.find('.comment-content').focus();
 
   // fix for iOS: when opening #newComment, we need to force focus on padOuter
@@ -971,12 +833,7 @@ ep_comments.prototype.showNewCommentForm = function(rep) {
   var self = this;
 
   newComment.showNewCommentForm(data, function(comment, index) {
-    if(comment.changeTo){
-      data.comment.changeFrom = comment.changeFrom;
-      data.comment.changeTo = comment.changeTo;
-    }
     data.comment.text = comment.text;
-
     self.saveComment(data, rep);
   });
 };
@@ -1103,8 +960,6 @@ ep_comments.prototype.buildComment = function(commentId, commentData){
   data.padId = this.padId;
   data.commentId = commentId;
   data.text = commentData.text;
-  data.changeTo = commentData.changeTo
-  data.changeFrom = commentData.changeFrom;
   data.name = commentData.name;
   data.timestamp = parseInt(commentData.timestamp);
 
@@ -1141,8 +996,6 @@ ep_comments.prototype.buildCommentReply = function(replyData){
   data.padId = this.padId;
   data.commentId = replyData.commentId;
   data.text = replyData.text;
-  data.changeTo = replyData.changeTo
-  data.changeFrom = replyData.changeFrom;
   data.replyId = replyData.replyId;
   data.name = replyData.name;
   data.timestamp = parseInt(replyData.timestamp);
@@ -1176,13 +1029,9 @@ ep_comments.prototype.commentListen = function(){
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply, changeTo, changeFrom){
-    // console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
-    // callback(replyId, reply);
-    // self.collectCommentReplies();
+  socket.on('pushAddCommentReply', function (replyId, reply){
     self.getCommentReplies(function (replies){
       if (!$.isEmptyObject(replies)){
-        // console.log("collecting comment replies");
         self.commentReplies = replies;
         self.collectCommentReplies();
       }
@@ -1196,28 +1045,6 @@ ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
   $comment.children('.comment-text').text(commentText)
 }
 
-ep_comments.prototype.showChangeAsAccepted = function(commentId){
-  var self = this;
-
-  // Get the comment
-  var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
-  button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
-  button.addClass("revert");
-  commentL10n.localize(button);
-}
-
-ep_comments.prototype.showChangeAsReverted = function(commentId){
-  var self = this;
-
-  // Get the comment
-  var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
-  button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
-  button.removeClass("revert");
-  commentL10n.localize(button);
-}
-
 // Push comment from collaborators
 ep_comments.prototype.pushComment = function(eventType, callback){
   var socket = this.socket;
@@ -1226,14 +1053,6 @@ ep_comments.prototype.pushComment = function(eventType, callback){
   socket.on('textCommentUpdated', function (commentId, commentText) {
     self.updateCommentBoxText(commentId, commentText);
   })
-
-  socket.on('changeAccepted', function(commentId){
-    self.showChangeAsAccepted(commentId);
-  });
-
-  socket.on('changeReverted', function(commentId){
-    self.showChangeAsReverted(commentId);
-  });
 
   // On collaborator add a comment in the current pad
   if (eventType == 'add'){
