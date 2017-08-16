@@ -11,6 +11,7 @@ var preCommentMark = require('./preCommentMark');
 var commentL10n = require('./commentL10n');
 var events = require('./copyPasteEvents');
 var api = require('./api');
+var utils = require('./utils');
 var smUtils = require('ep_script_scene_marks/static/js/utils');
 
 var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
@@ -102,16 +103,7 @@ ep_comments.prototype.init = function(){
 
   // When screen size changes (user changes device orientation, for example),
   // we need to make sure all sidebar comments are on the correct place
-  newComment.waitForResizeToFinishThenCall(200, function() {
-    self.editorResized();
-  });
-
-  // When Page View is enabled/disabled, we need to recalculate position of comments
-  $('#options-pageview').on('click', function(e) {
-    self.editorResized();
-  });
-  // When Page Breaks are enabled/disabled, we need to recalculate position of comments
-  $('#options-pagebreaks').on('click', function(e) {
+  utils.waitForResizeToFinishThenCall(200, function() {
     self.editorResized();
   });
 

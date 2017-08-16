@@ -86,7 +86,7 @@ var fixFlyingToobarOnIOS = function() {
 
     // When user changes orientation, we need to re-position menu_right
     if (shouldPlaceMenuRightOnBottom) {
-      waitForResizeToFinishThenCall(500, function() {
+      utils.waitForResizeToFinishThenCall(500, function() {
         var needToUpdateTop = $(".toolbar ul.menu_right").css("top") !== "";
         if (needToUpdateTop) placeMenuRightOnBottom();
       });
@@ -204,19 +204,6 @@ var hideNewCommentForm = function() {
   pad.plugins.ep_comments_page.preCommentMarker.unmarkSelectedText();
 }
 
-// Some browsers trigger resize several times while resizing the window, so
-// we need to make sure resize is done to avoid calling the callback multiple
-// times.
-// Based on: https://css-tricks.com/snippets/jquery/done-resizing-event/
-var waitForResizeToFinishThenCall = function(timeout, callback){
-  var resizeTimer;
-  $(window).on("resize", function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(callback, timeout);
-  });
-}
-
 exports.localizeNewCommentForm = localizeNewCommentForm;
 exports.showNewCommentForm = showNewCommentForm;
 exports.insertContainers = insertContainers;
-exports.waitForResizeToFinishThenCall = waitForResizeToFinishThenCall;
