@@ -211,8 +211,12 @@ var showNewCommentForm = function(comment, callback) {
     }).dialog('open');
     $ghost.remove();
 
-    // Allow user to start typing the comment right away
-    focusOnForm($newCommentForm);
+    // smoothly scroll the editor to make dialog visible
+    var outerIframe = $('iframe[name="ace_outer"]').get(0);
+    outerIframe.contentWindow.scrollIntoView($newCommentForm.get(0), function() {
+      // Allow user to start typing the comment right away
+      focusOnForm($newCommentForm);
+    });
   }, 0);
 
   // mark selected text, so it is clear to user which text range the comment is being applied to
