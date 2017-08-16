@@ -129,11 +129,26 @@ var insertContainers = function(target) {
   fixFlyingToobarOnIOS();
 }
 
+var getSelectedText = function() {
+  var $selectedText = utils.getPadInner().find(SELECTED_TEXT);
+
+  // when multiple lines are selected, the comment icon is aligned with the first one,
+  // so use it as reference to create the shadow
+  var lineAtBeginningOfSelection = $selectedText.first().closest('div').get(0);
+  var lineAtEndOfSelection = $selectedText.last().closest('div').get(0);
+  if (lineAtBeginningOfSelection !== lineAtEndOfSelection) {
+    $selectedText = $selectedText.first();
+  }
+
+  return $selectedText;
+}
+
 // create an element on the exact same position of the selected text.
 // Use it as reference to display new comment modal later
 var createShadowOnPadOuterOfSelectedText = function() {
-  var $selectedText = utils.getPadInner().find(SELECTED_TEXT);
-  // there might have multiple <span>'s on selected text
+  var $selectedText = getSelectedText();
+
+  // there might have multiple <span>'s on selected text (ex: if text has bold in the middle of it)
   var beginningOfSelectedText = $selectedText.first().get(0).getBoundingClientRect();
   var endingOfSelectedText    = $selectedText.last().get(0).getBoundingClientRect();
 
