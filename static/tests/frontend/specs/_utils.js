@@ -40,7 +40,7 @@ ep_comments_page_test_helper.utils = {
       helper.waitFor(function() {
         var secondLineText = self.getLine(1).text();
         return secondLineText === 'anything';
-      }).done(done);
+      }, 2000).done(done);
     });
   },
 
@@ -91,21 +91,28 @@ ep_comments_page_test_helper.utils = {
   },
 
   addCommentToLine: function(line, textOfComment, done) {
+    var self = this;
     var outer$ = helper.padOuter$;
     var chrome$ = helper.padChrome$;
+
     var $line = this.getLine(line);
     $line.sendkeys('{selectall}'); // needs to select content to add comment to
     var $commentButton = chrome$('.addComment');
     $commentButton.click();
 
-    // fill the comment form and submit it
-    var $commentField = outer$('textarea.comment-content');
-    $commentField.val(textOfComment);
-    var $submittButton = outer$('input[type=submit]');
-    $submittButton.click();
+    // wait for form to be displayed
+    helper.waitFor(function() {
+      return outer$('textarea:visible').length > 0;
+    }).done(function() {
+      // fill the comment form and submit it
+      var $commentField = outer$('textarea.comment-content');
+      $commentField.val(textOfComment);
+      var $submittButton = outer$('input[type=submit]');
+      $submittButton.click();
 
-    // wait until comment is created and comment id is set
-    this._waitForCommentToBeCreatedOnLine(line, done);
+      // wait until comment is created and comment id is set
+      self._waitForCommentToBeCreatedOnLine(line, done);
+    });
   },
 
   addCommentReplyToLine: function(line, textOfReply, done) {
@@ -206,5 +213,30 @@ ep_comments_page_test_helper.utils = {
 
   writeCommentText: function (commentText) {
     this.getEditForm().find('.comment-edit-text').text(commentText);
+  },
+
+  changeEtherpadLanguageTo: function(lang, callback) {
+    var boldTitles = {
+      'en' : 'Bold (Ctrl+B)',
+      'pt-br' : 'Negrito (Ctrl-B)',
+      'oc' : 'Gras (Ctrl-B)'
+    };
+    var chrome$ = helper.padChrome$;
+
+    // click on the settings button to make settings visible
+    var $settingsButton = chrome$('.buttonicon-settings');
+    $settingsButton.click();
+
+    // select the language
+    var $language = chrome$('#languagemenu');
+    $language.val(lang);
+    $language.change();
+
+    // hide settings again
+    $settingsButton.click();
+
+    helper.waitFor(function() {
+      return chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang];
+    }).done(callback);
   },
 }

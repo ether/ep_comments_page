@@ -112,6 +112,9 @@ ep_comments.prototype.init = function(){
     self.editorResized();
   });
 
+  this.padInner.contents().find("#innerdocbody").addClass("comments");
+  this.addListenersToCloseOpenedComment();
+
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
     e.preventDefault(); // stops focus from being lost
@@ -322,83 +325,29 @@ ep_comments.prototype.findContainers = function(){
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectComments = function(callback){
-  var self        = this;
-  var container   = this.container;
-  var comments    = this.comments;
+  var self = this;
   var $commentsOnText = this.padInner.contents().find('.comment');
-
-  $commentsOnText.each(function(it){
-    var $this           = $(this);
-    var cls             = $this.attr('class');
-    var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId       = (classCommentId) ? classCommentId[1] : null;
-    if(!commentId){
-      // console.log("returning due to no comment id, probably due to a deleted comment");
-      return;
-    }
-
-    self.padInner.contents().find("#innerdocbody").addClass("comments");
-
-    if (commentId === null) {
-      var isAuthorClassName = /(?:^| )(a.[A-Za-z0-9]*)/.exec(cls);
-      if (isAuthorClassName) self.removeComment(isAuthorClassName[1], it);
-      return;
-    }
-    var commentId   = classCommentId[1];
-    var commentElm  = container.find('#'+ commentId);
-
-    var comment     = comments[commentId];
-    if(comment){
-      if (comment !== null) {
-        // If comment is not in sidebar insert it
-        if (commentElm.length == 0) {
-          self.insertComment(commentId, comment.data, it);
-          commentElm = container.find('#'+ commentId);
-
-          $(this).on('click', function(){
-            markerTop = $(this).position().top;
-            commentTop = commentElm.position().top;
-            containerTop = container.css('top');
-            container.css('top', containerTop - (commentTop - markerTop));
-          });
-        }
-        // localize comment element
-        commentL10n.localize(commentElm);
-      }
-    }
-    var prevCommentElm = commentElm.prev();
-    var commentPos;
-
-    if (prevCommentElm.length == 0) {
-      commentPos = 0;
-    } else {
-      var prevCommentPos = prevCommentElm.css('top');
-      var prevCommentHeight = prevCommentElm.innerHeight();
-
-      commentPos = parseInt(prevCommentPos) + prevCommentHeight + 30;
-    }
-
-    commentElm.css({ 'top': commentPos });
-  });
-
-  self.addListenersToCloseOpenedComment();
 
   // TODO organize this code when we're done removing stuff from plugin:
 
-  // fill scene number of comments to send on API
+  // place icons + fill scene number of comments to send on API
   var $scenes = this.padInner.contents().find('div.withHeading');
   $commentsOnText.each(function() {
     var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
     var commentId      = classCommentId && classCommentId[1];
 
-    var $commentLine = $(this).closest('div');
+    var $lineWithComment = $(this).closest('div');
+    var commentData = self.comments[commentId].data;
+    commentData.commentId = commentId;
+    commentIcons.addIcon(commentData);
+
     var $headingOfSceneWhereCommentIs;
-    if ($commentLine.is('div.withHeading')) {
-      $headingOfSceneWhereCommentIs = $commentLine;
-    } else if (smUtils.checkIfHasSceneMark($commentLine)) {
-      $headingOfSceneWhereCommentIs = $commentLine.nextUntil('div.withHeading').addBack().last().next();
+    if ($lineWithComment.is('div.withHeading')) {
+      $headingOfSceneWhereCommentIs = $lineWithComment;
+    } else if (smUtils.checkIfHasSceneMark($lineWithComment)) {
+      $headingOfSceneWhereCommentIs = $lineWithComment.nextUntil('div.withHeading').addBack().last().next();
     } else {
-      $headingOfSceneWhereCommentIs = $commentLine.prevUntil('div.withHeading').addBack().first().prev();
+      $headingOfSceneWhereCommentIs = $lineWithComment.prevUntil('div.withHeading').addBack().first().prev();
     }
 
     self.comments[commentId].data.scene = 1 + $scenes.index($headingOfSceneWhereCommentIs);
@@ -501,62 +450,18 @@ ep_comments.prototype.insertContainers = function(){
   newComment.insertContainers(target);
 };
 
-// Insert a comment node
-ep_comments.prototype.insertComment = function(commentId, comment, index){
-  var content           = null;
-  var container         = this.container;
-  var commentAfterIndex = container.find('.sidebar-comment').eq(index);
-
-  comment.commentId = commentId;
-  content = $('#commentsTemplate').tmpl(comment);
-
-  commentL10n.localize(content);
-
-  // position doesn't seem to be relative to rep
-
-  // console.log('position', index, commentAfterIndex);
-  if (index === 0) {
-    content.prependTo(container);
-  } else if (commentAfterIndex.length === 0) {
-    content.appendTo(container);
-  } else {
-    commentAfterIndex.before(content);
-  }
-
-  // insert icon
-  commentIcons.addIcon(commentId, comment);
-};
-
-// Set all comments to be inline with their target REP
+// Set all comment icons to be aligned with their commented text
 ep_comments.prototype.setYofComments = function(){
-  // for each comment in the pad
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
-  var inlineComments = this.getFirstOcurrenceOfCommentIds();
-  var commentsToBeShown = [];
-
-  // hide each outer comment...
-  commentBoxes.hideAllComments();
-  // ... and hide comment icons too
+  // hide comment icons while their position is being updated
   commentIcons.hideIcons();
 
+  var inlineComments = this.getFirstOcurrenceOfCommentIds();
   $.each(inlineComments, function(){
-    var y = this.offsetTop;
-    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    var topOfCommentedText = this.offsetTop;
+    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
     if(commentId) {
-      // adjust outer comment...
-      var commentEle = commentBoxes.adjustTopOf(commentId[1], y);
-      // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], y);
-
-      // mark this comment to be displayed if it was visible before we start adjusting its position
-      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
+      commentIcons.adjustTopOf(commentId[1], topOfCommentedText);
     }
-  });
-
-  // re-display comments that were visible before
-  _.each(commentsToBeShown, function(commentEle) {
-    commentEle.show();
   });
 };
 
@@ -762,7 +667,7 @@ ep_comments.prototype.saveComment = function(data, rep) {
       // console.log('addComment :: ', commentId);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
-    },'insertComment', true);
+    },'saveComment', true);
 
     self.setComment(commentId, comment);
     self.collectComments();

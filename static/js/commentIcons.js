@@ -208,12 +208,16 @@ var insertContainer = function() {
 }
 
 // Create a new comment icon
-var addIcon = function(commentId, comment){
+var addIcon = function(comment) {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
-  var inlineComment = utils.getPadInner().find(".comment."+commentId);
-  var top = inlineComment.get(0).offsetTop + 5;
+  // only create icon if it was not created before
+  var $icon = utils.getPadOuter().find('#icon-' + comment.commentId);
+  if ($icon.length > 0) return;
+
+  var $inlineComment = utils.getPadInner().find('.comment.' + comment.commentId);
+  var top = $inlineComment.get(0).offsetTop + 5;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
   var icon = $('#commentIconTemplate').tmpl(comment);
 

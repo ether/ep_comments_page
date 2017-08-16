@@ -107,10 +107,14 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     beforeEach(function(cb) {
       var outer$ = helper.padOuter$;
 
-      var $cancelButton = outer$("#comment-reset");
-      $cancelButton.click();
+      helper.waitFor(function() {
+        return outer$('.ui-dialog-titlebar-close').length > 0;
+      }).done(function() {
+        var $closeButton = outer$('.ui-dialog-titlebar-close');
+        $closeButton.click();
 
-      cb();
+        cb();
+      });
     });
 
     it("unmarks text", function(done) {

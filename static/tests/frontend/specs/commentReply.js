@@ -1,4 +1,4 @@
-describe("ep_comments_page - Comment Reply", function(){
+describe.skip("ep_comments_page - Comment Reply", function(){
   //create a new pad with comment before each test run
   beforeEach(function(cb){
     helper.newPad(function() {
@@ -21,7 +21,6 @@ describe("ep_comments_page - Comment Reply", function(){
 
   it("Ensures a comment can be replied", function(done) {
     createReply(done);
-    });
   });
 
   it("Clears the comment reply form after submitting a reply", function(done) {

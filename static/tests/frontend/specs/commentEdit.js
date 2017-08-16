@@ -1,4 +1,4 @@
-describe('ep_comments_page - Comment Edit', function(){
+describe.skip('ep_comments_page - Comment Edit', function(){
   var helperFunctions;
   var textOfComment = 'original comment';
   var textOfReply = 'original reply';
