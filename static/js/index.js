@@ -721,8 +721,8 @@ ep_comments.prototype.getCommentData = function (){
 }
 
 ep_comments.prototype.displayNewCommentForm = function() {
-  var self = this;
   var rep = {};
+  var hasSelectedText = false;
   var ace = this.ace;
 
   ace.callWithAce(function(ace) {
@@ -731,92 +731,14 @@ ep_comments.prototype.displayNewCommentForm = function() {
     rep.lines    = saveRep.lines;
     rep.selStart = saveRep.selStart;
     rep.selEnd   = saveRep.selEnd;
+
+    hasSelectedText = !ace.ace_isCaret();
   },'saveCommentedSelection', true);
 
-  var selectedText = self.getSelectedText(rep);
-  // we have nothing selected, do nothing
-  var noTextSelected = (selectedText.length === 0);
-  if (noTextSelected) {
-    return;
+  // do nothing if we have nothing selected
+  if (hasSelectedText) {
+    this.showNewCommentForm(rep);
   }
-
-  self.showNewCommentForm(rep);
-
-  // Check if the first element selected is visible in the viewport
-  var $firstSelectedElement = self.getFirstElementSelected();
-  var firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElement);
-
-  if(!firstSelectedElementInViewport){
-    self.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
-  }
-
-  // Adjust focus on the form
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  padOuter.find('.comment-content').focus();
-
-  // fix for iOS: when opening #newComment, we need to force focus on padOuter
-  // contentWindow, otherwise keyboard will be displayed but text input made by
-  // the user won't be added to textarea
-  var outerIframe = $('iframe[name="ace_outer"]').get(0);
-  if (outerIframe && outerIframe.contentWindow) {
-    outerIframe.contentWindow.focus();
-  }
-}
-
-ep_comments.prototype.scrollViewportIfSelectedTextIsNotVisible = function($firstSelectedElement){
-  // Set the top of the form to be the same Y as the target Rep
-    var y = $firstSelectedElement.offsetTop;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    padOuter.find('#outerdocbody').scrollTop(y); // Works in Chrome
-    padOuter.find('#outerdocbody').parent().scrollTop(y); // Works in Firefox
-}
-
-ep_comments.prototype.isElementInViewport = function(element) {
-  var elementPosition = element.getBoundingClientRect();
-  var scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(); // works only on firefox
-  var scrolltop = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop() || scrollTopFirefox;
-  // position relative to the current viewport
-  var elementPositionTopOnViewport = elementPosition.top - scrolltop;
-  var elementPositionBottomOnViewport = elementPosition.bottom - scrolltop;
-
-  var $ace_outer = $('iframe[name="ace_outer"]');
-  var ace_outerHeight = $ace_outer.height();
-  var ace_outerPaddingTop = this.getIntValueOfCSSProperty($ace_outer, "padding-top");
-
-  var clientHeight = ace_outerHeight - ace_outerPaddingTop;
-
-  var elementAboveViewportTop = elementPositionTopOnViewport < 0;
-  var elementBelowViewportBottom = elementPositionBottomOnViewport > clientHeight;
-
-  return !(elementAboveViewportTop || elementBelowViewportBottom);
-}
-
-ep_comments.prototype.getIntValueOfCSSProperty = function($element, property){
-  var valueString = $element.css(property);
-  return parseInt(valueString) || 0;
-}
-
-ep_comments.prototype.getFirstElementSelected = function(){
-  var element;
-
-  this.ace.callWithAce(function(ace) {
-    var rep = ace.ace_getRep();
-    var line = rep.lines.atIndex(rep.selStart[0]);
-    var key = "#"+line.key;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
-    element = padInner.find(key);
-
-  },'getFirstElementSelected', true);
-
-  return element[0];
-}
-
-// Indicates if user selected some text on editor
-ep_comments.prototype.checkNoTextSelected = function(rep) {
-  var noTextSelected = ((rep.selStart[0] == rep.selEnd[0]) && (rep.selStart[1] == rep.selEnd[1]));
-
-  return noTextSelected;
 }
 
 // Create form to add comment
@@ -829,87 +751,6 @@ ep_comments.prototype.showNewCommentForm = function(rep) {
     self.saveComment(data, rep);
   });
 };
-
-// Get a string representation of the text selected on the editor
-ep_comments.prototype.getSelectedText = function(rep) {
-  var self = this;
-  var firstLine = rep.selStart[0];
-  var lastLine = self.getLastLine(firstLine, rep);
-  var selectedText = "";
-
-  _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
-     // rep looks like -- starts at line 2, character 1, ends at line 4 char 1
-     /*
-     {
-        rep.selStart[2,0],
-        rep.selEnd[4,2]
-     }
-     */
-     var line = rep.lines.atIndex(lineNumber);
-     // If we span over multiple lines
-     if(rep.selStart[0] === lineNumber){
-       // Is this the first line?
-       if(rep.selStart[1] > 0){
-         var posStart = rep.selStart[1];
-       }else{
-         var posStart = 0;
-       }
-     }
-     if(rep.selEnd[0] === lineNumber){
-       if(rep.selEnd[1] <= line.text.length){
-         var posEnd = rep.selEnd[1];
-       }else{
-         var posEnd = 0;
-       }
-     }
-     var lineText = line.text.substring(posStart, posEnd);
-     // When it has a selection with more than one line we select at least the beginning
-     // of the next line after the first line. As it is not possible to select the beginning
-     // of the first line, we skip it.
-     if(lineNumber > firstLine){
-      // if the selection takes the very beginning of line, and the element has a lineMarker,
-      // it means we select the * as well, so we need to clean it from the text selected
-      lineText = self.cleanLine(line, lineText);
-      lineText = '\n' + lineText;
-     }
-     selectedText += lineText;
-  });
-  return selectedText;
-}
-
-ep_comments.prototype.getLastLine = function(firstLine, rep){
-  var lastLineSelected = rep.selEnd[0];
-
-  if (lastLineSelected > firstLine){
-    // Ignore last line if the selected text of it it is empty
-    if(this.lastLineSelectedIsEmpty(rep, lastLineSelected)){
-      lastLineSelected--;
-    }
-  }
-  return lastLineSelected;
-}
-
-ep_comments.prototype.lastLineSelectedIsEmpty = function(rep, lastLineSelected){
-  var line = rep.lines.atIndex(lastLineSelected);
-  // when we've a line with line attribute, the first char line position
-  // in a line is 1 because of the *, otherwise is 0
-  var firstCharLinePosition = this.lineHasMarker(line) ? 1 : 0;
-  var lastColumnSelected = rep.selEnd[1];
-
-  return lastColumnSelected === firstCharLinePosition;
-}
-
-ep_comments.prototype.lineHasMarker = function(line){
-  return line.lineMarker === 1;
-}
-
-ep_comments.prototype.cleanLine = function(line, lineText){
-  var hasALineMarker = this.lineHasMarker(line);
-  if(hasALineMarker){
-    lineText = lineText.substring(1);
-  }
-  return lineText;
-}
 
 // Save comment
 ep_comments.prototype.saveComment = function(data, rep) {

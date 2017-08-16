@@ -33,6 +33,7 @@ var createNewCommentForm = function(comment) {
     // de-select text when modal is closed
     close: hideNewCommentForm,
   });
+
   // the close button of $.dialog() cannot be customized as needed, so override it
   var $closeButton = $('#closeButton').tmpl();
   var $originalButtonContainer = utils.getPadOuter().find('.ui-dialog-titlebar-close');
@@ -44,6 +45,8 @@ var createNewCommentForm = function(comment) {
   // enable l10n of dialog title
   var $dialogTitle = utils.getPadOuter().find('.ui-dialog-title');
   $dialogTitle.attr('data-l10n-id', 'ep_comments_page.comments_template.comment');
+
+  localizeNewCommentForm();
 };
 
 // Create a comment object with data filled on the given form
@@ -154,10 +157,19 @@ var createShadowOnPadOuterOfSelectedText = function() {
   return $ghost;
 }
 
-var showNewCommentForm = function(comment, callback) {
-  localizeNewCommentForm();
+var focusOnForm = function($newCommentForm) {
+  $newCommentForm.find('textarea').focus();
 
-  // TODO do we need this??
+  // fix for iOS: when opening #newComment, we need to force focus on padOuter
+  // contentWindow, otherwise keyboard will be displayed but text input made by
+  // the user won't be added to textarea
+  var outerIframe = $('iframe[name="ace_outer"]').get(0);
+  if (outerIframe && outerIframe.contentWindow) {
+    outerIframe.contentWindow.focus();
+  }
+}
+
+var showNewCommentForm = function(comment, callback) {
   comment.commentId = "";
 
   var $newCommentForm = utils.getPadOuter().find('#newComment');
@@ -184,9 +196,8 @@ var showNewCommentForm = function(comment, callback) {
     }).dialog('open');
     $ghost.remove();
 
-    // TODO scroll if necessary
-    // var outerIframe = $('iframe[name="ace_outer"]').get(0);
-    // outerIframe.contentWindow.scrollIntoView(utils.getPadOuter().find('#newComment').get(0));
+    // Allow user to start typing the comment right away
+    focusOnForm($newCommentForm);
   }, 0);
 
   // mark selected text, so it is clear to user which text range the comment is being applied to
