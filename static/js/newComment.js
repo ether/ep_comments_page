@@ -16,7 +16,7 @@ var getNewCommentContainer = function() {
 var createNewCommentForm = function(comment) {
   var $container = getNewCommentContainer();
 
-  var $content = $('#newCommentTemplate').tmpl(comment);
+  var $content = $('#newCommentTemplate').tmpl(getUserInfo());
   $content.prependTo($container);
 
   $content.dialog({
@@ -48,6 +48,21 @@ var createNewCommentForm = function(comment) {
 
   localizeNewCommentForm();
 };
+
+var getUserInfo = function() {
+  var userName = clientVars.userName;
+  var userNames = userName.trim().split(' ');
+  var thereIsALastName = userNames.length > 1;
+
+  var firstInitial = userNames[0][0];
+  var lastInitial = thereIsALastName ? userNames[userNames.length - 1][0] : userNames[0][1];
+  var userInitials = firstInitial + lastInitial;
+
+  return {
+    initials: userInitials.toUpperCase(),
+    name: userName,
+  }
+}
 
 // Create a comment object with data filled on the given form
 var buildCommentFrom = function(form) {
