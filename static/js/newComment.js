@@ -64,26 +64,13 @@ var getUserInfo = function() {
   }
 }
 
-// Create a comment object with data filled on the given form
-var buildCommentFrom = function(form) {
-  var text = form.find('.comment-content').val();
-  return { text: text };
-}
-
-// Callback for new comment Cancel
-var cancelNewComment = function(){
-  hideNewCommentForm();
-}
-
 // Callback for new comment Submit
 var submitNewComment = function(form, callback) {
-  var index = 0;
   var text = form.find('.comment-content').val();
   var commentTextIsNotEmpty = text.length !== 0;
-  var comment = buildCommentFrom(form);
   if (commentTextIsNotEmpty) {
     hideNewCommentForm();
-    callback(comment, index);
+    callback(text);
   }
   return false;
 }
@@ -92,7 +79,7 @@ var fixFlyingToobarOnIOS = function() {
   if (browser.ios) {
     var shouldPlaceMenuRightOnBottom = $(".toolbar ul.menu_right").css('bottom') !== "auto";
 
-    utils.getPadOuter().find('#newComments').find('input, textarea')
+    getNewCommentContainer().find('input, textarea')
     .on("focus", function() {
       fixToolbarPosition();
       if (shouldPlaceMenuRightOnBottom) placeMenuRightOnBottom();
@@ -135,8 +122,8 @@ var localizeNewCommentForm = function() {
 };
 
 // Create container to hold new comment form
-var insertContainers = function(target) {
-  target.prepend('<div id="newComments"></div>');
+var insertContainers = function() {
+  utils.getPadOuter().find('#sidediv').after('<div id="newComments"></div>');
 
   createNewCommentForm();
 

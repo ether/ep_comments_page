@@ -8,6 +8,7 @@ var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
 // messages coming from outside
 var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
 var ACTIVATE_COMMENT_MESSAGE_TYPE = 'comment_activate';
+var EDIT_COMMENT_MESSAGE_TYPE = 'comment_edit';
 
 exports.initialize = function(ace) {
   // listen to outbound calls of this API
@@ -24,12 +25,19 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
     pad.plugins.ep_comments_page.collectComments();
   } else if (e.data.type === ACTIVATE_COMMENT_MESSAGE_TYPE) {
     onCommentActivation(e.data.commentId);
+  } else if (e.data.type === EDIT_COMMENT_MESSAGE_TYPE) {
+    onCommentEdition(e.data.commentId, e.data.text);
   }
 }
 
 var onCommentActivation = function() {};
 exports.setHandleCommentActivation = function(fn) {
   onCommentActivation = fn;
+}
+
+var onCommentEdition = function() {};
+exports.setHandleCommentEdition = function(fn) {
+  onCommentEdition = fn;
 }
 
 /*

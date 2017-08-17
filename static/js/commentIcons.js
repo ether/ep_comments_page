@@ -207,19 +207,28 @@ var insertContainer = function() {
   api.setHandleCommentActivation(handleCommentActivation);
 }
 
-// Create a new comment icon
-var addIcon = function(comment) {
+// Create new comment icons, if they don't exist yet
+var addIcons = function(comments) {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
+  for(var commentId in comments) {
+    addIcon(commentId);
+  }
+}
+
+var addIcon = function(commentId) {
   // only create icon if it was not created before
-  var $icon = utils.getPadOuter().find('#icon-' + comment.commentId);
+  var $icon = utils.getPadOuter().find('#icon-' + commentId);
   if ($icon.length > 0) return;
 
-  var $inlineComment = utils.getPadInner().find('.comment.' + comment.commentId);
+  // only create icon if commented text was not removed from pad
+  var $inlineComment = utils.getPadInner().find('.comment.' + commentId);
+  if ($inlineComment.length === 0) return;
+
   var top = $inlineComment.get(0).offsetTop + 5;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
-  var icon = $('#commentIconTemplate').tmpl(comment);
+  var icon = $('#commentIconTemplate').tmpl({ commentId: commentId });
 
   icon.appendTo(iconsAtLine);
 }
@@ -312,7 +321,7 @@ var shouldNotCloseComment = function(e) {
 }
 
 exports.insertContainer = insertContainer;
-exports.addIcon = addIcon;
+exports.addIcons = addIcons;
 exports.hideIcons = hideIcons;
 exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;

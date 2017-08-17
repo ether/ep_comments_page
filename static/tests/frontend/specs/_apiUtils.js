@@ -36,6 +36,7 @@ ep_comments_page_test_helper.apiUtils = {
   /**** messages coming from outside ****/
   DELETE_COMMENT_EVENT: 'comment_delete',
   ACTIVATE_COMMENT_EVENT: 'comment_activate',
+  EDIT_COMMENT_EVENT: 'comment_edit',
 
   simulateCallToDeleteComment: function(commentId) {
     var message = {
@@ -46,10 +47,22 @@ ep_comments_page_test_helper.apiUtils = {
     var inboundApiEventsTarget = helper.padChrome$.window;
     inboundApiEventsTarget.postMessage(message, '*');
   },
+
   simulateCallToActivateComment: function(commentId) {
     var message = {
       type: this.ACTIVATE_COMMENT_EVENT,
       commentId: commentId,
+    };
+
+    var inboundApiEventsTarget = helper.padChrome$.window;
+    inboundApiEventsTarget.postMessage(message, '*');
+  },
+
+  simulateCallToEditComment: function(commentId, newText) {
+    var message = {
+      type: this.EDIT_COMMENT_EVENT,
+      commentId: commentId,
+      text: newText,
     };
 
     var inboundApiEventsTarget = helper.padChrome$.window;

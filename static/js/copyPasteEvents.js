@@ -1,8 +1,9 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var shared = require('./shared');
+var utils = require('./utils');
 
-exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comments, replies){
+exports.addTextOnClipboard = function(e, ace, removeSelection, comments, replies){
   var commentIdOnFirstPositionSelected;
   var hasCommentOnSelection;
   ace.callWithAce(function(ace) {
@@ -12,7 +13,7 @@ exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comment
 
   if(hasCommentOnSelection){
     var commentsData;
-    var range = padInner.contents()[0].getSelection().getRangeAt(0);
+    var range = utils.getPadInner()[0].getSelection().getRangeAt(0);
     var rawHtml = createHiddenDiv(range);
     var html = rawHtml;
     var onlyTextIsSelected = selectionHasOnlyText(rawHtml);
@@ -40,7 +41,7 @@ exports.addTextOnClipboard = function(e, ace, padInner, removeSelection, comment
 
     // if it is a cut event we have to remove the selection
     if(removeSelection){
-      padInner.contents()[0].execCommand("delete");
+      utils.getPadInner()[0].execCommand("delete");
     }
   }
 };
@@ -209,7 +210,6 @@ exports.saveCommentsAndReplies = function(e){
 
 var saveComments = function(comments){
   var commentsToSave = {};
-  var padId = clientVars.padId;
 
   var mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
   var mapFakeComments = pad.plugins.ep_comments_page.mapFakeComments;
@@ -222,12 +222,11 @@ var saveComments = function(comments){
     mapOriginalCommentsId[originalCommentId] = newCommentId;
     commentsToSave[newCommentId] = comment;
   });
-  pad.plugins.ep_comments_page.saveCommentWithoutSelection(padId, commentsToSave);
+  pad.plugins.ep_comments_page.saveCommentWithoutSelection(commentsToSave);
 };
 
 var saveReplies = function(replies){
   var repliesToSave = {};
-  var padId = clientVars.padId;
   var mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
   _.each(replies, function(reply, replyId){
     var originalCommentId = reply.commentId;
@@ -235,7 +234,7 @@ var saveReplies = function(replies){
     reply.commentId = mapOriginalCommentsId[originalCommentId];
     repliesToSave[replyId] = reply;
   });
-  pad.plugins.ep_comments_page.saveCommentReplies(padId, repliesToSave);
+  pad.plugins.ep_comments_page.saveRepliesWithoutSelection(repliesToSave);
 };
 
 var buildCommentData = function(comment, fakeCommentId){
