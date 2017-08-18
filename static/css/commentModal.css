@@ -62,7 +62,6 @@
   display: flex;
 
   padding: 10px 0 3px 0;
-  margin-bottom: 5px;
   line-height: 20px;
 
   text-transform: uppercase;
@@ -96,9 +95,16 @@ authorname {
 .comment-text textarea {
   width: 100%;
   min-height: 100px;
-  border: none;
   resize: none;
   background: transparent;
+
+  /* avoid a "pseudo-margin-bottom" that Chrome adds for textarea */
+  display: block;
+
+  /* draw a line around the textarea, and give some space between it and its content */
+  border: 1px solid #19BBDA; /* color A */
+  padding: 5px;
+  box-sizing: border-box;
 
   caret-color: currentColor;
   font-family: 'Roboto', sans-serif;

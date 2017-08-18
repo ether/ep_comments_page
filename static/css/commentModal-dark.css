@@ -14,11 +14,6 @@
   color: #A0A2A6; /* color 160 */
 }
 
-/* dialog sections separator */
-.theme-dark .ui-dialog-content > div:not(:last-child) {
-  border-bottom: 1px solid #323237; /* color 50 */
-}
-
 /* save button */
 .theme-dark input.comment-button--save {
   box-shadow: 1px 1px 1px 1px #141419; /* color 20 */
