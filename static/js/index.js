@@ -105,22 +105,16 @@ ep_comments.prototype.init = function(){
     self.displayNewCommentForm();
   });
 
-  // // is this even used? - Yes, it is!
-  // this.container.on("submit", ".comment-reply", function(e){
-  //   e.preventDefault();
-  //   var data = self.getCommentData();
-  //   data.commentId = $(this).parent().data('commentid');
-  //   data.reply = $(this).find(".comment-reply-input").val();
-  //   self.socket.emit('addCommentReply', data, function (){
-  //     // Append the reply to the comment
-  //     // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
-  //     $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > form.comment-reply  .comment-reply-input').val("");
-  //     self.commentDataManager.refreshAllReplyData(function(replies){
-  //       self.commentReplies = replies;
-  //       self.markCommentsWithReply();
-  //     });
-  //   });
-  // });
+  api.setHandleReplyCreation(function(commentId, text) {
+    var data = self.getCommentData();
+    data.commentId = commentId;
+    data.reply = text;
+
+    self.socket.emit('addCommentReply', data, function(replyId, reply) {
+      self.commentDataManager.addReply(replyId, reply);
+      self.markCommentsWithReply();
+    });
+  });
 
   // Enable and handle cookies
   if (padcookie.getPref("comments") === false) {
@@ -476,7 +470,7 @@ ep_comments.prototype.commentListen = function(){
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
-  this.socket.on('pushAddCommentReply', function(replyId, reply) {
+  this.socket.on('pushAddCommentReplyInBulk', function(replyId, reply) {
     self.commentDataManager.refreshAllReplyData(function(replies) {
       if (!$.isEmptyObject(replies)) {
         self.markCommentsWithReply();

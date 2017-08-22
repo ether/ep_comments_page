@@ -82,7 +82,7 @@ exports.socketio = function (hook_name, args, cb){
 
     socket.on('bulkAddCommentReplies', function(padId, data, callback){
       commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
-        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
+        socket.broadcast.to(padId).emit('pushAddCommentReplyInBulk', repliesId, replies);
         var repliesWithReplyId = _.object(repliesId, replies); // {c-reply-123:data, c-reply-124:data}
         callback(repliesWithReplyId);
       });
@@ -104,8 +104,6 @@ exports.socketio = function (hook_name, args, cb){
 
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
-      var content = data.reply;
-      var commentId = data.commentId;
       commentManager.addCommentReply(padId, data, function (err, replyId, reply){
         reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);

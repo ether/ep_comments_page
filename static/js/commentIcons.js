@@ -273,7 +273,7 @@ var isCommentOpenedByClickOnIcon = function() {
   return commentOpenedByClickOnIcon;
 }
 
-// Mark comment as a comment-with-reply, so it can be displayed with a
+// Mark comment as a "comment with reply", so it can be displayed with a
 // different icon
 var commentHasReply = function(commentId) {
   // we're only doing something if icons will be displayed at all
@@ -281,7 +281,7 @@ var commentHasReply = function(commentId) {
 
   // change comment icon
   var iconForComment = utils.getPadOuter().find('#commentIcons').find("#icon-"+commentId);
-  iconForComment.addClass("with-reply");
+  iconForComment.addClass('withReply');
 }
 
 // Indicate if sidebar comment should be shown, checking if it had the characteristics

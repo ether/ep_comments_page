@@ -55,6 +55,8 @@ commentDataManager.prototype.addReply = function(replyId, reply) {
   reply.formattedDate = new Date(reply.timestamp).toISOString();
 
   this.commentReplies[replyId] = reply;
+
+  this.triggerDataChanged();
 }
 
 commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId, commentText) {
@@ -71,9 +73,7 @@ commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId
       // to update our local data with the new text saved
       self._setCommentOrReplyNewText(commentOrReplyId, commentText);
 
-      // TODO this method is doing too much. On this case we only need to send the list
-      // of comments on the api, don't need to collect all comments from text
-      self.updateListOfCommentsStillOnText();
+      self.triggerDataChanged();
     }
   });
 }
@@ -113,8 +113,17 @@ commentDataManager.prototype.refreshAllReplyData = function(callback) {
   });
 };
 
+commentDataManager.prototype.triggerDataChanged = function() {
+  // TODO this method is doing too much. On this case we only need to send the list
+  // of comments on the api, don't need to collect all comments from text
+  this.updateListOfCommentsStillOnText();
+}
+
 // some comments might had been removed from text, so update the list
 commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
+  // TODO can we store the data that we're processing here, so we don't need to redo
+  // the processing for the data we had already built?
+
   var self = this;
 
   var $commentsOnText = utils.getPadInner().find('.comment');
@@ -155,7 +164,7 @@ commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
     .unique()
     .value();
 
-  api.triggerDataChanged(self.comments, orderedCommentIds);
+  api.triggerDataChanged(self.comments, self.commentReplies, orderedCommentIds);
 }
 
 exports.init = function(socket) {

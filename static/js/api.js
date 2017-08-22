@@ -9,6 +9,7 @@ var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
 var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
 var ACTIVATE_COMMENT_MESSAGE_TYPE = 'comment_activate';
 var EDIT_COMMENT_MESSAGE_TYPE = 'comment_edit';
+var CREATE_REPLY_MESSAGE_TYPE = 'comment_reply_create';
 
 exports.initialize = function(ace) {
   // listen to outbound calls of this API
@@ -18,15 +19,22 @@ exports.initialize = function(ace) {
 }
 
 var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
-  if (e.data.type === DELETE_COMMENT_MESSAGE_TYPE) {
-    commentDelete.deleteComment(e.data.commentId, ace);
-
-    // TODO this should be replaced by a better method
-    pad.plugins.ep_comments_page.collectComments();
-  } else if (e.data.type === ACTIVATE_COMMENT_MESSAGE_TYPE) {
-    onCommentActivation(e.data.commentId);
-  } else if (e.data.type === EDIT_COMMENT_MESSAGE_TYPE) {
-    onCommentEdition(e.data.commentId, e.data.text);
+  switch (e.data.type) {
+    case DELETE_COMMENT_MESSAGE_TYPE:
+      commentDelete.deleteComment(e.data.commentId, ace);
+      // TODO this should be replaced by a better method.
+      // Call commentDataManager.updateListOfCommentsStillOnText() directly?
+      pad.plugins.ep_comments_page.collectComments();
+      break;
+    case ACTIVATE_COMMENT_MESSAGE_TYPE:
+      onCommentActivation(e.data.commentId);
+      break;
+    case EDIT_COMMENT_MESSAGE_TYPE:
+      onCommentEdition(e.data.commentId, e.data.text);
+      break;
+    case CREATE_REPLY_MESSAGE_TYPE:
+      onReplyCreate(e.data.commentId, e.data.text);
+      break;
   }
 }
 
@@ -38,6 +46,11 @@ exports.setHandleCommentActivation = function(fn) {
 var onCommentEdition = function() {};
 exports.setHandleCommentEdition = function(fn) {
   onCommentEdition = fn;
+}
+
+var onReplyCreate = function() {};
+exports.setHandleReplyCreation = function(fn) {
+  onReplyCreate = fn;
 }
 
 /*
@@ -62,28 +75,59 @@ exports.triggerCommentDeactivation = function() {
     type: 'comments_data_changed',
     values: [
       {
-        author: 'a.dG8CtEvWhEmR3cf5',
         commentId: 'c-b4WEFBNt7Bxu6Dhr',
+        author: 'a.dG8CtEvWhEmR3cf5',
         name: 'Author Name',
         text: 'the comment text',
         timestamp: 1501599806477,
-      }
+        replies: [
+          {
+            replyId: 'c-reply-dfksfu2df',
+            author: 'a.aT8CtEvWhEmR3cf5',
+            name: 'Other Author Name',
+            text: 'the reply text',
+            timestamp: 1621599806477,
+          },
+          (...)
+        ]
+      },
+      (...)
     ]
   }
 */
-exports.triggerDataChanged = function(commentsData, orderedCommentIds) {
-  var data = _buildSortedData(commentsData, orderedCommentIds);
+exports.triggerDataChanged = function(commentsData, repliesData, orderedCommentIds) {
+  _putRepliesInsideComments(commentsData, repliesData);
+  var orderedData = _buildSortedData(commentsData, orderedCommentIds);
 
   var message = {
     type: NEW_DATA_MESSAGE_TYPE,
-    values: data,
+    values: orderedData,
   };
 
   _triggerEvent(message);
 }
 
+var _putRepliesInsideComments = function(commentsData, repliesData) {
+  _makeSureAllCommentsHaveRepliesProp(commentsData);
+
+  _(repliesData).each(function(replyData, replyId) {
+    var commentId = replyData.commentId;
+    // TODO remove this "data" here
+    var commentData = commentsData[commentId].data;
+    commentData.replies.push(replyData);
+  });
+}
+
+var _makeSureAllCommentsHaveRepliesProp = function(commentsData) {
+  _(commentsData).each(function(commentData, commentId) {
+    // TODO remove this "data" here
+    commentData.data.replies = [];
+  });
+}
+
 var _buildSortedData = function(commentsData, orderedCommentIds) {
   return _(orderedCommentIds).map(function(commentId) {
+    // TODO remove this "data" here
     return commentsData[commentId].data;
   });
 }
