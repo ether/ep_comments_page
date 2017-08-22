@@ -42,17 +42,24 @@ commentDataManager.prototype.addComment = function(commentId, commentData) {
 
 commentDataManager.prototype.addReplies = function(replies) {
   for(var replyId in replies) {
-    this.addReply(replyId, replies[replyId]);
+    this.addReplyWithoutTriggeringDataChangedEvent(replyId, replies[replyId]);
   }
 }
-commentDataManager.prototype.addReply = function(replyId, replyData) {
+
+commentDataManager.prototype.addReplyWithoutTriggeringDataChangedEvent = function(replyId, replyData) {
+  this.addReply(replyId, replyData, true);
+}
+
+commentDataManager.prototype.addReply = function(replyId, replyData, doNotTriggerDataChanged) {
   replyData.replyId       = replyId;
   replyData.date          = replyData.timestamp;
   replyData.formattedDate = new Date(replyData.timestamp).toISOString();
 
   this.commentReplies[replyId] = replyData;
 
-  this.triggerDataChanged();
+  if (!doNotTriggerDataChanged) {
+    this.triggerDataChanged();
+  }
 }
 
 commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId, commentText) {
