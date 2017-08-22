@@ -32,16 +32,12 @@ commentDataManager.prototype.addComments = function(comments) {
     this.addComment(commentId, comments[commentId]);
   }
 }
-commentDataManager.prototype.addComment = function(commentId, comment) {
-  comment.commentId     = commentId;
-  comment.date          = comment.timestamp;
-  comment.formattedDate = new Date(comment.timestamp).toISOString();
+commentDataManager.prototype.addComment = function(commentId, commentData) {
+  commentData.commentId     = commentId;
+  commentData.date          = commentData.timestamp;
+  commentData.formattedDate = new Date(commentData.timestamp).toISOString();
 
-  // initialize obj if necessary
-  this.comments[commentId] = this.comments[commentId] || {};
-
-  // TODO can we store directly on this.comments[commentId] (without ".data")?
-  this.comments[commentId].data = comment;
+  this.comments[commentId] = commentData;
 }
 
 commentDataManager.prototype.addReplies = function(replies) {
@@ -49,12 +45,12 @@ commentDataManager.prototype.addReplies = function(replies) {
     this.addReply(replyId, replies[replyId]);
   }
 }
-commentDataManager.prototype.addReply = function(replyId, reply) {
-  reply.replyId       = replyId;
-  reply.date          = reply.timestamp;
-  reply.formattedDate = new Date(reply.timestamp).toISOString();
+commentDataManager.prototype.addReply = function(replyId, replyData) {
+  replyData.replyId       = replyId;
+  replyData.date          = replyData.timestamp;
+  replyData.formattedDate = new Date(replyData.timestamp).toISOString();
 
-  this.commentReplies[replyId] = reply;
+  this.commentReplies[replyId] = replyData;
 
   this.triggerDataChanged();
 }
@@ -83,7 +79,7 @@ commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReply
   var reply = this.commentReplies[commentOrReplyId];
 
   if (comment) {
-    comment.data.text = text;
+    comment.text = text;
   } else if (reply) {
     reply.text = text;
   }
@@ -135,7 +131,7 @@ commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
     var commentId      = classCommentId && classCommentId[1];
 
     var $lineWithComment = $(this).closest('div');
-    var commentData = self.comments[commentId].data;
+    var commentData = self.comments[commentId];
     commentData.commentId = commentId;
 
     var $headingOfSceneWhereCommentIs;
@@ -147,7 +143,7 @@ commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
       $headingOfSceneWhereCommentIs = $lineWithComment.prevUntil('div.withHeading').addBack().first().prev();
     }
 
-    self.comments[commentId].data.scene = 1 + $scenes.index($headingOfSceneWhereCommentIs);
+    self.comments[commentId].scene = 1 + $scenes.index($headingOfSceneWhereCommentIs);
   });
 
   // get the order of comments to send on API

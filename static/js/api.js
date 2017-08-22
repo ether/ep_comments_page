@@ -108,27 +108,25 @@ exports.triggerDataChanged = function(commentsData, repliesData, orderedCommentI
 }
 
 var _putRepliesInsideComments = function(commentsData, repliesData) {
-  _makeSureAllCommentsHaveRepliesProp(commentsData);
+  var commentsWithReplies = _makeSureAllCommentsHaveRepliesProp(commentsData);
 
   _(repliesData).each(function(replyData, replyId) {
     var commentId = replyData.commentId;
-    // TODO remove this "data" here
-    var commentData = commentsData[commentId].data;
+    var commentData = commentsData[commentId];
     commentData.replies.push(replyData);
   });
 }
 
 var _makeSureAllCommentsHaveRepliesProp = function(commentsData) {
-  _(commentsData).each(function(commentData, commentId) {
-    // TODO remove this "data" here
-    commentData.data.replies = [];
+  return _(commentsData).mapObject(function(commentData, commentId) {
+    commentData.replies = [];
+    return commentData;
   });
 }
 
 var _buildSortedData = function(commentsData, orderedCommentIds) {
   return _(orderedCommentIds).map(function(commentId) {
-    // TODO remove this "data" here
-    return commentsData[commentId].data;
+    return commentsData[commentId];
   });
 }
 
