@@ -8,8 +8,9 @@ ep_comments_page_test_helper.apiUtils = {
 
   startListeningToApiEvents: function() {
     var self = this;
-    var outboundApiEventsTarget = helper.padChrome$.window.parent;
+    this.resetData();
 
+    var outboundApiEventsTarget = helper.padChrome$.window.parent;
     outboundApiEventsTarget.addEventListener('message', function(e) {
       self.lastDataSent[e.data.type] = e.data;
     });
@@ -37,7 +38,7 @@ ep_comments_page_test_helper.apiUtils = {
   DELETE_COMMENT_EVENT: 'comment_delete',
   ACTIVATE_COMMENT_EVENT: 'comment_activate',
   EDIT_COMMENT_EVENT: 'comment_edit',
-  CREATE_REPLY_EVENT: 'comment_reply_create',
+  EDIT_REPLY_EVENT: 'comment_reply_edit',
 
   simulateCallToDeleteComment: function(commentId) {
     var message = {
@@ -73,8 +74,9 @@ ep_comments_page_test_helper.apiUtils = {
 
   simulateCallToCreateReply: function(commentId, replyText) {
     var message = {
-      type: this.CREATE_REPLY_EVENT,
+      type: this.EDIT_REPLY_EVENT,
       commentId: commentId,
+      replyId: undefined,
       text: replyText,
     };
 

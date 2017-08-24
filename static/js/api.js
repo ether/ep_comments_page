@@ -9,7 +9,7 @@ var NEW_DATA_MESSAGE_TYPE = 'comments_data_changed';
 var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
 var ACTIVATE_COMMENT_MESSAGE_TYPE = 'comment_activate';
 var EDIT_COMMENT_MESSAGE_TYPE = 'comment_edit';
-var CREATE_REPLY_MESSAGE_TYPE = 'comment_reply_create';
+var EDIT_REPLY_MESSAGE_TYPE = 'comment_reply_edit';
 
 exports.initialize = function(ace) {
   // listen to outbound calls of this API
@@ -32,8 +32,10 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
     case EDIT_COMMENT_MESSAGE_TYPE:
       onCommentEdition(e.data.commentId, e.data.text);
       break;
-    case CREATE_REPLY_MESSAGE_TYPE:
-      onReplyCreate(e.data.commentId, e.data.text);
+    case EDIT_REPLY_MESSAGE_TYPE:
+      if (e.data.replyId === undefined) {
+        onReplyCreate(e.data.commentId, e.data.text);
+      }
       break;
   }
 }
@@ -95,8 +97,7 @@ exports.triggerCommentDeactivation = function() {
     ]
   }
 */
-exports.triggerDataChanged = function(commentsData, repliesData, orderedCommentIds) {
-  _putRepliesInsideComments(commentsData, repliesData);
+exports.triggerDataChanged = function(commentsData, orderedCommentIds) {
   var orderedData = _buildSortedData(commentsData, orderedCommentIds);
 
   var message = {
@@ -105,23 +106,6 @@ exports.triggerDataChanged = function(commentsData, repliesData, orderedCommentI
   };
 
   _triggerEvent(message);
-}
-
-var _putRepliesInsideComments = function(commentsData, repliesData) {
-  var commentsWithReplies = _makeSureAllCommentsHaveRepliesProp(commentsData);
-
-  _(repliesData).each(function(replyData, replyId) {
-    var commentId = replyData.commentId;
-    var commentData = commentsData[commentId];
-    commentData.replies.push(replyData);
-  });
-}
-
-var _makeSureAllCommentsHaveRepliesProp = function(commentsData) {
-  return _(commentsData).mapObject(function(commentData, commentId) {
-    commentData.replies = [];
-    return commentData;
-  });
 }
 
 var _buildSortedData = function(commentsData, orderedCommentIds) {

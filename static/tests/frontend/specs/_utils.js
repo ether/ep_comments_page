@@ -21,6 +21,8 @@ ep_comments_page_test_helper.utils = {
 
   createPad: function(test, done) {
     var self = this;
+    this.padId = undefined;
+
     self._loadPad(test, function() {
       self._createOrResetPadText(done);
     });
@@ -63,6 +65,10 @@ ep_comments_page_test_helper.utils = {
     $('#iframe-container iframe').css('max-width', '');
   },
 
+  cleanText: function(text) {
+    return text.replace(/\s/gi, ' ');
+  },
+
   _chooseToShowComments: function() {
     var chrome$ = helper.padChrome$;
 
@@ -83,7 +89,7 @@ ep_comments_page_test_helper.utils = {
     $commentIcon.click();
   },
 
-  addComentAndReplyToLine: function(line, textOfComment, textOfReply, done) {
+  addCommentAndReplyToLine: function(line, textOfComment, textOfReply, done) {
     var self = this;
     this.addCommentToLine(line, textOfComment, function() {
       self.addCommentReplyToLine(line, textOfReply, done);
@@ -111,32 +117,25 @@ ep_comments_page_test_helper.utils = {
       $submittButton.click();
 
       // wait until comment is created and comment id is set
-      self._waitForCommentToBeCreatedOnLine(line, done);
+      self.waitForCommentToBeCreatedOnLine(line, done);
     });
   },
 
   addCommentReplyToLine: function(line, textOfReply, done) {
-    var outer$ = helper.padOuter$;
+    var apiUtils = ep_comments_page_test_helper.apiUtils;
+
+    var comments = apiUtils.getLastDataSent();
+    var replies = comments[0].replies || [];
+    var originalNumberOfRepliesOfComment = replies.length;
     var commentId = this.getCommentIdOfLine(line);
-    var existingReplies = outer$('.sidebar-comment-reply').length;
-
-    // if comment icons are enabled, make sure we display the comment box:
-    if (this.commentIconsEnabled()) {
-      this.clickOnCommentIcon(commentId);
-    }
-
-    // fill reply field
-    var $replyField = outer$('.comment-reply-input');
-    $replyField.val(textOfReply);
-
-    // submit reply
-    var $submitReplyButton = outer$("form.comment-reply input[type='submit']").first();
-    $submitReplyButton.click();
+    apiUtils.simulateCallToCreateReply(commentId, textOfReply);
 
     // wait for the reply to be saved
     helper.waitFor(function() {
-      var hasSavedReply = outer$('.sidebar-comment-reply').length === existingReplies + 1;
-      return hasSavedReply;
+      var comments = apiUtils.getLastDataSent() || [{ replies:[] }];
+      var replies = comments[0].replies;
+      var replyWasCreated = replies.length === originalNumberOfRepliesOfComment + 1;
+      return replyWasCreated;
     }).done(done);
   },
 
@@ -150,13 +149,31 @@ ep_comments_page_test_helper.utils = {
     return style.getPropertyValue('background-color');
   },
 
-  _waitForCommentToBeCreatedOnLine: function(line, done) {
+  waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
+    var apiUtils = ep_comments_page_test_helper.apiUtils;
+
     helper.waitFor(function() {
-      return self.getCommentIdOfLine(line) !== null;
+      var idOfCreatedComment = self.getCommentIdOfLine(line);
+      var commentIdsSentOnAPI = (apiUtils.getLastDataSent() || []).map(function(commentData) {
+        return commentData.commentId;
+      });
+
+      return idOfCreatedComment !== null && commentIdsSentOnAPI.includes(idOfCreatedComment);
     }).done(done);
   },
 
+  getCommentDataOfLine: function(lineNumber) {
+    var apiUtils = ep_comments_page_test_helper.apiUtils;
+
+    var commentIdOfTargetLine = this.getCommentIdOfLine(lineNumber);
+    var comments = apiUtils.getLastDataSent();
+    var commentData = _(comments || []).find(function(commentData) {
+      return commentData.commentId === commentIdOfTargetLine;
+    });
+
+    return commentData;
+  },
   getCommentIdOfLine: function(lineNumber) {
     var $line = this.getLine(lineNumber);
     var comment = $line.find('.comment');
@@ -185,36 +202,6 @@ ep_comments_page_test_helper.utils = {
     $editButton.click();
   },
 
-  getEditForm: function () {
-    var outer$ = helper.padOuter$;
-    return outer$('.comment-edit-form');
-  },
-
-  checkIfOneFormEditWasAdded: function () {
-    expect(this.getEditForm().length).to.be(1);
-  },
-  checkIfOneFormEditWasRemoved: function () {
-    expect(this.getEditForm().length).to.be(0);
-  },
-  checkIfCommentFieldIsHidden: function (fieldClass) {
-    var outer$ = helper.padOuter$;
-    var $field = outer$('.' + fieldClass).first();
-    expect($field.is(':visible')).to.be(false);
-  },
-
-  pressCancel: function () {
-    var $cancelButton =  this.getEditForm().find('.comment-edit-cancel');
-    $cancelButton.click();
-  },
-  pressSave: function () {
-    var $saveButton =  this.getEditForm().find('.comment-edit-submit');
-    $saveButton.click();
-  },
-
-  writeCommentText: function (commentText) {
-    this.getEditForm().find('.comment-edit-text').text(commentText);
-  },
-
   changeEtherpadLanguageTo: function(lang, callback) {
     var boldTitles = {
       'en' : 'Bold (Ctrl+B)',
@@ -238,5 +225,24 @@ ep_comments_page_test_helper.utils = {
     helper.waitFor(function() {
       return chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang];
     }).done(callback);
+  },
+
+  placeCaretOnLine: function(lineNum, done) {
+    var self = this;
+    var $targetLine = this.getLine(lineNum);
+    $targetLine.sendkeys("{selectall}");
+
+    helper.waitFor(function() {
+     var $targetLine = self.getLine(lineNum);
+     var $lineWhereCaretIs = self.getLineWhereCaretIs();
+
+     return $targetLine.get(0) === $lineWhereCaretIs.get(0);
+    }).done(done);
+  },
+  getLineWhereCaretIs: function() {
+    var inner$ = helper.padInner$;
+    var nodeWhereCaretIs = inner$.document.getSelection().anchorNode;
+    var $lineWhereCaretIs = $(nodeWhereCaretIs).closest("div");
+    return $lineWhereCaretIs;
   },
 }

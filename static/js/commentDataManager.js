@@ -8,7 +8,6 @@ var smUtils = require('ep_script_scene_marks/static/js/utils');
 var commentDataManager = function(socket) {
   this.socket = socket;
   this.comments = {};
-  this.commentReplies = {};
 
   api.setHandleCommentEdition(this.onCommentOrReplyEdition.bind(this));
 
@@ -23,10 +22,6 @@ commentDataManager.prototype.getComments = function() {
   return this.comments;
 }
 
-commentDataManager.prototype.getReplies = function() {
-  return this.commentReplies;
-}
-
 commentDataManager.prototype.addComments = function(comments) {
   for(var commentId in comments) {
     this.addComment(commentId, comments[commentId]);
@@ -36,6 +31,7 @@ commentDataManager.prototype.addComment = function(commentId, commentData) {
   commentData.commentId     = commentId;
   commentData.date          = commentData.timestamp;
   commentData.formattedDate = new Date(commentData.timestamp).toISOString();
+  commentData.replies       = [];
 
   this.comments[commentId] = commentData;
 }
@@ -55,7 +51,8 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
   replyData.date          = replyData.timestamp;
   replyData.formattedDate = new Date(replyData.timestamp).toISOString();
 
-  this.commentReplies[replyId] = replyData;
+  var commentOfReply = this.comments[replyData.commentId];
+  commentOfReply.replies.push(replyData);
 
   if (!doNotTriggerDataChanged) {
     this.triggerDataChanged();
@@ -81,13 +78,12 @@ commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId
   });
 }
 
-commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReplyId, text) {
+commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReplyId, text, commentId) {
   var comment = this.comments[commentOrReplyId];
-  var reply = this.commentReplies[commentOrReplyId];
-
   if (comment) {
     comment.text = text;
-  } else if (reply) {
+  } else {
+    var reply = this.comments[commentId].replies[commentOrReplyId];
     reply.text = text;
   }
 }
@@ -105,16 +101,22 @@ commentDataManager.prototype.refreshAllCommentData = function(callback) {
 }
 
 commentDataManager.prototype.refreshAllReplyData = function(callback) {
-  var req = { padId: clientVars.padId };
+  this._resetRepliesOnComments();
 
+  var req = { padId: clientVars.padId };
   var self = this;
   this.socket.emit('getCommentReplies', req, function(res) {
-    self.commentReplies = {};
     self.addReplies(res.replies);
 
     callback(res.replies);
   });
-};
+}
+
+commentDataManager.prototype._resetRepliesOnComments = function() {
+  _(this.comments).each(function(comment, commentId) {
+    comment.replies = [];
+  });
+}
 
 commentDataManager.prototype.triggerDataChanged = function() {
   // TODO this method is doing too much. On this case we only need to send the list
@@ -167,7 +169,7 @@ commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
     .unique()
     .value();
 
-  api.triggerDataChanged(self.comments, self.commentReplies, orderedCommentIds);
+  api.triggerDataChanged(self.comments, orderedCommentIds);
 }
 
 exports.init = function(socket) {

@@ -3,7 +3,7 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 var shared = require('./shared');
 var utils = require('./utils');
 
-exports.addTextOnClipboard = function(e, ace, removeSelection, comments, replies){
+exports.addTextOnClipboard = function(e, ace, removeSelection, comments) {
   var commentIdOnFirstPositionSelected;
   var hasCommentOnSelection;
   ace.callWithAce(function(ace) {
@@ -12,7 +12,6 @@ exports.addTextOnClipboard = function(e, ace, removeSelection, comments, replies
   });
 
   if(hasCommentOnSelection){
-    var commentsData;
     var range = utils.getPadInner()[0].getSelection().getRangeAt(0);
     var rawHtml = createHiddenDiv(range);
     var html = rawHtml;
@@ -26,48 +25,38 @@ exports.addTextOnClipboard = function(e, ace, removeSelection, comments, replies
       var textSelected = rawHtml[0].textContent;
       html = buildHtmlToCopyWhenSelectionHasOnlyText(textSelected, range, commentIdOnFirstPositionSelected);
     }
-    var commentIds = getCommentIds(html);
-    commentsData = buildCommentsData(html, comments);
-    var htmlToCopy = replaceCommentIdsWithFakeIds(commentsData, html)
-    commentsData = JSON.stringify(commentsData);
-    var replyData = getReplyData(replies, commentIds);
-    replyData = JSON.stringify(replyData);
-    e.originalEvent.clipboardData.setData('text/objectReply', replyData);
-    e.originalEvent.clipboardData.setData('text/objectComment', commentsData);
+
+    var commentsData = buildCommentsData(html, comments);
+    var replyData = getReplyData(comments);
+    var commentsJSON = JSON.stringify(commentsData);
+    var replyJSON = JSON.stringify(replyData);
+    e.originalEvent.clipboardData.setData('text/objectReply', replyJSON);
+    e.originalEvent.clipboardData.setData('text/objectComment', commentsJSON);
 
     // here we override the default copy behavior
+    var htmlToCopy = replaceCommentIdsWithFakeIds(commentsData, html);
     e.originalEvent.clipboardData.setData('text/html', htmlToCopy);
     e.preventDefault();
 
     // if it is a cut event we have to remove the selection
     if(removeSelection){
-      utils.getPadInner()[0].execCommand("delete");
+      utils.getPadInner()[0].execCommand('delete');
     }
   }
 };
 
-var getReplyData = function(replies, commentIds){
-  var replyData = {};
-  _.each(commentIds, function(commentId){
-    replyData =  _.extend(getRepliesFromCommentId(replies, commentId), replyData);
-  });
-  return replyData;
-};
+var getReplyData = function(comments) {
+  // array of replyData
+  var replies = _.flatten(_(comments).pluck('replies'));
 
-var getRepliesFromCommentId = function(replies, commentId){
-  var repliesFromCommentID = {};
-  _.each(replies, function(reply, replyId){
-    if(reply.commentId === commentId){
-      repliesFromCommentID[replyId] = reply;
-    }
-  });
-  return repliesFromCommentID;
+  // { 'c-reply-123': {...}, 'c-reply-456': {...}, ...}
+  return _(replies).indexBy('replyId');
 };
 
 var buildCommentIdToFakeIdMap = function(commentsData){
   var commentIdToFakeId = {};
   _.each(commentsData, function(comment, fakeCommentId){
-    var commentId = comment.data.originalCommentId;
+    var commentId = comment.originalCommentId;
     commentIdToFakeId[commentId] = fakeCommentId;
   });
   return commentIdToFakeId;
@@ -88,7 +77,7 @@ var buildCommentsData = function(html, comments){
   _.each(originalCommentIds, function(originalCommentId){
     var fakeCommentId = generateFakeCommentId();
     var comment = comments[originalCommentId];
-    comment.data.originalCommentId = originalCommentId;
+    comment.originalCommentId = originalCommentId;
     commentsData[fakeCommentId] = comment;
   });
   return commentsData;
@@ -112,7 +101,7 @@ var getCommentIds = function(html){
   });
   var uniqueCommentIds = _.uniq(commentIds);
   return uniqueCommentIds;
- };
+};
 
 var createHiddenDiv = function(range){
   var content = range.cloneContents();
@@ -218,7 +207,7 @@ var saveComments = function(comments){
     var commentData = buildCommentData(comment, fakeCommentId);
     var newCommentId = shared.generateCommentId();
     mapFakeComments[fakeCommentId] = newCommentId;
-    var originalCommentId = comment.data.originalCommentId;
+    var originalCommentId = comment.originalCommentId;
     mapOriginalCommentsId[originalCommentId] = newCommentId;
     commentsToSave[newCommentId] = comment;
   });
@@ -240,7 +229,7 @@ var saveReplies = function(replies){
 var buildCommentData = function(comment, fakeCommentId){
   var commentData = {};
   commentData.padId = clientVars.padId;
-  commentData.comment = comment.data;
+  commentData.comment = comment;
   commentData.comment.commentId = fakeCommentId;
   return commentData;
 };

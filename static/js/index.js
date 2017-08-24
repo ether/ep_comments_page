@@ -142,9 +142,9 @@ ep_comments.prototype.init = function(){
   // text<comment class='comment'><span>to be copied</span></comment>
   if(browser.chrome || browser.firefox){
     utils.getPadInner().on("copy", function(e) {
-      copyPasteEvents.addTextOnClipboard(e, self.ace, false, self.commentDataManager.getComments(), self.commentDataManager.getReplies());
+      copyPasteEvents.addTextOnClipboard(e, self.ace, false, self.commentDataManager.getComments());
     }).on("cut", function(e) {
-      copyPasteEvents.addTextOnClipboard(e, self.ace, true, self.commentDataManager.getComments(), self.commentDataManager.getReplies());
+      copyPasteEvents.addTextOnClipboard(e, self.ace, true, self.commentDataManager.getComments());
     }).on("paste", function(e) {
       copyPasteEvents.saveCommentsAndReplies(e);
     });
@@ -227,12 +227,14 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
   this.closeOpenedComment(e);
 }
 
-// Collect Comments and link text content to the comments div
+// Adjust icons of comments with reply(ies)
 ep_comments.prototype.markCommentsWithReply = function() {
-  var replies = this.commentDataManager.getReplies();
-  $.each(replies, function(replyId, reply) {
-    // tell comment icon that this comment has 1+ replies
-    commentIcons.commentHasReply(reply.commentId);
+  var comments = this.commentDataManager.getComments();
+  _(comments).each(function(commentData) {
+    if (commentData.replies.length > 0) {
+      // tell comment icon that this comment has 1+ replies
+      commentIcons.commentHasReply(commentData.commentId);
+    }
   });
 };
 
@@ -399,15 +401,11 @@ ep_comments.prototype.saveCommentWithoutSelection = function (commentData) {
 }
 
 ep_comments.prototype.buildComments = function(commentsData){
-  var self = this;
-  var comments = _.map(commentsData, function(commentData, commentId){
-    return self.buildComment(commentId, commentData.data);
-  });
-  return comments;
+  return _.map(commentsData, this.buildComment);
 }
 
 // commentData = {c-newCommentId123: data:{author:..., date:..., ...}, ...
-ep_comments.prototype.buildComment = function(commentId, commentData){
+ep_comments.prototype.buildComment = function(commentData, commentId){
   var data = {};
   data.padId = clientVars.padId;
   data.commentId = commentId;
