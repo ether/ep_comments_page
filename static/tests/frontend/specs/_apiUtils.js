@@ -39,6 +39,7 @@ ep_comments_page_test_helper.apiUtils = {
   ACTIVATE_COMMENT_EVENT: 'comment_activate',
   EDIT_COMMENT_EVENT: 'comment_edit',
   EDIT_REPLY_EVENT: 'comment_reply_edit',
+  DELETE_REPLY_EVENT: 'comment_reply_delete',
 
   simulateCallToDeleteComment: function(commentId) {
     var message = {
@@ -71,13 +72,23 @@ ep_comments_page_test_helper.apiUtils = {
     inboundApiEventsTarget.postMessage(message, '*');
   },
 
-
   simulateCallToCreateReply: function(commentId, replyText) {
     var message = {
       type: this.EDIT_REPLY_EVENT,
       commentId: commentId,
       replyId: undefined,
       text: replyText,
+    };
+
+    var inboundApiEventsTarget = helper.padChrome$.window;
+    inboundApiEventsTarget.postMessage(message, '*');
+  },
+
+  simulateCallToDeleteReply: function(replyId, commentId) {
+    var message = {
+      type: this.DELETE_REPLY_EVENT,
+      commentId: commentId,
+      replyId: replyId,
     };
 
     var inboundApiEventsTarget = helper.padChrome$.window;

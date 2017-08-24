@@ -10,21 +10,21 @@ var DELETE_COMMENT_MESSAGE_TYPE = 'comment_delete';
 var ACTIVATE_COMMENT_MESSAGE_TYPE = 'comment_activate';
 var EDIT_COMMENT_MESSAGE_TYPE = 'comment_edit';
 var EDIT_REPLY_MESSAGE_TYPE = 'comment_reply_edit';
+var DELETE_REPLY_MESSAGE_TYPE = 'comment_reply_delete';
 
-exports.initialize = function(ace) {
+exports.initialize = function(ace, socket) {
   // listen to outbound calls of this API
   window.addEventListener('message', function(e) {
-    _handleOutboundCalls(e, ace);
+    _handleOutboundCalls(e, ace, socket);
   });
 }
 
-var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
+var _handleOutboundCalls = function _handleOutboundCalls(e, ace, socket) {
   switch (e.data.type) {
     case DELETE_COMMENT_MESSAGE_TYPE:
-      commentDelete.deleteComment(e.data.commentId, ace);
-      // TODO this should be replaced by a better method.
-      // Call commentDataManager.updateListOfCommentsStillOnText() directly?
-      pad.plugins.ep_comments_page.collectComments();
+      commentDelete.deleteComment(e.data.commentId, ace, socket, function() {
+        pad.plugins.ep_comments_page.collectComments();
+      });
       break;
     case ACTIVATE_COMMENT_MESSAGE_TYPE:
       onCommentActivation(e.data.commentId);
@@ -36,6 +36,13 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace) {
       if (e.data.replyId === undefined) {
         onReplyCreate(e.data.commentId, e.data.text);
       }
+      break;
+    case DELETE_REPLY_MESSAGE_TYPE:
+      var commentId = e.data.commentId;
+      var replyId = e.data.replyId;
+      commentDelete.deleteReply(replyId, commentId, socket, function() {
+        onReplyDeletion(replyId, commentId);
+      });
       break;
   }
 }
@@ -53,6 +60,11 @@ exports.setHandleCommentEdition = function(fn) {
 var onReplyCreate = function() {};
 exports.setHandleReplyCreation = function(fn) {
   onReplyCreate = fn;
+}
+
+var onReplyDeletion = function() {};
+exports.setHandleReplyDeletion = function(fn) {
+  onReplyDeletion = fn;
 }
 
 /*

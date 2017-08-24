@@ -1,4 +1,9 @@
-exports.deleteComment = function(commentId, ace) {
+exports.deleteComment = function(commentId, ace, socket, callback) {
+  _deleteCommentFromText(commentId, ace);
+  _deleteCommentFromDatabase(commentId, socket, callback);
+}
+
+var _deleteCommentFromText = function(commentId, ace) {
   var selector = '.' + commentId;
   ace.callWithAce(function(aceTop) {
     var repArr = aceTop.ace_getRepFromSelector(selector);
@@ -11,4 +16,31 @@ exports.deleteComment = function(commentId, ace) {
       // a commentId we now flag it as "comment-deleted"
     });
   },'deleteCommentedSelection', true);
+}
+
+var _deleteCommentFromDatabase = function(commentId, socket, callback) {
+  var data = {
+    padId: clientVars.padId,
+    commentId: commentId,
+  };
+
+  socket.emit('deleteComment', data, function(commentId) {
+    callback();
+  });
+}
+
+exports.deleteReply = function(replyId, commentId, socket, callback) {
+  _deleteReplyFromDatabase(replyId, commentId, socket, callback);
+}
+
+var _deleteReplyFromDatabase = function(replyId, commentId, socket, callback) {
+  var data = {
+    padId: clientVars.padId,
+    replyId: replyId,
+    commentId: commentId,
+  };
+
+  socket.emit('deleteCommentReply', data, function(replyId, commentId) {
+    callback();
+  });
 }

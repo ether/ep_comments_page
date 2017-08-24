@@ -88,6 +88,14 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('deleteComment', function (data, callback) {
+      var padId = data.padId;
+      commentManager.deleteComment(padId, data, function() {
+        socket.broadcast.to(padId).emit('pushDeleteComment', data.commentId);
+        callback();
+      });
+    });
+
     socket.on('updateCommentText', function(data, callback) {
       // Broadcast to all other users that the comment text was changed.
       // Note that commentId here can either be the commentId or replyId..
@@ -108,6 +116,14 @@ exports.socketio = function (hook_name, args, cb){
         reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
         callback(replyId, reply);
+      });
+    });
+
+    socket.on('deleteCommentReply', function (data, callback) {
+      var padId = data.padId;
+      commentManager.deleteCommentReply(padId, data, function() {
+        socket.broadcast.to(padId).emit('pushDeleteCommentReply', data.replyId, data.commentId);
+        callback();
       });
     });
 

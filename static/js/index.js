@@ -45,7 +45,7 @@ function ep_comments(context){
   this.mapOriginalCommentsId = [];
   this.shouldCollectComment = false;
 
-  api.initialize(this.ace);
+  api.initialize(this.ace, this.socket);
   this.commentDataManager = commentDataManager.init(this.socket);
   this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
@@ -114,6 +114,13 @@ ep_comments.prototype.init = function(){
     });
   });
 
+  api.setHandleReplyDeletion(function(replyId, commentId) {
+    self.handleReplyDeletion(replyId, commentId);
+  });
+  this.socket.on('pushDeleteCommentReply', function(replyId, commentId) {
+    self.handleReplyDeletion(replyId, commentId);
+  });
+
   // Enable and handle cookies
   if (padcookie.getPref("comments") === false) {
     $('#options-comments').attr('checked','unchecked');
@@ -148,6 +155,11 @@ ep_comments.prototype.init = function(){
     });
   }
 };
+
+ep_comments.prototype.handleReplyDeletion = function(replyId, commentId) {
+  this.commentDataManager.deleteReply(replyId, commentId);
+  this.markCommentsWithReply();
+}
 
 // This function is useful to collect new comments on the collaborators
 ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {

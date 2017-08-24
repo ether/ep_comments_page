@@ -59,6 +59,18 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
   }
 }
 
+commentDataManager.prototype.deleteReply = function(replyId, commentId) {
+  var commentOfReply = this.comments[commentId];
+
+  // TODO improve this: use an object instead of array to store replies on comment,
+  // so we find them faster
+  commentOfReply.replies = _(commentOfReply.replies).reject(function(reply) {
+    return reply.replyId === replyId;
+  });
+
+  this.triggerDataChanged();
+}
+
 commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId, commentText) {
   var self = this;
   var data = {

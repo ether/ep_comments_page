@@ -6,13 +6,15 @@ describe('ep_comments_page - api - "data changed" event', function() {
   var textOfLastCreatedComment = 'I was created later';
   var textOfReply = 'I am a reply';
 
+  var COMMENT_LINE = 1;
+
   before(function (done) {
     utils.createPad(this, done);
   });
 
   context('when user creates a comment', function() {
     before(function(done) {
-      utils.addCommentToLine(1, textOfFirstCreatedComment, done);
+      utils.addCommentToLine(COMMENT_LINE, textOfFirstCreatedComment, done);
     });
 
     it('sends the data of created comment', function(done) {
@@ -31,8 +33,8 @@ describe('ep_comments_page - api - "data changed" event', function() {
     context('and user reloads the pad', function() {
       before(function(done) {
         // create a reply too
-        var comments = apiUtils.getLastDataSent();
-        apiUtils.simulateCallToCreateReply(comments[0].commentId, textOfReply);
+        var commentId = utils.getCommentIdOfLine(COMMENT_LINE);
+        apiUtils.simulateCallToCreateReply(commentId, textOfReply);
 
         apiUtils.resetData();
         utils.reloadPad(this, done);
