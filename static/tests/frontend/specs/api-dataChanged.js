@@ -4,6 +4,7 @@ describe('ep_comments_page - api - "data changed" event', function() {
 
   var textOfFirstCreatedComment = 'I was created first';
   var textOfLastCreatedComment = 'I was created later';
+  var textOfReply = 'I am a reply';
 
   before(function (done) {
     utils.createPad(this, done);
@@ -29,6 +30,10 @@ describe('ep_comments_page - api - "data changed" event', function() {
 
     context('and user reloads the pad', function() {
       before(function(done) {
+        // create a reply too
+        var comments = apiUtils.getLastDataSent();
+        apiUtils.simulateCallToCreateReply(comments[0].commentId, textOfReply);
+
         apiUtils.resetData();
         utils.reloadPad(this, done);
       });
@@ -39,6 +44,17 @@ describe('ep_comments_page - api - "data changed" event', function() {
 
           expect(comments.length).to.be(1);
           expect(comments[0].text).to.be(textOfFirstCreatedComment);
+
+          done();
+        });
+      });
+
+      it('sends the data of existing reply when pad finishes loading', function(done) {
+        apiUtils.waitForDataToBeSent(function() {
+          var comments = apiUtils.getLastDataSent();
+
+          expect(comments[0].replies.length).to.be(1);
+          expect(comments[0].replies[0].text).to.be(textOfReply);
 
           done();
         });

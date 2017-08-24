@@ -59,19 +59,17 @@ ep_comments.prototype.init = function(){
   newComment.insertContainers();
   commentIcons.insertContainer();
 
-  // Get initial set of comments
+  // Get initial set of comments and replies
   this.commentDataManager.refreshAllCommentData(function(comments) {
-    if (!$.isEmptyObject(comments)) {
-      self.collectComments();
-    }
-  });
+    self.commentDataManager.refreshAllReplyData(function(replies) {
+      if (!$.isEmptyObject(comments)) {
+        self.collectComments();
+        self.markCommentsWithReply();
+      }
 
-  this.commentDataManager.refreshAllReplyData(function(replies) {
-    if (!$.isEmptyObject(replies)) {
-      self.markCommentsWithReply();
-    }
-    self.commentRepliesListen();
-    self.commentListen();
+      self.commentRepliesListen();
+      self.commentListen();
+    });
   });
 
   // On collaborator add a comment in the current pad
