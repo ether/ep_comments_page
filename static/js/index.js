@@ -242,7 +242,7 @@ ep_comments.prototype.markCommentsWithReply = function() {
   var comments = this.commentDataManager.getComments();
   _(comments).each(function(commentData) {
     var commentWithReply = commentData.replies.length > 0;
-    commentIcons.commentHasReply(commentData, commentWithReply);
+    commentIcons.commentHasReply(commentData.commentId, commentWithReply);
   });
 };
 
