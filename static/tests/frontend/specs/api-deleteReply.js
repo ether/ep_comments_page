@@ -64,5 +64,28 @@ describe('ep_comments_page - api - delete reply', function() {
         });
       });
     });
+
+    context('and there is no reply left for comment', function() {
+      before(function() {
+        // delete the other reply
+        var comments = apiUtils.getLastDataSent();
+        var reply = comments[0].replies[0];
+
+        apiUtils.resetData();
+        apiUtils.simulateCallToDeleteReply(reply.replyId, reply.commentId);
+      });
+
+
+      it('changes the comment icon to have no replies', function(done) {
+        apiUtils.waitForDataToBeSent(function() {
+          var comment = apiUtils.getLastDataSent()[0];
+          var $commentIcon = helper.padOuter$('#commentIcons #icon-' + comment.commentId);
+
+          expect($commentIcon.hasClass('withReply')).to.be(false);
+
+          done();
+        });
+      });
+    });
   });
 });

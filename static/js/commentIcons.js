@@ -275,13 +275,13 @@ var isCommentOpenedByClickOnIcon = function() {
 
 // Mark comment as a "comment with reply", so it can be displayed with a
 // different icon
-var commentHasReply = function(commentId) {
+var commentHasReply = function(commentId, commentWithReply) {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
   // change comment icon
   var iconForComment = utils.getPadOuter().find('#commentIcons').find("#icon-"+commentId);
-  iconForComment.addClass('withReply');
+  iconForComment.toggleClass('withReply', commentWithReply);
 }
 
 // Indicate if sidebar comment should be shown, checking if it had the characteristics
