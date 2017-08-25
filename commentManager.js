@@ -123,7 +123,8 @@ exports.deleteComment = function(padId, data, callback)
     //save the new element back
     db.set("comments:" + padId, comments);
 
-    callback(null);
+    // delete also the replies
+    _deleteCommentRepliesOfComment(padId, data.commentId, callback);
   });
 };
 
@@ -216,6 +217,25 @@ exports.copyCommentReplies = function(originalPadId, newPadID, callback){
   });
 };
 
+var _deleteCommentRepliesOfComment = function(padId, commentId, callback){
+  //get the entry
+  db.get("comment-replies:" + padId, function(err, replies){
+    if(ERR(err, callback)) return;
+    // the entry doesn't exist, do nothing
+    if(replies == null) return;
+
+    var replyIds = _(replies).each(function(replyData) {
+      if (replyData.commentId === commentId) {
+        delete replies[replyData.replyId];
+      }
+    });
+
+    //save the new element back
+    db.set("comment-replies:" + padId, replies);
+
+    callback(null);
+  });
+};
 
 exports.deleteCommentReply = function(padId, data, callback){
   // We need to change readOnly PadIds to Normal PadIds

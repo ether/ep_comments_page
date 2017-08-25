@@ -52,7 +52,9 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
   replyData.formattedDate = new Date(replyData.timestamp).toISOString();
 
   var commentOfReply = this.comments[replyData.commentId];
-  commentOfReply.replies.push(replyData);
+
+  // precaution, if for any reason the comment was removed but the reply wasn't
+  commentOfReply && commentOfReply.replies.push(replyData);
 
   if (!doNotTriggerDataChanged) {
     this.triggerDataChanged();
