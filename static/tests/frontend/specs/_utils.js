@@ -124,17 +124,14 @@ ep_comments_page_test_helper.utils = {
   addCommentReplyToLine: function(line, textOfReply, done) {
     var apiUtils = ep_comments_page_test_helper.apiUtils;
 
-    var comments = apiUtils.getLastDataSent();
-    var replies = comments[0].replies || [];
-    var originalNumberOfRepliesOfComment = replies.length;
     var commentId = this.getCommentIdOfLine(line);
+    var originalNumberOfRepliesOfComment = apiUtils.getNumberOfRepliesOfComment(commentId);
     apiUtils.simulateCallToCreateReply(commentId, textOfReply);
 
     // wait for the reply to be saved
     helper.waitFor(function() {
-      var comments = apiUtils.getLastDataSent() || [{ replies:[] }];
-      var replies = comments[0].replies;
-      var replyWasCreated = replies.length === originalNumberOfRepliesOfComment + 1;
+      var newNumberOfRepliesOfComment = apiUtils.getNumberOfRepliesOfComment(commentId);
+      var replyWasCreated = newNumberOfRepliesOfComment === originalNumberOfRepliesOfComment + 1;
       return replyWasCreated;
     }).done(done);
   },

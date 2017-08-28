@@ -54,9 +54,9 @@ describe('ep_comments_page - api - "data changed" event', function() {
       it('sends the data of existing reply when pad finishes loading', function(done) {
         apiUtils.waitForDataToBeSent(function() {
           var comments = apiUtils.getLastDataSent();
-
-          expect(comments[0].replies.length).to.be(1);
-          expect(comments[0].replies[0].text).to.be(textOfReply);
+          var commentId = utils.getCommentIdOfLine(COMMENT_LINE);
+          expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(1);
+          expect(apiUtils.getReplyDataOnPosition(0, commentId).text).to.be(textOfReply);
 
           done();
         });

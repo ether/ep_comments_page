@@ -27,6 +27,23 @@ ep_comments_page_test_helper.apiUtils = {
     }).done(done);
   },
 
+  getCommentData: function(commentId) {
+    var comments = this.getLastDataSent();
+    return _(comments || []).find(function(commentData) {
+      return commentData.commentId === commentId;
+    });
+  },
+  getNumberOfRepliesOfComment: function(commentId) {
+    var replies = this.getCommentData(commentId).replies;
+    var replyIds = Object.keys(replies);
+    return replyIds.length;
+  },
+  getReplyDataOnPosition: function(replyPosition, commentId) {
+    var replies = this.getCommentData(commentId).replies;
+    var replyIds = Object.keys(replies);
+    return replies[replyIds[replyPosition]];
+  },
+
   getLastDataSent: function() {
     return (this.lastDataSent[this.DATA_CHANGED_EVENT] || {}).values;
   },

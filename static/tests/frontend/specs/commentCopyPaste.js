@@ -199,7 +199,8 @@ ep_comments_page_test_helper.copyAndPaste = {
   getTextOfCommentReplyFromLine: function(lineNumber) {
     var utils = ep_comments_page_test_helper.utils;
     var commentData = utils.getCommentDataOfLine(lineNumber);
-    return commentData.replies[0].text;
+    var replyIds = Object.keys(commentData.replies);
+    return commentData.replies[replyIds[0]].text;
   },
   testIfHasAllFieldsNecessaryToCreateACommementReply: function(event) {
     var commentReplyDataValues = this.getCommentReplyDataValues(event);

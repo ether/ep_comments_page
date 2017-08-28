@@ -241,7 +241,7 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
 ep_comments.prototype.markCommentsWithReply = function() {
   var comments = this.commentDataManager.getComments();
   _(comments).each(function(commentData) {
-    var commentWithReply = commentData.replies.length > 0;
+    var commentWithReply = Object.keys(commentData.replies).length > 0;
     commentIcons.commentHasReply(commentData.commentId, commentWithReply);
   });
 };

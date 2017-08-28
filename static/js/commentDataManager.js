@@ -31,7 +31,7 @@ commentDataManager.prototype.addComment = function(commentId, commentData) {
   commentData.commentId     = commentId;
   commentData.date          = commentData.timestamp;
   commentData.formattedDate = new Date(commentData.timestamp).toISOString();
-  commentData.replies       = [];
+  commentData.replies       = {};
 
   this.comments[commentId] = commentData;
 }
@@ -54,7 +54,9 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
   var commentOfReply = this.comments[replyData.commentId];
 
   // precaution, if for any reason the comment was removed but the reply wasn't
-  commentOfReply && commentOfReply.replies.push(replyData);
+  if (commentOfReply && commentOfReply.replies) {
+    commentOfReply.replies[replyId] = replyData;
+  }
 
   if (!doNotTriggerDataChanged) {
     this.triggerDataChanged();
@@ -63,13 +65,7 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
 
 commentDataManager.prototype.deleteReply = function(replyId, commentId) {
   var commentOfReply = this.comments[commentId];
-
-  // TODO improve this: use an object instead of array to store replies on comment,
-  // so we find them faster
-  commentOfReply.replies = _(commentOfReply.replies).reject(function(reply) {
-    return reply.replyId === replyId;
-  });
-
+  delete commentOfReply.replies[replyId];
   this.triggerDataChanged();
 }
 
@@ -128,7 +124,7 @@ commentDataManager.prototype.refreshAllReplyData = function(callback) {
 
 commentDataManager.prototype._resetRepliesOnComments = function() {
   _(this.comments).each(function(comment, commentId) {
-    comment.replies = [];
+    comment.replies = {};
   });
 }
 

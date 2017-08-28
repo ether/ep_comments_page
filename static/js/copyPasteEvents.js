@@ -46,11 +46,12 @@ exports.addTextOnClipboard = function(e, ace, removeSelection, comments) {
 };
 
 var getReplyData = function(comments) {
-  // array of replyData
-  var replies = _.flatten(_(comments).pluck('replies'));
-
   // { 'c-reply-123': {...}, 'c-reply-456': {...}, ...}
-  return _(replies).indexBy('replyId');
+  return _.chain(comments)
+    .pluck('replies') // until here we have [ {'c-reply-123': {...}}, ... ], still need to put
+                      // all items of the array into a single object
+    .reduce()
+    .value();
 };
 
 var buildCommentIdToFakeIdMap = function(commentsData){

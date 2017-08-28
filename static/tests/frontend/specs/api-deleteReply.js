@@ -5,18 +5,18 @@ describe('ep_comments_page - api - delete reply', function() {
   var COMMENT_LINE = 0;
   var textOfReplyNotRemoved = 'I will NOT be deleted';
 
+  var commentId;
+
   before(function(done) {
     utils.createPad(this, function() {
       utils.addCommentToLine(COMMENT_LINE, 'My reply will be deleted', function() {
-        var commentId = utils.getCommentIdOfLine(COMMENT_LINE);
+        commentId = utils.getCommentIdOfLine(COMMENT_LINE);
         apiUtils.simulateCallToCreateReply(commentId, textOfReplyNotRemoved);
         apiUtils.simulateCallToCreateReply(commentId, 'I will be deleted');
 
         // wait for reply to be created
         helper.waitFor(function() {
-          var comments = apiUtils.getLastDataSent() || [{ replies:[] }];
-          var replies = comments[0].replies;
-          return replies.length === 2;
+          return apiUtils.getNumberOfRepliesOfComment(commentId) === 2;
         }).done(done);
       });
     });
@@ -26,23 +26,19 @@ describe('ep_comments_page - api - delete reply', function() {
   context('when reply is deleted via API', function() {
     before(function() {
       // delete last reply
-      var comments = apiUtils.getLastDataSent();
-      var reply = comments[0].replies[1];
-
+      var reply = apiUtils.getReplyDataOnPosition(1, commentId);
       apiUtils.resetData();
       apiUtils.simulateCallToDeleteReply(reply.replyId, reply.commentId);
     });
 
     it('sends the data without the deleted reply', function(done) {
       apiUtils.waitForDataToBeSent(function() {
-        var comments = apiUtils.getLastDataSent();
-        var replies = comments[0].replies;
-
         // check if the reply was deleted
-        expect(replies.length).to.be(1);
+        expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(1);
 
         // check if the reply deleted was the correct one
-        expect(replies[0].text).to.be(textOfReplyNotRemoved);
+        var reply = apiUtils.getReplyDataOnPosition(0, commentId);
+        expect(reply.text).to.be(textOfReplyNotRemoved);
 
         done();
       });
@@ -56,10 +52,13 @@ describe('ep_comments_page - api - delete reply', function() {
 
       it('sends the data without the deleted reply', function(done) {
         apiUtils.waitForDataToBeSent(function() {
-          var comments = apiUtils.getLastDataSent();
-          var replies = comments[0].replies;
-          expect(replies.length).to.be(1);
-          expect(replies[0].text).to.be(textOfReplyNotRemoved);
+          // check if the reply was deleted
+          expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(1);
+
+          // check if the reply deleted was the correct one
+          var reply = apiUtils.getReplyDataOnPosition(0, commentId);
+          expect(reply.text).to.be(textOfReplyNotRemoved);
+
           done();
         });
       });
@@ -68,9 +67,7 @@ describe('ep_comments_page - api - delete reply', function() {
     context('and there is no reply left for comment', function() {
       before(function() {
         // delete the other reply
-        var comments = apiUtils.getLastDataSent();
-        var reply = comments[0].replies[0];
-
+        var reply = apiUtils.getReplyDataOnPosition(0, commentId);
         apiUtils.resetData();
         apiUtils.simulateCallToDeleteReply(reply.replyId, reply.commentId);
       });
@@ -78,11 +75,8 @@ describe('ep_comments_page - api - delete reply', function() {
 
       it('changes the comment icon to have no replies', function(done) {
         apiUtils.waitForDataToBeSent(function() {
-          var comment = apiUtils.getLastDataSent()[0];
-          var $commentIcon = helper.padOuter$('#commentIcons #icon-' + comment.commentId);
-
+          var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
           expect($commentIcon.hasClass('withReply')).to.be(false);
-
           done();
         });
       });
