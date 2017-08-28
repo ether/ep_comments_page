@@ -90,10 +90,14 @@ ep_comments_page_test_helper.apiUtils = {
   },
 
   simulateCallToCreateReply: function(commentId, replyText) {
+    this.simulateCallToEditReply(undefined, commentId, replyText);
+  },
+
+  simulateCallToEditReply: function(replyId, commentId, replyText) {
     var message = {
       type: this.EDIT_REPLY_EVENT,
       commentId: commentId,
-      replyId: undefined,
+      replyId: replyId,
       text: replyText,
     };
 

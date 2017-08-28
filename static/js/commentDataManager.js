@@ -9,9 +9,10 @@ var commentDataManager = function(socket) {
   this.socket = socket;
   this.comments = {};
 
-  api.setHandleCommentEdition(this.onCommentOrReplyEdition.bind(this));
+  api.setHandleCommentEdition(this._onCommentEdition.bind(this));
+  api.setHandleReplyEdition(this._onReplyEdition.bind(this));
 
-  // listen to comment changes made by other users on this pad
+  // listen to comment or reply changes made by other users on this pad
   var self = this;
   this.socket.on('textCommentUpdated', function (commentId, commentText) {
     self._setCommentOrReplyNewText(commentId, commentText);
@@ -69,30 +70,55 @@ commentDataManager.prototype.deleteReply = function(replyId, commentId) {
   this.triggerDataChanged();
 }
 
-commentDataManager.prototype.onCommentOrReplyEdition = function(commentOrReplyId, commentText) {
+commentDataManager.prototype._onCommentEdition = function(commentId, commentText) {
   var self = this;
   var data = {
     padId: clientVars.padId,
-    commentId: commentOrReplyId,
+    commentId: commentId,
     commentText: commentText,
   }
 
   this.socket.emit('updateCommentText', data, function(err) {
     if (!err) {
-      // although the comment or reply was saved on the data base successfully, we need
+      // although the comment was saved on the data base successfully, we need
       // to update our local data with the new text saved
-      self._setCommentOrReplyNewText(commentOrReplyId, commentText);
+      var comment = self.comments[commentId];
+      comment.text = commentText;
 
       self.triggerDataChanged();
     }
   });
 }
 
-commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReplyId, text, commentId) {
+commentDataManager.prototype._onReplyEdition = function(commentId, replyId, replyText) {
+  var self = this;
+  var data = {
+    padId: clientVars.padId,
+    commentId: replyId,
+    commentText: replyText,
+  }
+
+  this.socket.emit('updateCommentText', data, function(err) {
+    if (!err) {
+      // although the reply was saved on the data base successfully, we need
+      // to update our local data with the new text saved
+      var reply = self.comments[commentId].replies[replyId];
+      reply.text = replyText;
+
+      self.triggerDataChanged();
+    }
+  });
+}
+
+commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReplyId, text) {
   var comment = this.comments[commentOrReplyId];
   if (comment) {
     comment.text = text;
   } else {
+    // TODO receive commentId, so we don't need to look for the reply on each comment
+    var flattenReplies = utils.getRepliesIndexedByReplyId(this.comments);
+    var commentId = flattenReplies[commentOrReplyId].commentId;
+
     var reply = this.comments[commentId].replies[commentOrReplyId];
     reply.text = text;
   }

@@ -35,6 +35,8 @@ var _handleOutboundCalls = function _handleOutboundCalls(e, ace, socket) {
     case EDIT_REPLY_MESSAGE_TYPE:
       if (e.data.replyId === undefined) {
         onReplyCreate(e.data.commentId, e.data.text);
+      } else {
+        onReplyEdition(e.data.commentId, e.data.replyId, e.data.text);
       }
       break;
     case DELETE_REPLY_MESSAGE_TYPE:
@@ -55,6 +57,11 @@ exports.setHandleCommentActivation = function(fn) {
 var onCommentEdition = function() {};
 exports.setHandleCommentEdition = function(fn) {
   onCommentEdition = fn;
+}
+
+var onReplyEdition = function() {};
+exports.setHandleReplyEdition = function(fn) {
+  onReplyEdition = fn;
 }
 
 var onReplyCreate = function() {};

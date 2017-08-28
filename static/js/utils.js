@@ -25,3 +25,22 @@ exports.waitForResizeToFinishThenCall = function(timeout, callback) {
     resizeTimer = setTimeout(callback, timeout);
   });
 }
+
+/*
+   input: comments = {
+    'c-abc': {..., replies: { 'c-reply-123': {...}} },
+    'c-def': {..., replies: { 'c-reply-456': {...}} },
+   }
+
+   output: {
+    'c-reply-123': {...},
+    'c-reply-456': {...},
+   }
+*/
+exports.getRepliesIndexedByReplyId = function(comments) {
+  return _.chain(comments)
+    .pluck('replies') // until here we have [ {'c-reply-123': {...}}, ... ], still need to put
+                      // all items of the array into a single object
+    .reduce()
+    .value();
+};

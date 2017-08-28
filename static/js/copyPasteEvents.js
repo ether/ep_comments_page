@@ -27,7 +27,7 @@ exports.addTextOnClipboard = function(e, ace, removeSelection, comments) {
     }
 
     var commentsData = buildCommentsData(html, comments);
-    var replyData = getReplyData(comments);
+    var replyData = utils.getRepliesIndexedByReplyId(comments);
     var commentsJSON = JSON.stringify(commentsData);
     var replyJSON = JSON.stringify(replyData);
     e.originalEvent.clipboardData.setData('text/objectReply', replyJSON);
@@ -43,15 +43,6 @@ exports.addTextOnClipboard = function(e, ace, removeSelection, comments) {
       utils.getPadInner()[0].execCommand('delete');
     }
   }
-};
-
-var getReplyData = function(comments) {
-  // { 'c-reply-123': {...}, 'c-reply-456': {...}, ...}
-  return _.chain(comments)
-    .pluck('replies') // until here we have [ {'c-reply-123': {...}}, ... ], still need to put
-                      // all items of the array into a single object
-    .reduce()
-    .value();
 };
 
 var buildCommentIdToFakeIdMap = function(commentsData){

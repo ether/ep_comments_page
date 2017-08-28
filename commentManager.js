@@ -257,7 +257,7 @@ exports.deleteCommentReply = function(padId, data, callback){
 };
 
 exports.changeCommentText = function(padId, commentId, commentText, callback){
-  var commentTextIsNotEmpty = commentText.length > 0;
+  var commentTextIsNotEmpty = (commentText || '').length > 0;
   if(commentTextIsNotEmpty){
     // Given a comment we update the comment text
     // We need to change readOnly PadIds to Normal PadIds
