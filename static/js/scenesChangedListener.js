@@ -2,11 +2,14 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 var utils = require('./utils');
 var scheduler = require('./scheduler');
 
-var scenesChangedListener = function(onSceneChanged) {
+var scenesChangedListener = function(callback) {
   this.headingAlreadyChanged = false;
+  this.callback = callback;
+
   // to avoid lagging while user is typing, we set a scheduler to postpone
-  // calling onSceneChanged until edition had stopped
-  this.scheduler = scheduler.setCallbackWhenUserStopsChangingPad(onSceneChanged);
+  // calling callback until edition had stopped
+  this.scheduler = scheduler.setCallbackWhenUserStopsChangingPad(this.triggerCallbackIfNecessary.bind(this));
+
   this.startObserving();
 }
 
@@ -45,6 +48,13 @@ scenesChangedListener.prototype.mutationsAffectedASceneHeading = function(mutati
     .value();
 }
 
-exports.onSceneChanged = function(onSceneChanged) {
-  return new scenesChangedListener(onSceneChanged);
+scenesChangedListener.prototype.triggerCallbackIfNecessary = function() {
+  if (this.headingAlreadyChanged) {
+    this.headingAlreadyChanged = false;
+    this.callback();
+  }
+}
+
+exports.onSceneChanged = function(callback) {
+  return new scenesChangedListener(callback);
 }

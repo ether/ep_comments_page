@@ -107,7 +107,7 @@ describe('ep_comments_page - api - "data changed" event', function() {
     });
 
     context('and pad has scenes', function() {
-      var LINE_BEFORE_1ST_SCENE           = 1;
+      var LINE_BEFORE_1ST_SCENE           = 2;
       var LINE_ON_HEADING_OF_1ST_SCENE    = LINE_BEFORE_1ST_SCENE + 3; // SMs + heading
       var LINE_IN_THE_MIDDLE_OF_1ST_SCENE = LINE_ON_HEADING_OF_1ST_SCENE + 1;
       var LINE_ON_HEADING_OF_2ND_SCENE    = LINE_IN_THE_MIDDLE_OF_1ST_SCENE + 3; // SMs + heading
@@ -127,7 +127,7 @@ describe('ep_comments_page - api - "data changed" event', function() {
                        + lineInTheMiddleOf1stScene
                        + synopsis
                        + headingOf2ndScene;
-        utils.getLine(1).html(utils.getLine(1).html() + '<br>' + someScenes);
+        utils.getLine(1).html('<br>' + utils.getLine(1).html() + '<br>' + someScenes);
 
         // wait until all SMs are created
         helper.waitFor(function() {
@@ -184,15 +184,13 @@ describe('ep_comments_page - api - "data changed" event', function() {
 
       context('and user creates a new scene before scenes with comments', function() {
         before(function(done) {
-          // this.timeout(5000);
-
           var seUtils = ep_script_elements_test_helper.utils;
           var seApiUtils = ep_script_elements_test_helper.apiUtils;
 
           var originalNumberOfScenes = helper.padInner$('heading').length;
           apiUtils.resetData();
 
-          // sets first line to heading
+          // adds a scene before all comments
           utils.placeCaretOnLine(LINE_BEFORE_1ST_SCENE, function() {
             seApiUtils.simulateTriggerOfDropdownChanged(seUtils.HEADING);
 
@@ -200,7 +198,7 @@ describe('ep_comments_page - api - "data changed" event', function() {
               // wait for scene to be created
               var currentNumberOfScenes = helper.padInner$('heading').length;
               return currentNumberOfScenes === originalNumberOfScenes + 1;
-            }, 1000).done(done);
+            }).done(done);
           });
         });
 
@@ -212,6 +210,26 @@ describe('ep_comments_page - api - "data changed" event', function() {
             expect(comments[2].scene).to.be(2);
             expect(comments[3].scene).to.be(3);
             expect(comments[4].scene).to.be(3);
+            done();
+          });
+        });
+      });
+
+      context('and user edits a line that is not a heading and has no comment', function() {
+        before(function() {
+          apiUtils.resetData();
+          utils.getLine(0).sendkeys(' - edited - ');
+        });
+
+        it('does not send any data change', function(done) {
+          helper.waitFor(function() {
+            return apiUtils.getLastDataSent();
+          })
+          .done(function() {
+            expect().fail(function() { return 'API data sent' });
+          })
+          .fail(function() {
+            // all set, no API call. We can finish the test
             done();
           });
         });
