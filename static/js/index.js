@@ -509,7 +509,10 @@ var hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    if(context.callstack.docTextChanged) pad.plugins.ep_comments_page.setYofComments();
+    // TODO also update when change line type
+    if(context.callstack.docTextChanged) {
+      pad.plugins.ep_comments_page.setYofComments();
+    }
 
     var commentWasPasted = pad.plugins && pad.plugins.ep_comments_page && pad.plugins.ep_comments_page.shouldCollectComment;
     var domClean = context.callstack.domClean;

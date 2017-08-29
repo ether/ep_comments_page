@@ -181,6 +181,41 @@ describe('ep_comments_page - api - "data changed" event', function() {
         expect(comment.scene).to.be(2);
         done();
       });
+
+      context('and user creates a new scene before scenes with comments', function() {
+        before(function(done) {
+          // this.timeout(5000);
+
+          var seUtils = ep_script_elements_test_helper.utils;
+          var seApiUtils = ep_script_elements_test_helper.apiUtils;
+
+          var originalNumberOfScenes = helper.padInner$('heading').length;
+          apiUtils.resetData();
+
+          // sets first line to heading
+          utils.placeCaretOnLine(LINE_BEFORE_1ST_SCENE, function() {
+            seApiUtils.simulateTriggerOfDropdownChanged(seUtils.HEADING);
+
+            helper.waitFor(function() {
+              // wait for scene to be created
+              var currentNumberOfScenes = helper.padInner$('heading').length;
+              return currentNumberOfScenes === originalNumberOfScenes + 1;
+            }, 1000).done(done);
+          });
+        });
+
+        it('updates scene numbers on comments', function(done) {
+          apiUtils.waitForDataToBeSent(function() {
+            var comments = apiUtils.getLastDataSent();
+            expect(comments[0].scene).to.be(1);
+            expect(comments[1].scene).to.be(2);
+            expect(comments[2].scene).to.be(2);
+            expect(comments[3].scene).to.be(3);
+            expect(comments[4].scene).to.be(3);
+            done();
+          });
+        });
+      });
     });
   });
 });

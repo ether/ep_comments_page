@@ -2,12 +2,15 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
 var api = require('./api');
+var scenesChangedListener = require('./scenesChangedListener');
 var utils = require('./utils');
 var smUtils = require('ep_script_scene_marks/static/js/utils');
 
 var commentDataManager = function(socket) {
   this.socket = socket;
   this.comments = {};
+
+  scenesChangedListener.onSceneChanged(this.triggerDataChanged.bind(this));
 
   api.setHandleCommentEdition(this._onCommentEdition.bind(this));
   api.setHandleReplyEdition(this._onReplyEdition.bind(this));
@@ -122,6 +125,8 @@ commentDataManager.prototype._setCommentOrReplyNewText = function(commentOrReply
     var reply = this.comments[commentId].replies[commentOrReplyId];
     reply.text = text;
   }
+
+  this.triggerDataChanged();
 }
 
 commentDataManager.prototype.refreshAllCommentData = function(callback) {
