@@ -62,7 +62,7 @@ describe('ep_comments_page - Comment icons', function() {
         // check icon is not visible
         var $commentIcons = helper.padOuter$('#commentIcons #icon-' + commentId + ':visible');
         return $commentIcons.length === 0;
-      }).done(done);
+      }, 2000).done(done);
     });
   });
 
@@ -80,11 +80,11 @@ describe('ep_comments_page - Comment icons', function() {
     });
 
     it('does not show comment icon', function(done) {
-      // check icon is not visible
-      var $commentIcons = helper.padOuter$('#commentIcons #icon-' + commentId + ':visible');
-      expect($commentIcons.length).to.be(0);
-
-      done();
+      helper.waitFor(function() {
+        // check icon is not visible
+        var $commentIcons = helper.padOuter$('#commentIcons #icon-' + commentId + ':visible');
+        return $commentIcons.length === 0;
+      }, 2000).done(done);
     });
   });
 
@@ -115,9 +115,11 @@ describe('ep_comments_page - Comment icons', function() {
       var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
       var $commentedText = helper.padInner$('.' + commentId);
       var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
-      expect($commentIcon.offset().top).to.be(expectedTop);
 
-      done();
+      // icon might take some time to go to the correct position
+      helper.waitFor(function() {
+        return $commentIcon.offset().top === expectedTop;
+      }).done(done);
     });
   });
 

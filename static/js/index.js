@@ -509,9 +509,11 @@ var hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    // TODO also update when change line type
     if(context.callstack.docTextChanged) {
-      pad.plugins.ep_comments_page.setYofComments();
+      // give a small delay, so all lines will be processed when setYofComments() is called
+      setTimeout(function() {
+        pad.plugins.ep_comments_page.setYofComments();
+      }, 250);
     }
 
     var commentWasPasted = pad.plugins && pad.plugins.ep_comments_page && pad.plugins.ep_comments_page.shouldCollectComment;
