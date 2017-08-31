@@ -30,6 +30,7 @@
   display: inline-block;
   margin-right: 5px;
   fill: #808286;
+  cursor: pointer;
 }
 .comment-icon:hover {
   fill: #515256;
