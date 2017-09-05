@@ -250,7 +250,7 @@ var adjustTopOf = function(commentId, baseTop) {
   if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
   var icon = utils.getPadOuter().find('#icon-'+commentId);
-  var targetTop = baseTop+5;
+  var targetTop = baseTop+2;
   var iconsAtLine = getOrCreateIconsContainerAt(targetTop);
 
   // move icon from one line to the other
