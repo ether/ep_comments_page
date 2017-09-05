@@ -7,7 +7,7 @@
 
 /* when line numbers are not visible, we need to move icons to the left */
 #sidediv.sidedivhidden ~ #commentIcons {
-  padding-left: 0px;
+  padding-left: 20px;
 }
 
 /* when page view is disabled, we need to move icons to the left */
@@ -29,14 +29,14 @@
 .comment-icon {
   display: inline-block;
   margin-right: 5px;
-  fill: #808286;
+  fill: #808286; /* Color 130 */
   cursor: pointer;
 }
 .comment-icon:hover {
-  fill: #515256;
+  fill: #515256; /* Color 80 */
 }
 .comment-icon.active {
-  fill: #19BBDA;
+  fill: #19BBDA; /* Color A */
 }
 
 /* show the single-comment icon by default */
