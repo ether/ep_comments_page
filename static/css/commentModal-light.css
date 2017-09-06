@@ -22,6 +22,9 @@
 .theme-light input.comment-button--save:hover {
   color: #515256; /* color 80 */
 }
+.theme-light input.comment-button--save:focus {
+  color: #19BBDA; /* color A */
+}
 .theme-light input.comment-button--save:active {
   color: #19BBDA; /* color A */
 }
