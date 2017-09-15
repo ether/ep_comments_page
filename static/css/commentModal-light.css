@@ -2,9 +2,9 @@
 .theme-light .ui-dialog {
   background-color: #FFFFFF; /* color 255 */
 
-  -webkit-box-shadow: 0px 2px 15px 5px #C5C7CB; /* color 200 */
-  -moz-box-shadow: 0px 2px 15px 5px #C5C7CB; /* color 200 */
-  box-shadow: 0px 2px 15px 5px #C5C7CB; /* color 200 */
+  -webkit-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  -moz-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
 }
 
 /* font color */
