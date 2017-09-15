@@ -2,9 +2,9 @@
 .theme-light .ui-dialog {
   background-color: #FFFFFF; /* color 255 */
 
-  -webkit-box-shadow: 0px 2px 15px 5px #DCDEE1; /* color 220 */
-  -moz-box-shadow: 0px 2px 15px 5px #DCDEE1; /* color 220 */
-  box-shadow: 0px 2px 15px 5px #DCDEE1; /* color 220 */
+  -webkit-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  -moz-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
 }
 
 /* font color */
@@ -16,7 +16,7 @@
 
 /* save button */
 .theme-light input.comment-button--save {
-  box-shadow: 1px 1px 1px 1px #DCDEE1; /* color 220 */
+  box-shadow: 0.5px 0.5px 0.5px 0.5px #C5C7CB; /* color 200 */
   background-color: #FFFFFF; /* color 255 */
 }
 .theme-light input.comment-button--save:hover {
@@ -31,7 +31,7 @@
 
 /* title bar */
 .theme-light .ui-dialog .ui-dialog-titlebar {
-  background-color: #EBECED; /* color 235 */
+  background-color: #EAEBED; /* color 235 */
 }
 
 /* close button */
