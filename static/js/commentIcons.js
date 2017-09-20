@@ -238,7 +238,7 @@ var addIcon = function(commentId) {
   var $inlineComment = utils.getPadInner().find('.comment.' + commentId);
   if ($inlineComment.length === 0) return;
 
-  var top = $inlineComment.get(0).offsetTop + 5;
+  var top = $inlineComment.get(0).offsetTop + 2;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
   var icon = $('#commentIconTemplate').tmpl({ commentId: commentId });
 
@@ -261,8 +261,8 @@ var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons() || !screenHasSpaceForIcons()) return;
 
-  var icon = utils.getPadOuter().find('#icon-'+commentId);
-  var targetTop = baseTop+2;
+  var icon = utils.getPadOuter().find('#icon-' + commentId);
+  var targetTop = baseTop + 2;
   var iconsAtLine = getOrCreateIconsContainerAt(targetTop);
 
   // move icon from one line to the other

@@ -40,7 +40,7 @@ describe('ep_comments_page - Comment icons', function() {
 
     // check height is the same
     var $commentedText = helper.padInner$('.' + commentId);
-    var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
+    var expectedTop = $commentedText.offset().top + 2; // all icons are +2px down to adjust position
     expect($commentIcon.offset().top).to.be(expectedTop);
 
     done();
@@ -136,7 +136,7 @@ describe('ep_comments_page - Comment icons', function() {
       // check height is the same
       var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
       var $commentedText = helper.padInner$('.' + commentId);
-      var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
+      var expectedTop = $commentedText.offset().top + 2; // all icons are +2px down to adjust position
 
       // icon might take some time to go to the correct position
       helper.waitFor(function() {
