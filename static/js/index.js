@@ -116,21 +116,18 @@ ep_comments.prototype.init = function(){
   });
 
   api.setHandleCommentDeletion(function(commentId) {
-    // delete replies before comment is deleted
-    var repliesToBeDeleted = self.commentDataManager.getRepliesOfComment(commentId);
-    _(repliesToBeDeleted).each(function(replyData) {
-      self.handleReplyDeletion(replyData.replyId, commentId);
-    });
+    var repliesOfComment = self.commentDataManager.getRepliesOfComment(commentId);
+    var replyIds = _(repliesOfComment).pluck('replyId');
 
-    commentSaveOrDelete.deleteComment(commentId, self.ace);
+    commentSaveOrDelete.deleteCommentAndItsReplies(commentId, replyIds, self.ace);
 
     self.collectComments();
   });
   api.setHandleReplyDeletion(function(replyId, commentId) {
-    self.handleReplyDeletion(replyId, commentId);
+    commentSaveOrDelete.deleteReply(replyId, commentId, self.ace);
   });
   this.socket.on('pushDeleteCommentReply', function(replyId, commentId) {
-    self.handleReplyDeletion(replyId, commentId);
+    commentSaveOrDelete.deleteReply(replyId, commentId, self.ace);
   });
 
   // Enable and handle cookies

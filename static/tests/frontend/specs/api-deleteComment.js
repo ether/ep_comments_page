@@ -5,13 +5,25 @@ describe('ep_comments_page - api - delete comment', function() {
   var TARGET_COMMENT_LINE = 0;
   var TEXT_OF_TARGET_COMMENT = 'I will be deleted';
   var TEXT_OF_COMMENT_NOT_REMOVED = 'I will NOT be removed';
+  var TEXT_OF_FIRST_REPLY = '1st reply';
+  var TEXT_OF_SECOND_REPLY = '2nd reply';
+
   var commentId;
 
   var createTargetComment = function(done) {
     utils.addCommentToLine(TARGET_COMMENT_LINE, TEXT_OF_TARGET_COMMENT, function() {
       commentId = utils.getCommentIdOfLine(TARGET_COMMENT_LINE);
-      done();
+      createRepliesOfTargetComment(commentId, done);
     });
+  }
+
+  var createRepliesOfTargetComment = function(commentId, done) {
+    apiUtils.simulateCallToCreateReply(commentId, TEXT_OF_FIRST_REPLY);
+    apiUtils.simulateCallToCreateReply(commentId, TEXT_OF_SECOND_REPLY);
+
+    helper.waitFor(function() {
+      return apiUtils.getNumberOfRepliesOfComment(commentId) === 2;
+    }).done(done);
   }
 
   before(function(done) {
@@ -41,6 +53,12 @@ describe('ep_comments_page - api - delete comment', function() {
     it('removes the comment from pad text', function(done) {
       helper.waitFor(function() {
         return utils.getCommentIdOfLine(TARGET_COMMENT_LINE) === null;
+      }).done(done);
+    });
+
+    it('removes the associated replies from pad text', function(done) {
+      helper.waitFor(function() {
+        return utils.getReplyIdOfLine(TARGET_COMMENT_LINE) === null;
       }).done(done);
     });
 
@@ -78,11 +96,21 @@ describe('ep_comments_page - api - delete comment', function() {
         });
       });
 
-      it('sends the data with the un-deleted comment', function(done) {
+      it('sends the data with the restored comment', function(done) {
         apiUtils.waitForDataToBeSent(function() {
           var comments = apiUtils.getLastDataSent();
           expect(comments.length).to.be(2);
           expect(comments[0].text).to.be(TEXT_OF_TARGET_COMMENT);
+          done();
+        });
+      });
+
+      it('sends the data with the restored replies', function(done) {
+        apiUtils.waitForDataToBeSent(function() {
+          expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(2);
+          expect(apiUtils.getReplyDataOnPosition(0, commentId).text).to.be(TEXT_OF_FIRST_REPLY);
+          expect(apiUtils.getReplyDataOnPosition(1, commentId).text).to.be(TEXT_OF_SECOND_REPLY);
+
           done();
         });
       });
@@ -103,6 +131,16 @@ describe('ep_comments_page - api - delete comment', function() {
             var comments = apiUtils.getLastDataSent();
             expect(comments.length).to.be(2);
             expect(comments[0].text).to.be(TEXT_OF_TARGET_COMMENT);
+            done();
+          });
+        });
+
+        it('sends the data with the restored replies', function(done) {
+          apiUtils.waitForDataToBeSent(function() {
+            expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(2);
+            expect(apiUtils.getReplyDataOnPosition(0, commentId).text).to.be(TEXT_OF_FIRST_REPLY);
+            expect(apiUtils.getReplyDataOnPosition(1, commentId).text).to.be(TEXT_OF_SECOND_REPLY);
+
             done();
           });
         });
