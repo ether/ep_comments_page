@@ -83,16 +83,8 @@ exports.socketio = function (hook_name, args, cb){
     socket.on('bulkAddCommentReplies', function(padId, data, callback){
       commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
         socket.broadcast.to(padId).emit('pushAddCommentReplyInBulk', repliesId, replies);
-        var repliesWithReplyId = _.object(repliesId, replies); // {c-reply-123:data, c-reply-124:data}
+        var repliesWithReplyId = _.object(repliesId, replies); // {cr-123:data, cr-124:data}
         callback(repliesWithReplyId);
-      });
-    });
-
-    socket.on('deleteComment', function (data, callback) {
-      var padId = data.padId;
-      commentManager.deleteComment(padId, data, function() {
-        socket.broadcast.to(padId).emit('pushDeleteComment', data.commentId);
-        callback();
       });
     });
 
@@ -116,14 +108,6 @@ exports.socketio = function (hook_name, args, cb){
         reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
         callback(replyId, reply);
-      });
-    });
-
-    socket.on('deleteCommentReply', function (data, callback) {
-      var padId = data.padId;
-      commentManager.deleteCommentReply(padId, data, function() {
-        socket.broadcast.to(padId).emit('pushDeleteCommentReply', data.replyId, data.commentId);
-        callback();
       });
     });
 

@@ -107,27 +107,6 @@ exports.copyComments = function(originalPadId, newPadID, callback)
   });
 };
 
-exports.deleteComment = function(padId, data, callback)
-{
-   // We need to change readOnly PadIds to Normal PadIds
-   padId = _getReadWritePadId(padId);
-
-  //get the entry
-  db.get("comments:" + padId, function(err, comments) {
-    if(ERR(err, callback)) return;
-    // the entry doesn't exist, do nothing
-    if(comments == null) return;
-
-    delete comments[data.commentId]
-
-    //save the new element back
-    db.set("comments:" + padId, comments);
-
-    // delete also the replies
-    _deleteCommentRepliesOfComment(padId, data.commentId, callback);
-  });
-};
-
 exports.getCommentReplies = function (padId, callback){
  // We need to change readOnly PadIds to Normal PadIds
  padId = _getReadWritePadId(padId);
@@ -173,15 +152,15 @@ exports.bulkAddCommentReplies = function(padId, data, callback){
 
     var newReplies = [];
     var replyIds = _.map(data, function(replyData) {
-      //create the new reply id
-      var replyId = "c-reply-" + randomString(16);
+      //create the new reply id if necessary
+      var replyId = replyData.replyId || "cr-" + randomString(16);
 
       metadata = replyData.comment || {};
 
       var reply = {
         "commentId"  : replyData.commentId,
         "text"       : replyData.reply               || replyData.text,
-        "author"     : metadata.author               || "empty",
+        "author"     : metadata.author               || replyData.author || "empty",
         "name"       : metadata.name                 || replyData.name,
         "timestamp"  : parseInt(replyData.timestamp) || new Date().getTime()
       };
@@ -217,45 +196,6 @@ exports.copyCommentReplies = function(originalPadId, newPadID, callback){
   });
 };
 
-var _deleteCommentRepliesOfComment = function(padId, commentId, callback){
-  //get the entry
-  db.get("comment-replies:" + padId, function(err, replies){
-    if(ERR(err, callback)) return;
-    // the entry doesn't exist, do nothing
-    if(replies == null) return;
-
-    var replyIds = _(replies).each(function(replyData) {
-      if (replyData.commentId === commentId) {
-        delete replies[replyData.replyId];
-      }
-    });
-
-    //save the new element back
-    db.set("comment-replies:" + padId, replies);
-
-    callback(null);
-  });
-};
-
-exports.deleteCommentReply = function(padId, data, callback){
-  // We need to change readOnly PadIds to Normal PadIds
-  padId = _getReadWritePadId(padId);
-
-  //get the entry
-  db.get("comment-replies:" + padId, function(err, replies){
-    if(ERR(err, callback)) return;
-    // the entry doesn't exist, do nothing
-    if(replies == null) return;
-
-    delete replies[data.replyId];
-
-    //save the new element back
-    db.set("comment-replies:" + padId, replies);
-
-    callback(null);
-  });
-};
-
 exports.changeCommentText = function(padId, commentId, commentText, callback){
   var commentTextIsNotEmpty = (commentText || '').length > 0;
   if(commentTextIsNotEmpty){
@@ -265,7 +205,7 @@ exports.changeCommentText = function(padId, commentId, commentText, callback){
 
     // If we're dealing with comment replies we need to a different query
     var prefix = "comments:";
-    if(commentId.substring(0,7) === "c-reply"){
+    if(commentId.startsWith("cr")){
       prefix = "comment-replies:";
     }
 

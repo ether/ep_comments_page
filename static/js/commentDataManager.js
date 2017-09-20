@@ -1,8 +1,8 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
+var linesChangedListener = require('./linesChangedListener');
 var api = require('./api');
-var scenesChangedListener = require('./scenesChangedListener');
 var utils = require('./utils');
 var smUtils = require('ep_script_scene_marks/static/js/utils');
 
@@ -10,7 +10,7 @@ var commentDataManager = function(socket) {
   this.socket = socket;
   this.comments = {};
 
-  scenesChangedListener.onSceneChanged(this.triggerDataChanged.bind(this));
+  linesChangedListener.onLineChanged('.comment, heading', this.triggerDataChanged.bind(this));
 
   api.setHandleCommentEdition(this._onCommentEdition.bind(this));
   api.setHandleReplyEdition(this._onReplyEdition.bind(this));
@@ -24,6 +24,10 @@ var commentDataManager = function(socket) {
 
 commentDataManager.prototype.getComments = function() {
   return this.comments;
+}
+
+commentDataManager.prototype.getRepliesOfComment = function(commentId) {
+  return this.comments[commentId].replies;
 }
 
 commentDataManager.prototype.addComments = function(comments) {
@@ -65,12 +69,6 @@ commentDataManager.prototype.addReply = function(replyId, replyData, doNotTrigge
   if (!doNotTriggerDataChanged) {
     this.triggerDataChanged();
   }
-}
-
-commentDataManager.prototype.deleteReply = function(replyId, commentId) {
-  var commentOfReply = this.comments[commentId];
-  delete commentOfReply.replies[replyId];
-  this.triggerDataChanged();
 }
 
 commentDataManager.prototype._onCommentEdition = function(commentId, commentText) {
@@ -149,7 +147,7 @@ commentDataManager.prototype.refreshAllReplyData = function(callback) {
   this.socket.emit('getCommentReplies', req, function(res) {
     self.addReplies(res.replies);
 
-    callback(res.replies);
+    if (callback) callback(res.replies);
   });
 }
 
@@ -165,52 +163,75 @@ commentDataManager.prototype.triggerDataChanged = function() {
   this.updateListOfCommentsStillOnText();
 }
 
+commentDataManager.prototype._getHeadingOfLine = function($lineWithComment) {
+  if ($lineWithComment.is('div.withHeading')) {
+    return $lineWithComment;
+  } else if (smUtils.checkIfHasSceneMark($lineWithComment)) {
+    return $lineWithComment.nextUntil('div.withHeading').addBack().last().next();
+  } else {
+    return $lineWithComment.prevUntil('div.withHeading').addBack().first().prev();
+  }
+}
 // some comments might had been removed from text, so update the list
 commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
   // TODO can we store the data that we're processing here, so we don't need to redo
   // the processing for the data we had already built?
 
   var self = this;
+  var commentIdRegex = /(?:^| )(c-[A-Za-z0-9]*)/;
+  var replyIdRegex = /(?:^| )(cr-[A-Za-z0-9]*)/;
 
   var $commentsOnText = utils.getPadInner().find('.comment');
   var $scenes = utils.getPadInner().find('div.withHeading');
 
-  // fill scene number of comments to send on API
-  $commentsOnText.each(function() {
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
+  // get the order of comments to send on API + grab data from script to be used
+  // to fill comment & reply data later
+  var orderedComments = $commentsOnText.map(function() {
+    var classCommentId = commentIdRegex.exec($(this).attr('class'));
     var commentId      = classCommentId && classCommentId[1];
 
-    var $lineWithComment = $(this).closest('div');
-    var commentData = self.comments[commentId];
-    commentData.commentId = commentId;
-
-    var $headingOfSceneWhereCommentIs;
-    if ($lineWithComment.is('div.withHeading')) {
-      $headingOfSceneWhereCommentIs = $lineWithComment;
-    } else if (smUtils.checkIfHasSceneMark($lineWithComment)) {
-      $headingOfSceneWhereCommentIs = $lineWithComment.nextUntil('div.withHeading').addBack().last().next();
-    } else {
-      $headingOfSceneWhereCommentIs = $lineWithComment.prevUntil('div.withHeading').addBack().first().prev();
-    }
-
-    self.comments[commentId].scene = 1 + $scenes.index($headingOfSceneWhereCommentIs);
+    // ignore comments without a valid id -- maybe comment was deleted?
+    return commentId && {
+      commentId: commentId,
+      element: this,
+    };
   });
 
-  // get the order of comments to send on API
-  var orderedCommentIds = $commentsOnText.map(function() {
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
-    var commentId      = classCommentId && classCommentId[1];
-    return commentId;
-  });
   // remove null and duplicate ids (this happens when comment is split
   // into 2 parts -- by an overlapping comment, for example)
-  orderedCommentIds = _(orderedCommentIds)
+  orderedComments = _(orderedComments)
     .chain()
     .compact()
-    .unique()
+    .unique('commentId')
     .value();
 
-  api.triggerDataChanged(self.comments, orderedCommentIds);
+  var commentsToSend = _(orderedComments).map(function(commentInfo) {
+    // create a copy of each comment, so we can change it without messing up
+    // with self.comments
+    var commentData = Object.assign({}, self.comments[commentInfo.commentId]);
+
+    // fill scene number
+    var $lineWithComment = $(commentInfo.element).closest('div');
+    var $headingOfSceneWhereCommentIs = self._getHeadingOfLine($lineWithComment);
+    var sceneNumberOfComment = 1 + $scenes.index($headingOfSceneWhereCommentIs);
+    commentData.scene = sceneNumberOfComment;
+
+    // remove replies that are not on text anymore
+    var commentReplyIds = _(commentInfo.element.classList).filter(function(className) {
+      return replyIdRegex.test(className);
+    });
+
+    // sort replies by date. Note: this needs to be done because DELETE/UNDO messes
+    // up with the order of the replies on text class
+    var sortedReplyIds = _(commentReplyIds).sortBy(function(replyId) {
+      return commentData.replies[replyId].timestamp;
+    });
+    commentData.replies = _(commentData.replies).pick(sortedReplyIds);
+
+    return commentData;
+  });
+
+  api.triggerDataChanged(commentsToSend);
 }
 
 exports.init = function(socket) {

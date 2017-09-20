@@ -172,13 +172,19 @@ ep_comments_page_test_helper.utils = {
     return commentData;
   },
   getCommentIdOfLine: function(lineNumber) {
+    return this._getCommentOrReplyIdOfLine(lineNumber, /(?:^| )(c-[A-Za-z0-9]*)/);
+  },
+  getReplyIdOfLine: function(lineNumber) {
+    return this._getCommentOrReplyIdOfLine(lineNumber, /(?:^| )(cr-[A-Za-z0-9]*)/);
+  },
+  _getCommentOrReplyIdOfLine: function(lineNumber, regex) {
     var $line = this.getLine(lineNumber);
-    var comment = $line.find('.comment');
-    var cls = comment.attr('class');
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
+    var commentOrReply = $line.find('.comment, .comment-reply');
+    var cls = commentOrReply.attr('class');
+    var classId = regex.exec(cls);
+    var commentOrReplyId = (classId) ? classId[1] : null;
 
-    return commentId;
+    return commentOrReplyId;
   },
 
   commentIconsEnabled: function() {

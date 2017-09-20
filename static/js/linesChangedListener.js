@@ -2,8 +2,9 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 var utils = require('./utils');
 var scheduler = require('./scheduler');
 
-var scenesChangedListener = function(callback) {
-  this.headingAlreadyChanged = false;
+var linesChangedListener = function(selector, callback) {
+  this.targetLineAlreadyChanged = false;
+  this.selector = selector;
   this.callback = callback;
 
   // to avoid lagging while user is typing, we set a scheduler to postpone
@@ -13,26 +14,27 @@ var scenesChangedListener = function(callback) {
   this.startObserving();
 }
 
-scenesChangedListener.prototype.startObserving = function() {
+linesChangedListener.prototype.startObserving = function() {
   var $editor = utils.getPadInner().find('#innerdocbody');
   this.createObserver().observe($editor.get(0), { childList: true });
 }
 
-scenesChangedListener.prototype.createObserver = function() {
+linesChangedListener.prototype.createObserver = function() {
   var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
   return new MutationObserver(this.handlePadLinesChanged.bind(this));
 }
 
-scenesChangedListener.prototype.handlePadLinesChanged = function(mutations) {
+linesChangedListener.prototype.handlePadLinesChanged = function(mutations) {
   this.scheduler.padChanged();
 
-  // don't need to check mutations if we already know there was a heading affected
-  if (!this.headingAlreadyChanged && this.mutationsAffectedASceneHeading(mutations)) {
-    this.headingAlreadyChanged = true;
+  // don't need to check mutations if we already know there was a target line affected
+  if (!this.targetLineAlreadyChanged && this.mutationsAffectedATargetLine(mutations)) {
+    this.targetLineAlreadyChanged = true;
   }
 }
 
-scenesChangedListener.prototype.mutationsAffectedASceneHeading = function(mutations) {
+linesChangedListener.prototype.mutationsAffectedATargetLine = function(mutations) {
+  var selector = this.selector;
   return _(mutations)
     .chain()
     // extract changed lines
@@ -43,18 +45,18 @@ scenesChangedListener.prototype.mutationsAffectedASceneHeading = function(mutati
     })
     .flatten()
     .unique()
-    // check if any of the changed lines was a heading
-    .any(function(lineNode) { return lineNode.querySelector('heading') })
+    // check if any of the changed lines matches the provided selector
+    .any(function(lineNode) { return lineNode.querySelector(selector) })
     .value();
 }
 
-scenesChangedListener.prototype.triggerCallbackIfNecessary = function() {
-  if (this.headingAlreadyChanged) {
-    this.headingAlreadyChanged = false;
+linesChangedListener.prototype.triggerCallbackIfNecessary = function() {
+  if (this.targetLineAlreadyChanged) {
+    this.targetLineAlreadyChanged = false;
     this.callback();
   }
 }
 
-exports.onSceneChanged = function(callback) {
-  return new scenesChangedListener(callback);
+exports.onLineChanged = function(selector, callback) {
+  return new linesChangedListener(selector, callback);
 }

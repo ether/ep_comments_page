@@ -13,6 +13,7 @@ var commentL10n = require('./commentL10n');
 var copyPasteEvents = require('./copyPasteEvents');
 var api = require('./api');
 var utils = require('./utils');
+var commentSaveOrDelete = require('./commentSaveOrDelete');
 
 var cssFiles = [
   '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
@@ -39,13 +40,11 @@ function ep_comments(context){
   var loc = document.location;
   var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
   var url = loc.protocol + "//" + loc.hostname + ":" + port + "/" + "comment";
-  this.socket     = io.connect(url);
+  this.socket = io.connect(url);
 
-  this.mapFakeComments = [];
-  this.mapOriginalCommentsId = [];
   this.shouldCollectComment = false;
 
-  api.initialize(this.ace, this.socket);
+  api.initialize();
   this.commentDataManager = commentDataManager.init(this.socket);
   this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
@@ -64,7 +63,6 @@ ep_comments.prototype.init = function(){
     self.commentDataManager.refreshAllReplyData(function(replies) {
       if (!$.isEmptyObject(comments)) {
         self.collectComments();
-        self.markCommentsWithReply();
       }
 
       self.commentRepliesListen();
@@ -72,10 +70,13 @@ ep_comments.prototype.init = function(){
     });
   });
 
-  // On collaborator add a comment in the current pad
+  // On collaborator add a comment or reply in the current pad
   this.socket.on('pushAddComment', function (commentId, comment) {
     self.commentDataManager.addComment(commentId, comment);
     self.collectCommentsAfterSomeIntervalsOfTime();
+  });
+  this.socket.on('pushAddCommentReply', function (replyId, reply) {
+    self.commentDataManager.addReply(replyId, reply);
   });
 
   // When language is changed, we need to localize other components too
@@ -109,11 +110,22 @@ ep_comments.prototype.init = function(){
     data.reply = text;
 
     self.socket.emit('addCommentReply', data, function(replyId, reply) {
+      commentSaveOrDelete.saveReplyOnCommentText(replyId, commentId, self.ace);
       self.commentDataManager.addReply(replyId, reply);
-      self.markCommentsWithReply();
     });
   });
 
+  api.setHandleCommentDeletion(function(commentId) {
+    // delete replies before comment is deleted
+    var repliesToBeDeleted = self.commentDataManager.getRepliesOfComment(commentId);
+    _(repliesToBeDeleted).each(function(replyData) {
+      self.handleReplyDeletion(replyData.replyId, commentId);
+    });
+
+    commentSaveOrDelete.deleteComment(commentId, self.ace);
+
+    self.collectComments();
+  });
   api.setHandleReplyDeletion(function(replyId, commentId) {
     self.handleReplyDeletion(replyId, commentId);
   });
@@ -157,8 +169,7 @@ ep_comments.prototype.init = function(){
 };
 
 ep_comments.prototype.handleReplyDeletion = function(replyId, commentId) {
-  this.commentDataManager.deleteReply(replyId, commentId);
-  this.markCommentsWithReply();
+  commentSaveOrDelete.deleteReply(replyId, commentId, this.ace);
 }
 
 // This function is useful to collect new comments on the collaborators
@@ -237,15 +248,6 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
   this.closeOpenedComment(e);
 }
 
-// Adjust icons of comments with reply(ies)
-ep_comments.prototype.markCommentsWithReply = function() {
-  var comments = this.commentDataManager.getComments();
-  _(comments).each(function(commentData) {
-    var commentWithReply = Object.keys(commentData.replies).length > 0;
-    commentIcons.commentHasReply(commentData.commentId, commentWithReply);
-  });
-};
-
 ep_comments.prototype.commentIdOf = function(e){
   var cls             = e.currentTarget.classList;
   var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
@@ -280,9 +282,9 @@ ep_comments.prototype.getFirstOcurrenceOfCommentIds = function() {
 ep_comments.prototype.getUniqueCommentsId = function() {
   var inlineComments = utils.getPadInner().find(".comment");
   var commentsId = _.map(inlineComments, function(inlineComment){
-   var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
-   // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
-   if(commentId) return commentId[1];
+    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
+    // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
+    if(commentId) return commentId[1];
   });
   return _.uniq(commentsId);
 }
@@ -386,11 +388,7 @@ ep_comments.prototype.showNewCommentForm = function(rep) {
 ep_comments.prototype.saveComment = function(data, rep) {
   var self = this;
   self.socket.emit('addComment', data, function (commentId, comment){
-    self.ace.callWithAce(function (ace){
-      ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
-      ace.ace_setAttributeOnSelection('comment', commentId);
-    },'saveComment', true);
-
+    commentSaveOrDelete.saveCommentOnSelectedText(commentId, rep, self.ace);
     self.commentDataManager.addComment(commentId, comment);
     self.collectComments();
   });
@@ -404,7 +402,7 @@ ep_comments.prototype.saveCommentWithoutSelection = function (commentData) {
 
   self.socket.emit('bulkAddComment', padId, data, function (comments){
     self.commentDataManager.addComments(comments);
-    self.shouldCollectComment = true
+    self.shouldCollectComment = true;
   });
 }
 
@@ -424,11 +422,7 @@ ep_comments.prototype.buildComment = function(commentData, commentId){
   return data;
 }
 
-ep_comments.prototype.getMapfakeComments = function(){
-  return this.mapFakeComments;
-}
-
-// commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
+// commentReplyData = {cr-123:{commentReplyData1}, cr-234:{commentReplyData1}, ...}
 ep_comments.prototype.saveRepliesWithoutSelection = function(commentReplyData) {
   var self = this;
   var padId = clientVars.padId;
@@ -477,11 +471,7 @@ ep_comments.prototype.commentListen = function(){
 ep_comments.prototype.commentRepliesListen = function(){
   var self = this;
   this.socket.on('pushAddCommentReplyInBulk', function(replyId, reply) {
-    self.commentDataManager.refreshAllReplyData(function(replies) {
-      if (!$.isEmptyObject(replies)) {
-        self.markCommentsWithReply();
-      }
-    });
+    self.commentDataManager.refreshAllReplyData();
   });
 };
 
@@ -521,7 +511,6 @@ var hooks = {
     // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
     if(commentWasPasted && domClean){
       pad.plugins.ep_comments_page.collectComments(function(){
-        pad.plugins.ep_comments_page.markCommentsWithReply();
         pad.plugins.ep_comments_page.shouldCollectComment = false;
       });
     }
@@ -532,8 +521,11 @@ var hooks = {
     if(context.key === 'comment' && context.value !== "comment-deleted") {
       return ['comment', context.value];
     }
+    else if(context.key.startsWith('comment-reply-')) {
+      return ['comment-reply', context.value];
+    }
     // only read marks made by current user
-    if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
+    else if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
       return [preCommentMark.MARK_CLASS, context.value];
     }
   },
@@ -643,6 +635,5 @@ function getRepFromSelector(selector) {
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
-  editorInfo.ace_getCommentIdOnFirstPositionSelected = _(copyPasteEvents.getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(copyPasteEvents.hasCommentOnSelection).bind(context);
 }

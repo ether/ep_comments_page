@@ -7,50 +7,74 @@ describe('ep_comments_page - api - create comment reply', function() {
 
   var commentId;
 
-  before(function (done) {
+  before(function(done) {
     utils.createPad(this, function() {
       utils.addCommentToLine(0, COMMENT_TEXT, function() {
         commentId = utils.getCommentIdOfLine(0);
-        apiUtils.waitForDataToBeSent(function() {
-          apiUtils.resetData();
-          apiUtils.simulateCallToCreateReply(commentId, REPLY_TEXT);
-          done();
-        });
+        apiUtils.waitForDataToBeSent(done);
       });
     });
   });
 
-  it('sends the reply data inside its comment data', function(done) {
-    apiUtils.waitForDataToBeSent(function() {
-      var comments = apiUtils.getLastDataSent();
-      expect(comments.length).to.be(1);
-      expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(1);
-
-      var reply = apiUtils.getReplyDataOnPosition(0, commentId);
-      expect(reply.text).to.be(REPLY_TEXT);
-
-      done();
+  context('when comment reply is created', function() {
+    before(function() {
+      apiUtils.resetData();
+      apiUtils.simulateCallToCreateReply(commentId, REPLY_TEXT);
     });
-  });
 
-  it('sets the other reply values', function(done) {
-    apiUtils.waitForDataToBeSent(function() {
-      var reply = apiUtils.getReplyDataOnPosition(0, commentId);
+    it('sends the reply data inside its comment data', function(done) {
+      apiUtils.waitForDataToBeSent(function() {
+        var comments = apiUtils.getLastDataSent();
+        expect(comments.length).to.be(1);
+        expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(1);
 
-      expect(reply.author).to.not.be(undefined);
-      expect(reply.name).to.not.be(undefined);
-      expect(reply.timestamp).to.not.be(undefined);
-      expect(reply.replyId).to.not.be(undefined);
+        var reply = apiUtils.getReplyDataOnPosition(0, commentId);
+        expect(reply.text).to.be(REPLY_TEXT);
 
-      done();
+        done();
+      });
     });
-  });
 
-  it('changes the comment icon to have replies', function(done) {
-    apiUtils.waitForDataToBeSent(function() {
-      var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
-      expect($commentIcon.hasClass('withReply')).to.be(true);
-      done();
+    it('sets the other reply values', function(done) {
+      apiUtils.waitForDataToBeSent(function() {
+        var reply = apiUtils.getReplyDataOnPosition(0, commentId);
+
+        expect(reply.author).to.not.be(undefined);
+        expect(reply.name).to.not.be(undefined);
+        expect(reply.timestamp).to.not.be(undefined);
+        expect(reply.replyId).to.not.be(undefined);
+
+        done();
+      });
+    });
+
+    it('changes the comment icon to have replies', function(done) {
+      helper.waitFor(function() {
+        var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
+        return $commentIcon.hasClass('withReply');
+      }).done(done);
+    });
+
+    context('and user presses UNDO', function() {
+      before(function() {
+        apiUtils.resetData();
+        utils.undo();
+      });
+
+      it('sends no reply data inside comment data', function(done) {
+        apiUtils.waitForDataToBeSent(function() {
+          expect(apiUtils.getNumberOfRepliesOfComment(commentId)).to.be(0);
+          done();
+        });
+      });
+
+      it('changes the comment icon to have no reply', function(done) {
+        apiUtils.waitForDataToBeSent(function() {
+          var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
+          expect($commentIcon.hasClass('withReply')).to.be(false);
+          done();
+        });
+      });
     });
   });
 });

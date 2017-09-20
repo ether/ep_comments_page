@@ -3,6 +3,7 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var utils = require('ep_comments_page/static/js/utils');
 var api = require('ep_comments_page/static/js/api');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
+var linesChangedListener = require('./linesChangedListener');
 
 // Indicates if Etherpad is configured to display icons
 var displayIcons = function() {
@@ -88,6 +89,13 @@ var placeCaretAtBeginningOfTextOf = function(commentId) {
 
 var makeSureEditorHasTheFocus = function() {
   utils.getPadOuter().find('iframe[name="ace_inner"]').get(0).contentWindow.focus();
+}
+
+var addListenersToUpdateIconStyle = function() {
+  // we're only doing something if icons will be displayed at all
+  if (!displayIcons()) return;
+
+  linesChangedListener.onLineChanged('.comment-reply', updateCommentIconsStyle);
 }
 
 var addListenersToCommentIcons = function() {
@@ -200,6 +208,8 @@ var insertContainer = function() {
   utils.getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
   adjustIconsForNewScreenSize();
+
+  addListenersToUpdateIconStyle();
   addListenersToCommentIcons();
   addListenersToDeactivateComment();
   loadHelperLibs();
@@ -215,6 +225,8 @@ var addIcons = function(comments) {
   for(var commentId in comments) {
     addIcon(commentId);
   }
+
+  updateCommentIconsStyle();
 }
 
 var addIcon = function(commentId) {
@@ -273,15 +285,23 @@ var isCommentOpenedByClickOnIcon = function() {
   return commentOpenedByClickOnIcon;
 }
 
-// Mark comment as a "comment with reply", so it can be displayed with a
-// different icon
-var commentHasReply = function(commentId, commentWithReply) {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
+// Update which comments have reply
+var updateCommentIconsStyle = function() {
+  var $iconsContainer = utils.getPadOuter().find('#commentIcons');
+  var $commentsOnText = utils.getPadInner().find('.comment');
 
-  // change comment icon
-  var iconForComment = utils.getPadOuter().find('#commentIcons').find("#icon-"+commentId);
-  iconForComment.toggleClass('withReply', commentWithReply);
+  $commentsOnText.each(function() {
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec($(this).attr('class'));
+    var commentId = classCommentId && classCommentId[1];
+
+    // ignore comments without a valid id -- maybe comment was deleted?
+    if (commentId) {
+      var commentHasReply = $(this).hasClass('comment-reply');
+      // change comment icon
+      var $commentIcon = $iconsContainer.find('#icon-' + commentId);
+      $commentIcon.toggleClass('withReply', commentHasReply);
+    }
+  });
 }
 
 // Indicate if sidebar comment should be shown, checking if it had the characteristics
@@ -325,7 +345,6 @@ exports.addIcons = addIcons;
 exports.hideIcons = hideIcons;
 exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
-exports.commentHasReply = commentHasReply;
 exports.shouldShow = shouldShow;
 exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
 exports.shouldNotCloseComment = shouldNotCloseComment;

@@ -46,6 +46,28 @@ describe('ep_comments_page - Comment icons', function() {
     done();
   });
 
+  context('when comment has a reply and pad is reloaded', function() {
+    before(function(done) {
+      apiUtils.simulateCallToCreateReply(commentId, 'anything');
+
+      // wait for reply to be saved
+      var test = this;
+      helper.waitFor(function() {
+        var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
+        return $commentIcon.hasClass('withReply');
+      }).done(function() {
+        utils.reloadPad(test, done);
+      });
+    });
+
+    it('loads the comment icon with reply', function(done) {
+      helper.waitFor(function() {
+        var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId);
+        return $commentIcon.hasClass('withReply');
+      }).done(done);
+    });
+  });
+
   context('when commented text is removed', function() {
     before(function() {
       var $commentedLine = helper.padInner$('div .comment').first().parent();

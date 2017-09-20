@@ -40,6 +40,13 @@ describe('ep_comments_page - api - "data changed" event', function() {
         utils.reloadPad(this, done);
       });
 
+      after(function() {
+        // remove the reply created on before()
+        var commentId = utils.getCommentIdOfLine(COMMENT_LINE);
+        var replyData = apiUtils.getReplyDataOnPosition(0, commentId);
+        apiUtils.simulateCallToDeleteReply(replyData.replyId, commentId);
+      });
+
       it('sends the data of existing comment when pad finishes loading', function(done) {
         apiUtils.waitForDataToBeSent(function() {
           var comments = apiUtils.getLastDataSent();
