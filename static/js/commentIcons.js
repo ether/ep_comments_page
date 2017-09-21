@@ -2,37 +2,11 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
 var utils = require('ep_comments_page/static/js/utils');
 var api = require('ep_comments_page/static/js/api');
-var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 var linesChangedListener = require('./linesChangedListener');
 
 // Indicates if Etherpad is configured to display icons
 var displayIcons = function() {
   return clientVars.displayCommentAsIcon
-}
-
-// Indicates if screen has enough space on right margin to display icons
-var screenHasSpaceToDisplayIcons;
-var screenHasSpaceForIcons = function() {
-  if (screenHasSpaceToDisplayIcons === undefined) calculateIfScreenHasSpaceForIcons();
-
-  return screenHasSpaceToDisplayIcons;
-}
-
-var calculateIfScreenHasSpaceForIcons = function() {
-  var $firstElementOnPad = utils.getPadInner().find('#innerdocbody > div').first();
-  var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
-
-  screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
-}
-
-// The space available can be anything like padding, margin or border
-var getSpaceAvailableOnTheRightSide = function($element) {
-  var rightPadding      = parseInt($element.css('padding-right'), 10);
-  var rightBorder       = parseInt($element.css('border-right-width'), 10);
-  var rightMargin       = parseInt($element.css('margin-right'), 10);
-
-  var rightEdgeSpace = rightPadding + rightBorder + rightMargin;
-  return rightEdgeSpace;
 }
 
 var getOrCreateIconsContainerAt = function(top) {
@@ -141,13 +115,9 @@ var addListenersToDeactivateComment = function() {
   });
 }
 
-// Close comment if event target was outside of comment or on a comment icon
+// Close comment if event target was on a comment icon
 var deactivateCommentIfNotOnSelectedElements = function(e) {
-  // Don't do anything if clicked on the following elements:
-  if (shouldNotCloseComment(e) // any of the comment icons
-    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
-    return;
-  }
+  if (shouldNotCloseComment(e)) return;
 
   // All clear, can close the comment
   var openedComment = findOpenedComment();
@@ -207,8 +177,6 @@ var insertContainer = function() {
 
   utils.getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
-  adjustIconsForNewScreenSize();
-
   addListenersToUpdateIconStyle();
   addListenersToCommentIcons();
   addListenersToDeactivateComment();
@@ -248,7 +216,7 @@ var addIcon = function(commentId) {
 // Hide comment icons from container
 var hideIcons = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return;
+  if (!displayIcons()) return;
 
   utils.getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
@@ -259,7 +227,7 @@ var hideIcons = function() {
 // height of the pad text associated to the comment, and return the affected icon
 var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return;
+  if (!displayIcons()) return;
 
   var icon = utils.getPadOuter().find('#icon-' + commentId);
   var targetTop = baseTop + 2;
@@ -277,7 +245,7 @@ var adjustTopOf = function(commentId, baseTop) {
 // comment icon.
 var isCommentOpenedByClickOnIcon = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return false;
+  if (!displayIcons()) return false;
 
   var iconClicked = utils.getPadOuter().find('#commentIcons').find(".comment-icon.active");
   var commentOpenedByClickOnIcon = iconClicked.length !== 0;
@@ -309,7 +277,7 @@ var updateCommentIconsStyle = function() {
 var shouldShow = function(sidebarComent) {
   var shouldShowComment = false;
 
-  if (!displayIcons() || !screenHasSpaceForIcons()) {
+  if (!displayIcons()) {
     // if icons are not being displayed, we always show comments
     shouldShowComment = true;
   } else if (sidebarComent.hasClass("mouseover")) {
@@ -318,21 +286,6 @@ var shouldShow = function(sidebarComent) {
   }
 
   return shouldShowComment;
-}
-
-var adjustIconsForNewScreenSize = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
-  // now that screen has a different size, we need to force calculation
-  // of flag used by screenHasSpaceForIcons() before calling the function
-  calculateIfScreenHasSpaceForIcons();
-
-  if (screenHasSpaceForIcons()) {
-    utils.getPadOuter().find('#commentIcons').show();
-  } else {
-    utils.getPadOuter().find('#commentIcons').hide();
-  }
 }
 
 // Indicates if event was on one of the elements that does not close comment (any of the comment icons)
@@ -346,5 +299,4 @@ exports.hideIcons = hideIcons;
 exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
 exports.shouldShow = shouldShow;
-exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
 exports.shouldNotCloseComment = shouldNotCloseComment;

@@ -4,7 +4,6 @@ var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
 var shared = require('./shared');
-var commentBoxes = require('./commentBoxes');
 var commentIcons = require('./commentIcons');
 var newComment = require('./newComment');
 var preCommentMark = require('./preCommentMark');
@@ -96,7 +95,6 @@ ep_comments.prototype.init = function(){
   });
 
   utils.getPadInner().find("#innerdocbody").addClass("comments");
-  this.addListenersToCloseOpenedComment();
 
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
@@ -212,46 +210,6 @@ ep_comments.prototype.collectComments = function(callback) {
   if(callback) callback();
 };
 
-ep_comments.prototype.addListenersToCloseOpenedComment = function() {
-  var self = this;
-
-  // we need to add listeners to the different iframes of the page
-  $(document).on("touchstart", function(e){
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
-  });
-  utils.getPadOuter().find('html').on("touchstart", function(e){
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
-  });
-  utils.getPadInner().find('html').on("touchstart", function(e){
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
-  });
-}
-
-// Close comment that is opened
-ep_comments.prototype.closeOpenedComment = function(e) {
-  var commentId = this.commentIdOf(e);
-  commentBoxes.hideComment(commentId);
-}
-
-// Close comment if event target was outside of comment or on a comment icon
-ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
-  // Don't do anything if clicked on the allowed elements:
-  if (commentIcons.shouldNotCloseComment(e) // any of the comment icons
-    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
-    return;
-  }
-
-  // All clear, can close the comment
-  this.closeOpenedComment(e);
-}
-
-ep_comments.prototype.commentIdOf = function(e){
-  var cls             = e.currentTarget.classList;
-  var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-
-  return (classCommentId) ? classCommentId[1] : null;
-};
-
 // Set all comment icons to be aligned with their commented text
 ep_comments.prototype.setYofComments = function(){
   // hide comment icons while their position is being updated
@@ -289,46 +247,7 @@ ep_comments.prototype.getUniqueCommentsId = function() {
 // Make the adjustments after editor is resized (due to a window resize or
 // enabling/disabling Page View)
 ep_comments.prototype.editorResized = function() {
-  var self = this;
-
-  commentIcons.adjustIconsForNewScreenSize();
-
-  // We try increasing timeouts, to make sure user gets the response as fast as we can
-  setTimeout(function() {
-    if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-    setTimeout(function() {
-      if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-      setTimeout(function() {
-        if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-      }, 1000);
-    }, 500);
-  }, 250);
-}
-
-// Adjusts position on the screen for sidebar comments and comment icons
-ep_comments.prototype.adjustCommentPositions = function(){
-  commentIcons.adjustIconsForNewScreenSize();
   this.setYofComments();
-}
-
-// Indicates if all comments are on the correct Y position, and don't need to
-// be adjusted
-ep_comments.prototype.allCommentsOnCorrectYPosition = function(){
-  var inlineComments = utils.getPadInner().find(".comment");
-  var allCommentsAreCorrect = true;
-
-  $.each(inlineComments, function(){
-    var y = this.offsetTop;
-    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if(commentId) {
-      if (!commentBoxes.isOnTop(commentId[1], y)) { // found one comment on the incorrect place
-        allCommentsAreCorrect = false;
-        return false; // to break loop
-      }
-    }
-  });
-
-  return allCommentsAreCorrect;
 }
 
 ep_comments.prototype.getCommentData = function (){
