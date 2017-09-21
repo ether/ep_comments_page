@@ -21,13 +21,6 @@
     margin-right:0px;
   }
 }
-
-/* display comments at > 955px wide */
-@media (min-width: 955px) {
-  #comments.active{
-    display:block;
-  }
-}
 /* #innerdocbody is inside of another iframe, so needs a new media query */
 @media (min-width: 947px) { /* 955 - 8 (8 is #innerdocbody left position) */
   #innerdocbody.comments:not(.innerPV){
