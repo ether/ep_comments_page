@@ -182,21 +182,6 @@ ep_comments_page_test_helper.copyAndPaste = {
       helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
     });
   },
-  getCommentIdOfLine: function(line) {
-    return ep_comments_page_test_helper.utils.getCommentIdOfLine(line);
-  },
-  getCommentDataValues: function(event) {
-    var commentData = event.originalEvent.clipboardData.getData('text/objectComment');
-    var commentDataJSON = JSON.parse(commentData);
-    var commentDataValues = _.values(commentDataJSON)[0];
-    return commentDataValues;
-  },
-  getCommentReplyDataValues: function(event) {
-    var commentReplyData = event.originalEvent.clipboardData.getData('text/objectReply');
-    var commentReplyDataJSON = JSON.parse(commentReplyData);
-    var commentReplyDataValues = _.values(commentReplyDataJSON)[0];
-    return commentReplyDataValues;
-  },
   getTextOfCommentFromLine: function(lineNumber) {
     var utils = ep_comments_page_test_helper.utils;
     var commentData = utils.getCommentDataOfLine(lineNumber);
@@ -207,22 +192,5 @@ ep_comments_page_test_helper.copyAndPaste = {
     var commentData = utils.getCommentDataOfLine(lineNumber);
     var replyIds = Object.keys(commentData.replies);
     return commentData.replies[replyIds[0]].text;
-  },
-  testIfHasAllFieldsNecessaryToCreateACommementReply: function(event) {
-    var commentReplyDataValues = this.getCommentReplyDataValues(event);
-    var keys = _.keys(commentReplyDataValues);
-    var keysRequired = ["commentId", "text", "author", "name", "timestamp", "replyId", "formattedDate"];
-    this.checkIfHasAllKeys(keysRequired, keys);
-  },
-  testIfHasAllFieldsNecessaryToCreateAComment(event) {
-    var commentDataValues = this.getCommentDataValues(event);
-    var keys = _.keys(commentDataValues);
-    var keysRequired = ["author", "name", "text", "timestamp", "commentId", "date", "formattedDate", "originalCommentId"];
-    this.checkIfHasAllKeys(keysRequired, keys);
-  },
-  checkIfHasAllKeys: function(keysRequired, keys) {
-    _.each(keysRequired, function(keyRequired){
-      expect(keys).to.contain(keyRequired);
-    });
   },
 };
