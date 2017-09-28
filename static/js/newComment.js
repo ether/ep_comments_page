@@ -1,9 +1,6 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var utils = require('./utils');
 var commentL10n = require('./commentL10n');
-var preCommentMark = require('./preCommentMark');
-
-var SELECTED_TEXT = '.' + preCommentMark.MARK_CLASS;
 
 // Easier access to new comment container
 var newCommentContainer;
@@ -132,7 +129,8 @@ var insertContainers = function() {
 }
 
 var getSelectedText = function() {
-  var $selectedText = utils.getPadInner().find(SELECTED_TEXT);
+  var selector = '.' + pad.plugins.ep_comments_page.preCommentMarker.markClass;
+  var $selectedText = utils.getPadInner().find(selector);
 
   // when multiple lines are selected, the comment icon is aligned with the first one,
   // so use it as reference to create the shadow

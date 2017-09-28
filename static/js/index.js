@@ -6,7 +6,7 @@ var browser = require('ep_etherpad-lite/static/js/browser');
 var shared = require('./shared');
 var commentIcons = require('./commentIcons');
 var newComment = require('./newComment');
-var preCommentMark = require('./preCommentMark');
+var preTextMarker = require('./preTextMarker');
 var commentDataManager = require('./commentDataManager');
 var commentL10n = require('./commentL10n');
 var copyPasteEvents = require('./copyPasteEvents');
@@ -48,7 +48,7 @@ function ep_comments(context){
   api.initialize();
   this.commentDataManager = commentDataManager.init(this.socket);
   this.init();
-  this.preCommentMarker = preCommentMark.init(this.ace);
+  this.preCommentMarker = preTextMarker.createForTarget('comment', this.ace);
 }
 
 // Init Etherpad plugin comment pads
@@ -411,11 +411,7 @@ var hooks = {
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
 
     // first check if some text is being marked/unmarked to add comment to it
-    if(eventType === "unmarkPreSelectedTextToComment") {
-      pad.plugins.ep_comments_page.preCommentMarker.handleUnmarkText(context);
-    } else if(eventType === "markPreSelectedTextToComment") {
-      pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
-    }
+    preTextMarker.processAceEditEvent(context);
 
     if(context.callstack.docTextChanged) {
       // give a small delay, so all lines will be processed when setYofComments() is called
@@ -443,8 +439,8 @@ var hooks = {
       return ['comment-reply', context.value];
     }
     // only read marks made by current user
-    else if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
-      return [preCommentMark.MARK_CLASS, context.value];
+    else if(context.key.startsWith(preTextMarker.BASE_CLASS) && context.value === clientVars.userId) {
+      return [context.key];
     }
   },
 
