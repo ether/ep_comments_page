@@ -65,14 +65,10 @@ describe('get comments API', function() {
     var name       = "name";
     var text       = "text";
     var timestamp  = 1440671727068;
-    var changeTo   = "changeTo";
-    var changeFrom = "changeFrom";
     var data = {
       name: name,
       text: text,
       timestamp: timestamp,
-      changeTo: changeTo,
-      changeFrom: changeFrom,
     };
     createComment(padID, data, function(err, commentId){
       api.get(listCommentsEndPointFor(padID, apiKey))
@@ -81,8 +77,6 @@ describe('get comments API', function() {
         if(comment_data.name != name)             throw new Error("Wrong name. Expected: "       + name       + ", got: " + comment_data.name);
         if(comment_data.text != text)             throw new Error("Wrong text. Expected: "       + text       + ", got: " + comment_data.text);
         if(comment_data.timestamp != timestamp)   throw new Error("Wrong timestamp. Expected: "  + timestamp  + ", got: " + comment_data.timestamp);
-        if(comment_data.changeTo != changeTo)     throw new Error("Wrong changeTo. Expected: "   + changeTo   + ", got: " + comment_data.changeTo);
-        if(comment_data.changeFrom != changeFrom) throw new Error("Wrong changeFrom. Expected: " + changeFrom + ", got: " + comment_data.changeFrom);
       })
       .end(done);
     })

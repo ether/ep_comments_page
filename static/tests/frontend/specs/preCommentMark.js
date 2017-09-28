@@ -29,7 +29,7 @@ describe("ep_comments_page - Pre-comment text mark", function() {
 
   context("when user reloads pad", function() {
     beforeEach(function(cb) {
-      this.timeout(5000);
+      this.timeout(10000);
 
       // wait for changes to be saved as a revision before reloading the pad, otherwise
       // it won't have the text that we created on beforeEach after reload
@@ -51,7 +51,7 @@ describe("ep_comments_page - Pre-comment text mark", function() {
 
   context("when user performs UNDO operation", function() {
     beforeEach(function(cb) {
-      this.timeout(5000);
+      this.timeout(10000);
 
       // wait for changes to be saved as a revision and reload pad, otherwise
       // UNDO will remove the text that we created on beforeEach
@@ -107,10 +107,14 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     beforeEach(function(cb) {
       var outer$ = helper.padOuter$;
 
-      var $cancelButton = outer$("#comment-reset");
-      $cancelButton.click();
+      helper.waitFor(function() {
+        return outer$('.ui-dialog-titlebar-close').length > 0;
+      }).done(function() {
+        var $closeButton = outer$('.ui-dialog-titlebar-close');
+        $closeButton.click();
 
-      cb();
+        cb();
+      });
     });
 
     it("unmarks text", function(done) {
@@ -131,10 +135,6 @@ describe("ep_comments_page - Pre-comment text mark", function() {
       // fill the comment form and submit it
       var $commentField = outer$("textarea.comment-content");
       $commentField.val("My comment");
-      var $hasSuggestion = outer$("#suggestion-checkbox");
-      $hasSuggestion.click();
-      var $suggestionField = outer$("textarea.comment-suggest-to");
-      $suggestionField.val("Change to this suggestion");
       var $submittButton = outer$("input[type=submit]");
       $submittButton.click();
 

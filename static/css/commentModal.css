@@ -1,0 +1,144 @@
+/* Adjustments to pre-defined styles of jQuery-UI dialogs */
+
+/* no rouded corners on any component of the dialog */
+.ui-corner-all {
+  border-radius: 0;
+}
+
+/* avoid Etherpad from overwriting cursors on dialog components */
+.ui-dialog-titlebar span {
+  cursor: move;
+}
+.ui-button span {
+  cursor: pointer;
+}
+
+/* remove space between titlebar and its parent (the whole dialog) */
+.ui-dialog {
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400; /* Roboto Regular */
+}
+
+/* remove external border of the dialog */
+.ui-widget-content,
+.ui-widget.ui-widget-content {
+  border: none;
+}
+
+/* remove border + different background on "close" button */
+.ui-dialog-titlebar-close:active,
+.ui-dialog-titlebar-close:focus,
+.ui-dialog-titlebar-close:hover,
+.ui-dialog-titlebar-close {
+  border: none;
+  background: initial;
+  text-indent: unset;
+}
+
+/* End of "Adjustments to ..." */
+
+.ui-dialog .ui-dialog-titlebar {
+  border: none;
+
+  text-transform: uppercase;
+  font-weight: 400; /* Roboto Regular */
+  font-size: 10px;
+}
+
+/* close button */
+.ui-dialog-titlebar-close {
+  fill: #808286; /* color 130 */
+}
+.ui-dialog-titlebar-close:active {
+  fill: #19BBDA; /* color A */
+}
+
+.ui-dialog .ui-dialog-content {
+  padding: 0 10px 10px;
+}
+
+.comment-author {
+  display: flex;
+
+  padding: 10px 0 3px 0;
+  line-height: 20px;
+
+  text-transform: uppercase;
+}
+
+authoricon {
+  display: inline-block;
+  border-radius: 100%;
+  text-align: center;
+  border: 1px solid;
+
+  font-size: 9px;
+  height: 20px;
+  width: 20px;
+}
+
+authorname {
+  margin-left: 8px;
+  flex: 1;
+
+  /* hide longer names */
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.comment-text {
+  margin-bottom: 5px;
+}
+
+.comment-text textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: none;
+  background: transparent;
+
+  /* avoid a "pseudo-margin-bottom" that Chrome adds for textarea */
+  display: block;
+
+  /* draw a line around the textarea, and give some space between it and its content */
+  border: 1px solid #19BBDA; /* color A */
+  padding: 5px;
+  box-sizing: border-box;
+
+  caret-color: currentColor;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300; /* Roboto Light */
+  font-size: 11px;
+}
+
+.comment-text textarea::placeholder {
+  font-style: italic;
+}
+
+.comment-buttons {
+  margin-top: 10px;
+}
+
+input.comment-button--save {
+  float: right;
+  padding: 2px 6px 3px;
+
+  font-family: inherit; /* avoid jQueryUI from overwriting the font */
+  font-size: 11px;
+  font-weight: 300; /* Roboto Light */
+  text-transform: lowercase;
+
+  color: #808286; /* color 130 */
+  border: none;
+}
+
+/* button "click" */
+input.comment-button--save:active {
+  box-shadow: inset 1px 1px 1px 1px rgba(0, 0, 0, 0.125);
+}
+
+/* remove focus decoration on any component of the dialog */
+.ui-dialog *:focus {
+  outline: 0;
+}

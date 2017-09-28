@@ -63,15 +63,11 @@ describe('get comments replies', function(){
   it('returns comment replies data', function(done){
     createComment(padID, {}, function(err, comment){
       var text       = "text";
-      var changeTo   = "changeTo";
-      var changeFrom = "changeFrom";
       var name       = "name";
       var timestamp  = 1440671727068;
       var data = {
         commentId: comment,
         reply: text,
-        changeTo: changeTo,
-        changeFrom: changeFrom,
         name: name,
         timestamp: timestamp,
       };
@@ -81,8 +77,6 @@ describe('get comments replies', function(){
           var comment_reply_data = res.body.data.replies[replyId];
           if(comment_reply_data.commentId  != comment   )  throw new Error("Wrong commentId. Expected: "  + comment    + ", got: " + comment_reply_data.commentId)
           if(comment_reply_data.text       != text )       throw new Error("Wrong text. Expected: "       + text       + ", got: " + comment_reply_data.text)
-          if(comment_reply_data.changeTo   != changeTo )   throw new Error("Wrong changeTo. Expected: "   + changeTo   + ", got: " + comment_reply_data.changeTo)
-          if(comment_reply_data.changeFrom != changeFrom ) throw new Error("Wrong changeFrom. Expected: " + changeFrom + ", got: " + comment_reply_data.changeFrom)
           if(comment_reply_data.name       != name )       throw new Error("Wrong name. Expected: "       + name       + ", got: " + comment_reply_data.name)
           if(comment_reply_data.timestamp  != timestamp )  throw new Error("Wrong timestamp. Expected: "  + timestamp  + ", got: " + comment_reply_data.timestamp)
         }).end(done);

@@ -78,9 +78,8 @@ preCommentMarker.prototype.removeMarks = function(editorInfo, rep, callstack) {
   // we don't want the text marking to be undoable
   this.performNonUnduableEvent(eventType, callstack, function() {
     // remove marked text
-    var padInner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     var selector = "." + exports.MARK_CLASS;
-    var repArr = editorInfo.ace_getRepFromSelector(selector, padInner);
+    var repArr = editorInfo.ace_getRepFromSelector(selector);
     // repArr is an array of reps
     $.each(repArr, function(index, rep){
       editorInfo.ace_performSelectionChange(rep[0], rep[1], true);

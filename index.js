@@ -72,36 +72,18 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
-    socket.on('revertChange', function(data, callback) {
-      // Broadcast to all other users that this change was accepted.
-      // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
-      commentManager.changeAcceptedState(padId, data.commentId, false, function(){
-        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
-      });
-    });
-
-    socket.on('acceptChange', function(data, callback) {
-      // Broadcast to all other users that this change was accepted.
-      // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
-      commentManager.changeAcceptedState(padId, data.commentId, true, function(){
-        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-      });
-    });
-
     socket.on('bulkAddComment', function (padId, data, callback) {
       commentManager.bulkAddComments(padId, data, function(error, commentsId, comments){
         socket.broadcast.to(padId).emit('pushAddCommentInBulk');
         var commentWithCommentId = _.object(commentsId, comments); // {c-123:data, c-124:data}
-        callback(commentWithCommentId)
+        callback(commentWithCommentId);
       });
     });
 
     socket.on('bulkAddCommentReplies', function(padId, data, callback){
       commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
-        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-        var repliesWithReplyId = _.zip(repliesId, replies);
+        socket.broadcast.to(padId).emit('pushAddCommentReplyInBulk', repliesId, replies);
+        var repliesWithReplyId = _.object(repliesId, replies); // {cr-123:data, cr-124:data}
         callback(repliesWithReplyId);
       });
     });
@@ -122,15 +104,9 @@ exports.socketio = function (hook_name, args, cb){
 
     socket.on('addCommentReply', function (data, callback) {
       var padId = data.padId;
-      var content = data.reply;
-      var changeTo = data.changeTo || null;
-      var changeFrom = data.changeFrom || null;
-      var changeAccepted = data.changeAccepted || null;
-      var changeReverted = data.changeReverted || null;
-      var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
+      commentManager.addCommentReply(padId, data, function (err, replyId, reply){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
         callback(replyId, reply);
       });
     });
@@ -163,16 +139,6 @@ exports.socketio = function (hook_name, args, cb){
   });
 };
 
-exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/menuButtons.ejs");
-  return cb();
-};
-
-exports.eejsBlock_mySettings = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/settings.ejs");
-  return cb();
-};
-
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
   return cb();
@@ -181,11 +147,6 @@ exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
-  return cb();
-};
-
-exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html", {}, module);
   return cb();
 };
 
