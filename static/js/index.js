@@ -47,8 +47,8 @@ function ep_comments(context){
 
   api.initialize();
   this.commentDataManager = commentDataManager.init(this.socket);
-  this.init();
   this.preCommentMarker = preTextMarker.createForTarget('comment', this.ace);
+  this.init();
 }
 
 // Init Etherpad plugin comment pads
@@ -56,7 +56,7 @@ ep_comments.prototype.init = function(){
   var self = this;
   var ace = this.ace;
 
-  newComment.insertContainers();
+  newComment.createNewCommentForm(this.preCommentMarker);
   commentIcons.insertContainer();
 
   // Get initial set of comments and replies
@@ -78,11 +78,6 @@ ep_comments.prototype.init = function(){
   });
   this.socket.on('pushAddCommentReply', function (replyId, reply) {
     self.commentDataManager.addReply(replyId, reply);
-  });
-
-  // When language is changed, we need to localize other components too
-  html10n.bind('localized', function() {
-    newComment.localizeNewCommentForm();
   });
 
   // When screen size changes (user changes device orientation, for example),

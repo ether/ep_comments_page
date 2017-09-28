@@ -45,3 +45,18 @@ exports.getRepliesIndexedByReplyId = function(comments) {
     }, {}) // hash indexed by replyId: { 'cr-123': {...}, 'cr-456': {...} }
     .value();
 };
+
+exports.getUserInfo = function() {
+  var userName = clientVars.userName;
+  var userNames = userName.trim().split(' ');
+  var thereIsALastName = userNames.length > 1;
+
+  var firstInitial = userNames[0][0];
+  var lastInitial = thereIsALastName ? userNames[userNames.length - 1][0] : userNames[0][1];
+  var userInitials = firstInitial + lastInitial;
+
+  return {
+    initials: userInitials.toUpperCase(),
+    name: userName,
+  }
+}
