@@ -15,8 +15,10 @@ var utils = require('./utils');
 var commentSaveOrDelete = require('./commentSaveOrDelete');
 
 var cssFiles = [
-  '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
   '//fonts.googleapis.com/css?family=Roboto:300,400', // light, regular
+  'ep_comments_page/static/css/lib/jquery-ui.min.css',
+  'ep_comments_page/static/css/lib/jquery-ui.structure.min.css',
+  'ep_comments_page/static/css/lib/jquery-ui.theme.min.css',
   'ep_comments_page/static/css/comment.css',
   'ep_comments_page/static/css/commentIcon.css',
   'ep_comments_page/static/css/commentModal.css',
