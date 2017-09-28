@@ -4,11 +4,6 @@ describe("ep_comments_page - Pre-comment text mark", function() {
   //create a new pad before each test run
   beforeEach(function(cb){
     padId = helper.newPad(function() {
-      // can only run this suite if text highlight is enabled
-      if (textHighlightIsDisabled()) {
-        throw new Error("Cannot test pre-comment text mark. Feature disabled. Please change your settings.json");
-      }
-
       createPadWithTwoLines(function() {
         selectLineAndOpenCommentForm(0, cb);
       });
@@ -219,10 +214,6 @@ describe("ep_comments_page - Pre-comment text mark", function() {
       line = line.next();
     }
     return line;
-  }
-
-  var textHighlightIsDisabled = function() {
-    return !helper.padChrome$.window.clientVars.highlightSelectedText;
   }
 
 });

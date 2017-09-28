@@ -150,15 +150,6 @@ exports.eejsBlock_scripts = function (hook_name, args, cb) {
   return cb();
 };
 
-exports.clientVars = function (hook, context, cb) {
-  var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
-  var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
-  return cb({
-    "displayCommentAsIcon": displayCommentAsIcon,
-    "highlightSelectedText": highlightSelectedText,
-  });
-};
-
 exports.expressCreateServer = function (hook_name, args, callback) {
   args.app.get('/p/:pad/:rev?/comments', function(req, res) {
     var fields = req.query;

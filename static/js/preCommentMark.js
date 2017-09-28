@@ -6,9 +6,6 @@ var preCommentMarker = function(ace) {
   this.ace = ace;
   var self = this;
 
-  // do nothing if this feature is not enabled
-  if (!this.highlightSelectedText()) return;
-
   // remove any existing marks, as there is no comment being added on plugin initialization
   // (we need the timeout to let the plugin be fully initialized before starting to remove
   // marked texts)
@@ -17,22 +14,11 @@ var preCommentMarker = function(ace) {
   }, 0);
 }
 
-// Indicates if Etherpad is configured to highlight text
-preCommentMarker.prototype.highlightSelectedText = function() {
-  return clientVars.highlightSelectedText;
-}
-
 preCommentMarker.prototype.markSelectedText = function() {
-  // do nothing if this feature is not enabled
-  if (!this.highlightSelectedText()) return;
-
   this.ace.callWithAce(doNothing, 'markPreSelectedTextToComment', true);
 }
 
 preCommentMarker.prototype.unmarkSelectedText = function() {
-  // do nothing if this feature is not enabled
-  if (!this.highlightSelectedText()) return;
-
   this.ace.callWithAce(doNothing, 'unmarkPreSelectedTextToComment', true);
 }
 

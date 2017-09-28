@@ -8,12 +8,6 @@ describe('ep_comments_page - Comment icons', function() {
 
   before(function(done) {
     utils.createPad(this, function() {
-      if (helper.padOuter$('#commentIcons').length === 0) {
-        done('Comment icons are disabled, cannot test icons feature. '
-          + 'Please enable it on settings.json by adding the config: '
-          + '"ep_comments_page": { "displayCommentAsIcon": true }');
-      }
-
       utils.addCommentToLine(LINE_WITH_COMMENT, 'One comment', function() {
         commentId = utils.getCommentIdOfLine(LINE_WITH_COMMENT);
 
