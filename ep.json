@@ -6,6 +6,7 @@
       "post": ["ep_etherpad-lite/static"],
       "client_hooks": {
         "postAceInit": "ep_comments_page/static/js/index",
+        "aceKeyEvent": "ep_comments_page/static/js/index",
         "collectContentPre": "ep_comments_page/static/js/shared",
         "aceAttribsToClasses": "ep_comments_page/static/js/index",
         "aceEditorCSS": "ep_comments_page/static/js/index",

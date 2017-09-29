@@ -1,9 +1,14 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
-exports.saveCommentOnSelectedText = function(commentId, rep, ace) {
-  ace.callWithAce(function(aceTop){
-    aceTop.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
-    aceTop.ace_setAttributeOnSelection('comment', commentId);
+exports.saveCommentOnPreMarkedText = function(commentId, preMarkedTextRepArr, ace) {
+  var attributeName = 'comment';
+  var attributeValue = commentId;
+
+  ace.callWithAce(function(aceTop) {
+    _(preMarkedTextRepArr).each(function(rep) {
+      aceTop.ace_performSelectionChange(rep[0], rep[1], true);
+      aceTop.ace_setAttributeOnSelection(attributeName, attributeValue);
+    });
   }, 'saveComment', true);
 }
 
@@ -53,7 +58,7 @@ var _deleteReplyOnCurrentAceEvent = function(replyId, commentId, ace) {
 var _setAttributeOnSelections = function(selector, attributeName, attributeValue, ace) {
   var repArr = ace.ace_getRepFromSelector(selector);
 
-  // rep is an array of reps.. I will need to iterate over each to do something meaningful..
+  // repArr is an array of reps.. I will need to iterate over each to do something meaningful..
   _(repArr).each(function(rep) {
     ace.ace_performSelectionChange(rep[0], rep[1], true);
     ace.ace_setAttributeOnSelection(attributeName, attributeValue);

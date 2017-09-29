@@ -1,11 +1,13 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var utils = require('./utils');
 var commentL10n = require('./commentL10n');
+var preTextMarker = require('./preTextMarker');
 
 var dialog = function(config) {
-  this.textMarker = config.textMarker;
+  this.textMarker = preTextMarker.createForTarget(config.targetType, config.ace);
   this.$content = config.$content;
   this.onSubmit = config.onSubmit;
+  this.ace = config.ace;
 
   this._buildWidget(config);
 
@@ -62,16 +64,25 @@ dialog.prototype._localizeDialogContent = function() {
   commentL10n.localize(this.widget);
 }
 
-dialog.prototype.open = function(callbackOnSubmit) {
+dialog.prototype.open = function(aceContext, callbackOnSubmit) {
   var self = this;
 
   // Detach current "submit" handler to be able to call the updated callbackOnSubmit
   this.$content.off("submit").submit(function() {
-    return self.onSubmit($(this), callbackOnSubmit);
+    var $form = $(this);
+
+    self.ace.callWithAce(function(ace) {
+      var preMarkedTextSelector = '.' + self.textMarker.markClass;
+      var preMarkedTextRepArr = ace.ace_getRepFromSelector(preMarkedTextSelector);
+      self.onSubmit($form, preMarkedTextRepArr, callbackOnSubmit);
+    });
+
+    // don't submit the form, we don't want Etherpad page to be reloaded
+    return false;
   });
 
   // mark selected text, so it is clear to user which text range the dialog is being applied to
-  this.textMarker.markSelectedText();
+  this.textMarker.markSelectedText(aceContext);
 
   this._openDialogBelowSelectedText();
   this._smoothlyScrollEditorToMakeDialogFullyVisible();

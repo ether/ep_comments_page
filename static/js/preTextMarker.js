@@ -20,9 +20,15 @@ var preTextMarker = function(targetType, ace) {
   }, 0);
 }
 
-// we do nothing on callWithAce; actions will be handled on aceEditEvent
-preTextMarker.prototype.markSelectedText = function() {
-  this.ace.callWithAce(doNothing, this.markTextEvent, true);
+preTextMarker.prototype.markSelectedText = function(aceContext) {
+  if (aceContext && aceContext.callstack) {
+    // there's an active callstack already, don't need to create a new one
+    this.handleMarkText(aceContext.editorInfo, aceContext.rep, aceContext.callstack);
+  } else {
+    // we need a callstack to be able to make text marking/unmarking
+    // a non-undoable event, so prepare to create a callstack here
+    this.ace.callWithAce(doNothing, this.markTextEvent, true);
+  }
 }
 preTextMarker.prototype.unmarkSelectedText = function() {
   this.ace.callWithAce(doNothing, this.unmarkTextEvent, true);

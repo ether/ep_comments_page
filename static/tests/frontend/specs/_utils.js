@@ -2,9 +2,8 @@ var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.utils = {
   padId: undefined,
 
-  undo: function() {
-    ep_script_elements_test_helper.utils.undo();
-  },
+  undo: function() { ep_script_elements_test_helper.utils.undo() },
+  redo: function() { ep_script_elements_test_helper.utils.redo() },
 
   _loadPad: function(test, done) {
     var self = this;
@@ -15,7 +14,11 @@ ep_comments_page_test_helper.utils = {
       ep_comments_page_test_helper.apiUtils.startListeningToApiEvents();
       self._enlargeScreen();
       self._chooseToShowComments();
-      done();
+
+      // wait for all helper libs to be loaded
+      helper.waitFor(function() {
+        return helper.padOuter$.window.scrollIntoView;
+      }).done(done);
     }, this.padId);
   },
 
@@ -247,5 +250,24 @@ ep_comments_page_test_helper.utils = {
     var nodeWhereCaretIs = inner$.document.getSelection().anchorNode;
     var $lineWhereCaretIs = $(nodeWhereCaretIs).closest("div");
     return $lineWhereCaretIs;
+  },
+
+  C_KEY_CODE: 67, // shortcut is Cmd + Ctrl + C
+  // based on similar method of smUtils
+  pressShortcutToAddCommentToLine(line, done) {
+    var self = this;
+    var smUtils = ep_script_scene_marks_test_helper.utils;
+
+    var bowser = helper.padInner$(window)[0].bowser;
+    var os = bowser.mac ? 'mac' : 'windows';
+    var modifierKeys = smUtils.shortcuts.KEYS_MODIFIER_ADD_SCENE_MARK[os];
+
+    var $line = this.getLine(line);
+    $line.sendkeys('{selectall}'); // needs to select content to add comment to
+
+    setTimeout(function() {
+      smUtils.shortcuts.pressKeyWithModifier(self.C_KEY_CODE, modifierKeys);
+      done();
+    }, 1000);
   },
 }

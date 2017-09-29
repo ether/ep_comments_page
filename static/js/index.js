@@ -4,6 +4,7 @@ var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
 var shared = require('./shared');
+var shortcuts = require('./shortcuts');
 var commentIcons = require('./commentIcons');
 var newComment = require('./newComment');
 var preTextMarker = require('./preTextMarker');
@@ -47,16 +48,14 @@ function ep_comments(context){
 
   api.initialize();
   this.commentDataManager = commentDataManager.init(this.socket);
-  this.preCommentMarker = preTextMarker.createForTarget('comment', this.ace);
   this.init();
 }
 
 // Init Etherpad plugin comment pads
 ep_comments.prototype.init = function(){
   var self = this;
-  var ace = this.ace;
 
-  newComment.createNewCommentForm(this.preCommentMarker);
+  newComment.createNewCommentForm(this.ace);
   commentIcons.insertContainer();
 
   // Get initial set of comments and replies
@@ -265,43 +264,40 @@ ep_comments.prototype.getCommentData = function (){
   return data;
 }
 
-ep_comments.prototype.displayNewCommentForm = function() {
-  var rep = {};
-  var hasSelectedText = false;
-  var ace = this.ace;
-
-  ace.callWithAce(function(ace) {
-    var saveRep = ace.ace_getRep();
-
-    rep.lines    = saveRep.lines;
-    rep.selStart = saveRep.selStart;
-    rep.selEnd   = saveRep.selEnd;
-
-    hasSelectedText = !ace.ace_isCaret();
-  },'saveCommentedSelection', true);
-
+ep_comments.prototype.displayNewCommentForm = function(aceContext) {
   // do nothing if we have nothing selected
-  if (hasSelectedText) {
-    this.showNewCommentForm(rep);
+  if (this.hasSelectedText(aceContext)) {
+    this.showNewCommentForm(aceContext);
   }
 }
 
+ep_comments.prototype.hasSelectedText = function(aceContext) {
+  var rep = aceContext && aceContext.rep;
+  if (!rep) {
+    this.ace.callWithAce(function(ace) {
+      rep = ace.ace_getRep();
+    },'saveCommentedSelection', true);
+  }
+
+  return rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+}
+
 // Create form to add comment
-ep_comments.prototype.showNewCommentForm = function(rep) {
+ep_comments.prototype.showNewCommentForm = function(aceContext) {
   var data = this.getCommentData();
   var self = this;
 
-  newComment.showNewCommentForm(data, function(commentText) {
+  newComment.showNewCommentForm(data, aceContext, function(commentText, preMarkedTextRepArr) {
     data.comment.text = commentText;
-    self.saveComment(data, rep);
+    self.saveComment(data, preMarkedTextRepArr);
   });
 };
 
 // Save comment
-ep_comments.prototype.saveComment = function(data, rep) {
+ep_comments.prototype.saveComment = function(data, preMarkedTextRepArr) {
   var self = this;
   self.socket.emit('addComment', data, function (commentId, comment){
-    commentSaveOrDelete.saveCommentOnSelectedText(commentId, rep, self.ace);
+    commentSaveOrDelete.saveCommentOnPreMarkedText(commentId, preMarkedTextRepArr, self.ace);
     self.commentDataManager.addComment(commentId, comment);
     self.collectComments();
   });
@@ -441,6 +437,10 @@ var hooks = {
 
   aceEditorCSS: function(){
     return cssFiles;
+  },
+
+  aceKeyEvent: function(hook, context) {
+    return shortcuts.processAceKeyEvent(context);
   }
 
 };
@@ -449,6 +449,7 @@ exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
+exports.aceKeyEvent           = hooks.aceKeyEvent;
 
 // Given a CSS selector and a target element (in this case pad inner)
 // return the rep as an array of array of tuples IE [[[0,1],[0,2]], [[1,3],[1,5]]]
