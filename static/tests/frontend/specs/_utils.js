@@ -110,13 +110,14 @@ ep_comments_page_test_helper.utils = {
     $commentButton.click();
 
     // wait for form to be displayed
+    var $commentForm = outer$('#newComment');
     helper.waitFor(function() {
-      return outer$('textarea:visible').length > 0;
+      return $commentForm.is(':visible');
     }).done(function() {
       // fill the comment form and submit it
-      var $commentField = outer$('textarea.comment-content');
+      var $commentField = $commentForm.find('textarea.comment-content');
       $commentField.val(textOfComment);
-      var $submittButton = outer$('input[type=submit]');
+      var $submittButton = $commentForm.find('input[type=submit]');
       $submittButton.click();
 
       // wait until comment is created and comment id is set

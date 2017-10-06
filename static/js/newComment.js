@@ -34,9 +34,5 @@ var hideNewCommentForm = function() {
 exports.showNewCommentForm = function(comment, aceContext, callbackOnSubmit) {
   comment.commentId = "";
 
-  // Reset form to make sure it is all clear
-  var $newCommentForm = utils.getPadOuter().find('#newComment');
-  $newCommentForm.get(0).reset();
-
   newCommentDialog.open(aceContext, callbackOnSubmit);
 }

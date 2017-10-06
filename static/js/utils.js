@@ -60,3 +60,12 @@ exports.getUserInfo = function() {
     name: userName,
   }
 }
+
+exports.openSocketConnectionToRoute = function(routePath) {
+  // Required for instances running on weird ports
+  // This probably needs some work for instances running on root or not on /p/
+  var loc = document.location;
+  var port = loc.port == '' ? (loc.protocol == 'https:' ? 443 : 80) : loc.port;
+  var url = loc.protocol + '//' + loc.hostname + ':' + port + routePath;
+  return io.connect(url);
+}

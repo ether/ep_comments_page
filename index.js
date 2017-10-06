@@ -39,8 +39,6 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
 exports.socketio = function (hook_name, args, cb){
   var app = args.app;
   var io = args.io;
-  var pushComment;
-  var padComment = io;
 
   var commentSocket = io
   .of('/comment')

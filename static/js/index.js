@@ -25,6 +25,9 @@ var cssFiles = [
   'ep_comments_page/static/css/commentModal.css',
   'ep_comments_page/static/css/commentModal-light.css',
   'ep_comments_page/static/css/commentModal-dark.css',
+  'ep_comments_page/static/css/jquery-ui-custom.css',
+  'ep_comments_page/static/css/jquery-ui-custom-light.css',
+  'ep_comments_page/static/css/jquery-ui-custom-dark.css',
 ];
 
 var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
@@ -36,14 +39,7 @@ var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 // Container
 function ep_comments(context){
   this.ace = context.ace;
-
-  // Required for instances running on weird ports
-  // This probably needs some work for instances running on root or not on /p/
-  var loc = document.location;
-  var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
-  var url = loc.protocol + "//" + loc.hostname + ":" + port + "/" + "comment";
-  this.socket = io.connect(url);
-
+  this.socket = utils.openSocketConnectionToRoute('/comment');
   this.shouldCollectComment = false;
 
   api.initialize();
