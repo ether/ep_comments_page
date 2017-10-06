@@ -1,0 +1,62 @@
+/* Adjustments to pre-defined styles of jQuery-UI dialogs */
+
+/* no rouded corners on any component of the dialog */
+.ui-corner-all {
+  border-radius: 0;
+}
+
+/* avoid Etherpad from overwriting cursors on dialog components */
+.ui-dialog-titlebar span {
+  cursor: move;
+}
+.ui-button span {
+  cursor: pointer;
+}
+
+/* remove space between titlebar and its parent (the whole dialog) */
+.ui-dialog {
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400; /* Roboto Regular */
+}
+
+/* remove external border of the dialog */
+.ui-widget-content,
+.ui-widget.ui-widget-content {
+  border: none;
+}
+
+/* remove border + different background on "close" button */
+.ui-dialog-titlebar-close:active,
+.ui-dialog-titlebar-close:focus,
+.ui-dialog-titlebar-close:hover,
+.ui-dialog-titlebar-close {
+  border: none;
+  background: initial;
+  text-indent: unset;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+  border: none;
+
+  text-transform: uppercase;
+  font-weight: 400; /* Roboto Regular */
+  font-size: 10px;
+}
+
+/* close button */
+.ui-dialog-titlebar-close {
+  fill: #808286; /* color 130 */
+}
+.ui-dialog-titlebar-close:active {
+  fill: #19BBDA; /* color A */
+}
+
+.ui-dialog .ui-dialog-content {
+  padding: 0 10px 10px;
+}
+
+/* remove focus decoration on any component of the dialog */
+.ui-dialog *:focus {
+  outline: 0;
+}
