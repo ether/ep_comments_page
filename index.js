@@ -137,11 +137,6 @@ exports.socketio = function (hook_name, args, cb){
   });
 };
 
-exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
-  return cb();
-};
-
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);

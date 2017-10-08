@@ -1,5 +1,7 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
+exports.OPEN_NEW_COMMENT_MODAL_EVENT = 'OPEN_NEW_COMMENT_MODAL_EVENT';
+
 // Easier access to outer pad
 var padOuter;
 exports.getPadOuter = function() {

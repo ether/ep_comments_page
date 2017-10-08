@@ -86,13 +86,12 @@ ep_comments.prototype.init = function(){
     self.editorResized();
   });
 
-  utils.getPadInner().find("#innerdocbody").addClass("comments");
-
-  // On click comment icon toolbar
-  $('.addComment').on('click', function(e){
-    e.preventDefault(); // stops focus from being lost
+  // listen to events called by other plugins
+  utils.getPadOuter().find('body').on(utils.OPEN_NEW_COMMENT_MODAL_EVENT, function() {
     self.displayNewCommentForm();
   });
+
+  utils.getPadInner().find('#innerdocbody').addClass('comments');
 
   api.setHandleReplyCreation(function(commentId, text) {
     var data = self.getCommentData();

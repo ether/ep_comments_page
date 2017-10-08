@@ -185,7 +185,7 @@ describe('ep_comments_page - Pre-comment text mark', function() {
   });
 
   /* ********** Helper functions ********** */
-  var selectLineAndOpenCommentForm = function(lineNumber, callback, doNotCloseOpenedForm) {
+  var selectLineAndOpenCommentForm = function(lineNumber, done, doNotCloseOpenedForm) {
     var inner$ = helper.padInner$;
     var outer$ = helper.padOuter$;
     var chrome$ = helper.padChrome$;
@@ -196,15 +196,7 @@ describe('ep_comments_page - Pre-comment text mark', function() {
       $closeButton.click();
     }
 
-    // select first line to add comment to
-    var $targetLine = utils.getLine(lineNumber);
-    $targetLine.sendkeys('{selectall}');
-
-    // get the comment button and click it
-    var $commentButton = chrome$('.addComment');
-    $commentButton.click();
-
-    callback();
+    var utils = ep_comments_page_test_helper.utils;
+    utils.pressShortcutToAddCommentToLine(line, done);
   }
-
 });

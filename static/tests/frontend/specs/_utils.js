@@ -104,24 +104,21 @@ ep_comments_page_test_helper.utils = {
     var outer$ = helper.padOuter$;
     var chrome$ = helper.padChrome$;
 
-    var $line = this.getLine(line);
-    $line.sendkeys('{selectall}'); // needs to select content to add comment to
-    var $commentButton = chrome$('.addComment');
-    $commentButton.click();
+    self.pressShortcutToAddCommentToLine(line, function() {
+      // wait for form to be displayed
+      var $commentForm = outer$('#newComment');
+      helper.waitFor(function() {
+        return $commentForm.is(':visible');
+      }).done(function() {
+        // fill the comment form and submit it
+        var $commentField = $commentForm.find('textarea.comment-content');
+        $commentField.val(textOfComment);
+        var $submittButton = $commentForm.find('input[type=submit]');
+        $submittButton.click();
 
-    // wait for form to be displayed
-    var $commentForm = outer$('#newComment');
-    helper.waitFor(function() {
-      return $commentForm.is(':visible');
-    }).done(function() {
-      // fill the comment form and submit it
-      var $commentField = $commentForm.find('textarea.comment-content');
-      $commentField.val(textOfComment);
-      var $submittButton = $commentForm.find('input[type=submit]');
-      $submittButton.click();
-
-      // wait until comment is created and comment id is set
-      self.waitForCommentToBeCreatedOnLine(line, done);
+        // wait until comment is created and comment id is set
+        self.waitForCommentToBeCreatedOnLine(line, done);
+      });
     });
   },
 
@@ -159,7 +156,6 @@ ep_comments_page_test_helper.utils = {
       var commentIdsSentOnAPI = (apiUtils.getLastDataSent() || []).map(function(commentData) {
         return commentData.commentId;
       });
-
       return idOfCreatedComment !== null && commentIdsSentOnAPI.includes(idOfCreatedComment);
     }).done(done);
   },
