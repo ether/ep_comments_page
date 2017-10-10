@@ -1,4 +1,5 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
+var smUtils = require('ep_script_scene_marks/static/js/utils');
 
 exports.OPEN_NEW_COMMENT_MODAL_EVENT = 'OPEN_NEW_COMMENT_MODAL_EVENT';
 
@@ -70,4 +71,14 @@ exports.openSocketConnectionToRoute = function(routePath) {
   var port = loc.port == '' ? (loc.protocol == 'https:' ? 443 : 80) : loc.port;
   var url = loc.protocol + '//' + loc.hostname + ':' + port + routePath;
   return io.connect(url);
+}
+
+exports.getHeadingOfDomLine = function($line) {
+  if ($line.is('div.withHeading')) {
+    return $line;
+  } else if (smUtils.checkIfHasSceneMark($line)) {
+    return $line.nextUntil('div.withHeading').addBack().last().next();
+  } else {
+    return $line.prevUntil('div.withHeading').addBack().first().prev();
+  }
 }

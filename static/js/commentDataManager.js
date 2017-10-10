@@ -4,7 +4,6 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 var linesChangedListener = require('./linesChangedListener');
 var api = require('./api');
 var utils = require('./utils');
-var smUtils = require('ep_script_scene_marks/static/js/utils');
 
 var commentDataManager = function(socket) {
   this.socket = socket;
@@ -163,15 +162,6 @@ commentDataManager.prototype.triggerDataChanged = function() {
   this.updateListOfCommentsStillOnText();
 }
 
-commentDataManager.prototype._getHeadingOfLine = function($lineWithComment) {
-  if ($lineWithComment.is('div.withHeading')) {
-    return $lineWithComment;
-  } else if (smUtils.checkIfHasSceneMark($lineWithComment)) {
-    return $lineWithComment.nextUntil('div.withHeading').addBack().last().next();
-  } else {
-    return $lineWithComment.prevUntil('div.withHeading').addBack().first().prev();
-  }
-}
 // some comments might had been removed from text, so update the list
 commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
   // TODO can we store the data that we're processing here, so we don't need to redo
@@ -212,7 +202,7 @@ commentDataManager.prototype.updateListOfCommentsStillOnText = function() {
 
     // fill scene number
     var $lineWithComment = $(commentInfo.element).closest('div');
-    var $headingOfSceneWhereCommentIs = self._getHeadingOfLine($lineWithComment);
+    var $headingOfSceneWhereCommentIs = utils.getHeadingOfDomLine($lineWithComment);
     var sceneNumberOfComment = 1 + $scenes.index($headingOfSceneWhereCommentIs);
     commentData.scene = sceneNumberOfComment;
 
