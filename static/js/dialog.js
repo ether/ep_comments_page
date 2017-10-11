@@ -105,6 +105,7 @@ dialog.prototype.open = function(aceContext, callbackOnSubmit) {
     this.textMarker.markSelectedText(aceContext);
   }
 
+  this._localizeDialogContent();
   this._resetForm();
   this._openDialog();
   this._smoothlyScrollEditorToMakeDialogFullyVisible();
