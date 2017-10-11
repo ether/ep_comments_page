@@ -210,7 +210,7 @@ dialog.prototype._smoothlyScrollEditorToMakeDialogFullyVisible = function() {
   var self = this;
 
   var outerIframe = $('iframe[name="ace_outer"]').get(0);
-  outerIframe.contentWindow.scrollIntoView(self.widget.get(0), function() {
+  outerIframe.contentWindow.scrollIntoView(self.$content.get(0), function() {
     // Allow user to start typing an input right away
     self._focusOnContainer();
   });
