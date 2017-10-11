@@ -147,6 +147,15 @@ ep_comments_page_test_helper.utils = {
     return style.getPropertyValue('background-color');
   },
 
+  // from https://stackoverflow.com/a/22480938/7884942
+  isVisibleOnViewport: function(el) {
+    var elemTop = el.getBoundingClientRect().top;
+    var elemBottom = el.getBoundingClientRect().bottom;
+
+    var isVisible = (elemTop >= 0) && (elemBottom <= helper.padOuter$.window.innerHeight);
+    return isVisible;
+  },
+
   waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
     var apiUtils = ep_comments_page_test_helper.apiUtils;
