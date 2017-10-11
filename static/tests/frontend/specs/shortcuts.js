@@ -16,10 +16,12 @@ describe('ep_comments_page - Shortcuts', function() {
 
   context('when user submits the form', function() {
     before(function() {
+      var $commentForm = helper.padOuter$('#newComment');
+
       // fill the comment form and submit it
-      var $commentField = helper.padOuter$('textarea.comment-content');
+      var $commentField = $commentForm.find('textarea.comment-content');
       $commentField.val('My comment');
-      var $submittButton = helper.padOuter$('input[type=submit]');
+      var $submittButton = $commentForm.find('input[type=submit]');
       $submittButton.click();
     });
 

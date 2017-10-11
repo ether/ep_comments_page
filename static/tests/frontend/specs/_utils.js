@@ -156,6 +156,23 @@ ep_comments_page_test_helper.utils = {
     return isVisible;
   },
 
+  getCloseButton: function(modalSelector) {
+    var $modal = helper.padOuter$('.ui-dialog:has(' + modalSelector + ')');
+    var $closeButton = $modal.find('.ui-dialog-titlebar-close');
+    return $closeButton;
+  },
+
+  closeModal: function(modalSelector, done) {
+    var utils = ep_comments_page_test_helper.utils;
+    var $closeButton = utils.getCloseButton(modalSelector);
+    $closeButton.click();
+
+    var $modal = helper.padOuter$('.ui-dialog:has(' + modalSelector + ')');
+    helper.waitFor(function() {
+      return !$modal.is(':visible');
+    }).done(done);
+  },
+
   waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
     var apiUtils = ep_comments_page_test_helper.apiUtils;

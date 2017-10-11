@@ -23,16 +23,7 @@ describe('ep_comments_page - Pre-comment text mark', function() {
 
   context('when user closes the New Comment form', function() {
     before(function(done) {
-      var outer$ = helper.padOuter$;
-
-      helper.waitFor(function() {
-        return outer$('.ui-dialog-titlebar-close').length > 0;
-      }).done(function() {
-        var $closeButton = outer$('.ui-dialog-titlebar-close');
-        $closeButton.click();
-
-        done();
-      });
+      utils.closeModal('#newComment', done);
     });
 
     // make sure we re-open the form for the following tests
@@ -53,18 +44,17 @@ describe('ep_comments_page - Pre-comment text mark', function() {
 
   context('when user submits the comment', function() {
     before(function(done) {
-      var outer$ = helper.padOuter$;
-      var inner$ = helper.padInner$;
+      var $commentForm = helper.padOuter$('#newComment');
 
       // fill the comment form and submit it
-      var $commentField = outer$('textarea.comment-content');
+      var $commentField = $commentForm.find('textarea.comment-content');
       $commentField.val('My comment');
-      var $submittButton = outer$('input[type=submit]');
+      var $submittButton = $commentForm.find('input[type=submit]');
       $submittButton.click();
 
       // wait until comment is created and comment id is set
       helper.waitFor(function() {
-        return inner$('.comment').length > 0;
+        return helper.padInner$('.comment').length > 0;
       }).done(done);
     });
 
@@ -186,17 +176,14 @@ describe('ep_comments_page - Pre-comment text mark', function() {
 
   /* ********** Helper functions ********** */
   var selectLineAndOpenCommentForm = function(lineNumber, done, doNotCloseOpenedForm) {
-    var inner$ = helper.padInner$;
-    var outer$ = helper.padOuter$;
-    var chrome$ = helper.padChrome$;
-
-    if (!doNotCloseOpenedForm) {
-      // make sure for is closed before we start
-      var $closeButton = outer$('.ui-dialog-titlebar-close');
-      $closeButton.click();
-    }
-
     var utils = ep_comments_page_test_helper.utils;
-    utils.pressShortcutToAddCommentToLine(line, done);
+    var openCommentForm = function() { utils.pressShortcutToAddCommentToLine(lineNumber, done) };
+
+    if (doNotCloseOpenedForm) {
+      openCommentForm();
+    } else {
+      // make sure form is closed before we start
+      utils.closeModal('#newComment', openCommentForm);
+    }
   }
 });

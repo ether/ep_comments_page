@@ -121,6 +121,8 @@ describe('ep_comments_page - api - "data changed" event', function() {
       var LINE_ON_SM_OF_2ND_SCENE         = LINE_ON_HEADING_OF_2ND_SCENE - 1;
 
       before(function(done) {
+        this.timeout(10000);
+
         var seUtils = ep_script_elements_test_helper.utils;
         var smUtils = ep_script_scene_marks_test_helper.utils;
 
