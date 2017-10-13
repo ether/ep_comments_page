@@ -1,0 +1,43 @@
+/* buttons */
+.theme-dark .ui-dialog input.button {
+  box-shadow: 0.5px 0.5px 0.5px 0.5px #141419; /* color 20 */
+  background-color: #323237; /* color 50 */
+}
+.theme-dark .ui-dialog input.button:hover {
+  color: #A0A2A6; /* color 160 */
+}
+.theme-dark .ui-dialog input.button:focus {
+  color: #FFFFFF; /* color 255 */
+}
+.theme-dark .ui-dialog input.button:active {
+  color: #FFFFFF; /* color 255 */
+  /* button "click" */
+  box-shadow: inset 1px 1px 1px 1px rgba(0, 0, 0, 0.125);
+}
+
+/* form fields */
+.theme-dark .ui-dialog input {
+  color: #A0A2A6; /* color 160 */
+}
+.theme-dark .ui-dialog textarea::placeholder {
+  color: #64666A; /* color 100 */
+}
+.theme-dark .ui-dialog input:not(.button):not(:focus),
+.theme-dark .ui-dialog textarea:not(:focus) {
+  border: 1px solid #414246; /* color 65 */
+}
+
+/*
+overwrite autofill default:
+[1] yellow-banana background
+[2] black font
+[3] try to avoid border to get yellowish - this isn't working very well
+*/
+.theme-dark .ui-dialog input:-webkit-autofill,
+.theme-dark .ui-dialog input:-webkit-autofill:hover,
+.theme-dark .ui-dialog input:-webkit-autofill:focus {
+  -webkit-box-shadow: inset 0 0 0px 9999px #1E1E23; /* color 30 */ /* [1] */
+  -webkit-text-fill-color: #A0A2A6; /* color 160 */ /* [2] */
+  border: 1px solid #414246; /* color 65 */ /* [3] */
+}
+

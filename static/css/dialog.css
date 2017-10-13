@@ -1,0 +1,50 @@
+.ui-dialog input:not(.button),
+.ui-dialog textarea {
+  width: 100%;
+  background: transparent;
+
+  caret-color: currentColor;
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+
+  /* avoid a "pseudo-margin-bottom" that Chrome adds for textarea */
+  display: block;
+
+  /* give some space between field and its content */
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.ui-dialog textarea {
+  min-height: 100px;
+  resize: none;
+  font-weight: 300; /* Roboto Light */
+}
+
+.ui-dialog input:focus,
+.ui-dialog textarea:focus {
+  border: 1px solid #19BBDA; /* color A */
+}
+
+.ui-dialog textarea::placeholder {
+  font-style: italic;
+}
+
+/* margin between dialog content and buttons row */
+.ui-dialog .buttons-row {
+  margin-top: 10px;
+}
+
+/* button Save */
+.ui-dialog input.button--save {
+  float: right;
+  padding: 2px 6px 3px;
+
+  font-family: inherit; /* avoid jQueryUI from overwriting the font */
+  font-size: 11px;
+  font-weight: 300; /* Roboto Light */
+  text-transform: lowercase;
+
+  color: #808286; /* color 130 */
+  border: none;
+}
