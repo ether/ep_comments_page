@@ -83,7 +83,23 @@ exports.getHeadingOfDomLine = function($line) {
   }
 }
 
-exports.selectFullTextOfRepArray = function(repArr, ace) {
+exports.setAttributeOnSelections = function(selector, attributeName, attributeValue, ace) {
+  var repArr = ace.ace_getRepFromSelector(selector);
+  setAttributeOnRepArray(repArr, attributeName, attributeValue, ace);
+}
+
+var setAttributeOnRepArray = function(repArr, attributeName, attributeValue, ace) {
+  // repArr is an array of reps.. I will need to iterate over each to do something meaningful..
+  _(repArr).each(function(rep) {
+    ace.ace_performSelectionChange(rep[0], rep[1], true);
+    ace.ace_setAttributeOnSelection(attributeName, attributeValue);
+  });
+
+  selectFullTextOfRepArray(repArr, ace);
+}
+exports.setAttributeOnRepArray = setAttributeOnRepArray;
+
+var selectFullTextOfRepArray = function(repArr, ace) {
   if (repArr.length === 0) return;
 
   var firstSelectedPart = repArr[0];
@@ -94,3 +110,4 @@ exports.selectFullTextOfRepArray = function(repArr, ace) {
 
   ace.ace_performSelectionChange(beginningOfSelection, endOfSelection, true);
 }
+exports.selectFullTextOfRepArray = selectFullTextOfRepArray;

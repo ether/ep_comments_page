@@ -6,12 +6,7 @@ exports.saveCommentOnPreMarkedText = function(commentId, preMarkedTextRepArr, ac
   var attributeValue = commentId;
 
   ace.callWithAce(function(aceTop) {
-    _(preMarkedTextRepArr).each(function(rep) {
-      aceTop.ace_performSelectionChange(rep[0], rep[1], true);
-      aceTop.ace_setAttributeOnSelection(attributeName, attributeValue);
-    });
-
-    utils.selectFullTextOfRepArray(preMarkedTextRepArr, aceTop);
+    utils.setAttributeOnRepArray(preMarkedTextRepArr, attributeName, attributeValue, aceTop);
   }, 'saveComment', true);
 }
 
@@ -32,7 +27,7 @@ var _deleteCommentOnCurrentAceEvent = function(commentId, ace) {
   // a commentId we now flag it as "comment-deleted"
   var attributeValue = 'comment-deleted';
 
-  _setAttributeOnSelections(selector, attributeName, attributeValue, ace);
+  utils.setAttributeOnSelections(selector, attributeName, attributeValue, ace);
 }
 
 exports.saveReplyOnCommentText = function(replyId, commentId, ace) {
@@ -41,7 +36,7 @@ exports.saveReplyOnCommentText = function(replyId, commentId, ace) {
   var attributeValue = replyId;
 
   ace.callWithAce(function(aceTop) {
-    _setAttributeOnSelections(selector, attributeName, attributeValue, aceTop);
+    utils.setAttributeOnSelections(selector, attributeName, attributeValue, aceTop);
   }, 'saveCommentReply', true);
 }
 
@@ -55,17 +50,5 @@ var _deleteReplyOnCurrentAceEvent = function(replyId, commentId, ace) {
   var selector = '.' + replyId;
   var attributeName = 'comment-reply-' + replyId;
   var attributeValue = false;
-  _setAttributeOnSelections(selector, attributeName, attributeValue, ace);
-}
-
-var _setAttributeOnSelections = function(selector, attributeName, attributeValue, ace) {
-  var repArr = ace.ace_getRepFromSelector(selector);
-
-  // repArr is an array of reps.. I will need to iterate over each to do something meaningful..
-  _(repArr).each(function(rep) {
-    ace.ace_performSelectionChange(rep[0], rep[1], true);
-    ace.ace_setAttributeOnSelection(attributeName, attributeValue);
-  });
-
-  utils.selectFullTextOfRepArray(repArr, ace);
+  utils.setAttributeOnSelections(selector, attributeName, attributeValue, ace);
 }

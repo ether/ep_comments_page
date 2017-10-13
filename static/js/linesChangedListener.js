@@ -44,6 +44,7 @@ linesChangedListener.prototype.mutationsAffectedATargetLine = function(mutations
       return addedNodes.concat(removedNodes);
     })
     .flatten()
+    .compact()
     .unique()
     // check if any of the changed lines matches the provided selector
     .any(function(lineNode) { return lineNode.querySelector(selector) })
