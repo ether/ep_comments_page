@@ -274,6 +274,9 @@ ep_comments_page_test_helper.utils = {
     var $lineWhereCaretIs = $(nodeWhereCaretIs).closest("div");
     return $lineWhereCaretIs;
   },
+  getSelectedText: function() {
+    return helper.padInner$.document.getSelection().toString();
+  },
 
   C_KEY_CODE: 67, // shortcut is Cmd + Ctrl + C
   // based on similar method of smUtils

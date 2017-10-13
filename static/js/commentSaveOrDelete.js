@@ -1,4 +1,5 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
+var utils = require('./utils');
 
 exports.saveCommentOnPreMarkedText = function(commentId, preMarkedTextRepArr, ace) {
   var attributeName = 'comment';
@@ -9,6 +10,8 @@ exports.saveCommentOnPreMarkedText = function(commentId, preMarkedTextRepArr, ac
       aceTop.ace_performSelectionChange(rep[0], rep[1], true);
       aceTop.ace_setAttributeOnSelection(attributeName, attributeValue);
     });
+
+    utils.selectFullTextOfRepArray(preMarkedTextRepArr, aceTop);
   }, 'saveComment', true);
 }
 
@@ -63,4 +66,6 @@ var _setAttributeOnSelections = function(selector, attributeName, attributeValue
     ace.ace_performSelectionChange(rep[0], rep[1], true);
     ace.ace_setAttributeOnSelection(attributeName, attributeValue);
   });
+
+  utils.selectFullTextOfRepArray(repArr, ace);
 }

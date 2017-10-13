@@ -28,6 +28,13 @@ describe('ep_comments_page - api - delete comment', function() {
 
   before(function(done) {
     utils.createPad(this, function() {
+      // create multiple tags on the line to have comment, so we can test the text selection
+      // after the comment delete
+      var $targetLine = utils.getLine(TARGET_COMMENT_LINE);
+      helper.selectLines($targetLine, $targetLine, 1, 2);
+      var $boldButton = helper.padChrome$('.buttonicon-bold');
+      $boldButton.click();
+
       createTargetComment(function() {
         utils.addCommentToLine(TARGET_COMMENT_LINE + 1, TEXT_OF_COMMENT_NOT_REMOVED, done);
       });
@@ -60,6 +67,15 @@ describe('ep_comments_page - api - delete comment', function() {
       helper.waitFor(function() {
         return utils.getReplyIdOfLine(TARGET_COMMENT_LINE) === null;
       }).done(done);
+    });
+
+    // this scenario also applies to other comment operations, like adding comment,
+    // adding a reply, etc.
+    it('selects the text originally commented', function(done) {
+      var textWithOriginalComment = utils.getLine(TARGET_COMMENT_LINE).text();
+      var selectedText = utils.getSelectedText();
+      expect(selectedText).to.be(textWithOriginalComment);
+      done();
     });
 
     context('and user reloads the pad', function() {

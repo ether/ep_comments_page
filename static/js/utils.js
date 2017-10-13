@@ -82,3 +82,15 @@ exports.getHeadingOfDomLine = function($line) {
     return $line.prevUntil('div.withHeading').addBack().first().prev();
   }
 }
+
+exports.selectFullTextOfRepArray = function(repArr, ace) {
+  if (repArr.length === 0) return;
+
+  var firstSelectedPart = repArr[0];
+  var lastSelectedPart  = repArr[repArr.length - 1];
+
+  var beginningOfSelection = firstSelectedPart[0];
+  var endOfSelection       = lastSelectedPart[1];
+
+  ace.ace_performSelectionChange(beginningOfSelection, endOfSelection, true);
+}
