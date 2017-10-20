@@ -50,9 +50,14 @@ exports.getRepliesIndexedByReplyId = function(comments) {
 };
 
 exports.getUserInfo = function() {
-  var userName = clientVars.userName;
+  var userName = clientVars.userName || '';
   var userNames = userName.trim().split(' ');
   var thereIsALastName = userNames.length > 1;
+
+  // fallback in case userNames is empty
+  if (userNames[0] === '') {
+    userNames = ['  '];
+  }
 
   var firstInitial = userNames[0][0];
   var lastInitial = thereIsALastName ? userNames[userNames.length - 1][0] : userNames[0][1];
