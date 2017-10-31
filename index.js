@@ -39,8 +39,6 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
 exports.socketio = function (hook_name, args, cb){
   var app = args.app;
   var io = args.io;
-  var pushComment;
-  var padComment = io;
 
   var commentSocket = io
   .of('/comment')
@@ -139,24 +137,10 @@ exports.socketio = function (hook_name, args, cb){
   });
 };
 
-exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
-  return cb();
-};
-
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
   return cb();
-};
-
-exports.clientVars = function (hook, context, cb) {
-  var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
-  var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
-  return cb({
-    "displayCommentAsIcon": displayCommentAsIcon,
-    "highlightSelectedText": highlightSelectedText,
-  });
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {

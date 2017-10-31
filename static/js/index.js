@@ -4,9 +4,10 @@ var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var browser = require('ep_etherpad-lite/static/js/browser');
 
 var shared = require('./shared');
+var shortcuts = require('./shortcuts');
 var commentIcons = require('./commentIcons');
 var newComment = require('./newComment');
-var preCommentMark = require('./preCommentMark');
+var preTextMarker = require('./preTextMarker');
 var commentDataManager = require('./commentDataManager');
 var commentL10n = require('./commentL10n');
 var copyPasteEvents = require('./copyPasteEvents');
@@ -15,13 +16,19 @@ var utils = require('./utils');
 var commentSaveOrDelete = require('./commentSaveOrDelete');
 
 var cssFiles = [
-  '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
   '//fonts.googleapis.com/css?family=Roboto:300,400', // light, regular
+  'ep_comments_page/static/css/lib/jquery-ui.min.css',
+  'ep_comments_page/static/css/lib/jquery-ui.structure.min.css',
+  'ep_comments_page/static/css/lib/jquery-ui.theme.min.css',
+  'ep_comments_page/static/css/dialog.css',
+  'ep_comments_page/static/css/dialog-light.css',
+  'ep_comments_page/static/css/dialog-dark.css',
   'ep_comments_page/static/css/comment.css',
   'ep_comments_page/static/css/commentIcon.css',
   'ep_comments_page/static/css/commentModal.css',
-  'ep_comments_page/static/css/commentModal-light.css',
-  'ep_comments_page/static/css/commentModal-dark.css',
+  'ep_comments_page/static/css/jquery-ui-custom.css',
+  'ep_comments_page/static/css/jquery-ui-custom-light.css',
+  'ep_comments_page/static/css/jquery-ui-custom-dark.css',
 ];
 
 var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
@@ -33,28 +40,19 @@ var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 // Container
 function ep_comments(context){
   this.ace = context.ace;
-
-  // Required for instances running on weird ports
-  // This probably needs some work for instances running on root or not on /p/
-  var loc = document.location;
-  var port = loc.port == "" ? (loc.protocol == "https:" ? 443 : 80) : loc.port;
-  var url = loc.protocol + "//" + loc.hostname + ":" + port + "/" + "comment";
-  this.socket = io.connect(url);
-
+  this.socket = utils.openSocketConnectionToRoute('/comment');
   this.shouldCollectComment = false;
 
   api.initialize();
   this.commentDataManager = commentDataManager.init(this.socket);
   this.init();
-  this.preCommentMarker = preCommentMark.init(this.ace);
 }
 
 // Init Etherpad plugin comment pads
 ep_comments.prototype.init = function(){
   var self = this;
-  var ace = this.ace;
 
-  newComment.insertContainers();
+  newComment.createNewCommentForm(this.ace);
   commentIcons.insertContainer();
 
   // Get initial set of comments and replies
@@ -78,11 +76,6 @@ ep_comments.prototype.init = function(){
     self.commentDataManager.addReply(replyId, reply);
   });
 
-  // When language is changed, we need to localize other components too
-  html10n.bind('localized', function() {
-    newComment.localizeNewCommentForm();
-  });
-
   // When screen size changes (user changes device orientation, for example),
   // we need to make sure all sidebar comments are on the correct place
   utils.waitForResizeToFinishThenCall(200, function() {
@@ -94,13 +87,12 @@ ep_comments.prototype.init = function(){
     self.editorResized();
   });
 
-  utils.getPadInner().find("#innerdocbody").addClass("comments");
-
-  // On click comment icon toolbar
-  $('.addComment').on('click', function(e){
-    e.preventDefault(); // stops focus from being lost
+  // listen to events called by other plugins
+  utils.getPadOuter().find('body').on(utils.OPEN_NEW_COMMENT_MODAL_EVENT, function() {
     self.displayNewCommentForm();
   });
+
+  utils.getPadInner().find('#innerdocbody').addClass('comments');
 
   api.setHandleReplyCreation(function(commentId, text) {
     var data = self.getCommentData();
@@ -268,43 +260,40 @@ ep_comments.prototype.getCommentData = function (){
   return data;
 }
 
-ep_comments.prototype.displayNewCommentForm = function() {
-  var rep = {};
-  var hasSelectedText = false;
-  var ace = this.ace;
-
-  ace.callWithAce(function(ace) {
-    var saveRep = ace.ace_getRep();
-
-    rep.lines    = saveRep.lines;
-    rep.selStart = saveRep.selStart;
-    rep.selEnd   = saveRep.selEnd;
-
-    hasSelectedText = !ace.ace_isCaret();
-  },'saveCommentedSelection', true);
-
+ep_comments.prototype.displayNewCommentForm = function(aceContext) {
   // do nothing if we have nothing selected
-  if (hasSelectedText) {
-    this.showNewCommentForm(rep);
+  if (this.hasSelectedText(aceContext)) {
+    this.showNewCommentForm(aceContext);
   }
 }
 
+ep_comments.prototype.hasSelectedText = function(aceContext) {
+  var rep = aceContext && aceContext.rep;
+  if (!rep) {
+    this.ace.callWithAce(function(ace) {
+      rep = ace.ace_getRep();
+    },'saveCommentedSelection', true);
+  }
+
+  return rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+}
+
 // Create form to add comment
-ep_comments.prototype.showNewCommentForm = function(rep) {
+ep_comments.prototype.showNewCommentForm = function(aceContext) {
   var data = this.getCommentData();
   var self = this;
 
-  newComment.showNewCommentForm(data, function(commentText) {
+  newComment.showNewCommentForm(data, aceContext, function(commentText, preMarkedTextRepArr) {
     data.comment.text = commentText;
-    self.saveComment(data, rep);
+    self.saveComment(data, preMarkedTextRepArr);
   });
 };
 
 // Save comment
-ep_comments.prototype.saveComment = function(data, rep) {
+ep_comments.prototype.saveComment = function(data, preMarkedTextRepArr) {
   var self = this;
   self.socket.emit('addComment', data, function (commentId, comment){
-    commentSaveOrDelete.saveCommentOnSelectedText(commentId, rep, self.ace);
+    commentSaveOrDelete.saveCommentOnPreMarkedText(commentId, preMarkedTextRepArr, self.ace);
     self.commentDataManager.addComment(commentId, comment);
     self.collectComments();
   });
@@ -409,11 +398,7 @@ var hooks = {
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
 
     // first check if some text is being marked/unmarked to add comment to it
-    if(eventType === "unmarkPreSelectedTextToComment") {
-      pad.plugins.ep_comments_page.preCommentMarker.handleUnmarkText(context);
-    } else if(eventType === "markPreSelectedTextToComment") {
-      pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
-    }
+    preTextMarker.processAceEditEvent(context);
 
     if(context.callstack.docTextChanged) {
       // give a small delay, so all lines will be processed when setYofComments() is called
@@ -441,13 +426,17 @@ var hooks = {
       return ['comment-reply', context.value];
     }
     // only read marks made by current user
-    else if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
-      return [preCommentMark.MARK_CLASS, context.value];
+    else if(context.key.startsWith(preTextMarker.BASE_CLASS) && context.value === clientVars.userId) {
+      return [context.key];
     }
   },
 
   aceEditorCSS: function(){
     return cssFiles;
+  },
+
+  aceKeyEvent: function(hook, context) {
+    return shortcuts.processAceKeyEvent(context);
   }
 
 };
@@ -456,6 +445,7 @@ exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
+exports.aceKeyEvent           = hooks.aceKeyEvent;
 
 // Given a CSS selector and a target element (in this case pad inner)
 // return the rep as an array of array of tuples IE [[[0,1],[0,2]], [[1,3],[1,5]]]

@@ -2,9 +2,8 @@ var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.utils = {
   padId: undefined,
 
-  undo: function() {
-    ep_script_elements_test_helper.utils.undo();
-  },
+  undo: function() { ep_script_elements_test_helper.utils.undo() },
+  redo: function() { ep_script_elements_test_helper.utils.redo() },
 
   _loadPad: function(test, done) {
     var self = this;
@@ -15,7 +14,11 @@ ep_comments_page_test_helper.utils = {
       ep_comments_page_test_helper.apiUtils.startListeningToApiEvents();
       self._enlargeScreen();
       self._chooseToShowComments();
-      done();
+
+      // wait for all helper libs to be loaded
+      helper.waitFor(function() {
+        return helper.padOuter$.window.scrollIntoView;
+      }).done(done);
     }, this.padId);
   },
 
@@ -101,23 +104,21 @@ ep_comments_page_test_helper.utils = {
     var outer$ = helper.padOuter$;
     var chrome$ = helper.padChrome$;
 
-    var $line = this.getLine(line);
-    $line.sendkeys('{selectall}'); // needs to select content to add comment to
-    var $commentButton = chrome$('.addComment');
-    $commentButton.click();
+    self.pressShortcutToAddCommentToLine(line, function() {
+      // wait for form to be displayed
+      var $commentForm = outer$('#newComment');
+      helper.waitFor(function() {
+        return $commentForm.is(':visible');
+      }).done(function() {
+        // fill the comment form and submit it
+        var $commentField = $commentForm.find('textarea.comment-content');
+        $commentField.val(textOfComment);
+        var $submittButton = $commentForm.find('input[type=submit]');
+        $submittButton.click();
 
-    // wait for form to be displayed
-    helper.waitFor(function() {
-      return outer$('textarea:visible').length > 0;
-    }).done(function() {
-      // fill the comment form and submit it
-      var $commentField = outer$('textarea.comment-content');
-      $commentField.val(textOfComment);
-      var $submittButton = outer$('input[type=submit]');
-      $submittButton.click();
-
-      // wait until comment is created and comment id is set
-      self.waitForCommentToBeCreatedOnLine(line, done);
+        // wait until comment is created and comment id is set
+        self.waitForCommentToBeCreatedOnLine(line, done);
+      });
     });
   },
 
@@ -146,6 +147,32 @@ ep_comments_page_test_helper.utils = {
     return style.getPropertyValue('background-color');
   },
 
+  // from https://stackoverflow.com/a/22480938/7884942
+  isVisibleOnViewport: function(el) {
+    var elemTop = el.getBoundingClientRect().top;
+    var elemBottom = el.getBoundingClientRect().bottom;
+
+    var isVisible = (elemTop >= 0) && (elemBottom <= helper.padOuter$.window.innerHeight);
+    return isVisible;
+  },
+
+  getCloseButton: function(modalSelector) {
+    var $modal = helper.padOuter$('.ui-dialog:has(' + modalSelector + ')');
+    var $closeButton = $modal.find('.ui-dialog-titlebar-close');
+    return $closeButton;
+  },
+
+  closeModal: function(modalSelector, done) {
+    var utils = ep_comments_page_test_helper.utils;
+    var $closeButton = utils.getCloseButton(modalSelector);
+    $closeButton.click();
+
+    var $modal = helper.padOuter$('.ui-dialog:has(' + modalSelector + ')');
+    helper.waitFor(function() {
+      return !$modal.is(':visible');
+    }).done(done);
+  },
+
   waitForCommentToBeCreatedOnLine: function(line, done) {
     var self = this;
     var apiUtils = ep_comments_page_test_helper.apiUtils;
@@ -155,7 +182,6 @@ ep_comments_page_test_helper.utils = {
       var commentIdsSentOnAPI = (apiUtils.getLastDataSent() || []).map(function(commentData) {
         return commentData.commentId;
       });
-
       return idOfCreatedComment !== null && commentIdsSentOnAPI.includes(idOfCreatedComment);
     }).done(done);
   },
@@ -247,5 +273,27 @@ ep_comments_page_test_helper.utils = {
     var nodeWhereCaretIs = inner$.document.getSelection().anchorNode;
     var $lineWhereCaretIs = $(nodeWhereCaretIs).closest("div");
     return $lineWhereCaretIs;
+  },
+  getSelectedText: function() {
+    return helper.padInner$.document.getSelection().toString();
+  },
+
+  C_KEY_CODE: 67, // shortcut is Cmd + Ctrl + C
+  // based on similar method of smUtils
+  pressShortcutToAddCommentToLine(line, done) {
+    var self = this;
+    var smUtils = ep_script_scene_marks_test_helper.utils;
+
+    var bowser = helper.padInner$(window)[0].bowser;
+    var os = bowser.mac ? 'mac' : 'windows';
+    var modifierKeys = smUtils.shortcuts.KEYS_MODIFIER_ADD_SCENE_MARK[os];
+
+    var $line = this.getLine(line);
+    $line.sendkeys('{selectall}'); // needs to select content to add comment to
+
+    setTimeout(function() {
+      smUtils.shortcuts.pressKeyWithModifier(self.C_KEY_CODE, modifierKeys);
+      done();
+    }, 1000);
   },
 }

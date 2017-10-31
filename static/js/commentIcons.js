@@ -4,11 +4,6 @@ var utils = require('ep_comments_page/static/js/utils');
 var api = require('ep_comments_page/static/js/api');
 var linesChangedListener = require('./linesChangedListener');
 
-// Indicates if Etherpad is configured to display icons
-var displayIcons = function() {
-  return clientVars.displayCommentAsIcon
-}
-
 var getOrCreateIconsContainerAt = function(top) {
   var iconContainer = utils.getPadOuter().find('#commentIcons');
   var iconClass = "icon-at-"+top;
@@ -66,9 +61,6 @@ var makeSureEditorHasTheFocus = function() {
 }
 
 var addListenersToUpdateIconStyle = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
   linesChangedListener.onLineChanged('.comment-reply', updateCommentIconsStyle);
 }
 
@@ -172,9 +164,6 @@ var triggerCommentActivation = function(commentId) {
 
 // Create container to hold comment icons
 var insertContainer = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
   utils.getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
 
   addListenersToUpdateIconStyle();
@@ -187,9 +176,6 @@ var insertContainer = function() {
 
 // Create new comment icons, if they don't exist yet
 var addIcons = function(comments) {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
   for(var commentId in comments) {
     addIcon(commentId);
   }
@@ -215,9 +201,6 @@ var addIcon = function(commentId) {
 
 // Hide comment icons from container
 var hideIcons = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
   utils.getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
   });
@@ -226,9 +209,6 @@ var hideIcons = function() {
 // Adjust position of the comment icon on the container, to be on the same
 // height of the pad text associated to the comment, and return the affected icon
 var adjustTopOf = function(commentId, baseTop) {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
   var icon = utils.getPadOuter().find('#icon-' + commentId);
   var targetTop = baseTop + 2;
   var iconsAtLine = getOrCreateIconsContainerAt(targetTop);
@@ -239,18 +219,6 @@ var adjustTopOf = function(commentId, baseTop) {
   icon.show();
 
   return icon;
-}
-
-// Indicate if comment detail currently opened was shown by a click on
-// comment icon.
-var isCommentOpenedByClickOnIcon = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return false;
-
-  var iconClicked = utils.getPadOuter().find('#commentIcons').find(".comment-icon.active");
-  var commentOpenedByClickOnIcon = iconClicked.length !== 0;
-
-  return commentOpenedByClickOnIcon;
 }
 
 // Update which comments have reply
@@ -272,22 +240,6 @@ var updateCommentIconsStyle = function() {
   });
 }
 
-// Indicate if sidebar comment should be shown, checking if it had the characteristics
-// of a comment that was being displayed on the screen
-var shouldShow = function(sidebarComent) {
-  var shouldShowComment = false;
-
-  if (!displayIcons()) {
-    // if icons are not being displayed, we always show comments
-    shouldShowComment = true;
-  } else if (sidebarComent.hasClass("mouseover")) {
-    // if icons are being displayed, we only show comments clicked by user
-    shouldShowComment = true;
-  }
-
-  return shouldShowComment;
-}
-
 // Indicates if event was on one of the elements that does not close comment (any of the comment icons)
 var shouldNotCloseComment = function(e) {
   return $(e.target).closest('.comment-icon').length !== 0;
@@ -297,6 +249,3 @@ exports.insertContainer = insertContainer;
 exports.addIcons = addIcons;
 exports.hideIcons = hideIcons;
 exports.adjustTopOf = adjustTopOf;
-exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
-exports.shouldShow = shouldShow;
-exports.shouldNotCloseComment = shouldNotCloseComment;

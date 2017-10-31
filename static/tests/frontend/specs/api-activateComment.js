@@ -58,7 +58,7 @@ describe('ep_comments_page - api - activate comment', function() {
       it('scrolls editor to show comment icon', function(done) {
         var $commentIcon = helper.padOuter$('#commentIcons #icon-' + commentId).first();
         helper.waitFor(function() {
-          return isVisibleOnViewport($commentIcon.get(0));
+          return utils.isVisibleOnViewport($commentIcon.get(0));
         }).done(done);
       });
     });
@@ -110,13 +110,4 @@ describe('ep_comments_page - api - activate comment', function() {
       });
     });
   });
-
-  // from https://stackoverflow.com/a/22480938/7884942
-  var isVisibleOnViewport = function(el) {
-    var elemTop = el.getBoundingClientRect().top;
-    var elemBottom = el.getBoundingClientRect().bottom;
-
-    var isVisible = (elemTop >= 0) && (elemBottom <= helper.padOuter$.window.innerHeight);
-    return isVisible;
-  }
 });

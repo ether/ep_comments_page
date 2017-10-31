@@ -14,21 +14,6 @@
   color: #64666A; /* color 100 */
 }
 
-/* save button */
-.theme-light input.comment-button--save {
-  box-shadow: 0.5px 0.5px 0.5px 0.5px #C5C7CB; /* color 200 */
-  background-color: #FFFFFF; /* color 255 */
-}
-.theme-light input.comment-button--save:hover {
-  color: #515256; /* color 80 */
-}
-.theme-light input.comment-button--save:focus {
-  color: #19BBDA; /* color A */
-}
-.theme-light input.comment-button--save:active {
-  color: #19BBDA; /* color A */
-}
-
 /* title bar */
 .theme-light .ui-dialog .ui-dialog-titlebar {
   background-color: #EAEBED; /* color 235 */
