@@ -3,6 +3,8 @@ var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var COMMENT_PREFIX = 'c-';
 var REPLY_PREFIX = 'cr-';
 
+var FAKE_ID_PREFIX = 'fake-';
+
 exports.collectContentPre = function(hook, context){
   collectAttribFrom(context, REPLY_PREFIX, 'comment-reply-');
 
@@ -15,12 +17,23 @@ exports.collectContentPre = function(hook, context){
 };
 
 exports.getIdsFrom = function(str, classPrefix) {
-  // ex: regex = /(?:^| )(cr-[A-Za-z0-9]*)/g
-  var regex = new RegExp('(?:^| )(' + classPrefix + '[A-Za-z0-9]*)', 'g');
+  // ex: regex = /(?:^| |fake-)(cr-[A-Za-z0-9]*)/g
+  var regex = new RegExp('(?:^| |' + FAKE_ID_PREFIX + ')(' + classPrefix + '[A-Za-z0-9]*)', 'g');
 
   var ids = (str || '').match(regex) || [];
-  // remove possible whitespaces on the edges of ids
-  ids = _(ids).map(function(id) { return id.trim() });
+
+  // replace fake ids with the real ones
+  ids = _(ids).map(function(id) {
+    var cleanId = id.trim();
+    if (cleanId.startsWith(FAKE_ID_PREFIX)) {
+      // make sure fake id mapper is ready to be used
+      if ((((pad || {}).plugins || {}).ep_comments_page || {}).fakeIdsMapper) {
+        cleanId = pad.plugins.ep_comments_page.fakeIdsMapper.getRealIdOfFakeId(cleanId);
+      }
+    }
+    return cleanId;
+  });
+
   return ids;
 }
 var getIdsFrom = exports.getIdsFrom;

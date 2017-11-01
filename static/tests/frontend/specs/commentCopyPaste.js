@@ -5,6 +5,7 @@ describe('ep_comments_page - Comment copy and paste', function() {
 
   var LINE_WITH_ORIGINAL_COMMENT = 0;
   var LINE_WITH_PASTED_COMMENT = 1;
+  var LINE_WITH_2ND_PASTED_COMMENT = 2;
 
   var COMMENT_TEXT = 'My comment';
   var REPLY_TEXT = 'A reply';
@@ -12,10 +13,18 @@ describe('ep_comments_page - Comment copy and paste', function() {
   before(function(done) {
     helperFunctions = ep_comments_page_test_helper.copyAndPaste;
     utils.createPad(this, function() {
-      utils.addCommentAndReplyToLine(LINE_WITH_ORIGINAL_COMMENT, COMMENT_TEXT, REPLY_TEXT, function() {
-        originalCommentId = utils.getCommentIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
-        originalReplyId = utils.getReplyIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
-        done();
+      // make sure all lines are created
+      helper.padInner$('div').last().sendkeys('{selectall}{rightarrow}{enter}one more line');
+      helper.waitFor(function() {
+        var numberOfLines = helper.padInner$('div').length;
+        return numberOfLines >= LINE_WITH_2ND_PASTED_COMMENT + 1;
+      }).done(function() {
+        // now we can add the comments and replies
+        utils.addCommentAndReplyToLine(LINE_WITH_ORIGINAL_COMMENT, COMMENT_TEXT, REPLY_TEXT, function() {
+          originalCommentId = utils.getCommentIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
+          originalReplyId = utils.getReplyIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
+          done();
+        });
       });
     });
     this.timeout(60000);
@@ -70,6 +79,45 @@ describe('ep_comments_page - Comment copy and paste', function() {
       done();
     });
 
+    context('and user pastes the same content again on another line', function() {
+      before(function(done) {
+        apiUtils.resetData();
+        utils.pasteOnLine(LINE_WITH_2ND_PASTED_COMMENT, function() {
+          utils.waitForCommentToBeCreatedOnLine(LINE_WITH_2ND_PASTED_COMMENT, done);
+        });
+      });
+
+      after(function(done) {
+        helperFunctions.performActionAndWaitForDataToBeSent(utils.undo, done);
+      });
+
+      it('generates a different comment id for the comment pasted', function(done) {
+        var commentIdOn1stLinePasted = utils.getCommentIdOfLine(LINE_WITH_PASTED_COMMENT);
+        var commentIdOn2ndLinePasted = utils.getCommentIdOfLine(LINE_WITH_2ND_PASTED_COMMENT);
+        expect(commentIdOn2ndLinePasted).to.not.be(originalCommentId);
+        expect(commentIdOn2ndLinePasted).to.not.be(commentIdOn1stLinePasted);
+        done();
+      });
+
+      it('generates a different reply id for the reply pasted', function(done) {
+        var replyIdOn1stLinePasted = utils.getReplyIdOfLine(LINE_WITH_PASTED_COMMENT);
+        var replyIdOn2ndLinePasted = utils.getReplyIdOfLine(LINE_WITH_2ND_PASTED_COMMENT);
+        expect(replyIdOn2ndLinePasted).to.not.be(originalReplyId);
+        expect(replyIdOn2ndLinePasted).to.not.be(replyIdOn1stLinePasted);
+        done();
+      });
+
+      it('creates a new icon for the comment pasted', function(done) {
+        var outer$ = helper.padOuter$;
+
+        helper.waitFor(function() {
+          var $commentIcon = outer$('.comment-icon.withReply:visible');
+          // 3 = the original comment and the 2 pasted ones
+          return $commentIcon.length === 3;
+        }).done(done);
+      });
+    });
+
     context('when user removes the original comment', function() {
       before(function() {
         apiUtils.simulateCallToDeleteComment(originalCommentId);
@@ -122,7 +170,7 @@ describe('ep_comments_page - Comment copy and paste', function() {
       var outer$ = helper.padOuter$;
 
       helper.waitFor(function() {
-        var $commentIcon = outer$('.comment-icon:visible');
+        var $commentIcon = outer$('.comment-icon:not(.withReply):visible');
         // 2 = the original comment and the pasted one
         return $commentIcon.length === 2;
       }).done(done);

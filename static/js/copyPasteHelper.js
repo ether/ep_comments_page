@@ -1,77 +1,97 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
-var copyPasteHelper = function() {};
+var copyPasteHelper = function(configs) {
+  this.itemDataTypeOnClipboard = this._getClipboardDataTypeOf(configs.itemType);
+  this.subItemDataTypeOnClipboard = this._itemHasSubItems() && this._getClipboardDataTypeOf(configs.subItemType);
+};
+
+copyPasteHelper.prototype._getClipboardDataTypeOf = function(itemType) {
+  return 'text/object' + this._capitalizeFirstChar(itemType);
+}
 
 copyPasteHelper.prototype.addTextAndDataToClipboard = function(clipboardData, $copiedHtml) {
   var hasItemsOnSelection = $copiedHtml.find(this.itemSelectorOnPad).length > 0;
   if (hasItemsOnSelection) {
     var items = this.getItemsData();
-    this._buildDataAndSaveToClipboard(clipboardData, $copiedHtml, items, this.itemType, this._buildItemsDataWithNewIds.bind(this));
+    this._buildDataAndSaveToClipboard(
+      clipboardData,
+      $copiedHtml,
+      items,
+      this.itemDataTypeOnClipboard,
+      this._buildItemsDataWithFakeIds.bind(this),
+    );
 
     if (this._itemHasSubItems()) {
       var subItems = this.getSubItemsData(items);
-      this._buildDataAndSaveToClipboard(clipboardData, $copiedHtml, subItems, this.subItemType, this._buildSubItemsDataWithNewIds.bind(this));
+      this._buildDataAndSaveToClipboard(
+        clipboardData,
+        $copiedHtml,
+        subItems,
+        this.subItemDataTypeOnClipboard,
+        this._buildSubItemsDataWithFakeIds.bind(this)
+      );
     }
   }
   return hasItemsOnSelection;
 }
 
-copyPasteHelper.prototype._buildDataAndSaveToClipboard = function(clipboardData, $copiedHtml, items, itemType, buildItemsDataWithNewIds) {
-  var itemsWithNewIds = buildItemsDataWithNewIds($copiedHtml, items);
-  var itemsJSON = JSON.stringify(itemsWithNewIds);
-  var itemDataTypeOnClipboard = this._getClipboardDataTypeOf(itemType);
-  clipboardData.setData(itemDataTypeOnClipboard, itemsJSON);
+copyPasteHelper.prototype._buildDataAndSaveToClipboard = function(clipboardData, $copiedHtml, items, clipboardDataType, buildItemsDataWithFakeIds) {
+  var itemsWithFakeIds = buildItemsDataWithFakeIds($copiedHtml, items);
+  var itemsJSON = JSON.stringify(itemsWithFakeIds);
+  clipboardData.setData(clipboardDataType, itemsJSON);
 }
 
-copyPasteHelper.prototype._buildSubItemsDataWithNewIds = function($copiedHtml, subItems) {
-  return this._buildDataWithNewIds(
+copyPasteHelper.prototype._buildSubItemsDataWithFakeIds = function($copiedHtml, subItems) {
+  return this._buildDataWithFakeIds(
     $copiedHtml,
     subItems,
     this._getSubItemIdsFrom.bind(this),
-    this.generateNewSubItemId,
     this.setSubItemIdOnSubItem,
   );
 }
 
-copyPasteHelper.prototype._buildItemsDataWithNewIds = function($copiedHtml, items) {
-  return this._buildDataWithNewIds(
+copyPasteHelper.prototype._buildItemsDataWithFakeIds = function($copiedHtml, items) {
+  return this._buildDataWithFakeIds(
     $copiedHtml,
     items,
     this._getItemIdsFrom.bind(this),
-    this.generateNewItemId,
     this.setItemIdOnItem,
-    this.setItemIdOnSubItem,
-    this.getSubItemsOf,
+    true,
   );
 }
 
-copyPasteHelper.prototype._buildDataWithNewIds = function($copiedHtml, items, getIdsFromHtml, generateNewId, setItemIdOnItem, setItemIdOnSubItem, getSubItemsOf) {
-  var itemsWithNewIds = {};
+copyPasteHelper.prototype._buildDataWithFakeIds = function($copiedHtml, items, getIdsFromHtml, setItemIdOnItem, updateSubItemsToo) {
+  var itemsWithFakeIds = {};
   var originalIds = getIdsFromHtml($copiedHtml);
 
-  _.each(originalIds, function(originaId) {
-    var newId = generateNewId();
-
-    // create a copy of item with new id
-    var itemWithNewId = Object.assign({}, items[originaId]);
-    itemsWithNewIds[newId] = itemWithNewId;
-    setItemIdOnItem(itemWithNewId, newId);
-
-    var updateSubItemsToo = setItemIdOnSubItem && getSubItemsOf;
-    if (updateSubItemsToo) {
-      // replace item id on its sub-items
-      var subItems = getSubItemsOf(itemWithNewId);
-      _.each(subItems, function(subItem) {
-        setItemIdOnSubItem(subItem, newId);
-      });
-    }
+  _(originalIds).each(function(originaId) {
+    var fakeId = 'fake-' + originaId;
+    var originalItem = items[originaId];
+    var itemWithFakeId = this._replaceIdOnItemAndSubItems(originalItem, fakeId, setItemIdOnItem, updateSubItemsToo);
+    itemsWithFakeIds[fakeId] = itemWithFakeId;
 
     // replace item id on pad content
-    $copiedHtml.find('.' + originaId).removeClass(originaId).addClass(newId);
-  });
+    $copiedHtml.find('.' + originaId).removeClass(originaId).addClass(fakeId);
+  }, this);
 
-  return itemsWithNewIds;
+  return itemsWithFakeIds;
+}
+
+copyPasteHelper.prototype._replaceIdOnItemAndSubItems = function(item, newId, setItemIdOnItem, updateSubItemsToo) {
+  // create a copy of item with new id
+  var itemWithReplacedId = Object.assign({}, item);
+  setItemIdOnItem(itemWithReplacedId, newId);
+
+  if (updateSubItemsToo && this._itemHasSubItems()) {
+    // replace item id on its sub-items
+    var subItems = this.getSubItemsOf(itemWithReplacedId);
+    _(subItems).each(function(subItem) {
+      this.setItemIdOnSubItem(subItem, newId);
+    }, this);
+  }
+
+  return itemWithReplacedId;
 }
 
 copyPasteHelper.prototype._getItemIdsFrom = function($copiedHtml) {
@@ -101,22 +121,63 @@ copyPasteHelper.prototype._capitalizeFirstChar = function(string) {
 }
 
 copyPasteHelper.prototype.saveItemsAndSubItems = function(clipboardData) {
-  this._getClipboardDataAndSaveIt(clipboardData, this.itemType, this.saveItemsData);
+  var itemsData = this._buildDataFromClipboard(
+    clipboardData,
+    this.itemDataTypeOnClipboard,
+    this.generateNewItemId,
+    this.setItemIdOnItem,
+    true,
+  );
+
+  var subItemsData;
   if (this._itemHasSubItems()) {
-    this._getClipboardDataAndSaveIt(clipboardData, this.subItemType, this.saveSubItemsData);
+    subItemsData = this._buildDataFromClipboard(
+      clipboardData,
+      this.subItemDataTypeOnClipboard,
+      this.generateNewSubItemId,
+      this.setSubItemIdOnSubItem,
+    );
+
+    // subItemsData still have fake ids for its items, we need to fix that before saving data
+    this._replaceFakeItemIdsOnSubItems(subItemsData);
   }
+
+  this.saveItemsData(itemsData);
+  subItemsData && this.saveSubItemsData(subItemsData);
 }
 
-copyPasteHelper.prototype._getClipboardDataAndSaveIt = function(clipboardData, itemType, saveItemsData) {
-  var itemDataTypeOnClipboard = this._getClipboardDataTypeOf(itemType);
-  var items = clipboardData.getData(itemDataTypeOnClipboard);
-  if (items) {
-    saveItemsData(JSON.parse(items));
+copyPasteHelper.prototype._buildDataFromClipboard = function(clipboardData, clipboardDataType, generateNewId, setItemIdOnItem, updateSubItemsToo) {
+  var data = {};
+  var itemsJSON = clipboardData.getData(clipboardDataType);
+  if (itemsJSON) {
+    var itemsWithFakeIds = JSON.parse(itemsJSON);
+    var itemsWithNewIds = this._replaceFakeIdsWithNewIds(itemsWithFakeIds, generateNewId, setItemIdOnItem, updateSubItemsToo);
+    data = itemsWithNewIds;
   }
+  return data;
 }
 
-copyPasteHelper.prototype._getClipboardDataTypeOf = function(itemType) {
-  return 'text/object' + this._capitalizeFirstChar(itemType);
+copyPasteHelper.prototype._replaceFakeIdsWithNewIds = function(itemsWithFakeIds, generateNewId, setItemIdOnItem, updateSubItemsToo) {
+  var itemsWithNewIds = {};
+
+  _(itemsWithFakeIds).each(function(itemWithFakeId, originaFakeId) {
+    var newId = generateNewId();
+    var itemWithNewId = this._replaceIdOnItemAndSubItems(itemWithFakeId, newId, setItemIdOnItem, updateSubItemsToo);
+    itemsWithNewIds[newId] = itemWithNewId;
+
+    // register fake id => new id mapping, to be used when pasted content is collected
+    pad.plugins.ep_comments_page.fakeIdsMapper.registerNewMapping(originaFakeId, newId);
+  }, this);
+
+  return itemsWithNewIds;
+}
+
+copyPasteHelper.prototype._replaceFakeItemIdsOnSubItems = function(subItems) {
+  _(subItems).each(function(subItem) {
+    var fakeItemId = this.getItemIdOfSubItem(subItem);
+    var itemId = pad.plugins.ep_comments_page.fakeIdsMapper.getRealIdOfFakeId(fakeItemId);
+    this.setItemIdOnSubItem(subItem, itemId);
+  }, this);
 }
 
 copyPasteHelper.prototype._itemHasSubItems = function() {
@@ -124,25 +185,27 @@ copyPasteHelper.prototype._itemHasSubItems = function() {
 }
 
 /* Possible configs:
+   (*): configs only needed if item has sub-items
      itemType
-     subItemType
+   * subItemType
      itemSelectorOnPad
-     subItemSelectorOnPad
+   * subItemSelectorOnPad
      getItemsData
-     getSubItemsData
+   * getSubItemsData
      getItemIdsFromString
-     getSubItemIdsFromString
+   * getSubItemIdsFromString
      generateNewItemId
-     generateNewSubItemId
+   * generateNewSubItemId
      setItemIdOnItem
-     setSubItemIdOnSubItem
-     setItemIdOnSubItem
-     getSubItemsOf
+   * setSubItemIdOnSubItem
+   * setItemIdOnSubItem
+   * getItemIdOfSubItem
+   * getSubItemsOf
      saveItemsData
-     saveSubItemsData
+   * saveSubItemsData
 */
 exports.init = function(configs) {
-  var helper = new copyPasteHelper();
+  var helper = new copyPasteHelper(configs);
   // add configs as helper properties
   return _(helper).extend(configs);
 }

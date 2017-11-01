@@ -151,6 +151,7 @@ ep_comments.prototype.init = function(){
     setItemIdOnItem: function(comment, newCommentId) { comment.commentId = newCommentId },
     setSubItemIdOnSubItem: function(reply, newReplyId) { reply.replyId = newReplyId },
     setItemIdOnSubItem: function(reply, newCommentId) { reply.commentId = newCommentId },
+    getItemIdOfSubItem: function(reply) { return reply.commentId },
     getSubItemsOf: function(comment) { return comment.replies },
     saveItemsData: this.saveCommentWithoutSelection.bind(this),
     saveSubItemsData: this.saveRepliesWithoutSelection.bind(this),
@@ -390,9 +391,10 @@ var hooks = {
 
   // Init pad comments
   postAceInit: function(hook, context){
-    if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
-    pad.plugins.ep_comments_page = Comments;
+    pad.plugins = pad.plugins || {};
+    pad.plugins.ep_comments_page = pad.plugins.ep_comments_page || {};
+    pad.plugins.ep_comments_page.commentHandler = Comments;
   },
 
   aceEditEvent: function(hook, context){
@@ -405,16 +407,16 @@ var hooks = {
     if(context.callstack.docTextChanged) {
       // give a small delay, so all lines will be processed when setYofComments() is called
       setTimeout(function() {
-        pad.plugins.ep_comments_page.setYofComments();
+        pad.plugins.ep_comments_page.commentHandler.setYofComments();
       }, 250);
     }
 
-    var commentWasPasted = pad.plugins && pad.plugins.ep_comments_page && pad.plugins.ep_comments_page.shouldCollectComment;
+    var commentWasPasted = ((((pad || {}).plugins || {}).ep_comments_page || {}).commentHandler || {}).shouldCollectComment;
     var domClean = context.callstack.domClean;
     // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
     if(commentWasPasted && domClean){
-      pad.plugins.ep_comments_page.collectComments(function(){
-        pad.plugins.ep_comments_page.shouldCollectComment = false;
+      pad.plugins.ep_comments_page.commentHandler.collectComments(function(){
+        pad.plugins.ep_comments_page.commentHandler.shouldCollectComment = false;
       });
     }
   },

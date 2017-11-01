@@ -1,6 +1,7 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var utils = require('./utils');
 var copyPasteHelper = require('./copyPasteHelper');
+var fakeIdsMapper = require('./copyPasteFakeIdsMapper');
 var htmlExtractor = require('./htmlExtractorFromSelection');
 
 var addTextAndDataOfAllHelpersToClipboardAndDeleteSelectedContent = function(e) {
@@ -12,7 +13,7 @@ var addTextAndDataOfAllHelpersToClipboard = function(e) {
   var $copiedHtml = htmlExtractor.getHtmlOfSelectedContent();
   var clipboardData = e.originalEvent.clipboardData;
 
-  var helpersHaveItemsOnSelection = _(pad.copyPasteHelpers).map(function(helper) {
+  var helpersHaveItemsOnSelection = _(pad.plugins.ep_comments_page.copyPasteHelpers).map(function(helper) {
     return helper.addTextAndDataToClipboard(clipboardData, $copiedHtml);
   });
 
@@ -26,12 +27,17 @@ var addTextAndDataOfAllHelpersToClipboard = function(e) {
 
 var saveItemsAndSubItemsOfAllHelpers = function(e) {
   var clipboardData = e.originalEvent.clipboardData;
-  _(pad.copyPasteHelpers).each(function(helper) {
+  _(pad.plugins.ep_comments_page.copyPasteHelpers).each(function(helper) {
     helper.saveItemsAndSubItems(clipboardData);
   });
 }
 
 exports.init = function() {
+  pad.plugins = pad.plugins || {};
+  pad.plugins.ep_comments_page = pad.plugins.ep_comments_page || {};
+  pad.plugins.ep_comments_page.copyPasteHelpers = pad.plugins.ep_comments_page.copyPasteHelpers || [];
+  pad.plugins.ep_comments_page.fakeIdsMapper = fakeIdsMapper.init();
+
   // Override  copy, cut, paste events on Google chrome and Mozilla Firefox.
   if(browser.chrome || browser.firefox) {
     utils.getPadInner().
@@ -43,6 +49,5 @@ exports.init = function() {
 
 exports.listenToCopyCutPasteEventsOfItems = function(configs) {
   var helper = copyPasteHelper.init(configs);
-  pad.copyPasteHelpers = pad.copyPasteHelpers || [];
-  pad.copyPasteHelpers.push(helper)
+  pad.plugins.ep_comments_page.copyPasteHelpers.push(helper)
 }
