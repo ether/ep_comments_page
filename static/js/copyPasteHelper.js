@@ -161,7 +161,7 @@ copyPasteHelper.prototype._replaceFakeIdsWithNewIds = function(itemsWithFakeIds,
   var itemsWithNewIds = {};
 
   _(itemsWithFakeIds).each(function(itemWithFakeId, originaFakeId) {
-    var newId = generateNewId();
+    var newId = generateNewId(itemWithFakeId);
     var itemWithNewId = this._replaceIdOnItemAndSubItems(itemWithFakeId, newId, setItemIdOnItem, updateSubItemsToo);
     itemsWithNewIds[newId] = itemWithNewId;
 

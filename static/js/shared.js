@@ -3,7 +3,8 @@ var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var COMMENT_PREFIX = 'c-';
 var REPLY_PREFIX = 'cr-';
 
-var FAKE_ID_PREFIX = 'fake-';
+exports.FAKE_ID_PREFIX = 'fake-';
+var FAKE_ID_PREFIX = exports.FAKE_ID_PREFIX;
 
 exports.collectContentPre = function(hook, context){
   collectAttribFrom(context, REPLY_PREFIX, 'comment-reply-');
