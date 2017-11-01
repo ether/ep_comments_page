@@ -1,5 +1,5 @@
 describe('ep_comments_page - Comment copy and paste', function() {
-  var helperFunctions, event;
+  var helperFunctions;
   var utils = ep_comments_page_test_helper.utils;
   var apiUtils = ep_comments_page_test_helper.apiUtils;
 
@@ -14,7 +14,7 @@ describe('ep_comments_page - Comment copy and paste', function() {
     utils.createPad(this, function() {
       utils.addCommentAndReplyToLine(FIRST_LINE, COMMENT_TEXT, REPLY_TEXT, done);
     });
-    this.timeout(10000);
+    this.timeout(60000);
   });
 
   context('when user copies and pastes a text with comment and reply', function() {
@@ -27,10 +27,10 @@ describe('ep_comments_page - Comment copy and paste', function() {
       originalCommentId = utils.getCommentIdOfLine(FIRST_LINE);
       originalReplyId = utils.getReplyIdOfLine(FIRST_LINE);
 
-      event = helperFunctions.copySelectedText();
-      helperFunctions.pasteTextOnLine(event, SECOND_LINE);
-
-      utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+      utils.copySelection();
+      utils.pasteOnLine(SECOND_LINE, function() {
+        utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+      });
     });
 
     it('generates a different comment id for the comment pasted', function(done) {
@@ -101,10 +101,11 @@ describe('ep_comments_page - Comment copy and paste', function() {
 
       var $firstLine = utils.getLine(0);
       helper.selectLines($firstLine, $firstLine, 3, 6); //'eth'
-      event = helperFunctions.copySelectedText();
-      helperFunctions.pasteTextOnLine(event, SECOND_LINE);
 
-      utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+      utils.copySelection();
+      utils.pasteOnLine(SECOND_LINE, function() {
+        utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+      });
     });
 
     it('pastes a new comment', function(done) {
@@ -141,47 +142,6 @@ describe('ep_comments_page - Comment copy and paste', function() {
 
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.copyAndPaste = {
-  copySelectedText: function(){
-    var chrome$ = helper.padChrome$;
-    var inner$ = helper.padInner$;
-
-    // store data into a simple object, indexed by format
-    var clipboardDataMock = {
-     data: {},
-     setData: function(format, value) {
-       this.data[format] = value;
-     },
-     getData: function(format) {
-       return this.data[format];
-     }
-    };
-
-    var event = jQuery.Event("copy");
-    var e = {clipboardData: clipboardDataMock};
-    event.originalEvent = e;
-
-    // Hack: we need to use the same jQuery instance that is registering the main window,
-    // so we use "chrome$(inner$("div")[0])" instead of simply "inner$("div)"
-    chrome$(inner$("div")[0]).trigger(event);
-    return event;
-  },
-  pasteTextOnLine: function(event, line) {
-    var chrome$ = helper.padChrome$;
-    var inner$ = helper.padInner$;
-    var e = event;
-    e.type = "paste";
-
-    // Hack: we need to use the same jQuery instance that is registering the main window,
-    // so we use "chrome$(inner$("div")[0])" instead of simply "inner$("div)"
-    chrome$(inner$("div")[0]).trigger(event);
-
-    // as we can't trigger the paste on browser(chrome) natively using execCommand, we firstly trigger
-    // the event and then insert the html.
-    ep_comments_page_test_helper.utils.placeCaretOnLine(line, function() {
-      var copiedHTML = event.originalEvent.clipboardData.getData('text/html');
-      helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
-    });
-  },
   getTextOfCommentFromLine: function(lineNumber) {
     var utils = ep_comments_page_test_helper.utils;
     var commentData = utils.getCommentDataOfLine(lineNumber);

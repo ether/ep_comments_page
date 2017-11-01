@@ -43,7 +43,8 @@ function ep_comments(context){
   this.socket = utils.openSocketConnectionToRoute('/comment');
   this.shouldCollectComment = false;
 
-  api.initialize();
+  api.init();
+  copyPasteEvents.init();
   this.commentDataManager = commentDataManager.init(this.socket);
   this.init();
 }
@@ -136,23 +137,24 @@ ep_comments.prototype.init = function(){
     }
   });
 
-  // TODO - Implement to others browser like, Microsoft Edge, Opera, IE
-  // Override  copy, cut, paste events on Google chrome and Mozilla Firefox.
-  // When an user copies a comment and selects only the span, or part of it, Google chrome
-  // does not copy the classes only the styles, for example:
-  // <comment class='comment'><span>text to be copied</span></comment>
-  // As the comment classes are not only used for styling we have to add these classes when it pastes the content
-  // The same does not occur when the user selects more than the span, for example:
-  // text<comment class='comment'><span>to be copied</span></comment>
-  if(browser.chrome || browser.firefox){
-    utils.getPadInner().on("copy", function(e) {
-      copyPasteEvents.addTextOnClipboard(e, self.ace, false, self.commentDataManager.getComments());
-    }).on("cut", function(e) {
-      copyPasteEvents.addTextOnClipboard(e, self.ace, true, self.commentDataManager.getComments());
-    }).on("paste", function(e) {
-      copyPasteEvents.saveCommentsAndReplies(e);
-    });
-  }
+  copyPasteEvents.listenToCopyCutPasteEventsOfItems({
+    itemType: 'comment',
+    subItemType: 'reply',
+    itemSelectorOnPad: '.comment',
+    subItemSelectorOnPad: '.comment-reply',
+    getItemsData: function() { return self.commentDataManager.getComments() },
+    getSubItemsData: utils.getRepliesIndexedByReplyId,
+    getItemIdsFromString: shared.getCommentIdsFrom,
+    getSubItemIdsFromString: shared.getReplyIdsFrom,
+    generateNewItemId: shared.generateCommentId,
+    generateNewSubItemId: shared.generateReplyId,
+    setItemIdOnItem: function(comment, newCommentId) { comment.commentId = newCommentId },
+    setSubItemIdOnSubItem: function(reply, newReplyId) { reply.replyId = newReplyId },
+    setItemIdOnSubItem: function(reply, newCommentId) { reply.commentId = newCommentId },
+    getSubItemsOf: function(comment) { return comment.replies },
+    saveItemsData: this.saveCommentWithoutSelection.bind(this),
+    saveSubItemsData: this.saveRepliesWithoutSelection.bind(this),
+  });
 };
 
 ep_comments.prototype.handleReplyDeletion = function(replyId, commentId) {
@@ -541,5 +543,4 @@ function getRepFromSelector(selector) {
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
-  editorInfo.ace_hasCommentOnSelection = _(copyPasteEvents.hasCommentOnSelection).bind(context);
 }
