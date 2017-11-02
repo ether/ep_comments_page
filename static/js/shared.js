@@ -1,4 +1,5 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+var preTextMarker = require('./preTextMarker');
 
 var COMMENT_PREFIX = 'c-';
 var REPLY_PREFIX = 'cr-';
@@ -14,6 +15,10 @@ exports.collectContentPre = function(hook, context){
     // FIXME allow more than one comment on each segment
     // there can be only one comment on each text segment
     context.cc.doAttrib(context.state, 'comment::' + commentIds[0]);
+  }
+
+  if (pad && pad.preTextMarkers) {
+    preTextMarker.processCollectContentPre(context);
   }
 };
 

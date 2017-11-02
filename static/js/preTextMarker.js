@@ -96,6 +96,12 @@ preTextMarker.prototype.performNonUnduableEvent = function(eventType, callstack,
   callstack.startNewEvent(eventType);
 }
 
+preTextMarker.prototype.processCollectContentPre = function(context) {
+  var attributeName = this.markClass;
+  var attributeValue = clientVars.userId;
+  context.cc.doAttrib(context.state, attributeName + '::' + attributeValue);
+}
+
 exports.createForTarget = function(targetType, ace) {
   var newMarker = new preTextMarker(targetType, ace);
   pad.preTextMarkers = pad.preTextMarkers || {};
@@ -104,9 +110,14 @@ exports.createForTarget = function(targetType, ace) {
   return newMarker;
 }
 
+// process hooks for all text markers
 exports.processAceEditEvent = function(context) {
-  // process event for all text markers
   _(pad.preTextMarkers).each(function(marker) {
     marker.processAceEditEvent(context);
+  });
+}
+exports.processCollectContentPre = function(context) {
+  _(pad.preTextMarkers).each(function(marker) {
+    marker.processCollectContentPre(context);
   });
 }

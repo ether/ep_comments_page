@@ -98,6 +98,37 @@ describe('ep_comments_page - Pre-comment text mark', function() {
     });
   });
 
+  context('when user edits the originally selected text', function() {
+    var newText = '(edited)';
+
+    before(function(done) {
+      var inner$ = helper.padInner$;
+
+      var $firstLine = inner$('div').first();
+      $firstLine.sendkeys('{selectall}{rightarrow}' + newText + '{enter}{enter}');
+
+      helper.waitFor(function() {
+        var $secondLine = inner$('div').first().next();
+        return $secondLine.text() === '';
+      }).done(done);
+    });
+
+    after(function() {
+      utils.undo();
+    });
+
+    it('keeps marked text', function(done) {
+      var inner$ = helper.padInner$;
+
+      // verify if text is still marked with pre-comment class
+      var $preCommentTextMarked = inner$('.pre-selected-comment');
+      expect($preCommentTextMarked.length).to.be(1);
+      expect($preCommentTextMarked.text()).to.be(firstLineText + newText);
+
+      done();
+    });
+  });
+
   context('when user selects another text range and opens New Comment form for it', function() {
     before(function(done) {
       selectLineAndOpenCommentForm(1, done, true);
