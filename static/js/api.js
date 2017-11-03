@@ -12,7 +12,7 @@ var EDIT_COMMENT_MESSAGE_TYPE = 'comment_edit';
 var EDIT_REPLY_MESSAGE_TYPE = 'comment_reply_edit';
 var DELETE_REPLY_MESSAGE_TYPE = 'comment_reply_delete';
 
-exports.initialize = function() {
+exports.init = function() {
   // listen to outbound calls of this API
   window.addEventListener('message', function(e) {
     _handleOutboundCalls(e);

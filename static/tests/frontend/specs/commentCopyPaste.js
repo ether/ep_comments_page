@@ -1,10 +1,11 @@
 describe('ep_comments_page - Comment copy and paste', function() {
-  var helperFunctions, event;
+  var helperFunctions, originalCommentId, originalReplyId;
   var utils = ep_comments_page_test_helper.utils;
   var apiUtils = ep_comments_page_test_helper.apiUtils;
 
-  var FIRST_LINE = 0;
-  var SECOND_LINE = 1;
+  var LINE_WITH_ORIGINAL_COMMENT = 0;
+  var LINE_WITH_PASTED_COMMENT = 1;
+  var LINE_WITH_2ND_PASTED_COMMENT = 2;
 
   var COMMENT_TEXT = 'My comment';
   var REPLY_TEXT = 'A reply';
@@ -12,35 +13,46 @@ describe('ep_comments_page - Comment copy and paste', function() {
   before(function(done) {
     helperFunctions = ep_comments_page_test_helper.copyAndPaste;
     utils.createPad(this, function() {
-      utils.addCommentAndReplyToLine(FIRST_LINE, COMMENT_TEXT, REPLY_TEXT, done);
+      // make sure all lines are created
+      helper.padInner$('div').last().sendkeys('{selectall}{rightarrow}{enter}one more line');
+      helper.waitFor(function() {
+        var numberOfLines = helper.padInner$('div').length;
+        return numberOfLines >= LINE_WITH_2ND_PASTED_COMMENT + 1;
+      }).done(function() {
+        // now we can add the comments and replies
+        utils.addCommentAndReplyToLine(LINE_WITH_ORIGINAL_COMMENT, COMMENT_TEXT, REPLY_TEXT, function() {
+          originalCommentId = utils.getCommentIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
+          originalReplyId = utils.getReplyIdOfLine(LINE_WITH_ORIGINAL_COMMENT);
+          done();
+        });
+      });
     });
-    this.timeout(10000);
+    this.timeout(60000);
   });
 
   context('when user copies and pastes a text with comment and reply', function() {
-    var originalCommentId, originalReplyId;
-
     before(function(done) {
       var $firstLine = helper.padInner$('div').eq(0);
       helper.selectLines($firstLine, $firstLine, 1, 8); //'omethin'
 
-      originalCommentId = utils.getCommentIdOfLine(FIRST_LINE);
-      originalReplyId = utils.getReplyIdOfLine(FIRST_LINE);
+      utils.copySelection();
+      utils.pasteOnLine(LINE_WITH_PASTED_COMMENT, function() {
+        utils.waitForCommentToBeCreatedOnLine(LINE_WITH_PASTED_COMMENT, done);
+      });
+    });
 
-      event = helperFunctions.copySelectedText();
-      helperFunctions.pasteTextOnLine(event, SECOND_LINE);
-
-      utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+    after(function(done) {
+      helperFunctions.performActionAndWaitForDataToBeSent(utils.undo, done);
     });
 
     it('generates a different comment id for the comment pasted', function(done) {
-      var commentIdLinePasted = utils.getCommentIdOfLine(SECOND_LINE);
+      var commentIdLinePasted = utils.getCommentIdOfLine(LINE_WITH_PASTED_COMMENT);
       expect(commentIdLinePasted).to.not.be(originalCommentId);
       done();
     });
 
     it('generates a different reply id for the reply pasted', function(done) {
-      var replyIdLinePasted = utils.getReplyIdOfLine(SECOND_LINE);
+      var replyIdLinePasted = utils.getReplyIdOfLine(LINE_WITH_PASTED_COMMENT);
       expect(replyIdLinePasted).to.not.be(originalReplyId);
       done();
     });
@@ -49,22 +61,61 @@ describe('ep_comments_page - Comment copy and paste', function() {
       var outer$ = helper.padOuter$;
 
       helper.waitFor(function() {
-        var $commentIcon = outer$('.comment-icon.withReply');
+        var $commentIcon = outer$('.comment-icon.withReply:visible');
         // 2 = the original comment and the pasted one
         return $commentIcon.length === 2;
       }).done(done);
     });
 
     it('creates the comment text field with the same text of the one copied', function(done) {
-      var commentPastedText = helperFunctions.getTextOfCommentFromLine(SECOND_LINE);
+      var commentPastedText = helperFunctions.getTextOfCommentFromLine(LINE_WITH_PASTED_COMMENT);
       expect(commentPastedText).to.be(COMMENT_TEXT);
       done();
     });
 
     it('creates the comment reply text field with the same text of the one copied', function(done) {
-      var commentReplyText = helperFunctions.getTextOfCommentReplyFromLine(SECOND_LINE);
+      var commentReplyText = helperFunctions.getTextOfCommentReplyFromLine(LINE_WITH_PASTED_COMMENT);
       expect(commentReplyText).to.be(REPLY_TEXT);
       done();
+    });
+
+    context('and user pastes the same content again on another line', function() {
+      before(function(done) {
+        apiUtils.resetData();
+        utils.pasteOnLine(LINE_WITH_2ND_PASTED_COMMENT, function() {
+          utils.waitForCommentToBeCreatedOnLine(LINE_WITH_2ND_PASTED_COMMENT, done);
+        });
+      });
+
+      after(function(done) {
+        helperFunctions.performActionAndWaitForDataToBeSent(utils.undo, done);
+      });
+
+      it('generates a different comment id for the comment pasted', function(done) {
+        var commentIdOn1stLinePasted = utils.getCommentIdOfLine(LINE_WITH_PASTED_COMMENT);
+        var commentIdOn2ndLinePasted = utils.getCommentIdOfLine(LINE_WITH_2ND_PASTED_COMMENT);
+        expect(commentIdOn2ndLinePasted).to.not.be(originalCommentId);
+        expect(commentIdOn2ndLinePasted).to.not.be(commentIdOn1stLinePasted);
+        done();
+      });
+
+      it('generates a different reply id for the reply pasted', function(done) {
+        var replyIdOn1stLinePasted = utils.getReplyIdOfLine(LINE_WITH_PASTED_COMMENT);
+        var replyIdOn2ndLinePasted = utils.getReplyIdOfLine(LINE_WITH_2ND_PASTED_COMMENT);
+        expect(replyIdOn2ndLinePasted).to.not.be(originalReplyId);
+        expect(replyIdOn2ndLinePasted).to.not.be(replyIdOn1stLinePasted);
+        done();
+      });
+
+      it('creates a new icon for the comment pasted', function(done) {
+        var outer$ = helper.padOuter$;
+
+        helper.waitFor(function() {
+          var $commentIcon = outer$('.comment-icon.withReply:visible');
+          // 3 = the original comment and the 2 pasted ones
+          return $commentIcon.length === 3;
+        }).done(done);
+      });
     });
 
     context('when user removes the original comment', function() {
@@ -72,8 +123,8 @@ describe('ep_comments_page - Comment copy and paste', function() {
         apiUtils.simulateCallToDeleteComment(originalCommentId);
       });
 
-      after(function() {
-        utils.undo();
+      after(function(done) {
+        helperFunctions.performActionAndWaitForDataToBeSent(utils.undo, done);
       });
 
       it('does not remove the comment pasted', function(done) {
@@ -82,6 +133,53 @@ describe('ep_comments_page - Comment copy and paste', function() {
         expect(commentsLength).to.be(1);
         done();
       });
+    });
+  });
+
+  context('when user copies and pastes a text with only comment', function() {
+    before(function(done) {
+      apiUtils.resetData();
+      apiUtils.simulateCallToDeleteReply(originalReplyId, originalCommentId);
+
+      // remove reply to run this context
+      apiUtils.waitForDataToBeSent(function() {
+        var $firstLine = helper.padInner$('div').eq(0);
+        helper.selectLines($firstLine, $firstLine, 1, 8); //'omethin'
+
+        utils.copySelection();
+        utils.pasteOnLine(LINE_WITH_PASTED_COMMENT, function() {
+          utils.waitForCommentToBeCreatedOnLine(LINE_WITH_PASTED_COMMENT, done);
+        });
+      });
+    });
+
+    after(function(done) {
+      helperFunctions.performActionAndWaitForDataToBeSent(function() {
+        utils.undo(); // paste
+        utils.undo(); // reply deletion
+      }, done);
+    });
+
+    it('generates a different comment id for the comment pasted', function(done) {
+      var commentIdLinePasted = utils.getCommentIdOfLine(LINE_WITH_PASTED_COMMENT);
+      expect(commentIdLinePasted).to.not.be(originalCommentId);
+      done();
+    });
+
+    it('creates a new icon for the comment pasted', function(done) {
+      var outer$ = helper.padOuter$;
+
+      helper.waitFor(function() {
+        var $commentIcon = outer$('.comment-icon:not(.withReply):visible');
+        // 2 = the original comment and the pasted one
+        return $commentIcon.length === 2;
+      }).done(done);
+    });
+
+    it('creates the comment text field with the same text of the one copied', function(done) {
+      var commentPastedText = helperFunctions.getTextOfCommentFromLine(LINE_WITH_PASTED_COMMENT);
+      expect(commentPastedText).to.be(COMMENT_TEXT);
+      done();
     });
   });
 
@@ -101,38 +199,39 @@ describe('ep_comments_page - Comment copy and paste', function() {
 
       var $firstLine = utils.getLine(0);
       helper.selectLines($firstLine, $firstLine, 3, 6); //'eth'
-      event = helperFunctions.copySelectedText();
-      helperFunctions.pasteTextOnLine(event, SECOND_LINE);
 
-      utils.waitForCommentToBeCreatedOnLine(SECOND_LINE, done);
+      utils.copySelection();
+      utils.pasteOnLine(LINE_WITH_PASTED_COMMENT, function() {
+        utils.waitForCommentToBeCreatedOnLine(LINE_WITH_PASTED_COMMENT, done);
+      });
     });
 
     it('pastes a new comment', function(done) {
-      var commentIdLinePasted = utils.getCommentIdOfLine(SECOND_LINE);
+      var commentIdLinePasted = utils.getCommentIdOfLine(LINE_WITH_PASTED_COMMENT);
       expect(commentIdLinePasted).to.not.be(undefined);
       done();
     });
 
     it('pastes a new reply', function(done) {
-      var replyIdLinePasted = utils.getReplyIdOfLine(SECOND_LINE);
+      var replyIdLinePasted = utils.getReplyIdOfLine(LINE_WITH_PASTED_COMMENT);
       expect(replyIdLinePasted).to.not.be(undefined);
       done();
     });
 
     it('pastes content with the outer formatting', function(done) {
-      var $pastedContent = utils.getLine(SECOND_LINE);
+      var $pastedContent = utils.getLine(LINE_WITH_PASTED_COMMENT);
       expect($pastedContent.find('b').length).to.not.be(0);
       done();
     });
 
     it('pastes content with the formatting in the middle', function(done) {
-      var $pastedContent = utils.getLine(SECOND_LINE);
+      var $pastedContent = utils.getLine(LINE_WITH_PASTED_COMMENT);
       expect($pastedContent.find('i').length).to.not.be(0);
       done();
     });
 
     it('pastes content with the inner formatting', function(done) {
-      var $pastedContent = utils.getLine(SECOND_LINE);
+      var $pastedContent = utils.getLine(LINE_WITH_PASTED_COMMENT);
       expect($pastedContent.find('u').length).to.not.be(0);
       done();
     });
@@ -141,47 +240,6 @@ describe('ep_comments_page - Comment copy and paste', function() {
 
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
 ep_comments_page_test_helper.copyAndPaste = {
-  copySelectedText: function(){
-    var chrome$ = helper.padChrome$;
-    var inner$ = helper.padInner$;
-
-    // store data into a simple object, indexed by format
-    var clipboardDataMock = {
-     data: {},
-     setData: function(format, value) {
-       this.data[format] = value;
-     },
-     getData: function(format) {
-       return this.data[format];
-     }
-    };
-
-    var event = jQuery.Event("copy");
-    var e = {clipboardData: clipboardDataMock};
-    event.originalEvent = e;
-
-    // Hack: we need to use the same jQuery instance that is registering the main window,
-    // so we use "chrome$(inner$("div")[0])" instead of simply "inner$("div)"
-    chrome$(inner$("div")[0]).trigger(event);
-    return event;
-  },
-  pasteTextOnLine: function(event, line) {
-    var chrome$ = helper.padChrome$;
-    var inner$ = helper.padInner$;
-    var e = event;
-    e.type = "paste";
-
-    // Hack: we need to use the same jQuery instance that is registering the main window,
-    // so we use "chrome$(inner$("div")[0])" instead of simply "inner$("div)"
-    chrome$(inner$("div")[0]).trigger(event);
-
-    // as we can't trigger the paste on browser(chrome) natively using execCommand, we firstly trigger
-    // the event and then insert the html.
-    ep_comments_page_test_helper.utils.placeCaretOnLine(line, function() {
-      var copiedHTML = event.originalEvent.clipboardData.getData('text/html');
-      helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
-    });
-  },
   getTextOfCommentFromLine: function(lineNumber) {
     var utils = ep_comments_page_test_helper.utils;
     var commentData = utils.getCommentDataOfLine(lineNumber);
@@ -193,4 +251,12 @@ ep_comments_page_test_helper.copyAndPaste = {
     var replyIds = Object.keys(commentData.replies);
     return commentData.replies[replyIds[0]].text;
   },
+
+  performActionAndWaitForDataToBeSent: function(action, done) {
+    var apiUtils = ep_comments_page_test_helper.apiUtils;
+    apiUtils.resetData();
+    action();
+    // wait until all data is restored
+    apiUtils.waitForDataToBeSent(done);
+  }
 };

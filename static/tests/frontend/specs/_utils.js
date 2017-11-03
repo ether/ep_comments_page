@@ -147,6 +147,47 @@ ep_comments_page_test_helper.utils = {
     return style.getPropertyValue('background-color');
   },
 
+  // store data into a simple object, indexed by format
+  _createMockedClipboard: function() {
+    return {
+      data: {},
+      setData: function(format, value) {
+        this.data[format] = value;
+      },
+      getData: function(format) {
+        return this.data[format];
+      }
+    };
+  },
+
+  copySelection: function() {
+    this.clipboardData = this.clipboardData || this._createMockedClipboard();
+    this._triggerEvent('copy');
+  },
+
+  pasteOnLine: function(line, done) {
+    var event = this._triggerEvent('paste');
+
+    // as we can't trigger the paste on browser(chrome) natively using execCommand, we firstly trigger
+    // the event and then insert the html.
+    this.placeCaretOnLine(line, function() {
+      var copiedHTML = event.originalEvent.clipboardData.getData('text/html');
+      helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
+      done();
+    });
+  },
+
+  _triggerEvent: function(eventName) {
+    var event = jQuery.Event(eventName);
+    event.originalEvent = { clipboardData: this.clipboardData };
+
+    // Hack: we need to use the same jQuery instance that is registering the main window,
+    // so we use 'chrome$(inner$('div')[0])' instead of simply 'inner$('div)'
+    helper.padChrome$(helper.padInner$('div')[0]).trigger(event);
+
+    return event;
+  },
+
   // from https://stackoverflow.com/a/22480938/7884942
   isVisibleOnViewport: function(el) {
     var elemTop = el.getBoundingClientRect().top;
@@ -257,17 +298,9 @@ ep_comments_page_test_helper.utils = {
   },
 
   placeCaretOnLine: function(lineNum, done) {
-    var self = this;
-    var $targetLine = this.getLine(lineNum);
-    $targetLine.sendkeys("{selectall}");
-
-    helper.waitFor(function() {
-     var $targetLine = self.getLine(lineNum);
-     var $lineWhereCaretIs = self.getLineWhereCaretIs();
-
-     return $targetLine.get(0) === $lineWhereCaretIs.get(0);
-    }).done(done);
+    ep_script_elements_test_helper.utils.placeCaretAtTheEndOfLine(lineNum, done);
   },
+
   getLineWhereCaretIs: function() {
     var inner$ = helper.padInner$;
     var nodeWhereCaretIs = inner$.document.getSelection().anchorNode;
