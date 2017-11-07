@@ -1,3 +1,4 @@
+var _ = require('ep_etherpad-lite/static/js/underscore');
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var preTextMarker = require('./preTextMarker');
 
@@ -6,6 +7,11 @@ var REPLY_PREFIX = 'cr-';
 
 exports.FAKE_ID_PREFIX = 'fake-';
 var FAKE_ID_PREFIX = exports.FAKE_ID_PREFIX;
+
+exports.collectContentPreOnFrontEnd = function(hook, context){
+  collectContentPre(hook, context);
+  preTextMarker.processCollectContentPre(context);
+}
 
 exports.collectContentPre = function(hook, context){
   collectAttribFrom(context, REPLY_PREFIX, 'comment-reply-');
@@ -16,11 +22,8 @@ exports.collectContentPre = function(hook, context){
     // there can be only one comment on each text segment
     context.cc.doAttrib(context.state, 'comment::' + commentIds[0]);
   }
-
-  if (pad && pad.preTextMarkers) {
-    preTextMarker.processCollectContentPre(context);
-  }
 };
+var collectContentPre = exports.collectContentPre;
 
 exports.getIdsFrom = function(str, classPrefix) {
   // ex: regex = /(?:^| |fake-)(cr-[A-Za-z0-9]*)/g

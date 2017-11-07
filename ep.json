@@ -7,7 +7,7 @@
       "client_hooks": {
         "postAceInit": "ep_comments_page/static/js/index",
         "aceKeyEvent": "ep_comments_page/static/js/index",
-        "collectContentPre": "ep_comments_page/static/js/shared",
+        "collectContentPre": "ep_comments_page/static/js/shared:collectContentPreOnFrontEnd",
         "aceAttribsToClasses": "ep_comments_page/static/js/index",
         "aceEditorCSS": "ep_comments_page/static/js/index",
         "aceEditEvent": "ep_comments_page/static/js/index",
