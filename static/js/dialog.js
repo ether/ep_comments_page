@@ -52,6 +52,9 @@ dialog.prototype._buildWidget = function(config) {
       duration: 500
     },
     close: closeDialog,
+    classes: {
+      'ui-dialog': 'ui-dialog--' + config.targetType,
+    },
   };
   var opts = Object.assign({}, defaultDialogOpts, (config.dialogOpts || {}));
   this.$content.dialog(opts);
