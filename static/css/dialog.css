@@ -35,6 +35,12 @@
   margin-top: 10px;
 }
 
+/* overwrite round corner style shown by Chrome v62 on buttons */
+.ui-dialog input.button {
+  border-radius: 0;
+  -webkit-border-radius: 0;
+}
+
 /* button Save */
 .ui-dialog input.button--save {
   float: right;
