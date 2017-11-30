@@ -5,8 +5,13 @@ var fakeIdsMapper = require('./copyPasteFakeIdsMapper');
 var htmlExtractor = require('./htmlExtractorFromSelection');
 
 var addTextAndDataOfAllHelpersToClipboardAndDeleteSelectedContent = function(e) {
-  addTextAndDataOfAllHelpersToClipboard(e);
-  utils.getPadInner().get(0).execCommand('delete');
+  var cutWasOverrode = addTextAndDataOfAllHelpersToClipboard(e);
+
+  // we only remove the selection if the cut default behavior was overrode. Doing it we avoid
+  // losing the text cut on the clipboard
+  if (cutWasOverrode) {
+    utils.getPadInner().get(0).execCommand('delete');
+  }
 }
 
 var addTextAndDataOfAllHelpersToClipboard = function(e) {
@@ -23,6 +28,8 @@ var addTextAndDataOfAllHelpersToClipboard = function(e) {
     clipboardData.setData('text/html', $copiedHtml.html());
     e.preventDefault();
   }
+
+  return atLeastOneItemChangedClipboard;
 }
 
 var saveItemsAndSubItemsOfAllHelpers = function(e) {
