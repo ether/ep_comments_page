@@ -1,0 +1,25 @@
+/* add shadowed border */
+.theme-light .ui-dialog {
+  background-color: #FFFFFF; /* color 255 */
+
+  -webkit-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  -moz-box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+  box-shadow: 2px 4px 16px 1px #D8D9DC; /* color 220 */
+}
+
+/* font color */
+.theme-light .ui-dialog-content,
+.theme-light .ui-dialog-title,
+.theme-light .ui-dialog-content textarea {
+  color: #64666A; /* color 100 */
+}
+
+/* title bar */
+.theme-light .ui-dialog .ui-dialog-titlebar {
+  background-color: #EAEBED; /* color 235 */
+}
+
+/* close button */
+.theme-light .ui-dialog-titlebar-close:hover:not(:active) {
+  fill: #000000; /* color 0 */
+}

@@ -5,15 +5,20 @@ var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 var shared = require('./static/js/shared');
 
-exports.getComments = function (padId, callback)
-{
-  // We need to change readOnly PadIds to Normal PadIds
+var _getReadWritePadId = function(padId) {
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
     readOnlyManager.getPadId(padId, function(err, rwPadId){
       padId = rwPadId;
     });
   };
+  return padId;
+}
+
+exports.getComments = function (padId, callback)
+{
+  // We need to change readOnly PadIds to Normal PadIds
+  padId = _getReadWritePadId(padId);
 
   // Not sure if we will encouter race conditions here..  Be careful.
 
@@ -49,13 +54,8 @@ exports.addComment = function(padId, data, callback)
 
 exports.bulkAddComments = function(padId, data, callback)
 {
- // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
+   // We need to change readOnly PadIds to Normal PadIds
+   padId = _getReadWritePadId(padId);
 
   //get the entry
   db.get("comments:" + padId, function(err, comments) {
@@ -73,8 +73,6 @@ exports.bulkAddComments = function(padId, data, callback)
         "author": commentData.author || "empty",
         "name": commentData.name,
         "text": commentData.text,
-        "changeTo": commentData.changeTo,
-        "changeFrom": commentData.changeFrom,
         "timestamp": parseInt(commentData.timestamp) || new Date().getTime()
       };
       //add the entry for this pad
@@ -111,18 +109,13 @@ exports.copyComments = function(originalPadId, newPadID, callback)
 
 exports.getCommentReplies = function (padId, callback){
  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
+ padId = _getReadWritePadId(padId);
 
   //get the globalComments replies
   db.get("comment-replies:" + padId, function(err, replies)
   {
     if(ERR(err, callback)) return;
-    //comment does not exists
+    //replies do not exist
     if(replies == null) replies = {};
     callback(null, { replies: replies });
   });
@@ -148,12 +141,7 @@ exports.addCommentReply = function(padId, data, callback){
 
 exports.bulkAddCommentReplies = function(padId, data, callback){
   // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
+  padId = _getReadWritePadId(padId);
 
   //get the entry
   db.get("comment-replies:" + padId, function(err, replies){
@@ -164,17 +152,15 @@ exports.bulkAddCommentReplies = function(padId, data, callback){
 
     var newReplies = [];
     var replyIds = _.map(data, function(replyData) {
-      //create the new reply id
-      var replyId = "c-reply-" + randomString(16);
+      //create the new reply id if necessary
+      var replyId = replyData.replyId || "cr-" + randomString(16);
 
       metadata = replyData.comment || {};
 
       var reply = {
         "commentId"  : replyData.commentId,
         "text"       : replyData.reply               || replyData.text,
-        "changeTo"   : replyData.changeTo            || null,
-        "changeFrom" : replyData.changeFrom          || null,
-        "author"     : metadata.author               || "empty",
+        "author"     : metadata.author               || replyData.author || "empty",
         "name"       : metadata.name                 || replyData.name,
         "timestamp"  : parseInt(replyData.timestamp) || new Date().getTime()
       };
@@ -210,63 +196,16 @@ exports.copyCommentReplies = function(originalPadId, newPadID, callback){
   });
 };
 
-exports.changeAcceptedState = function(padId, commentId, state, callback){
-  // Given a comment we update that comment to say the change was accepted or reverted
-
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
-  };
-
-  // If we're dealing with comment replies we need to a different query
-  var prefix = "comments:";
-  if(commentId.substring(0,7) === "c-reply"){
-    prefix = "comment-replies:";
-  }
-
-  //get the entry
-  db.get(prefix + padId, function(err, comments){
-
-    if(ERR(err, callback)) return;
-
-    //add the entry for this pad
-    var comment = comments[commentId];
-
-    if(state){
-      comment.changeAccepted = true;
-      comment.changeReverted = false;
-    }else{
-      comment.changeAccepted = false;
-      comment.changeReverted = true;
-    }
-
-    comments[commentId] = comment;
-
-    //save the new element back
-    db.set(prefix + padId, comments);
-
-    callback(null, commentId, comment);
-  });
-}
-
 exports.changeCommentText = function(padId, commentId, commentText, callback){
-  var commentTextIsNotEmpty = commentText.length > 0;
+  var commentTextIsNotEmpty = (commentText || '').length > 0;
   if(commentTextIsNotEmpty){
     // Given a comment we update the comment text
     // We need to change readOnly PadIds to Normal PadIds
-    var isReadOnly = padId.indexOf("r.") === 0;
-    if(isReadOnly){
-      readOnlyManager.getPadId(padId, function(err, rwPadId){
-        padId = rwPadId;
-      });
-    };
+    padId = _getReadWritePadId(padId);
 
     // If we're dealing with comment replies we need to a different query
     var prefix = "comments:";
-    if(commentId.substring(0,7) === "c-reply"){
+    if(commentId.startsWith("cr")){
       prefix = "comment-replies:";
     }
 

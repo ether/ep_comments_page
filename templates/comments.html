@@ -1,131 +1,25 @@
-<script src="../static/plugins/ep_comments_page/static/js/jquery.tmpl.min.js"></script>
+<script src="../static/plugins/ep_comments_page/static/js/lib/jquery.tmpl.min.js"></script>
+<script src="../static/plugins/ep_comments_page/static/js/lib/jquery-ui.min.js"></script>
 
-<script id="commentsTemplate" type="text/html">
-    <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
-        <div class="comment-options-wrapper">
-          <span class="comment-options-button">
-            <span class="comment-options-button--icon"></span>
-          </span>
-          <div class="comment-options hidden">
-            <p data-l10n-id="ep_comments_page.delete_comment.title" class="comment-delete-container">
-                <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title">delete</span>
-            </p>
-            <p class="comment-edit-container">
-                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
-            </p>
-          </div>
-        </div>
-        <address class="comment-author-name">${name}:</address>
-        <section class="comment-text">${text}</section>
-        <time datetime="${formattedDate}">${date}</time>
-        {{if changeTo}}
-        <form class="comment-changeTo-form">
-            <p class="comment-changeFrom">
-                <span class="comment-changeFrom-label" data-l10n-id="ep_comments_page.comments_template.from">From:</span>
-                <span class="comment-changeFrom-value">${changeFrom}</span>
-            </p>
-            <p class="comment-changeTo">
-                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change">Suggested Change:</span>
-                <span class="comment-changeTo-value">${changeTo}</span>
-            </p>
-            <p class="comment-changeTo-approve">
-                <input type="Submit" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
-            </p>
-        </form>
-        {{/if}}
-        <form class='comment-reply'>
-            <label class='comment-reply-input-label'>
-                <span data-l10n-id="ep_comments_page.comments_template.reply_input_label">Your Reply (hit ENTER to send)</span>
-                <input class='comment-reply-input'>
-            </label>
-            <p class="reply-comment-suggest">
-                <input type="checkbox" id="reply-suggestion-checkbox-${commentId}" class="reply-suggestion-checkbox">
-                <label for="reply-suggestion-checkbox-${commentId}" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
-            </p>
-            <span class="reply-suggestion">
-                <p data-l10n-id="ep_comments_page.comments_template.from">From:</p>
-                <p class="reply-comment-suggest-from-p">
-                    <span class="reply-comment-changeFrom-value">${changeFrom}</span>
-                </p>
-                <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
-                <p class="reply-comment-suggest-to-p">
-                    <textarea class="reply-comment-suggest-to"></textarea>
-                </p>
-            </span>
-            <!-- for test purposes only -->
-            <input type="submit" style="display:none">
-        </form>
-    </div>
+<script id="closeButton" type="text/html">
+  <span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 9.9 9.9">
+      <polygon points="6.9 2.3 5 4.2 3 2.3 2.3 3 4.2 5 2.3 6.9 3 7.6 5 5.7 6.9 7.6 7.6 6.9 5.7 5 7.6 3 "/>
+    </svg>
+  </span>
 </script>
 
 <script id="newCommentTemplate" type="text/html">
-    <form id="newComment" class="sidebar-comment">
-        <p data-l10n-id="ep_comments_page.comment">Comment</p>
-        <p class="comment-text">
-            <textarea class="comment-content" autofocus></textarea>
-        </p>
-
-        <p class="comment-suggest">
-            <input type="checkbox" id="suggestion-checkbox">
-            <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
-        </p>
-        <span class="suggestion">
-            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest Change From:</p>
-            <p class="comment-suggest-from-p">
-                <textarea class="comment-suggest-from" disabled="disabled"></textarea>
-            </p>
-            <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
-            <p class="comment-suggest-to-p">
-                <textarea class="comment-suggest-to"></textarea>
-            </p>
-        </span>
-
-        <p class="comment-buttons">
-            <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
-            <input type="reset" id="comment-reset" value="Cancel" data-l10n-id="ep_comments_page.comments_template.cancel.value" />
-        </p>
-    </form>
-</script>
-
-<script id="replyTemplate" type="text/html">
-    <note id="${replyId}" class="sidebar-comment-reply" data-commentid="${replyId}">
-        <div class="comment-options-wrapper">
-          <span class="comment-options-button">
-            <span class="comment-options-button--icon"></span>
-          </span>
-          <div class="comment-options hidden">
-            <p class="comment-edit-container">
-                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
-            </p>
-          </div>
-        </div>
-        <address class="comment-author-name">${name}:</address>
-        <section class="comment-text">${text}</section>
-        <time datetime="${formattedDate}">${date}</time>
-        {{if changeTo}}
-        <form class="comment-changeTo-form">
-            <p class="comment-changeTo">
-                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From:</span>
-                <p class="reply-comment-suggest-from-p">
-                  <span class="comment-changeFrom-value">${changeFrom}</span>
-                </p>
-                <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
-                <span class="comment-changeTo-value">${changeTo}</span>
-            </p>
-            <p class="comment-reply-changeTo-approve">
-                <input type="Submit" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
-            </p>
-        </form>
-        {{/if}}
-    </note>
-</script>
-
-<script id="editCommentTemplate" type="text/html">
-  <div class="comment-edit-form">
-    <textarea class="comment-edit-text"></textarea>
-    <p>
-      <button data-l10n-id="ep_comments_page.comments_template.edit_comment.save" class="comment-edit-submit"></button>
-      <button data-l10n-id="ep_comments_page.comments_template.edit_comment.cancel" class="comment-edit-cancel"></button>
-    </p>
-  </div>
+  <form id="newComment">
+    <div class="comment-author">
+      <authoricon>${initials}</authoricon>
+      <authorname>${name}</authorname>
+    </div>
+    <div class="comment-text">
+      <textarea class="comment-content" autofocus placeholder="write here your comment" data-l10n-id="ep_comments_page.comments_template.comment.placeholder"></textarea>
+    </div>
+    <div class=" buttons-row comment-buttons">
+      <input class="button button--save comment-button--save" type="submit" value="Save" data-l10n-id="ep_comments_page.comments_template.save.value" />
+    </div>
+  </form>
 </script>
