@@ -124,12 +124,6 @@ ep_comments.prototype.init = function(){
     self.editorResized();
   });
 
-  // On click comment icon toolbar
-  $('.addComment').on('click', function(e){
-    e.preventDefault(); // stops focus from being lost
-    self.displayNewCommentForm();
-  });
-
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
   this.container.parent().on("click", ".comment-delete", function(){
@@ -1308,7 +1302,13 @@ var hooks = {
     var Comments = new ep_comments(context);
     pad.plugins.ep_comments_page = Comments;
   },
-
+  postToolbarInit: function (hookName, args) {
+    var editbar = args.toolbar;
+  
+    editbar.registerCommand('addComment', function () {
+      pad.plugins.ep_comments_page.displayNewCommentForm();
+    });
+  },
   aceEditEvent: function(hook, context){
     // first check if some text is being marked/unmarked to add comment to it
     var eventType = context.callstack.editEvent.eventType;
@@ -1352,6 +1352,7 @@ var hooks = {
 
 exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
+exports.postToolbarInit       = hooks.postToolbarInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
 

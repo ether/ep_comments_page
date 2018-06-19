@@ -178,6 +178,18 @@ exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   return cb();
 };
 
+exports.padInitToolbar = function (hookName, args) {
+  var toolbar = args.toolbar;
+
+  var button = toolbar.button({
+      command: 'addComment',
+      localizationId: 'ep_comments_page.add_comment.title',
+      class: 'buttonicon commenticon'
+  });
+
+  toolbar.registerButton('addComment', button);
+};
+
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
@@ -200,6 +212,16 @@ exports.clientVars = function (hook, context, cb) {
 
 exports.expressCreateServer = function (hook_name, args, callback) {
   args.app.get('/p/:pad/:rev?/comments', function(req, res) {
+    var origin = settings.ep_comments_page.accessControlAllowOrigin;
+    var allowCredentials = settings.ep_comments_page.accessControlAllowCredentials;
+    
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+
+    if (allowCredentials) {
+      res.header('Access-Control-Allow-Credentials', true);
+    }
     var fields = req.query;
     // check the api key
     if(!apiUtils.validateApiKey(fields, res)) return;
@@ -246,6 +268,16 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   });
 
   args.app.get('/p/:pad/:rev?/commentReplies', function(req, res){
+    var origin = settings.ep_comments_page.accessControlAllowOrigin;
+    var allowCredentials = settings.ep_comments_page.accessControlAllowCredentials;
+    
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+
+    if (allowCredentials) {
+      res.header('Access-Control-Allow-Credentials', true);
+    }
     //it's the same thing as the formidable's fields
     var fields = req.query;
     // check the api key
