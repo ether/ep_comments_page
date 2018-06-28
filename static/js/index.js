@@ -601,8 +601,13 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   var container   = this.container;
   var commentReplies = this.commentReplies;
   var padComment  = this.padInner.contents().find('.comment');
+  var counts = {};
   $.each(this.commentReplies, function(replyId, reply){
     var commentId = reply.commentId;
+    if (!counts[commentId]) {
+      counts[commentId] = 1;
+    }
+    counts[commentId]++;
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
 
@@ -623,6 +628,10 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     if(reply.changeAccepted){
       self.showChangeAsAccepted(replyId);
     }
+  });
+  var commentIds = Object.keys(counts);
+  $.each(commentIds, function (key, commentId) {
+    commentIcons.setCountValue(commentId, counts[commentId]);
   });
 };
 
@@ -1148,7 +1157,7 @@ ep_comments.prototype.getMapfakeComments = function(){
   return this.mapFakeComments;
 }
 
-// commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
+// commentData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
 ep_comments.prototype.saveCommentReplies = function(padId, commentReplyData){
   var self = this;
   var data = self.buildCommentReplies(commentReplyData);

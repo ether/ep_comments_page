@@ -104,6 +104,7 @@ var addListenersToCommentIcons = function() {
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
     commentBoxes.showComment(commentId, e, true);
+    commentBoxes.showReplies(commentId);
   });
 }
 
@@ -236,6 +237,12 @@ var commentHasReply = function(commentId) {
   iconForComment.addClass("with-reply");
 }
 
+//Change counter value in icon
+var setCountValue = function(commentId, count) {
+  var iconForCommentCount = getPadOuter().find('#commentIcons').find("#icon-"+commentId+"-counter");
+  iconForCommentCount.html(count);
+}
+
 // Indicate if sidebar comment should be shown, checking if it had the characteristics
 // of a comment that was being displayed on the screen
 var shouldShow = function(sidebarComent) {
@@ -278,6 +285,7 @@ exports.hideIcons = hideIcons;
 exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
 exports.commentHasReply = commentHasReply;
+exports.setCountValue = setCountValue;
 exports.shouldShow = shouldShow;
 exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
 exports.shouldNotCloseComment = shouldNotCloseComment;

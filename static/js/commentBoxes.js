@@ -18,6 +18,18 @@ var showComment = function(commentId, e) {
   highlightComment(commentId, e, false);
 };
 
+var showReplies = function (commentId) {
+  var commentElm = getCommentsContainer().find('#'+commentId);
+  console.log('COMMEL', commentElm);
+  console.log(commentElm.find('.comment-reply .sidebar-comment-reply'))
+  commentElm.find('.comment-reply .sidebar-comment-reply').show();
+}
+
+var hideReplies = function (commentId) {
+  var commentElm = getCommentsContainer().find('#'+commentId);
+  commentElm.find('.comment-reply .sidebar-comment-reply').hide();
+}
+
 var hideComment = function(commentId, hideCommentTitle) {
   var commentElm = getCommentsContainer().find('#'+ commentId);
   commentElm.removeClass('mouseover');
@@ -55,12 +67,15 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
 
     // only show the comment of the text selected
     commentElm.find('note').not('#' + commentId).hide();
+    
+    //show replies
+    commentElm.find('note').find('note').show();
 
     // before of appending it, we remove the classes that only makes sense on the side-bar
     commentElm.children().attr('class', '');
 
     // hovering comment view
-    getPadOuter().find('.comment-modal-comment').html(commentElm.html());
+    getPadOuter().find('.comment-modal-comment').html(commentElm.clone(true));
 
     // if hideEditAndRemoveCommentWindow is true, it hides the comment edit/remove window
     getPadOuter().find('.comment-options-wrapper').toggleClass('hidden', hideEditAndRemoveCommentWindow);
@@ -110,6 +125,8 @@ var shouldNotCloseComment = function(e) {
 
 exports.showComment = showComment;
 exports.hideComment = hideComment;
+exports.showReplies = showReplies;
+exports.hideReplies = hideReplies;
 exports.hideOpenedComments = hideOpenedComments;
 exports.hideAllComments = hideAllComments;
 exports.highlightComment = highlightComment;
