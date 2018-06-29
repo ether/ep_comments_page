@@ -336,7 +336,7 @@ ep_comments.prototype.init = function(){
   });
 
   // Enable and handle cookies
-  if (padcookie.getPref("comments") === false) {
+  if (padcookie.getPref("comments") === false || clientVars.displayCommentsInModal) {
     self.container.removeClass("active");
     $('#options-comments').attr('checked','unchecked');
     $('#options-comments').attr('checked',false);

@@ -20,8 +20,6 @@ var showComment = function(commentId, e) {
 
 var showReplies = function (commentId) {
   var commentElm = getCommentsContainer().find('#'+commentId);
-  console.log('COMMEL', commentElm);
-  console.log(commentElm.find('.comment-reply .sidebar-comment-reply'))
   commentElm.find('.comment-reply .sidebar-comment-reply').show();
 }
 

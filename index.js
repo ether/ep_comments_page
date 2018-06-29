@@ -204,9 +204,11 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 exports.clientVars = function (hook, context, cb) {
   var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  var displayCommentsInModal = settings.ep_comments_page ? settings.ep_comments_page.displayCommentsInModal : false;
   return cb({
     "displayCommentAsIcon": displayCommentAsIcon,
     "highlightSelectedText": highlightSelectedText,
+    "displayCommentsInModal": displayCommentsInModal
   });
 };
 
