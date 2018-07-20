@@ -143,24 +143,75 @@ var insertNewCommentFormIfDontExist = function(comment, callback) {
     // Detach current "submit" handler to be able to call the updated callback
     newCommentForm.off("submit");
   }
+  var clearSelection = function ()
+  {
+   if (window.getSelection) {window.getSelection().removeAllRanges();}
+   else if (document.selection) {document.selection.empty();}
+  }
 
   // Listen to comment confirmation (needs to be outside of if/else to be able to update the callback)
   newCommentForm.submit(function() {
     var form = $(this);
+    clearSelection();
     return submitNewComment(form, callback);
   });
 
   return newCommentForm;
 };
 
-var showNewCommentForm = function() {
-  getNewCommentContainer().addClass("active");
+var lastLineSelectedIsEmpty = function(rep, lastLineSelected) {
+  var line = rep.lines.atIndex(lastLineSelected);
+  // when we've a line with line attribute, the first char line position
+  // in a line is 1 because of the *, otherwise is 0
+  var firstCharLinePosition = (line.lineMarker === 1) ? 1 : 0;
+  var lastColumnSelected = rep.selEnd[1];
+
+  return lastColumnSelected === firstCharLinePosition;
+}
+
+var getLastLine = function(rep){
+  var firstLine =  rep.selStart[0];
+  var lastLineSelected = rep.selEnd[0];
+
+  if (lastLineSelected > firstLine){
+    // Ignore last line if the selected text of it it is empty
+    if(lastLineSelectedIsEmpty(rep, lastLineSelected)){
+      lastLineSelected--;
+    }
+  }
+  return lastLineSelected;
+}
+
+var showNewCommentForm = function(rep) {
+  var container = getNewCommentContainer();
+  container.addClass("active");
   // we need to set a timeout otherwise the animation to show #newComment won't be visible
   window.setTimeout(function() {
     getPadOuter().find('.suggestion').hide(); // Hides suggestion in case of a cancel
     getNewCommentContainer().find('#newComment').removeClass("hidden").addClass("visible");
   }, 0);
+  if (clientVars.displayCommentsInModal) {
+    var selectedLine = rep.lines.atIndex(getLastLine(rep));
+    var position = $(selectedLine.lineNode).position();
+    var height = $(selectedLine.lineNode).height();
+    var modal = getPadOuter().find('.comment-modal-comment');
+    $(container).detach().appendTo(modal[0]);
+    getPadOuter().find('iframe[name="ace_inner"]').contents().on('click', function () {
+      getPadOuter().find('.comment-modal').removeClass('active');
+      getPadOuter().find('.comment-modal').hide();
+    });
 
+    getPadOuter().find('.comment-modal').addClass('active');
+ 
+    getPadOuter().find('.comment-modal').show().css({
+      left: position.left +"px",
+      top: (position.top + height) +"px"
+    });
+    $(modal[0]).find('#comments').hide();
+    $(modal[0]).find('note').hide();
+
+    $(modal[0]).find('input').show();    
+  }
   // mark selected text, so it is clear to user which text range the comment is being applied to
   pad.plugins.ep_comments_page.preCommentMarker.markSelectedText();
 }
@@ -175,6 +226,12 @@ var hideNewCommentForm = function() {
   window.setTimeout(function() {
     getNewCommentContainer().removeClass("active");
   }, 500);
+
+  if (clientVars.displayCommentsInModal) {
+    var modal = getPadOuter().find('.comment-modal');
+    modal.removeClass('active');
+    modal.hide();
+  }
 
   // unmark selected text, as now there is no text being commented
   pad.plugins.ep_comments_page.preCommentMarker.unmarkSelectedText();

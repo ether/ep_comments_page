@@ -928,7 +928,7 @@ ep_comments.prototype.displayNewCommentForm = function() {
   padOuter.find(".comment-suggest-from").val(selectedText);
 
   // Display form
-  newComment.showNewCommentForm();
+  newComment.showNewCommentForm(rep);
 
   // Check if the first element selected is visible in the viewport
   var $firstSelectedElement = self.getFirstElementSelected();
@@ -1455,6 +1455,7 @@ function getRepFromSelector(selector, container){
   });
   return repArr;
 }
+
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
