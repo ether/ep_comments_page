@@ -315,6 +315,9 @@ ep_comments.prototype.init = function(){
     var data = self.getCommentData();
     data.commentId = $(this).parent().data('commentid');
     data.reply = $(this).find(".comment-reply-input").val();
+    if (!data.reply) {
+      return;
+    }
     data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
     data.changeFrom = $(this).find(".reply-comment-changeFrom-value").text() || null;
     self.socket.emit('addCommentReply', data, function (){
@@ -335,6 +338,12 @@ ep_comments.prototype.init = function(){
     }
   });
 
+  this.container.on("reset", ".comment-reply", function(e) {
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var modal = padOuter.find('.comment-modal');
+    modal.removeClass('active');
+    modal.hide()
+  });
   // Enable and handle cookies
   if (padcookie.getPref("comments") === false || clientVars.displayCommentsInModal) {
     self.container.removeClass("active");
@@ -551,7 +560,7 @@ ep_comments.prototype.collectComments = function(callback){
     var commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
 
     // only closes comment if it was not opened by a click on the icon
-    if (!commentOpenedByClickOnIcon) {
+    if (!commentOpenedByClickOnIcon && !clientVars.allowInlineClick) {
       self.closeOpenedComment(e);
     }
   });
@@ -1462,5 +1471,12 @@ exports.aceInitialized = function(hook, context){
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
   editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  padOuter.find('iframe[name="ace_inner"]').contents().on('click', function (e) {
+    if (padOuter.find('.comment-modal').is(':visible') && !$(e.target).hasClass('comment')) {
+      padOuter.find('.comment-modal').removeClass('active');
+      padOuter.find('.comment-modal').hide();
+    }
+  });
 }
 

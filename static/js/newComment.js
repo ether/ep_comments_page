@@ -196,10 +196,6 @@ var showNewCommentForm = function(rep) {
     var height = $(selectedLine.lineNode).height();
     var modal = getPadOuter().find('.comment-modal-comment');
     $(container).detach().appendTo(modal[0]);
-    getPadOuter().find('iframe[name="ace_inner"]').contents().on('click', function () {
-      getPadOuter().find('.comment-modal').removeClass('active');
-      getPadOuter().find('.comment-modal').hide();
-    });
 
     getPadOuter().find('.comment-modal').addClass('active');
  
