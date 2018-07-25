@@ -84,6 +84,7 @@ ep_comments.prototype.init = function(){
     if (!$.isEmptyObject(replies)){
       // console.log("collecting comment replies");
       self.commentReplies = replies;
+      self.setCommentReplies(replies);
       self.collectCommentReplies();
     }
     self.commentRepliesListen();
@@ -217,7 +218,7 @@ ep_comments.prototype.init = function(){
 
   // Create hover modal
   $('iframe[name="ace_outer"]').contents().find("body")
-    .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
+    .append("<div class='comment-modal'><div class='comment-modal-name'></div><div class='comment-modal-comment'></div></div>");
 
   // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
   this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
@@ -833,11 +834,28 @@ ep_comments.prototype.setComment = function(commentId, comment){
 
 };
 
+// Set comments content data
+ep_comments.prototype.setCommentReplies = function(replies){
+  for(var commentId in replies){
+    this.setCommentReplyData(this.commentReplies[commentId]);
+  }
+};
+
+ep_comments.prototype.setCommentReplyData = function(commentReply){
+  var commentReplies = this.commentReplies;
+  var replyId = commentReply.replyId;
+  commentReply.date = prettyDate(commentReply.timestamp);
+  commentReply.formattedDate = new Date(commentReply.timestamp).toISOString();
+  commentReplies[replyId] = commentReply;
+};
+
 // commentReply = ['c-reply-123', commentDataObject]
 // commentDataObject = {author:..., name:..., text:..., ...}
 ep_comments.prototype.setCommentReply = function(commentReply){
   var commentReplies = this.commentReplies;
   var replyId = commentReply[0];
+  commentReply[1].date = prettyDate(commentReply[1].timestamp);
+  commentReply[1].formattedDate = new Date(commentReply[1].timestamp).toISOString();
   commentReplies[replyId] = commentReply[1];
 };
 
