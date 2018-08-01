@@ -10,7 +10,8 @@ var shared = require('./shared');
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
+var readCookie = require('ep_etherpad-lite/static/js/pad_utils').readCookie;
+var moment = require('ep_comments_page/static/js/moment-with-locales.min');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 var commentIcons = require('ep_comments_page/static/js/commentIcons');
 var newComment = require('ep_comments_page/static/js/newComment');
@@ -64,7 +65,7 @@ function ep_comments(context){
 ep_comments.prototype.init = function(){
   var self = this;
   var ace = this.ace;
-
+  moment.locale(readCookie('language'));
   // Init prerequisite
   this.findContainers();
   this.insertContainers(); // Insert comment containers in sidebar
@@ -101,6 +102,7 @@ ep_comments.prototype.init = function(){
   // When language is changed, we need to reload the comments to make sure
   // all templates are localized
   html10n.bind('localized', function() {
+    moment.locale(html10n.getLanguage());
     self.localizeExistingComments();
     newComment.localizeNewCommentForm();
   });
@@ -254,13 +256,13 @@ ep_comments.prototype.init = function(){
     if(isRevert){
       // Tell all users this change was reverted
       self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.replyId);
+      self.showChangeAsReverted(data.replyId, $(e.target));
     }else{
       // Tell all users this change was accepted
       self.socket.emit('acceptChange', data, function (){});
 
       // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.replyId);
+      self.showChangeAsAccepted(data.replyId, $(e.target));
     }
 
   });
@@ -809,7 +811,7 @@ ep_comments.prototype.localizeExistingComments = function() {
       // localize comment element...
       commentL10n.localize(commentElm);
       // ... and update its date
-      comment.data.date = prettyDate(comment.data.timestamp);
+      comment.data.date = moment(comment.data.timestamp);
       comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
       commentElm.attr('title', comment.data.date);
     }
@@ -826,7 +828,7 @@ ep_comments.prototype.setComments = function(comments){
 // Set comment data
 ep_comments.prototype.setComment = function(commentId, comment){
   var comments = this.comments;
-  comment.date = prettyDate(comment.timestamp);
+  comment.date = moment(comment.timestamp).fromNow();
   comment.formattedDate = new Date(comment.timestamp).toISOString();
 
   if (comments[commentId] == null) comments[commentId] = {};
@@ -844,7 +846,7 @@ ep_comments.prototype.setCommentReplies = function(replies){
 ep_comments.prototype.setCommentReplyData = function(commentReply){
   var commentReplies = this.commentReplies;
   var replyId = commentReply.replyId;
-  commentReply.date = prettyDate(commentReply.timestamp);
+  commentReply.date = moment(commentReply.timestamp).fromNow();
   commentReply.formattedDate = new Date(commentReply.timestamp).toISOString();
   commentReplies[replyId] = commentReply;
 };
@@ -854,7 +856,7 @@ ep_comments.prototype.setCommentReplyData = function(commentReply){
 ep_comments.prototype.setCommentReply = function(commentReply){
   var commentReplies = this.commentReplies;
   var replyId = commentReply[0];
-  commentReply[1].date = prettyDate(commentReply[1].timestamp);
+  commentReply[1].date = moment(comment.timestamp).fromNow();
   commentReply[1].formattedDate = new Date(commentReply[1].timestamp).toISOString();
   commentReplies[replyId] = commentReply[1];
 };
@@ -1265,23 +1267,28 @@ ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
   $comment.children('.comment-text').text(commentText)
 }
 
-ep_comments.prototype.showChangeAsAccepted = function(commentId){
+ep_comments.prototype.showChangeAsAccepted = function(commentId, button){
   var self = this;
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
+  if (!button) {
+    var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
+  }
+
   button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
   button.addClass("revert");
   commentL10n.localize(button);
 }
 
-ep_comments.prototype.showChangeAsReverted = function(commentId){
+ep_comments.prototype.showChangeAsReverted = function(commentId, button){
   var self = this;
 
   // Get the comment
   var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
+  if (!button) {
+    button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
+  }
   button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
   button.removeClass("revert");
   commentL10n.localize(button);

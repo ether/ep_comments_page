@@ -234,7 +234,10 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
 
     //add the entry for this pad
     var comment = comments[commentId];
-
+    
+    if (!comment) {
+      return;
+    }
     if(state){
       comment.changeAccepted = true;
       comment.changeReverted = false;
