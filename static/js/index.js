@@ -302,13 +302,13 @@ ep_comments.prototype.init = function(){
     if(isRevert){
       // Tell all users this change was reverted
       self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.commentId);
+      self.showChangeAsReverted(data.commentId, $(e.target));
     }else{
       // Tell all users this change was accepted
       self.socket.emit('acceptChange', data, function (){});
 
       // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.commentId);
+      self.showChangeAsAccepted(data.commentId, $(e.target));
     }
   });
 
