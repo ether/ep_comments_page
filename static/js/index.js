@@ -926,6 +926,8 @@ ep_comments.prototype.deleteComment = function(commentId){
     });
   },'deleteCommentedSelection', true);
 
+  padOuter.find('.comment-modal').removeClass('active');
+  padOuter.find('.comment-modal').hide();
 //  });
 //  }, 'getRep');
 }
