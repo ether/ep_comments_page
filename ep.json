@@ -21,7 +21,6 @@
         "socketio": "ep_comments_page/index",
         "expressCreateServer": "ep_comments_page/index",
         "collectContentPre": "ep_comments_page/static/js/shared",
-        "eejsBlock_editbarMenuLeft": "ep_comments_page/index",
         "eejsBlock_dd_insert": "ep_comments_page/index",
         "eejsBlock_scripts": "ep_comments_page/index",
         "eejsBlock_mySettings": "ep_comments_page/index",
