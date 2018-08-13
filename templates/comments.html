@@ -3,9 +3,9 @@
 <script id="commentsTemplate" type="text/html">
     <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
         <div class="comment-options-wrapper">
-          <span class="comment-options-button">
+          <div class="comment-options-button">
             <span class="comment-options-button--icon"></span>
-          </span>
+          </div>
           <div class="comment-options hidden">
             <div data-l10n-id="ep_comments_page.delete_comment.title" class="comment-delete-container">
                 <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title">delete</span>
@@ -16,7 +16,7 @@
           </div>
         </div>
         <div class="comment-author-name">${name}:</div>
-        <section class="comment-text">${text}</section>
+        <div class="comment-text">${text}</div>
         <div class="comment-datetime" datetime="${formattedDate}">${date}</div>
         {{if changeTo}}
         <form class="comment-changeTo-form">
@@ -34,24 +34,24 @@
         </form>
         {{/if}}
         <form class='comment-reply'>
-            <label class='comment-reply-input-label'>
-                <span data-l10n-id="ep_comments_page.comments_template.reply_input_label">Your Reply (hit ENTER to send)</span>
+            <div class='comment-reply-input-label'>
+                <label data-l10n-id="ep_comments_page.comments_template.reply_input_label">Your Reply (hit ENTER to send)</label>
                 <input class='comment-reply-input'>
-            </label>
+            </div>
             <div class="reply-comment-suggest">
                 <input type="checkbox" id="reply-suggestion-checkbox-${commentId}" class="reply-suggestion-checkbox">
                 <label for="reply-suggestion-checkbox-${commentId}" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
             </div>
-            <span class="reply-suggestion">
-                <p data-l10n-id="ep_comments_page.comments_template.from">From:</p>
+            <div class="reply-suggestion">                
                 <div class="reply-comment-suggest-from-p">
+                    <label data-l10n-id="ep_comments_page.comments_template.from">From:</label>
                     <span class="reply-comment-changeFrom-value">${changeFrom}</span>
                 </div>
-                <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
                 <div class="reply-comment-suggest-to-p">
+                    <label data-l10n-id="ep_comments_page.comments_template.to">To:</label>
                     <textarea class="reply-comment-suggest-to"></textarea>
                 </div>
-            </span>
+            </div>
             <!-- for test purposes only -->
             <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
             <input type="reset" id="comment-reset" value="Cancel" data-l10n-id="ep_comments_page.comments_template.cancel.value" />
@@ -60,26 +60,28 @@
 </script>
 
 <script id="newCommentTemplate" type="text/html">
-    <form id="newComment" class="sidebar-comment">
-        <p data-l10n-id="ep_comments_page.comment">Comment</p>
+    <form id="newComment" class="sidebar-comment">        
         <div class="comment-text">
-            <textarea class="comment-content" autofocus></textarea>
+            <label data-l10n-id="ep_comments_page.comment" for="comment-content">Comment</label>
+            <textarea class="comment-content" id="comment-content" autofocus></textarea>
         </div>
 
         <div class="comment-suggest">
             <input type="checkbox" id="suggestion-checkbox">
             <label for="suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
         </div>
-        <span class="suggestion">
-            <p data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest Change From:</p>
+        <div class="suggestion">
+            <div data-l10n-id="ep_comments_page.comments_template.suggest_change">Suggest Change</div>
             <div class="comment-suggest-from-p">
-                <textarea class="comment-suggest-from" disabled="disabled"></textarea>
+                <label data-l10n-id="ep_comments_page.comments_template.from" for="comment-suggest-from">From:</label>
+                <textarea id="comment-suggest-from" class="comment-suggest-from" disabled="disabled"></textarea>
             </div>
-            <div data-l10n-id="ep_comments_page.comments_template.to">To:</div>
+            
             <div class="comment-suggest-to-p">
-                <textarea class="comment-suggest-to"></textarea>
+                <label data-l10n-id="ep_comments_page.comments_template.to" for="comment-suggest-to">To:</label>
+                <textarea id="comment-suggest-from" class="comment-suggest-to"></textarea>
             </div>
-        </span>
+        </div>
 
         <div class="comment-buttons">
             <input type="submit" value="Comment" data-l10n-id="ep_comments_page.comments_template.comment.value" />
@@ -91,9 +93,9 @@
 <script id="replyTemplate" type="text/html">
     <note id="${replyId}" class="sidebar-comment-reply" data-commentid="${replyId}">
         <div class="comment-options-wrapper">
-          <span class="comment-options-button">
+          <div class="comment-options-button">
             <span class="comment-options-button--icon"></span>
-          </span>
+          </div>
           <div class="comment-options hidden">
             <div class="comment-edit-container">
                 <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
@@ -106,12 +108,15 @@
         {{if changeTo}}
         <form class="comment-changeTo-form">
             <div class="comment-changeTo">
-                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From:</span>
-                <p class="reply-comment-suggest-from-p">
+                <span class="comment-changeTo-label" data-l10n-id="ep_comments_page.comments_template.suggested_change">Suggested Change</span>
+                <div class="reply-comment-suggest-from-p">
+                  <span data-l10n-id="ep_comments_page.comments_template.from">From:</span>
                   <span class="comment-changeFrom-value">${changeFrom}</span>
-                </p>
-                <p data-l10n-id="ep_comments_page.comments_template.to">To:</p>
-                <span class="comment-changeTo-value">${changeTo}</span>
+                </div>
+                <div class="reply-comment-suggest-from-p">
+                  <span data-l10n-id="ep_comments_page.comments_template.to">To:</span>
+                  <span class="comment-changeTo-value">${changeTo}</span>
+                </div>
             </div>
             <div class="comment-reply-changeTo-approve">
                 <input type="Submit" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
