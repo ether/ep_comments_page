@@ -546,11 +546,12 @@ ep_comments.prototype.collectComments = function(callback){
   });
 
   // hover event
+  /*
   this.padInner.contents().on("mouseover", ".comment", function(e){
     var commentId = self.commentIdOf(e);
     var hideEditAndRemoveCommentWindow = true;
     commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
-  });
+  });*/
 
   // click event
   this.padInner.contents().on("click", ".comment", function(e){
