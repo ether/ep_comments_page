@@ -586,7 +586,12 @@ ep_comments.prototype.addListenersToCloseOpenedComment = function() {
 // Close comment that is opened
 ep_comments.prototype.closeOpenedComment = function(e) {
   var commentId = this.commentIdOf(e);
-  commentBoxes.hideComment(commentId);
+  // Add a timeout of 3 seconds before closing the comment.
+  // If there are two comments on the same line, this gives the user the time
+  // to click the comment window before it gets closed.
+  setTimeout(function(){
+    commentBoxes.hideComment(commentId);
+  }, 3000);
 }
 
 // Close comment if event target was outside of comment or on a comment icon
@@ -1452,4 +1457,3 @@ exports.aceInitialized = function(hook, context){
   editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
 }
-
