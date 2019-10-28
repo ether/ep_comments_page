@@ -1357,6 +1357,7 @@ var hooks = {
   },
   aceEditEvent: function(hook, context){
     // first check if some text is being marked/unmarked to add comment to it
+    if(!pad.plugins || !pad.plugins.ep_comments_page) return;
     var eventType = context.callstack.editEvent.eventType;
     if(eventType === "unmarkPreSelectedTextToComment") {
       pad.plugins.ep_comments_page.preCommentMarker.handleUnmarkText(context);
