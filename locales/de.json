@@ -14,7 +14,7 @@
   "ep_comments_page.comments_template.include_suggestion" : "Änderung vorschlagen",
   "ep_comments_page.comments_template.comment.value" : "Kommentar",
   "ep_comments_page.comments_template.cancel.value" : "Abbrechen",
-  "ep_comments_page.comments_template.reply_input_label":"antworten: (mit ENTER)",
+  "ep_comments_page.comments_template.reply_input_label.placeholder":"antworten: (mit ENTER)",
   "ep_comments_page.time.seconds.past" : "vor {{count}} Sekunden",
   "ep_comments_page.time.seconds.future" : "{{count}} Sekunden von jetzt an",
   "ep_comments_page.time.one_minute.past" : "vor 1 Minute",

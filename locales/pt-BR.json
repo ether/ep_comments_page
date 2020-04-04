@@ -15,7 +15,7 @@
   "ep_comments_page.comments_template.include_suggestion" : "Incluir alteração sugerida",
   "ep_comments_page.comments_template.comment.value" : "Comentário",
   "ep_comments_page.comments_template.cancel.value" : "Cancelar",
-  "ep_comments_page.comments_template.reply_input_label":"Sua Resposta (clique ENTER para enviar)",
+  "ep_comments_page.comments_template.reply_input_label.placeholder":"Sua Resposta (clique ENTER para enviar)",
   "ep_comments_page.time.seconds.past" : "{{count}} segundos atrás",
   "ep_comments_page.time.seconds.future" : "daqui a {{count}} segundos",
   "ep_comments_page.time.one_minute.past" : "1 minuto atrás",
