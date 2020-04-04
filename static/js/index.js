@@ -145,7 +145,6 @@ ep_comments.prototype.init = function(){
     // hide the option window when it show the edit form
     var $commentOptions = $commentBox.children('.comment-options'); // edit, delete actions
     $commentOptions.addClass('hidden');
-    $commentBox.children('.comment-options-button').removeClass('comment-options-selected');
 
     // hide the comment author name and the comment text
     $commentBox.children('.comment-author-name, .comment-text').addClass('hidden');
@@ -179,21 +178,6 @@ ep_comments.prototype.init = function(){
         self.setCommentOrReplyNewText(commentId, commentText);
       }
     });
-  });
-
-  this.container.parent().on("click", ".comment-options-button", function(){ // three dots button
-    // if it exists any other comment option window open, hide them
-    var $padOuter = $('iframe[name="ace_outer"]').contents();
-    var $thisCommentOption = $(this).siblings('.comment-options');
-    $padOuter.find('.comment-options').not($thisCommentOption).addClass('hidden');
-
-    // unselect any other three dots selected
-    $thisThreeDotsClicked = $(this);
-    $padOuter.find('.comment-options-button').not($thisThreeDotsClicked).removeClass('comment-options-selected');
-
-    $(this).siblings('.comment-options').toggleClass('hidden');
-    var threeDotsButtonIsSelected = $(this).siblings('.comment-options').hasClass('hidden') === false;
-    $(this).toggleClass('comment-options-selected', threeDotsButtonIsSelected);
   });
 
   // hide the edit form and make the comment author and text visible again
@@ -268,12 +252,6 @@ ep_comments.prototype.init = function(){
       self.showChangeAsAccepted(data.replyId);
     }
 
-  });
-
-  this.container.parent().on("mouseleave", ".comment-options-wrapper", function(){
-    var $padOuter = $('iframe[name="ace_outer"]').contents();
-    $padOuter.find('.comment-options-button').removeClass('comment-options-selected');
-    $padOuter.find('.comment-options').addClass('hidden');
   });
 
   // User accepts a change

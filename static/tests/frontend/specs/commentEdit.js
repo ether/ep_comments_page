@@ -283,8 +283,6 @@ ep_comments_page_test_helper.commentEdit = {
   },
   clickEditCommentReplyButton: function () {
     var outer$ = helper.padOuter$;
-    var $threeDots = outer$('.comment-options-button').last();
-    $threeDots.click();
     var $editButton = outer$(".comment-edit").last();
     $editButton.click();
   },

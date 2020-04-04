@@ -3,16 +3,8 @@
 <script id="commentsTemplate" type="text/html">
     <note id="${commentId}" class="sidebar-comment" title="${date}" data-commentid="${commentId}">
         <div class="comment-options-wrapper">
-          <span class="comment-options-button">
-            <span class="comment-options-button--icon"></span>
-          </span>
-          <div class="comment-options hidden">
-            <p data-l10n-id="ep_comments_page.delete_comment.title" class="comment-delete-container">
-                <span class="comment-delete" title="Delete this comment" data-l10n-id="ep_comments_page.delete_comment.title">delete</span>
-            </p>
-            <p class="comment-edit-container">
-                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
-            </p>
+            <span class="comment-delete buttonicon buttonicon-trash" data-l10n-id="ep_comments_page.delete_comment.title"></span>
+            <span class="comment-edit buttonicon buttonicon-pencil" data-l10n-id="ep_comments_page.edit_comment.title"></span>
           </div>
         </div>
         <address class="comment-author-name">${name}:</address>
@@ -89,14 +81,8 @@
 <script id="replyTemplate" type="text/html">
     <note id="${replyId}" class="sidebar-comment-reply" data-commentid="${replyId}">
         <div class="comment-options-wrapper">
-          <span class="comment-options-button">
-            <span class="comment-options-button--icon"></span>
-          </span>
-          <div class="comment-options hidden">
-            <p class="comment-edit-container">
-                <span class="comment-edit" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title">edit</span>
-            </p>
-          </div>
+          <span class="comment-edit buttonicon buttonicon-pencil" title="Edit this comment" data-l10n-id="ep_comments_page.edit_comment.title"></span>
+        </div>
         </div>
         <address class="comment-author-name">${name}:</address>
         <section class="comment-text">${text}</section>
