@@ -1,29 +1,17 @@
 #commentIcons {
   display: block;
   z-index: 1;
-  margin-left: 760px;
-  padding-left: 25px;
+  margin-left: 15px;
+  width: 50px;
+  position: relative;
 }
-
-/* when line numbers are not visible, we need to move icons to the left */
-#sidediv.sidedivhidden ~ #commentIcons {
-  padding-left: 0px;
-}
-
-/* when page view is disabled, we need to move icons to the left */
-#outerdocbody.pageViewDisabled #commentIcons {
-  margin-left: calc(100% - 90px);
-}
-
-/* this is the point where #comments will be visible (check media queries on comment.css) */
-@media (min-width: 955px) {
-  #outerdocbody.pageViewDisabled #commentIcons {
-    margin-left: calc(100% - 290px);
-  }
+#commentIcons:not(.active) {
+  display: none;
 }
 
 .comment-icon-line {
   position: absolute;
+  margin-top: 2px;
 }
 .comment-icon {
   background-repeat: no-repeat;
@@ -32,10 +20,11 @@
   vertical-align: middle;
   width: 16px;
   margin-right: 5px;
+  cursor: pointer;
 }
 .comment-icon:before {
   font-family: "fontawesome-etherpad";
-  content: "\e838";
+  content: "\E850";
   color:#666;
   font-size:14px;
   padding-top:2px;
@@ -43,7 +32,7 @@
 }
 
 .comment-icon.with-reply:before {
-  content: "\e828";
+  content: "\E82D";
 }
 
 .comment-icon.active:before {

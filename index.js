@@ -72,6 +72,15 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('deleteComment', function(data, callback) {
+      // delete the comment on the database
+      commentManager.deleteComment(data.padId, data.commentId, function (){
+        // Broadcast to all other users that this comment was deleted
+        socket.broadcast.to(data.padId).emit('commentDeleted', data.commentId);
+      });
+
+    });
+
     socket.on('revertChange', function(data, callback) {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..

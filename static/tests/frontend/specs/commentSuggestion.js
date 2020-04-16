@@ -15,7 +15,7 @@ describe("ep_comments_page - Comment Suggestion", function(){
 
     openCommentFormWithSuggestion(targetText);
 
-    var $suggestionFrom = outer$(".comment-suggest-from");
+    var $suggestionFrom = outer$(".from-value");
     expect($suggestionFrom.val()).to.be("A\n text with\n line attributes");
     done();
   });
@@ -37,7 +37,7 @@ describe("ep_comments_page - Comment Suggestion", function(){
     .done(function() {
       openCommentFormWithSuggestion('New target for comment');
 
-      var $suggestionFrom = outer$(".comment-suggest-from");
+      var $suggestionFrom = outer$(".from-value");
       expect($suggestionFrom.val()).to.be('New target for comment');
       done();
     });
@@ -64,7 +64,7 @@ function openCommentFormWithSuggestion(targetText) {
   $commentButton.click();
 
   // check suggestion box
-  var $hasSuggestion = outer$("#suggestion-checkbox");
+  var $hasSuggestion = outer$(".suggestion-checkbox");
   $hasSuggestion.click();
 }
 
