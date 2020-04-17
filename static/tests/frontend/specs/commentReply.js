@@ -38,9 +38,9 @@ describe("ep_comments_page - Comment Reply", function(){
     createReply(true, function(){
       var outer$ = helper.padOuter$;
       var $replyForm = outer$("form.comment-reply");
-      var $replyField = $replyForm.find(".comment-reply-input");
+      var $replyField = $replyForm.find(".comment-content");
       var $replyWithSuggestionCheckbox = $replyForm.find(".reply-suggestion-checkbox");
-      var $replySuggestionTextarea = $replyForm.find(".reply-comment-suggest-to");
+      var $replySuggestionTextarea = $replyForm.find(".reply-to-value");
       expect($replyField.text()).to.be("");
       expect($replyWithSuggestionCheckbox.is(":checked")).to.be(false);
       expect($replySuggestionTextarea.text()).to.be("");
@@ -107,9 +107,9 @@ describe("ep_comments_page - Comment Reply", function(){
     // fill the comment form and submit it
     var $commentField = outer$("textarea.comment-content");
     $commentField.val("My comment");
-    var $hasSuggestion = outer$("#suggestion-checkbox");
+    var $hasSuggestion = outer$(".suggestion-checkbox");
     $hasSuggestion.click();
-    var $suggestionField = outer$("textarea.comment-suggest-to");
+    var $suggestionField = outer$("textarea.to-value");
     $suggestionField.val("Change to this suggestion");
     var $submittButton = outer$("input[type=submit]");
     $submittButton.click();
@@ -134,7 +134,7 @@ describe("ep_comments_page - Comment Reply", function(){
     }
 
     // fill reply field
-    var $replyField = outer$(".comment-reply-input");
+    var $replyField = outer$(".comment-content");
     $replyField.val("My reply");
 
     // fill suggestion
@@ -144,7 +144,7 @@ describe("ep_comments_page - Comment Reply", function(){
       $replySuggestionCheckbox.click();
 
       // fill suggestion field
-      var $suggestionField = outer$("textarea.reply-comment-suggest-to");
+      var $suggestionField = outer$("textarea.reply-to-value");
       $suggestionField.val("My suggestion");
     }
 

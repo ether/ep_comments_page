@@ -207,7 +207,7 @@ ep_comments_page_test_helper.copyAndPaste = {
     }
 
     // fill reply field
-    var $replyField = outer$(".comment-reply-input");
+    var $replyField = outer$(".comment-content");
     $replyField.val(textOfReply);
 
     // submit reply

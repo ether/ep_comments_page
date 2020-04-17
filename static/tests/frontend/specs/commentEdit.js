@@ -240,7 +240,7 @@ ep_comments_page_test_helper.commentEdit = {
     }
 
     // fill reply field
-    var $replyField = outer$(".comment-reply-input");
+    var $replyField = outer$(".comment-content");
     $replyField.val(textOfReply);
 
     // submit reply
@@ -283,8 +283,6 @@ ep_comments_page_test_helper.commentEdit = {
   },
   clickEditCommentReplyButton: function () {
     var outer$ = helper.padOuter$;
-    var $threeDots = outer$('.comment-options-button').last();
-    $threeDots.click();
     var $editButton = outer$(".comment-edit").last();
     $editButton.click();
   },

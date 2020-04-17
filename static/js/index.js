@@ -51,13 +51,6 @@ function ep_comments(context){
   this.shouldCollectComment = false;
   this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
-
-  // If we're on a read only pad then hide the ability to attempt to merge a suggestion
-  if(clientVars.readonly){
-    this.padInner.append(
-        "<style>.comment-changeTo-approve," +
-               ".comment-reply-changeTo-approve{display:none;}</style>");
-  }
 }
 
 // Init Etherpad plugin comment pads
@@ -101,28 +94,16 @@ ep_comments.prototype.init = function(){
   // all templates are localized
   html10n.bind('localized', function() {
     self.localizeExistingComments();
-    newComment.localizeNewCommentForm();
   });
 
-  // When screen size changes (user changes device orientation, for example),
-  // we need to make sure all sidebar comments are on the correct place
-  newComment.waitForResizeToFinishThenCall(200, function() {
-    self.editorResized();
+  // Recalculate position when editor is resized
+  $('#settings input, #skin-variant-full-width').on('change', function(e) {
+    self.setYofComments();
   });
-
-  // When Page View is enabled/disabled, we need to recalculate position of comments
-  $('#options-pageview').on('click', function(e) {
-    self.editorResized();
-  });
-  // When Page Breaks are enabled/disabled, we need to recalculate position of comments
-  $('#options-pagebreaks').on('click', function(e) {
-    self.editorResized();
-  });
-
-  // Allow recalculating the comments position by event
   this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, function(e){
-    self.editorResized();
+    self.setYofComments();
   });
+  $(window).resize(_.debounce( function() { self.setYofComments() }, 100 ) );
 
   // On click comment icon toolbar
   $('.addComment').on('click', function(e){
@@ -130,39 +111,64 @@ ep_comments.prototype.init = function(){
     self.displayNewCommentForm();
   });
 
+  // Import for below listener : we are using this.container.parent() so we include
+  // events on both comment-modal and sidebar
+
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
   this.container.parent().on("click", ".comment-delete", function(){
-    var commentId = $(this).closest('note')[0].id;
+    var commentId = $(this).closest('.comment-container')[0].id;
     self.deleteComment(commentId);
+    var padOuter = $('iframe[name="ace_outer"]').contents();
+    var padInner = padOuter.find('iframe[name="ace_inner"]');
+    var selector = "."+commentId;
+    var ace = self.ace;
+    ace.callWithAce(function(aceTop){
+      var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+      // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+      $.each(repArr, function(index, rep){
+        // I don't think we need this nested call
+        ace.callWithAce(function (ace){
+          ace.ace_performSelectionChange(rep[0],rep[1],true);
+          ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+          // Note that this is the correct way of doing it, instead of there being
+          // a commentId we now flag it as "comment-deleted"
+        });
+      });
+    },'deleteCommentedSelection', true);
+    // dispatch event
+    self.socket.emit('deleteComment', {padId: self.padId, commentId: commentId}, function (){});
   });
 
   // Listen for events to edit a comment
   // Here, it adds a form to edit the comment text
   this.container.parent().on("click", ".comment-edit", function(){
-    var $commentBox = $(this).closest('note');
+    var $commentBox = $(this).closest('.comment-container');
+    $commentBox.addClass('editing');
 
-    // hide the option window when it show the edit form
-    var $commentOptions = $commentBox.children('.comment-options'); // edit, delete actions
-    $commentOptions.addClass('hidden');
-    $commentBox.children('.comment-options-button').removeClass('comment-options-selected');
+    var textBox = self.findCommentText($commentBox).last();
 
-    // hide the comment author name and the comment text
-    $commentBox.children('.comment-author-name, .comment-text').addClass('hidden');
-    self.addCommentEditFormIfDontExist($commentBox);
-
-    // place original text on the edit form
-    var originalText = $commentBox.children('.comment-text').text();
-    $commentBox.find('.comment-edit-text').text(originalText);
+    // if edit form not already there
+    if (textBox.siblings('.comment-edit-form').length == 0) {
+      // add a form to edit the field
+      var data = {};
+      data.text = textBox.text();
+      var content = $("#editCommentTemplate").tmpl(data);
+      // localize the comment/reply edit form
+      commentL10n.localize(content);
+      // insert form
+      textBox.before(content);
+    }
   });
 
   // submit the edition on the text and update the comment text
   this.container.parent().on("click", ".comment-edit-submit", function(e){
     e.preventDefault();
     e.stopPropagation();
-    var $commentBox = $(this).closest('note');
+    var $commentBox = $(this).closest('.comment-container');
+    var $commentForm = $(this).closest('.comment-edit-form');
     var commentId = $commentBox.data('commentid');
-    var commentText = $commentBox.find('.comment-edit-text')[0].value;
+    var commentText = $commentForm.find('.comment-edit-text').val();
     var data = {};
     data.commentId = commentId;
     data.padId = clientVars.padId;
@@ -170,8 +176,8 @@ ep_comments.prototype.init = function(){
 
     self.socket.emit('updateCommentText', data, function (err){
       if(!err) {
-        $commentBox.children('.comment-edit-form').remove();
-        $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
+        $commentForm.remove();
+        $commentBox.removeClass('editing');
         self.updateCommentBoxText(commentId, commentText);
 
         // although the comment or reply was saved on the data base successfully, it needs
@@ -181,126 +187,58 @@ ep_comments.prototype.init = function(){
     });
   });
 
-  this.container.parent().on("click", ".comment-options-button", function(){ // three dots button
-    // if it exists any other comment option window open, hide them
-    var $padOuter = $('iframe[name="ace_outer"]').contents();
-    var $thisCommentOption = $(this).siblings('.comment-options');
-    $padOuter.find('.comment-options').not($thisCommentOption).addClass('hidden');
-
-    // unselect any other three dots selected
-    $thisThreeDotsClicked = $(this);
-    $padOuter.find('.comment-options-button').not($thisThreeDotsClicked).removeClass('comment-options-selected');
-
-    $(this).siblings('.comment-options').toggleClass('hidden');
-    var threeDotsButtonIsSelected = $(this).siblings('.comment-options').hasClass('hidden') === false;
-    $(this).toggleClass('comment-options-selected', threeDotsButtonIsSelected);
-  });
-
   // hide the edit form and make the comment author and text visible again
   this.container.parent().on("click", ".comment-edit-cancel", function(e){
     e.preventDefault();
     e.stopPropagation();
-    var $commentBox = $(this).closest('note');
-    $commentBox.children('.comment-edit-form').remove();
-    $commentBox.children('.comment-author-name, .comment-text').removeClass('hidden');
+    var $commentBox = $(this).closest('.comment-container');
+    var textBox = self.findCommentText($commentBox).last();
+    textBox.siblings('.comment-edit-form').remove();
+    $commentBox.removeClass('editing');
   });
 
   // Listen for include suggested change toggle
-  this.container.on("change", '.reply-suggestion-checkbox', function(){
+  this.container.parent().on("change", '.suggestion-checkbox', function(){
+    var parentComment = $(this).closest('.comment-container');
+    var parentSuggest = $(this).closest('.comment-reply');
+
     if($(this).is(':checked')){
-      var commentId = $(this).parent().parent().parent().data('commentid');
+      var commentId = parentComment.data('commentid');
       var padOuter = $('iframe[name="ace_outer"]').contents();
       var padInner = padOuter.find('iframe[name="ace_inner"]');
 
       var currentString = padInner.contents().find("."+commentId).html();
-      $(this).parent().parent().find(".reply-comment-changeFrom-value").html(currentString);
-      $(this).parent().parent().find('.reply-suggestion').addClass("active");
+
+      parentSuggest.find(".from-value").html(currentString);
+      parentSuggest.find('.suggestion').show();
     }else{
-      $(this).parent().parent().find('.reply-suggestion').removeClass("active");
+      parentSuggest.find('.suggestion').hide();
     }
   });
 
-
-  // Create hover modal
-  $('iframe[name="ace_outer"]').contents().find("body")
-    .append("<div class='comment-modal'><p class='comment-modal-name'></p><p class='comment-modal-comment'></p></div>");
-
-  // DUPLICATE CODE REQUIRED FOR COMMENT REPLIES, see below for slightly different version
-  this.container.on("click", ".comment-reply-changeTo-approve > input", function(e){
-    e.preventDefault();
-    var data = {};
-    data.commentId = $(this).parent().parent().parent().parent().parent()[0].id;
-    data.padId = clientVars.padId;
-
-    data.replyId = $(this).parent().parent().parent()[0].id;
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-
-    // Are we reverting a change?
-    var submitButton = $(this);
-    var isRevert = submitButton.hasClass("revert");
-    if(isRevert){
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeFrom-value").html();
-    }else{
-      var newString = $(this).parent().parent().parent().contents().find(".comment-changeTo-value").html();
-    }
-
-    // Nuke all that aren't first lines of this comment
-    padInner.contents().find("."+data.commentId+":not(:first)").html("");
-    var padCommentContent = padInner.contents().find("."+data.commentId).first();
-    newString = newString.replace(/(?:\r\n|\r|\n)/g, '<br />');
-
-    // Write the new pad contents
-    $(padCommentContent).html(newString);
-
-    // We change commentId to replyId in the data object so it's properly processed by the server..  This is hacky
-    data.commentId = data.replyId;
-
-    if(isRevert){
-      // Tell all users this change was reverted
-      self.socket.emit('revertChange', data, function (){});
-      self.showChangeAsReverted(data.replyId);
-    }else{
-      // Tell all users this change was accepted
-      self.socket.emit('acceptChange', data, function (){});
-
-      // Update our own comments container with the accepted change
-      self.showChangeAsAccepted(data.replyId);
-    }
-
-  });
-
-  this.container.parent().on("mouseleave", ".comment-options-wrapper", function(){
-    var $padOuter = $('iframe[name="ace_outer"]').contents();
-    $padOuter.find('.comment-options-button').removeClass('comment-options-selected');
-    $padOuter.find('.comment-options').addClass('hidden');
-  });
-
-  // User accepts a change
-  this.container.on("submit", ".comment-changeTo-form", function(e){
+  // User accepts or revert a change
+  this.container.parent().on("submit", ".comment-changeTo-form", function(e){
     e.preventDefault();
     var data = self.getCommentData();
-    data.commentId = $(this).parent().data('commentid');
+    var commentEl = $(this).closest('.comment-container');
+    data.commentId = commentEl.data('commentid');
     var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
+    var padInner = padOuter.find('iframe[name="ace_inner"]').contents();
 
     // Are we reverting a change?
-    var submitButton = $(this).contents().find("input[type='submit']");
-    var isRevert = submitButton.hasClass("revert");
-    if(isRevert){
-      var newString = $(this).parent().contents().find(".comment-changeFrom-value").html();
-    }else{
-      var newString = $(this).parent().contents().find(".comment-changeTo-value").html();
-    }
+    var isRevert = commentEl.hasClass("change-accepted");
+    var newString = isRevert ? $(this).find(".from-value").html() : $(this).find(".to-value").html();
 
+    // In case of suggested change is inside a reply, the parentId is different from the commentId (=replyId)
+    var parentId = $(this).closest('.sidebar-comment').data('commentid');
     // Nuke all that aren't first lines of this comment
-    padInner.contents().find("."+data.commentId+":not(:first)").html("");
+    padInner.find("."+parentId+":not(:first)").html("");
 
-    var padCommentContent = padInner.contents().find("."+data.commentId).first();
+    var padCommentSpan = padInner.find("."+parentId).first();
     newString = newString.replace(/(?:\r\n|\r)/g, '<br />');
 
     // Write the new pad contents
-    $(padCommentContent).html(newString);
+    padCommentSpan.html(newString);
 
     if(isRevert){
       // Tell all users this change was reverted
@@ -309,61 +247,89 @@ ep_comments.prototype.init = function(){
     }else{
       // Tell all users this change was accepted
       self.socket.emit('acceptChange', data, function (){});
-
       // Update our own comments container with the accepted change
       self.showChangeAsAccepted(data.commentId);
     }
+
+    // TODO: we need ace editor to commit the change so other people get it
+    // currently after approving or reverting, you need to do other thing on the pad
+    // for ace to commit
   });
 
-  // is this even used? - Yes, it is!
-  this.container.on("submit", ".comment-reply", function(e){
+  // When input reply is focused we display more option
+  this.container.parent().on("focus", ".comment-content", function(e){
+    $(this).closest('.new-comment').addClass('editing');
+  });
+  // When we leave we reset the form option to its minimal (only input)
+  this.container.parent().on('mouseleave', ".comment-container", function(e) {
+    $(this).find('.suggestion-checkbox').prop('checked', false);
+    $(this).find('.new-comment').removeClass('editing');
+  });
+
+  // When a reply get submitted
+  this.container.parent().on("submit", ".new-comment", function(e){
     e.preventDefault();
+
     var data = self.getCommentData();
-    data.commentId = $(this).parent().data('commentid');
-    data.reply = $(this).find(".comment-reply-input").val();
-    data.changeTo = $(this).find(".reply-comment-suggest-to").val() || null;
-    data.changeFrom = $(this).find(".reply-comment-changeFrom-value").text() || null;
+    data.commentId = $(this).closest('.comment-container').data('commentid');
+    data.reply = $(this).find(".comment-content").val();
+    data.changeTo = $(this).find(".to-value").val() || null;
+    data.changeFrom = $(this).find(".from-value").text() || null;
     self.socket.emit('addCommentReply', data, function (){
-      // Append the reply to the comment
-      // console.warn("addCommentReplyEmit WE EXPECT REPLY ID", data);
-      $('iframe[name="ace_outer"]').contents().find('#'+data.commentId + ' > form.comment-reply  .comment-reply-input').val("");
       self.getCommentReplies(function(replies){
         self.commentReplies = replies;
         self.collectCommentReplies();
+
+        // Once the new reply is displayed, we clear the form
+        $('iframe[name="ace_outer"]').contents().find('.new-comment').removeClass('editing');
       });
     });
 
-    // On submit we should hide this suggestion no?
-    if($(this).parent().parent().find(".reply-suggestion-checkbox").is(':checked')){
-      $(this).parent().parent().find(".reply-suggestion-checkbox:checked").click();
-      $(this).parent().parent().find(".reply-comment-suggest-to").val("");
-      //Only uncheck checked boxes. TODO: is a cleanup operation. Should we do it here?
-    }
+    $(this).trigger('reset_reply');
   });
+  this.container.parent().on("reset_reply", ".new-comment", function(e){
+    // Reset the form
+    $(this).find('.comment-content').val('');
+    $(this).find(':focus').blur();
+    $(this).find('.to-value').val('');
+    $(this).find('.suggestion-checkbox').prop('checked', false);
+    $(this).removeClass('editing');
+  });
+  // When click cancel reply
+  this.container.parent().on("click", ".btn-cancel-reply", function(e) {
+    $(this).closest('.new-comment').trigger('reset_reply')
+  });
+
 
   // Enable and handle cookies
   if (padcookie.getPref("comments") === false) {
-    self.container.removeClass("active");
+    self.padOuter.find('#comments, #commentIcons').removeClass("active");
     $('#options-comments').attr('checked','unchecked');
     $('#options-comments').attr('checked',false);
-  }else{
+  } else {
     $('#options-comments').attr('checked','checked');
   }
 
-  $('#options-comments').on('click', function() {
-    if($('#options-comments').is(':checked')) {
-      padcookie.setPref("comments", true);
-      self.container.addClass("active");
-    } else {
-      padcookie.setPref("comments", false);
-      self.container.removeClass("active");
-    }
+  $('#options-comments').on('change', function() {
+    $('#options-comments').is(':checked') ? enableComments() : disableComments();
   });
 
-  // Check to see if we should show already..
-  if($('#options-comments').is(':checked')){
-    self.container.addClass("active");
+  function enableComments() {
+    padcookie.setPref("comments", true);
+    self.padOuter.find('#comments, #commentIcons').addClass("active");
+    $('body').addClass('comments-active')
+    $('iframe[name="ace_outer"]').contents().find('body').addClass('comments-active')
   }
+
+  function disableComments() {
+    padcookie.setPref("comments", false);
+    self.padOuter.find('#comments, #commentIcons').removeClass("active");
+    $('body').removeClass('comments-active')
+    $('iframe[name="ace_outer"]').contents().find('body').removeClass('comments-active')
+  }
+
+  // Check to see if we should show already..
+  $('#options-comments').trigger('change');
 
   // TODO - Implement to others browser like, Microsoft Edge, Opera, IE
   // Override  copy, cut, paste events on Google chrome and Mozilla Firefox.
@@ -388,6 +354,13 @@ ep_comments.prototype.init = function(){
   }
 };
 
+ep_comments.prototype.findCommentText = function($commentBox) {
+  var isReply = $commentBox.hasClass('sidebar-comment-reply')
+  if (isReply)
+    return $commentBox.find(".comment-text");
+  else
+    return $commentBox.find('.compact-display-content .comment-text, .full-display-content .comment-title-wrapper .comment-text');
+}
 // This function is useful to collect new comments on the collaborators
 ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {
   var self = this;
@@ -423,25 +396,6 @@ ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function() {
         }, 1000);
     }
   }, 300);
-}
-
-ep_comments.prototype.addCommentEditFormIfDontExist = function ($commentBox) {
-  var hasEditForm = $commentBox.children(".comment-edit-form").length;
-  if (!hasEditForm) {
-    // get text from comment
-    var commentTextValue = $commentBox.find('.comment-text').text();
-
-    // add a form to edit the field
-    var data = {};
-    data.text = commentTextValue;
-    var content = $("#editCommentTemplate").tmpl(data);
-
-    // localize the comment/reply edit form
-    commentL10n.localize(content);
-
-    // insert form
-    $commentBox.children(".comment-text").after(content);
-  }
 }
 
 // Insert comments container on element use for linenumbers
@@ -485,14 +439,6 @@ ep_comments.prototype.collectComments = function(callback){
         // If comment is not in sidebar insert it
         if (commentElm.length == 0) {
           self.insertComment(commentId, comment.data, it);
-          commentElm = container.find('#'+ commentId);
-
-          $(this).on('click', function(){
-            markerTop = $(this).position().top;
-            commentTop = commentElm.position().top;
-            containerTop = container.css('top');
-            container.css('top', containerTop - (commentTop - markerTop));
-          });
         }
         // localize comment element
         commentL10n.localize(commentElm);
@@ -511,54 +457,45 @@ ep_comments.prototype.collectComments = function(callback){
     }
 
     commentElm.css({ 'top': commentPos });
-
-    // Should we show "Revert" instead of "Accept"
-    // Comment Replies are NOT handled here..
-    if(comments[commentId]){
-      var showRevert = comments[commentId].data.changeAccepted;
-    }
-
-    if(showRevert){
-      self.showChangeAsAccepted(commentId);
-    }
-
   });
-  // now if we apply a class such as mouseover to the editor it will go shitty
-  // so what we need to do is add CSS for the specific ID to the document...
-  // It's fucked up but that's how we do it..
-  var padInner = this.padInner;
+
+  // HOVER SIDEBAR COMMENT
+  var hideCommentTimer;
   this.container.on("mouseover", ".sidebar-comment", function(e){
-    var commentId = e.currentTarget.id;
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
-    inner.contents().find("head").append("<style>."+commentId+"{ color:orange }</style>");
-    // on hover we should show the reply option
+    // highlight comment
+    clearTimeout(hideCommentTimer);
+    commentBoxes.highlightComment(e.currentTarget.id, e);
+
   }).on("mouseout", ".sidebar-comment", function(e){
-    var commentId = e.currentTarget.id;
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
-    inner.contents().find("head").append("<style>."+commentId+"{ color:black }</style>");
-    // TODO this could potentially break ep_font_color
+    // do not hide directly the comment, because sometime the mouse get out accidently
+    hideCommentTimer = setTimeout(function() {
+      commentBoxes.hideComment(e.currentTarget.id);
+    },1000);
   });
 
+  // HOVER OR CLICK THE COMMENTED TEXT IN THE EDITOR
   // hover event
   this.padInner.contents().on("mouseover", ".comment", function(e){
-    var commentId = self.commentIdOf(e);
-    var hideEditAndRemoveCommentWindow = true;
-    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
+    if (container.is(':visible')) { // not on mobile
+      clearTimeout(hideCommentTimer);
+      var commentId = self.commentIdOf(e);
+      commentBoxes.highlightComment(commentId, e, $(this));
+    }
   });
 
   // click event
   this.padInner.contents().on("click", ".comment", function(e){
     var commentId = self.commentIdOf(e);
-    var hideEditAndRemoveCommentWindow = true;
-    commentBoxes.highlightComment(commentId, e, hideEditAndRemoveCommentWindow);
+    commentBoxes.highlightComment(commentId, e, $(this));
   });
 
   this.padInner.contents().on("mouseleave", ".comment", function(e){
     var commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
-
     // only closes comment if it was not opened by a click on the icon
-    if (!commentOpenedByClickOnIcon) {
-      self.closeOpenedComment(e);
+    if (!commentOpenedByClickOnIcon && container.is(':visible')) {
+      hideCommentTimer = setTimeout(function() {
+        self.closeOpenedComment(e);
+      }, 1000);
     }
   });
 
@@ -572,13 +509,13 @@ ep_comments.prototype.addListenersToCloseOpenedComment = function() {
   var self = this;
 
   // we need to add listeners to the different iframes of the page
-  $(document).on("touchstart", function(e){
+  $(document).on("touchstart click", function(e){
     self.closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  this.padOuter.find('html').on("touchstart", function(e){
+  this.padOuter.find('html').on("touchstart click", function(e){
     self.closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  this.padInner.contents().find('html').on("touchstart", function(e){
+  this.padInner.contents().find('html').on("touchstart click", function(e){
     self.closeOpenedCommentIfNotOnSelectedElements(e);
   });
 }
@@ -596,7 +533,6 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
     || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
     return;
   }
-
   // All clear, can close the comment
   this.closeOpenedComment(e);
 }
@@ -607,28 +543,25 @@ ep_comments.prototype.collectCommentReplies = function(callback){
   var container   = this.container;
   var commentReplies = this.commentReplies;
   var padComment  = this.padInner.contents().find('.comment');
+
   $.each(this.commentReplies, function(replyId, reply){
     var commentId = reply.commentId;
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
 
     var existsAlready = $('iframe[name="ace_outer"]').contents().find('#'+replyId).length;
-    if(existsAlready){
-        return;
-    }
+    if(existsAlready) return;
 
     reply.replyId = replyId;
+    reply.text = reply.text || ""
+    reply.date = prettyDate(reply.timestamp);
     reply.formattedDate = new Date(reply.timestamp).toISOString();
 
     var content = $("#replyTemplate").tmpl(reply);
     // localize comment reply
     commentL10n.localize(content);
-    $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-reply-input-label').before(content);
-    // Should we show "Revert" instead of "Accept"
-    // Comment Replies ARE handled here..
-    if(reply.changeAccepted){
-      self.showChangeAsAccepted(replyId);
-    }
+    var repliesContainer = $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-replies-container');
+    repliesContainer.append(content);
   });
 };
 
@@ -643,12 +576,13 @@ ep_comments.prototype.commentIdOf = function(e){
 ep_comments.prototype.insertContainers = function(){
   var target = $('iframe[name="ace_outer"]').contents().find("#outerdocbody");
 
-  // Add comments
-  target.prepend('<div id="comments"></div>');
-  this.container = this.padOuter.find('#comments');
+  // Create hover modal
+  target.prepend("<div class='comment-modal popup'><div class='popup-content comment-modal-comment'></div></div>");
 
-  // Add newComments
-  newComment.insertContainers(target);
+  // Add comments side bar container
+  target.prepend('<div id="comments"></div>');
+
+  this.container = this.padOuter.find('#comments');
 };
 
 // Insert a comment node
@@ -658,6 +592,7 @@ ep_comments.prototype.insertComment = function(commentId, comment, index){
   var commentAfterIndex = container.find('.sidebar-comment').eq(index);
 
   comment.commentId = commentId;
+  comment.reply = true;
   content = $('#commentsTemplate').tmpl(comment);
 
   commentL10n.localize(content);
@@ -691,13 +626,19 @@ ep_comments.prototype.setYofComments = function(){
   commentIcons.hideIcons();
 
   $.each(inlineComments, function(){
-    var y = this.offsetTop;
     var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    var commentEle = padOuter.find('#'+commentId[1])
+
+    var topOffset = this.offsetTop;
+    topOffset += parseInt(padInner.css('padding-top').split('px')[0])
+
+    // topOffset += ($(this).height() + $(this).outerHeight(true)) / 2 - commentEle.height();
+
     if(commentId) {
       // adjust outer comment...
-      var commentEle = commentBoxes.adjustTopOf(commentId[1], y);
+      commentBoxes.adjustTopOf(commentId[1], topOffset);
       // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], y);
+      commentIcons.adjustTopOf(commentId[1], topOffset);
 
       // mark this comment to be displayed if it was visible before we start adjusting its position
       if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
@@ -728,31 +669,6 @@ ep_comments.prototype.getUniqueCommentsId = function(padInner){
    if(commentId) return commentId[1];
   });
   return _.uniq(commentsId);
-}
-
-// Make the adjustments after editor is resized (due to a window resize or
-// enabling/disabling Page View)
-ep_comments.prototype.editorResized = function() {
-  var self = this;
-
-  commentIcons.adjustIconsForNewScreenSize();
-
-  // We try increasing timeouts, to make sure user gets the response as fast as we can
-  setTimeout(function() {
-    if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-    setTimeout(function() {
-      if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-      setTimeout(function() {
-        if (!self.allCommentsOnCorrectYPosition()) self.adjustCommentPositions();
-      }, 1000);
-    }, 500);
-  }, 250);
-}
-
-// Adjusts position on the screen for sidebar comments and comment icons
-ep_comments.prototype.adjustCommentPositions = function(){
-  commentIcons.adjustIconsForNewScreenSize();
-  this.setYofComments();
 }
 
 // Indicates if all comments are on the correct Y position, and don't need to
@@ -798,7 +714,6 @@ ep_comments.prototype.localizeExistingComments = function() {
       // ... and update its date
       comment.data.date = prettyDate(comment.data.timestamp);
       comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
-      commentElm.attr('title', comment.data.date);
     }
   });
 };
@@ -876,26 +791,7 @@ ep_comments.prototype.getCommentData = function (){
 
 // Delete a pad comment
 ep_comments.prototype.deleteComment = function(commentId){
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
-  var selector = "."+commentId;
-  var ace = this.ace;
-  ace.callWithAce(function(aceTop){
-    var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
-    // rep is an array of reps..  I will need to iterate over each to do something meaningful..
-    $.each(repArr, function(index, rep){
-      // I don't think we need this nested call
-      ace.callWithAce(function (ace){
-        ace.ace_performSelectionChange(rep[0],rep[1],true);
-        ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
-        // Note that this is the correct way of doing it, instead of there being
-        // a commentId we now flag it as "comment-deleted"
-      });
-    });
-  },'deleteCommentedSelection', true);
-
-//  });
-//  }, 'getRep');
+  $('iframe[name="ace_outer"]').contents().find('#' + commentId).remove();
 }
 
 ep_comments.prototype.displayNewCommentForm = function() {
@@ -915,17 +811,17 @@ ep_comments.prototype.displayNewCommentForm = function() {
   // we have nothing selected, do nothing
   var noTextSelected = (selectedText.length === 0);
   if (noTextSelected) {
+    $.gritter.add({text: html10n.translations["ep_comments_page.add_comment.hint"] || "Please first select the text to comment"})
     return;
   }
 
   self.createNewCommentFormIfDontExist(rep);
 
   // Write the text to the changeFrom form
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  padOuter.find(".comment-suggest-from").val(selectedText);
+  $('#newComment').find(".from-value").text(selectedText);
 
   // Display form
-  newComment.showNewCommentForm();
+  newComment.showNewCommentPopup();
 
   // Check if the first element selected is visible in the viewport
   var $firstSelectedElement = self.getFirstElementSelected();
@@ -936,15 +832,7 @@ ep_comments.prototype.displayNewCommentForm = function() {
   }
 
   // Adjust focus on the form
-  padOuter.find('.comment-content').focus();
-
-  // fix for iOS: when opening #newComment, we need to force focus on padOuter
-  // contentWindow, otherwise keyboard will be displayed but text input made by
-  // the user won't be added to textarea
-  var outerIframe = $('iframe[name="ace_outer"]').get(0);
-  if (outerIframe && outerIframe.contentWindow) {
-    outerIframe.contentWindow.focus();
-  }
+  $('#newComment').find('.comment-content').focus();
 }
 
 ep_comments.prototype.scrollViewportIfSelectedTextIsNotVisible = function($firstSelectedElement){
@@ -1009,7 +897,7 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
   var self = this;
 
   // If a new comment box doesn't already exist, create one
-  newComment.insertNewCommentFormIfDontExist(data, function(comment, index) {
+  newComment.insertNewCommentPopupIfDontExist(data, function(comment, index) {
     if(comment.changeTo){
       data.comment.changeFrom = comment.changeFrom;
       data.comment.changeTo = comment.changeTo;
@@ -1108,7 +996,7 @@ ep_comments.prototype.saveComment = function(data, rep) {
     comment.commentId = commentId;
 
     self.ace.callWithAce(function (ace){
-      // console.log('addComment :: ', commentId);
+      // console.log('addComment :: ', rep, comment);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
     },'insertComment', true);
@@ -1232,29 +1120,33 @@ ep_comments.prototype.commentRepliesListen = function(){
 
 ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
   var $comment = this.container.parent().find("[data-commentid='" + commentId + "']");
-  $comment.children('.comment-text').text(commentText)
+  var textBox = this.findCommentText($comment);
+  textBox.text(commentText)
 }
 
 ep_comments.prototype.showChangeAsAccepted = function(commentId){
   var self = this;
 
   // Get the comment
-  var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
-  button.attr("data-l10n-id", "ep_comments_page.comments_template.revert_change.value");
-  button.addClass("revert");
-  commentL10n.localize(button);
+  var comment = this.container.parent().find("[data-commentid='" + commentId + "']");
+  // Revert other comment that have already been accepted
+  comment.closest('.sidebar-comment')
+         .find('.comment-container.change-accepted').addBack('.change-accepted')
+         .each(function() {
+    $(this).removeClass('change-accepted');
+    var data = {commentId: $(this).attr('data-commentid'), padId: self.padId}
+    self.socket.emit('revertChange', data, function (){});
+  })
+
+  // this comment get accepted
+  comment.addClass('change-accepted');
 }
 
 ep_comments.prototype.showChangeAsReverted = function(commentId){
   var self = this;
-
   // Get the comment
-  var comment = self.container.find("#"+commentId);
-  var button = comment.find("input[type='submit']").first(); // we need to get the first button otherwise the replies suggestions will be affected too
-  button.attr("data-l10n-id", "ep_comments_page.comments_template.accept_change.value");
-  button.removeClass("revert");
-  commentL10n.localize(button);
+  var comment = self.container.parent().find("[data-commentid='" + commentId + "']");
+  comment.removeClass('change-accepted');
 }
 
 // Push comment from collaborators
@@ -1265,6 +1157,10 @@ ep_comments.prototype.pushComment = function(eventType, callback){
   socket.on('textCommentUpdated', function (commentId, commentText) {
     self.updateCommentBoxText(commentId, commentText);
   })
+
+  socket.on('commentDeleted', function(commentId){
+    self.deleteComment(commentId);
+  });
 
   socket.on('changeAccepted', function(commentId){
     self.showChangeAsAccepted(commentId);
@@ -1278,13 +1174,6 @@ ep_comments.prototype.pushComment = function(eventType, callback){
   if (eventType == 'add'){
     socket.on('pushAddComment', function (commentId, comment){
       callback(commentId, comment);
-    });
-  }
-
-  // On collaborator delete a comment in the current pad
-  else if (eventType == 'remove'){
-    socket.on('pushRemoveComment', function (commentId){
-      callback(commentId);
     });
   }
 
@@ -1307,6 +1196,15 @@ var hooks = {
     if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
     pad.plugins.ep_comments_page = Comments;
+
+    if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+      $.gritter.add({
+        title: "Error",
+        text: "Ep_comments_page: Please upgrade to etherpad 1.8.3 for this plugin to work correctly",
+        sticky: true,
+        class_name: "error"
+      })
+    }
   },
 
   aceEditEvent: function(hook, context){

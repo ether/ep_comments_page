@@ -7,31 +7,6 @@ var displayIcons = function() {
   return clientVars.displayCommentAsIcon
 }
 
-// Indicates if screen has enough space on right margin to display icons
-var screenHasSpaceToDisplayIcons;
-var screenHasSpaceForIcons = function() {
-  if (screenHasSpaceToDisplayIcons === undefined) calculateIfScreenHasSpaceForIcons();
-
-  return screenHasSpaceToDisplayIcons;
-}
-
-var calculateIfScreenHasSpaceForIcons = function() {
-  var $firstElementOnPad = getPadInner().find("#innerdocbody > div").first();
-  var availableSpaceOnTheRightOfPadLines = getSpaceAvailableOnTheRightSide($firstElementOnPad);
-
-  screenHasSpaceToDisplayIcons = availableSpaceOnTheRightOfPadLines !== 0;
-}
-
-// The space available can be anything like padding, margin or border
-var getSpaceAvailableOnTheRightSide = function($element) {
-  var rightPadding      = parseInt($element.css("padding-right"), 10);
-  var rightBorder       = parseInt($element.css("border-right-width"), 10);
-  var rightMargin       = parseInt($element.css("margin-right"), 10);
-
-  var rightEdgeSpace = rightPadding + rightBorder + rightMargin;
-  return rightEdgeSpace;
-}
-
 // Easier access to outer pad
 var padOuter;
 var getPadOuter = function() {
@@ -69,12 +44,11 @@ var targetCommentIdOf = function(e) {
 }
 
 var highlightTargetTextOf = function(commentId) {
-  getPadInner().find("head").append("<style>."+commentId+"{ color:orange }</style>");
+  getPadInner().find("head").append("<style class='comment-style'>."+commentId+"{ color: #a7680c !important }</style>");
 }
 
-var removeHighlightOfTargetTextOf = function(commentId) {
-  getPadInner().find("head").append("<style>."+commentId+"{ color:black }</style>");
-  // TODO this could potentially break ep_font_color
+var removeHighlightTargetText = function(commentId) {
+  getPadInner().find("head .comment-style").remove();
 }
 
 var toggleActiveCommentIcon = function(target) {
@@ -83,11 +57,12 @@ var toggleActiveCommentIcon = function(target) {
 
 var addListenersToCommentIcons = function() {
   getPadOuter().find('#commentIcons').on("mouseover", ".comment-icon", function(e){
+    removeHighlightTargetText();
     var commentId = targetCommentIdOf(e);
     highlightTargetTextOf(commentId);
   }).on("mouseout", ".comment-icon", function(e){
     var commentId = targetCommentIdOf(e);
-    removeHighlightOfTargetTextOf(commentId);
+    removeHighlightTargetText();
   }).on("click", ".comment-icon.active", function(e){
     toggleActiveCommentIcon($(this));
 
@@ -96,27 +71,15 @@ var addListenersToCommentIcons = function() {
   }).on("click", ".comment-icon.inactive", function(e){
     // deactivate/hide other comment boxes that are opened, so we have only
     // one comment box opened at a time
-    commentBoxes.hideOpenedComments();
+    commentBoxes.hideAllComments();
     var allActiveIcons = getPadOuter().find('#commentIcons').find(".comment-icon.active");
     toggleActiveCommentIcon(allActiveIcons);
 
     // activate/show only target comment
     toggleActiveCommentIcon($(this));
     var commentId = targetCommentIdOf(e);
-    commentBoxes.showComment(commentId, e, true);
+    commentBoxes.highlightComment(commentId, e);
   });
-}
-
-// Listen to Page View enabling/disabling, to adjust #commentIcons position
-var addListenersToPageView = function() {
-  $("#options-pageview").on("click", function() {
-    getPadOuter().find('#outerdocbody').toggleClass("pageViewDisabled");
-  });
-
-  // add class if Page View is disabled already
-  if(!$('#options-pageview').is(':checked')) {
-    getPadOuter().find('#outerdocbody').addClass("pageViewDisabled");
-  }
 }
 
 // Listen to clicks on the page to be able to close comment when clicking
@@ -165,11 +128,9 @@ var insertContainer = function() {
   if (!displayIcons()) return;
 
   getPadOuter().find("#sidediv").after('<div id="commentIcons"></div>');
-
-  adjustIconsForNewScreenSize();
+  getPadOuter().find("#comments").addClass('with-icons');
   addListenersToCommentIcons();
   addListenersToCloseOpenedComment();
-  addListenersToPageView();
 }
 
 // Create a new comment icon
@@ -178,7 +139,7 @@ var addIcon = function(commentId, comment){
   if (!displayIcons()) return;
 
   var inlineComment = getPadInner().find(".comment."+commentId);
-  var top = inlineComment.get(0).offsetTop + 5;
+  var top = inlineComment.get(0).offsetTop;
   var iconsAtLine = getOrCreateIconsContainerAt(top);
   var icon = $('#commentIconTemplate').tmpl(comment);
 
@@ -188,7 +149,7 @@ var addIcon = function(commentId, comment){
 // Hide comment icons from container
 var hideIcons = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return;
+  if (!displayIcons()) return;
 
   getPadOuter().find('#commentIcons').children().children().each(function(){
     $(this).hide();
@@ -199,10 +160,10 @@ var hideIcons = function() {
 // height of the pad text associated to the comment, and return the affected icon
 var adjustTopOf = function(commentId, baseTop) {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return;
+  if (!displayIcons()) return;
 
   var icon = getPadOuter().find('#icon-'+commentId);
-  var targetTop = baseTop+5;
+  var targetTop = baseTop;
   var iconsAtLine = getOrCreateIconsContainerAt(targetTop);
 
   // move icon from one line to the other
@@ -217,7 +178,7 @@ var adjustTopOf = function(commentId, baseTop) {
 // comment icon.
 var isCommentOpenedByClickOnIcon = function() {
   // we're only doing something if icons will be displayed at all
-  if (!displayIcons() || !screenHasSpaceForIcons()) return false;
+  if (!displayIcons()) return false;
 
   var iconClicked = getPadOuter().find('#commentIcons').find(".comment-icon.active");
   var commentOpenedByClickOnIcon = iconClicked.length !== 0;
@@ -241,7 +202,7 @@ var commentHasReply = function(commentId) {
 var shouldShow = function(sidebarComent) {
   var shouldShowComment = false;
 
-  if (!displayIcons() || !screenHasSpaceForIcons()) {
+  if (!displayIcons()) {
     // if icons are not being displayed, we always show comments
     shouldShowComment = true;
   } else if (sidebarComent.hasClass("mouseover")) {
@@ -250,21 +211,6 @@ var shouldShow = function(sidebarComent) {
   }
 
   return shouldShowComment;
-}
-
-var adjustIconsForNewScreenSize = function() {
-  // we're only doing something if icons will be displayed at all
-  if (!displayIcons()) return;
-
-  // now that screen has a different size, we need to force calculation
-  // of flag used by screenHasSpaceForIcons() before calling the function
-  calculateIfScreenHasSpaceForIcons();
-
-  if (screenHasSpaceForIcons()) {
-    getPadOuter().find('#commentIcons').show();
-  } else {
-    getPadOuter().find('#commentIcons').hide();
-  }
 }
 
 // Indicates if event was on one of the elements that does not close comment (any of the comment icons)
@@ -279,5 +225,4 @@ exports.adjustTopOf = adjustTopOf;
 exports.isCommentOpenedByClickOnIcon = isCommentOpenedByClickOnIcon;
 exports.commentHasReply = commentHasReply;
 exports.shouldShow = shouldShow;
-exports.adjustIconsForNewScreenSize = adjustIconsForNewScreenSize;
 exports.shouldNotCloseComment = shouldNotCloseComment;
