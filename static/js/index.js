@@ -1216,18 +1216,19 @@ var hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    // var padOuter = $('iframe[name="ace_outer"]').contents();
-    // padOuter.find('#sidediv').removeClass("sidedivhidden"); // TEMPORARY to do removing authorship colors can add sidedivhidden class to sidesiv!
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
     if(context.callstack.docTextChanged) pad.plugins.ep_comments_page.setYofComments();
-    var commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
-    var domClean = context.callstack.domClean;
-    // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
-    if(commentWasPasted && domClean){
-      pad.plugins.ep_comments_page.collectComments(function(){
-        pad.plugins.ep_comments_page.collectCommentReplies();
-        pad.plugins.ep_comments_page.shouldCollectComment = false;
-      });
+    // some times on init ep_comments_page is not yet on the plugin list
+    if (pad.plugins.ep_comments_page) {
+      var commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
+      var domClean = context.callstack.domClean;
+      // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
+      if(commentWasPasted && domClean){
+        pad.plugins.ep_comments_page.collectComments(function(){
+          pad.plugins.ep_comments_page.collectCommentReplies();
+          pad.plugins.ep_comments_page.shouldCollectComment = false;
+        });
+      }
     }
   },
 
