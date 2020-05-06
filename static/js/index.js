@@ -620,11 +620,6 @@ ep_comments.prototype.setYofComments = function(){
   var inlineComments = this.getFirstOcurrenceOfCommentIds();
   var commentsToBeShown = [];
 
-  // hide each outer comment...
-  commentBoxes.hideAllComments();
-  // ... and hide comment icons too
-  commentIcons.hideIcons();
-
   $.each(inlineComments, function(){
     var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
     var commentEle = padOuter.find('#'+commentId[1])
