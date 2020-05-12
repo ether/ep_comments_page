@@ -628,8 +628,7 @@ ep_comments.prototype.setYofComments = function(){
 
     var topOffset = this.offsetTop;
     topOffset += parseInt(padInner.css('padding-top').split('px')[0])
-
-    // topOffset += ($(this).height() + $(this).outerHeight(true)) / 2 - commentEle.height();
+    topOffset += parseInt($(this).css('padding-top').split('px')[0])
 
     if(commentId) {
       // adjust outer comment...
