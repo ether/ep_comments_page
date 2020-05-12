@@ -75,6 +75,7 @@ var highlightComment = function(commentId, e, editorComment){
     var targetLeft = e.clientX;
     var targetTop = $(e.target).offset().top;
     if (editorComment) {
+      targetLeft += padInner.offset().left;
       targetTop += parseInt(padInner.css('padding-top').split('px')[0])
       targetTop += parseInt(padOuter.find('#outerdocbody').css('padding-top').split('px')[0])
     } else {
