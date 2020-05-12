@@ -546,6 +546,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
   $.each(this.commentReplies, function(replyId, reply){
     var commentId = reply.commentId;
+    if (commentId) {
     // tell comment icon that this comment has 1+ replies
     commentIcons.commentHasReply(commentId);
 
@@ -562,6 +563,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     commentL10n.localize(content);
     var repliesContainer = $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-replies-container');
     repliesContainer.append(content);
+    }
   });
 };
 
