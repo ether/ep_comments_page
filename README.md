@@ -2,12 +2,9 @@
 
 ![Screen shot](http://i.imgur.com/sbiJ4xz.png)
 
-## Installing this plugin with git.
+## Installing this plugin with npm.
 ```
-npm install ep_page_view
-git clone https://github.com/JohnMcLear/ep_comments.git node_modules/ep_comments_page
-cd node_modules/ep_comments_page
-npm install
+npm install ep_comments_page
 ```
 
 ## Extra settings
@@ -62,6 +59,7 @@ If you need to add comments to a pad:
   ![Screen shot](http://i.imgur.com/KM4lPJx.png)
 
 NOTE: Adding a comment to a pad via API will make the other editors with that pad to be alerted, but this feature is only active if your Etherpad is run in `loadTest` mode. Read [the Etherpad Guide](https://github.com/ether/etherpad-lite/wiki/Load-Testing-Etherpad) for how to enable load testing.
+
 
 ## License
 Apache 2
