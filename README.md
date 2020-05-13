@@ -15,7 +15,7 @@ There is an alternative way to display comments. Instead of having all comments 
 
 ![Screen shot](http://i.imgur.com/cEo7PdL.png)
 
-To use this way of displaying comments, **make sure you have installed [ep_page_view](https://github.com/ether/ep_page_view)**, and add the following to your `settings.json`:
+To use this way of displaying comments, add the following to your `settings.json`:
 ```
 // Display comments as icons, not boxes
 "ep_comments_page": {
