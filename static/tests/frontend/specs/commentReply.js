@@ -105,7 +105,7 @@ describe("ep_comments_page - Comment Reply", function(){
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = outer$("textarea.comment-content");
+    var $commentField = chrome$("textarea.comment-content");
     $commentField.val("My comment");
     var $hasSuggestion = outer$(".suggestion-checkbox");
     $hasSuggestion.click();

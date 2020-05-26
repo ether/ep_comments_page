@@ -243,7 +243,7 @@ describe("ep_comments_page - Comment icons", function() {
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = outer$("textarea.comment-content");
+    var $commentField = chrome$("textarea.comment-content");
     $commentField.val(commentText);
     // we don't need comment suggestion to be filled for these tests, but here's how to do it:
     // var $hasSuggestion = outer$(".suggestion-checkbox");

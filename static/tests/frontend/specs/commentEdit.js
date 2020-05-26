@@ -219,7 +219,7 @@ ep_comments_page_test_helper.commentEdit = {
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = outer$("textarea.comment-content");
+    var $commentField = chrome$("textarea.comment-content");
     $commentField.val(textOfComment);
     var $submittButton = outer$("input[type=submit]");
     $submittButton.click();
