@@ -86,7 +86,7 @@ describe("ep_comments_page - Comment settings", function() {
     $hasSuggestion.click();
     var $suggestionField = outer$("textarea.to-value");
     $suggestionField.val("Change to this suggestion");
-    var $submittButton = outer$("input[type=submit]");
+    var $submittButton = chrome$(".comment-buttons input[type=submit]");
     $submittButton.click();
 
     // wait until comment is created and comment id is set
