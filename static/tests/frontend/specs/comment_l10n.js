@@ -22,8 +22,8 @@ describe("ep_comments_page - Comment Localization", function(){
       var commentId = getCommentId();
 
       //get the title of the comment
-      var $changeToLabel = outer$(".to-label").first();
-      expect($changeToLabel.text()).to.be("Suggested Change:");
+      var $changeToLabel = outer$(".comment-suggest").first();
+      expect($changeToLabel.text()).to.be("                                  Include suggested change             ");
 
       done();
     });
@@ -37,7 +37,7 @@ describe("ep_comments_page - Comment Localization", function(){
 
       //get the 'Suggested Change' label
       var $changeToLabel = outer$("#" + commentId + " .to-label").first();
-      expect($changeToLabel.text()).to.be("Alteração Sugerida:");
+      expect($changeToLabel.text()).to.be("Para");
 
       done();
     });
@@ -59,7 +59,7 @@ describe("ep_comments_page - Comment Localization", function(){
 
     changeEtherpadLanguageTo('pt-br', function(){
       //get the 'Include suggested change' label
-      var $changeToLabel = outer$('#newComment label.label-suggestion-checkbox').first();
+      var $changeToLabel = outer$('.new-comment label.label-suggestion-checkbox').first();
       expect($changeToLabel.text()).to.be("Incluir alteração sugerida");
 
       done();
