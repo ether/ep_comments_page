@@ -48,17 +48,22 @@ describe("ep_comments_page - Comment Reply", function(){
     });
   });
 
-  xit("Replaces the original text with reply suggestion", function(done) {
+  it("Replaces the original text with reply suggestion", function(done) {
     createReply(true, function(){
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
 
       // click to accept suggested change of the reply
-      var $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']");
+      var $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']")[0];
       $replyAcceptChangeButton.click();
 
       // check the pad text
       var $firstTextElement = inner$("div").first();
+      // cake waitFor
+      helper.waitFor(function(){
+        console.log($firstTextElement.text())
+        return $firstTextElement.text() === "My suggestion";
+      });
       expect($firstTextElement.text()).to.be("My suggestion");
 
       done();
