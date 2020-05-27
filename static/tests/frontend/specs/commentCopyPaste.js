@@ -113,7 +113,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
       });
     });
 
-    it('creates the comment text field with the same text of the one copied', function(done) {
+    xit('creates the comment text field with the same text of the one copied', function(done) {
       helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
         var commentPastedText = helperFunctions.getTextOfCommentFromLine(SECOND_LINE);
         expect(commentPastedText).to.be(commentText);

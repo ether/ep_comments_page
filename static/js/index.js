@@ -624,6 +624,7 @@ ep_comments.prototype.setYofComments = function(){
 
   $.each(inlineComments, function(){
     var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    if(!commentId || !commentId[1]) return;
     var commentEle = padOuter.find('#'+commentId[1])
 
     var topOffset = this.offsetTop;
@@ -662,7 +663,7 @@ ep_comments.prototype.getUniqueCommentsId = function(padInner){
   var commentsId = _.map(inlineComments, function(inlineComment){
    var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
    // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
-   if(commentId) return commentId[1];
+   if(commentId && commentId[1]) return commentId[1];
   });
   return _.uniq(commentsId);
 }
@@ -679,7 +680,7 @@ ep_comments.prototype.allCommentsOnCorrectYPosition = function(){
   $.each(inlineComments, function(){
     var y = this.offsetTop;
     var commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if(commentId) {
+    if(commentId && commentId[1]) {
       if (!commentBoxes.isOnTop(commentId[1], y)) { // found one comment on the incorrect place
         allCommentsAreCorrect = false;
         return false; // to break loop
