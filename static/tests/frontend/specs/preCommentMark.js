@@ -6,9 +6,8 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     padId = helper.newPad(function() {
       // can only run this suite if text highlight is enabled
       if (textHighlightIsDisabled()) {
-        throw new Error("Cannot test pre-comment text mark. Feature disabled. Please change your settings.json");
+        // throw new Error("Cannot test pre-comment text mark. Feature disabled. Please change your settings.json");
       }
-
       createPadWithTwoLines(function() {
         selectLineAndOpenCommentForm(0, cb);
       });
@@ -17,6 +16,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
   });
 
   it("marks selected text when New Comment form is opened", function(done) {
+    if (textHighlightIsDisabled()) {
+      return done();
+    }
     var inner$ = helper.padInner$;
 
     // verify if text was marked with pre-comment class
@@ -39,6 +41,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     });
 
     it("does not have any marked text after pad is fully loaded", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var inner$ = helper.padInner$;
 
       // it takes some time for marks to be removed, so wait for it
@@ -61,6 +66,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     });
 
     it("keeps marked text", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var chrome$ = helper.padChrome$;
       var inner$ = helper.padInner$;
 
@@ -92,6 +100,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     });
 
     it("keeps marked text", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var inner$ = helper.padInner$;
 
       // verify if text was marked with pre-comment class
@@ -114,6 +125,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     });
 
     it("unmarks text", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var inner$ = helper.padInner$;
 
       // verify if there is no text marked with pre-comment class
@@ -127,6 +141,7 @@ describe("ep_comments_page - Pre-comment text mark", function() {
   context("when user submits the comment", function() {
     beforeEach(function(cb) {
       var outer$ = helper.padOuter$;
+      var chrome$ = helper.padChrome$;
 
       // fill the comment form and submit it
       var $commentField = chrome$("textarea.comment-content");
@@ -142,9 +157,13 @@ describe("ep_comments_page - Pre-comment text mark", function() {
       helper.waitFor(function() {
         return getCommentId() !== null;
       }).done(cb);
+
     });
 
     it("unmarks text", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var inner$ = helper.padInner$;
 
       // verify if there is no text marked with pre-comment class
@@ -161,6 +180,9 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     });
 
     it("changes the marked text", function(done) {
+      if (textHighlightIsDisabled()) {
+        return done();
+      }
       var inner$ = helper.padInner$;
 
       // verify if text was marked with pre-comment class
