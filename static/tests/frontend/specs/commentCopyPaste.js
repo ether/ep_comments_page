@@ -155,8 +155,7 @@ ep_comments_page_test_helper.copyAndPaste = {
   cleanPad: function(callback) {
     var inner$ = helper.padInner$;
     var $padContent = inner$("#innerdocbody");
-    $padContent.html("");
-
+    $padContent.html(" ");
     // wait for Etherpad to re-create first line
     helper.waitFor(function(){
       var lineNumber = inner$("div").length;
@@ -169,8 +168,8 @@ ep_comments_page_test_helper.copyAndPaste = {
       inner$('div').first().sendkeys('something\n anything');
       helper.waitFor(function(){
         var inner$ = helper.padInner$;
-        var lineLength = inner$('div').length;
 
+        var lineLength = inner$('div').length;
         return lineLength > 1;
       }).done(cb);
     });
@@ -188,7 +187,6 @@ ep_comments_page_test_helper.copyAndPaste = {
     //click on the settings button to make settings visible
     var $deleteButton = outer$(".comment-delete");
     $deleteButton.click();
-
     helper.waitFor(function() {
       return chrome$(".sidebar-comment").is(":visible") === false;
     })
@@ -198,7 +196,6 @@ ep_comments_page_test_helper.copyAndPaste = {
     var outer$ = helper.padOuter$;
     var commentId = this.getCommentIdOfLine(line);
     var existingReplies = outer$(".sidebar-comment-reply").length;
-
     // if comment icons are enabled, make sure we display the comment box:
     if (this.commentIconsEnabled()) {
       // click on the icon
@@ -211,7 +208,7 @@ ep_comments_page_test_helper.copyAndPaste = {
     $replyField.val(textOfReply);
 
     // submit reply
-    var $submitReplyButton = outer$("form.comment-reply input[type='submit']").first();
+    var $submitReplyButton = outer$("form.new-comment input[type='submit']").first();
     $submitReplyButton.click();
 
     // wait for the reply to be saved
