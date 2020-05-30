@@ -311,7 +311,11 @@ ep_comments.prototype.init = function(){
   }
 
   $('#options-comments').on('change', function() {
-    $('#options-comments').is(':checked') ? enableComments() : disableComments();
+    if($('#options-comments').is(':checked')){
+      enableComments()
+    }else{
+      disableComments();
+    }
   });
 
   function enableComments() {
@@ -529,8 +533,8 @@ ep_comments.prototype.closeOpenedComment = function(e) {
 // Close comment if event target was outside of comment or on a comment icon
 ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function(e) {
   // Don't do anything if clicked on the allowed elements:
-  if (commentIcons.shouldNotCloseComment(e) // any of the comment icons
-    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
+  // any of the comment icons
+  if (commentIcons.shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
     return;
   }
   // All clear, can close the comment
