@@ -5,10 +5,12 @@ describe('ep_comments_page - Comment copy and paste', function () {
   var SECOND_LINE = 1;
 
   before(function(){
+    this.timeout = 60000;
     helperFunctions = ep_comments_page_test_helper.copyAndPaste;
   });
 
   context('when user copies a text with a comment', function(){
+    this.timeout = 60000;
     var commentText = 'My comment';
     var replyText = 'A reply';
     before(function (cb) {
