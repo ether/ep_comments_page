@@ -72,7 +72,7 @@ describe('ep_comments_page - Comment Edit', function(){
           helper.waitFor(function () {
             var outer$ = helper.padOuter$;
             var commentText = outer$('.comment-text').first().text();
-            return commentText.length;
+            return (commentText === updatedText);
           }).done(function(){
             var outer$ = helper.padOuter$;
             var commentText = outer$('.comment-text').first().text();
@@ -101,7 +101,6 @@ describe('ep_comments_page - Comment Edit', function(){
       });
     });
   });
-
   context('when user presses the button edit on a comment reply', function(){
     before(function () {
       helperFunctions.clickEditCommentReplyButton();
