@@ -6,6 +6,10 @@ describe('ep_comments_page - Comment Edit', function(){
 
   // create pad with a comment and a reply
   before(function (done) {
+    helper.waitFor(function(){
+      console.log("derp", ep_comments_page_test_helper);
+      return (ep_comments_page_test_helper !== 'undefined')
+    });
     helperFunctions = ep_comments_page_test_helper.commentEdit;
     helperFunctions.createPad(this, function(){
       helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
@@ -90,13 +94,14 @@ describe('ep_comments_page - Comment Edit', function(){
 
           it('shows the comment text updated', function (done) {
             var outer$ = helper.padOuter$;
-            var commentText = outer$('.comment-text').first().text();
             helper.waitFor(function(){
               var commentText = outer$('.comment-text').first().text();
               return (commentText === updatedText);
+            }, 2000).done(function(){
+              var commentText = outer$('.comment-text').first().text();
+              expect(commentText).to.be(updatedText);
+              done();
             });
-            expect(commentText).to.be(updatedText);
-            done();
           });
         });
       });
