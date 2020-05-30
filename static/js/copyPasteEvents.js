@@ -197,7 +197,6 @@ var getTagsInSelection = function(htmlObject){
 exports.saveCommentsAndReplies = function(e){
   var comments = e.originalEvent.clipboardData.getData('text/objectComment');
   var replies = e.originalEvent.clipboardData.getData('text/objectReply');
-console.log(comments, replies);
   if(comments && replies) {
     comments = JSON.parse(comments);
     replies = JSON.parse(replies);
