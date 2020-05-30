@@ -42,6 +42,7 @@ function prettyDate(time){
   if(time.substr(time.length-4,1)==".") time =time.substr(0,time.length-4);
   */
   var seconds = (new Date() - new Date(time)) / 1000;
+  // var seconds = new Date() - new Date(time) / 1000;
   var     token = 'ago',
     list_choice = 1,
   l10n_appendix = '.past';
@@ -54,7 +55,7 @@ function prettyDate(time){
   }
 
   var i = 0, format;
-  while (format == time_formats[i++])
+  while (format = time_formats[i++])
     if (seconds < format[0]) {
       var count = Math.floor(seconds / format[2]);
       var formatted_time;
