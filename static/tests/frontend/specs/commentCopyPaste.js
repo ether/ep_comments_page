@@ -204,7 +204,7 @@ ep_comments_page_test_helper.copyAndPaste = {
     helper.waitFor(function(){
       var lineNumber = inner$("div").length;
       return lineNumber === 1;
-    }, 2000).done(callback);
+    }, 20000).done(callback);
   },
   createOrResetPadText: function(cb) {
     this.cleanPad(function(){

@@ -31,13 +31,13 @@ describe("ep_comments_page - Pre-comment text mark", function() {
 
   context("when user reloads pad", function() {
     beforeEach(function(cb) {
-      this.timeout(5000);
+      this.timeout(20000);
 
       // wait for changes to be saved as a revision before reloading the pad, otherwise
       // it won't have the text that we created on beforeEach after reload
       setTimeout(function() {
         helper.newPad(cb, padId);
-      }, 1000);
+      }, 5000);
     });
 
     it("does not have any marked text after pad is fully loaded", function(done) {
@@ -56,13 +56,13 @@ describe("ep_comments_page - Pre-comment text mark", function() {
 
   context("when user performs UNDO operation", function() {
     beforeEach(function(cb) {
-      this.timeout(5000);
+      this.timeout(20000);
 
       // wait for changes to be saved as a revision and reload pad, otherwise
       // UNDO will remove the text that we created on beforeEach
       setTimeout(function() {
         helper.newPad(cb, padId);
-      }, 1000);
+      }, 5000);
     });
 
     it("keeps marked text", function(done) {
