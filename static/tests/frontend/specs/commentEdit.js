@@ -84,13 +84,16 @@ describe('ep_comments_page - Comment Edit', function(){
         // ensure that the comment was saved in database
         context('and reloads the page',  function () {
           before(function (done) {
-            helperFunctions.reloadPad(done);
-            this.timeout(10000);
+            helperFunctions.reloadPad(this, done);
+            this.timeout(20000);
           });
 
           it('shows the comment text updated', function (done) {
             var outer$ = helper.padOuter$;
             var commentText = outer$('.comment-text').first().text();
+            helper.waitFor(function(){
+              return (commentText === updatedText);
+            });
             expect(commentText).to.be(updatedText);
             done();
           });
@@ -121,9 +124,11 @@ describe('ep_comments_page - Comment Edit', function(){
         before(function () {
           helperFunctions.writeCommentText(updatedText);
           helperFunctions.pressSave();
+          this.timeout(10000);
         });
 
         it('should update the comment text', function (done) {
+          this.timeout(10000);
           helper.waitFor(function () {
             var outer$ = helper.padOuter$;
             var commentReplyText = outer$('.comment-text').last().text();
@@ -131,6 +136,10 @@ describe('ep_comments_page - Comment Edit', function(){
           }).done(function(){
             var outer$ = helper.padOuter$;
             var commentReplyText = outer$('.comment-text').last().text();
+            helper.waitFor(function(){
+              var commentReplyText = outer$('.comment-text').last().text();
+              return (commentReplyText === updatedText);
+            });
             expect(commentReplyText).to.be(updatedText);
             done();
           });
@@ -138,8 +147,7 @@ describe('ep_comments_page - Comment Edit', function(){
 
         context('and reloads the page', function(){
           before(function (done) {
-            helperFunctions.reloadPad(done);
-            this.timeout(10000);
+            helperFunctions.reloadPad(this, done);
           });
 
           it('should update the comment text', function(done){
@@ -180,9 +188,12 @@ ep_comments_page_test_helper.commentEdit = {
       }).done(cb);
     });
   },
-  reloadPad: function(cb){
+  reloadPad: function(test, cb){
+    test.timeout(10000);
     var self = this;
     var padId = this.padId;
+    // we do nothing for a second while we wait for content to be collected before reloading
+    // this may be hacky, but we need time for CC to run so... :?
     setTimeout(function() {
       helper.newPad(function(){
         self.enlargeScreen(cb);
