@@ -32,7 +32,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
       // we create two spans to avoid error on paste on chrome, when we copy only a text without tags
       var hasCopiedSpanTag = $dataFromGetData.filter('span').length === 2;
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       expect(textCopied).to.be('omethin');
@@ -42,7 +42,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('generates a fake comment class', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       var dataFromGetData = event.originalEvent.clipboardData.getData('text/html');
@@ -54,7 +54,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('puts the comment data on the clipboardData', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       var commentDataValues = helperFunctions.getCommentDataValues(event);
@@ -68,7 +68,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('puts the comment reply data on the clipboardData', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       var commentReplyDataValues = helperFunctions.getCommentReplyDataValues(event);
@@ -79,7 +79,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('has the fields required to build a comment', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.testIfHasAllFieldsNecessaryToCreateAComment(event);
@@ -88,7 +88,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('has the fields required to build a comment reply', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.testIfHasAllFieldsNecessaryToCreateACommementReply(event);
@@ -114,7 +114,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('generates a different comment id for the comment pasted', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       var commentIdOriginal = helperFunctions.getCommentIdOfLine(FIRST_LINE);
@@ -125,7 +125,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
         return commentIdLinePasted !== null;
       }).done(function(){
         // Skip if Edge
-        if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+        if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
           done();
         }
         expect(commentIdLinePasted).to.not.be(commentIdOriginal);
@@ -135,7 +135,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('creates a new icon for the comment pasted', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.finishTestIfIconsAreNotEnabled(done, function(){
@@ -160,7 +160,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     it('creates the comment reply text field with the same text of the one copied', function(done) {
       // Skip if Edge
-      if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
@@ -174,7 +174,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
       it('does not remove the comment pasted', function (done) {
         // Skip if Edge
-        if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+        if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
           done();
         }
         helperFunctions.removeCommentFromLine(FIRST_LINE, function(){

@@ -12,7 +12,7 @@ describe("ep_comments_page - Comment Delete", function(){
   it("Ensures a comment can be deleted", function(done) {
 
     // Skip if Edge
-    if (document.documentMode || /Edge/.test(navigator.userAgent)) {
+    if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
       done();
     }
 
