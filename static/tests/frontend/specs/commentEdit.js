@@ -7,7 +7,6 @@ describe('ep_comments_page - Comment Edit', function(){
   // create pad with a comment and a reply
   before(function (done) {
     helper.waitFor(function(){
-      console.log("derp", ep_comments_page_test_helper);
       return (ep_comments_page_test_helper !== 'undefined')
     });
     helperFunctions = ep_comments_page_test_helper.commentEdit;
@@ -107,7 +106,7 @@ describe('ep_comments_page - Comment Edit', function(){
       });
     });
   });
-// Commented out due to Firefox test failure 
+// Commented out due to Firefox test failure
 /*
   context('when user presses the button edit on a comment reply', function(){
     before(function () {

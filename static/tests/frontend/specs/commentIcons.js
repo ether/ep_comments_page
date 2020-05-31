@@ -44,7 +44,6 @@ describe("ep_comments_page - Comment icons", function() {
     finishTestIfIconsAreNotEnabled(done, function(){
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
-
       // remove commented text
       var $commentedLine = inner$("div .comment").parent();
       $commentedLine.sendkeys('{selectall}'); // select all
@@ -277,13 +276,17 @@ describe("ep_comments_page - Comment icons", function() {
 
   var getCommentId = function(numberOfComments) {
     var nthComment = numberOfComments || 0;
-    var inner$ = helper.padInner$;
-    var comment = inner$(".comment").eq(nthComment);
-    var cls = comment.attr('class');
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
-
-    return commentId;
+    helper.waitFor(function(){
+      var inner$ = helper.padInner$;
+      if(inner$) return true;
+    }).done(function(){
+      var inner$ = helper.padInner$;
+      var comment = inner$(".comment").eq(nthComment);
+      var cls = comment.attr('class');
+      var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+      var commentId = (classCommentId) ? classCommentId[1] : null;
+      return commentId;
+    });
   }
 
   var finishTestIfIconsAreNotEnabled = function(done, theTest) {

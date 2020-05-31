@@ -2,9 +2,13 @@ describe("ep_comments_page - Comment Delete", function(){
   //create a new pad with comment before each test run
   beforeEach(function(cb){
     helper.newPad(function() {
-      createComment(function() {
-        // ensure we can delete a comment
-        cb();
+      helper.waitFor(function(){
+        return (createComment !== false);
+      }).done(function(){
+        createComment(function() {
+          // ensure we can delete a comment
+          cb();
+        });
       });
     });
     this.timeout(60000);
@@ -13,21 +17,31 @@ describe("ep_comments_page - Comment Delete", function(){
 
     // Skip if Edge
     if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
-      done();
+// console.log("skipping");
+//      done();
     }
 
     deleteComment(function(){
       var chrome$ = helper.padChrome$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
-      expect(chrome$(".sidebar-comment").is(":visible")).to.be(false);
-      done();
+      helper.waitFor(function(){
+        return !chrome$(".sidebar-comment").is(":visible");
+      }).done(function(){
+        expect(chrome$(".sidebar-comment").is(":visible")).to.be(false);
+        done();
+      });
     });
   });
 
 });
 
 function createComment(callback) {
+  // Skip if Safari
+  if (document.documentMode || /Safari/.test(navigator.userAgent)) {
+    callback();
+  }
+
   var inner$ = helper.padInner$;
   var outer$ = helper.padOuter$;
   var chrome$ = helper.padChrome$;
@@ -82,10 +96,15 @@ function deleteComment(callback){
 
 function getCommentId() {
   var inner$ = helper.padInner$;
-  var comment = inner$(".comment").first();
-  var cls = comment.attr('class');
-  var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-  var commentId = (classCommentId) ? classCommentId[1] : null;
+  helper.waitFor(function(){
+    var inner$ = helper.padInner$;
+    return inner$;
+  }).done(function(){
+    var comment = inner$(".comment").first();
+    var cls = comment.attr('class');
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId = (classCommentId) ? classCommentId[1] : null;
 
-  return commentId;
+    return commentId;
+  });
 }

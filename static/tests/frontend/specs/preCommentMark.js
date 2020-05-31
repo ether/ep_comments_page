@@ -224,6 +224,22 @@ describe("ep_comments_page - Pre-comment text mark", function() {
     callback();
   }
 
+
+  var getCommentId = function() {
+    var inner$ = helper.padInner$;
+    helper.waitFor(function(){
+      var inner$ = helper.padInner$;
+      return inner$;
+    }).done(function(){
+      var comment = inner$(".comment").first();
+      var cls = comment.attr('class');
+      var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+      var commentId = (classCommentId) ? classCommentId[1] : null;
+
+      return commentId;
+    });
+  }
+
   var getCommentId = function() {
     var inner$ = helper.padInner$;
     var comment = inner$(".comment").first();

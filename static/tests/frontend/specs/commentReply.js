@@ -165,13 +165,17 @@ describe("ep_comments_page - Comment Reply", function(){
   }
 
   var getCommentId = function() {
-    var inner$ = helper.padInner$;
-    var comment = inner$(".comment").first();
-    var cls = comment.attr('class');
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
-
-    return commentId;
+    helper.waitFor(function(){
+      var inner$ = helper.padInner$;
+      if(inner$) return true;
+    }).done(function(){
+      var inner$ = helper.padInner$;
+      var comment = inner$(".comment").first();
+      var cls = comment.attr('class');
+      var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+      var commentId = (classCommentId) ? classCommentId[1] : null;
+      return commentId;
+    });
   }
 
   var chooseToShowComments = function(shouldShowComments, callback) {
