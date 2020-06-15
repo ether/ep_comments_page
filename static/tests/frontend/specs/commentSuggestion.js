@@ -7,6 +7,8 @@ describe("ep_comments_page - Comment Suggestion", function(){
 
   it("Fills suggestion Change From field when adding a comment with suggestion", function(done) {
     var outer$ = helper.padOuter$;
+    var chrome$ = helper.padChrome$;
+
     // As in the function openCommentFormWithSuggestion we send all the text and call 'selectall',
     // we select the beginning of line as well. This situation does not happen in the browser, it's not possible
     // to select the beginning of first line of a selection. To fix this we add a first text without line attribute,
@@ -14,9 +16,8 @@ describe("ep_comments_page - Comment Suggestion", function(){
     var targetText = "<span>A</span><ul><li> text with</li><li> line attributes</li></ul>";
 
     openCommentFormWithSuggestion(targetText);
-
-    var $suggestionFrom = outer$(".comment-suggest-from");
-    expect($suggestionFrom.val()).to.be("A\n text with\n line attributes");
+    var $suggestionFrom = chrome$(".from-value");
+    expect($suggestionFrom.text()).to.be("A\n text with\n line attributes");
     done();
   });
 
@@ -27,7 +28,7 @@ describe("ep_comments_page - Comment Suggestion", function(){
     openCommentFormWithSuggestion('This content will receive a comment');
 
     // cancel
-    var $cancelButton = outer$("#comment-reset");
+    var $cancelButton = chrome$("#comment-reset");
     $cancelButton.click();
 
     // wait for comment form to close
@@ -37,8 +38,8 @@ describe("ep_comments_page - Comment Suggestion", function(){
     .done(function() {
       openCommentFormWithSuggestion('New target for comment');
 
-      var $suggestionFrom = outer$(".comment-suggest-from");
-      expect($suggestionFrom.val()).to.be('New target for comment');
+      var $suggestionFrom = chrome$(".from-value");
+      expect($suggestionFrom.text()).to.be('New target for comment');
       done();
     });
   });
@@ -64,7 +65,6 @@ function openCommentFormWithSuggestion(targetText) {
   $commentButton.click();
 
   // check suggestion box
-  var $hasSuggestion = outer$("#suggestion-checkbox");
+  var $hasSuggestion = chrome$(".suggestion-checkbox");
   $hasSuggestion.click();
 }
-

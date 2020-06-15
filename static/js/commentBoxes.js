@@ -15,82 +15,83 @@ var showComment = function(commentId, e) {
   var commentElm = getCommentsContainer().find('#'+ commentId);
   commentElm.show();
 
-  highlightComment(commentId, e, false);
+  highlightComment(commentId, e);
 };
-
-var showReplies = function (commentId) {
-  var commentElm = getCommentsContainer().find('#'+commentId);
-  commentElm.find('.comment-reply .sidebar-comment-reply').show();
-}
-
-var hideReplies = function (commentId) {
-  var commentElm = getCommentsContainer().find('#'+commentId);
-  commentElm.find('.comment-reply .sidebar-comment-reply').hide();
-}
 
 var hideComment = function(commentId, hideCommentTitle) {
   var commentElm = getCommentsContainer().find('#'+ commentId);
-  commentElm.removeClass('mouseover');
+  commentElm.removeClass('full-display');
 
   // hide even the comment title
   if (hideCommentTitle) commentElm.hide();
 
-  getPadOuter().find('.comment-modal').hide();
+  var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+  inner.contents().find("head .comment-style").remove();
+
+  getPadOuter().find('.comment-modal').removeClass('popup-show');
 };
 
-var hideOpenedComments = function() {
-  var openedComments = getCommentsContainer().find('.mouseover');
-  openedComments.removeClass('mouseover').hide();
-
-  getPadOuter().find('.comment-modal').hide();
-}
-
 var hideAllComments = function() {
-  getCommentsContainer().children().hide();
+  getCommentsContainer().find('.sidebar-comment').removeClass('full-display');
+  getPadOuter().find('.comment-modal').removeClass('popup-show');
 }
 
-var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
+var highlightComment = function(commentId, e, editorComment){
   var container       = getCommentsContainer();
   var commentElm      = container.find('#'+ commentId);
-  var commentsVisible = container.is(":visible");
-  if(commentsVisible) {
-    // sidebar view highlight
-    commentElm.addClass('mouseover');
+  var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+
+  if (container.is(":visible")) {
+    // hide all other comments
+    container.find('.sidebar-comment').each(function() {
+      inner.contents().find("head .comment-style").remove();
+      $(this).removeClass('full-display')
+    });
+
+    // Then highlight new comment
+    commentElm.addClass('full-display');
+    // now if we apply a class such as mouseover to the editor it will go shitty
+    // so what we need to do is add CSS for the specific ID to the document...
+    // It's fucked up but that's how we do it..
+    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+    inner.contents().find("head").append("<style class='comment-style'>."+commentId+"{ color: #a7680c !important }</style>");
   } else {
     // make a full copy of the html, including listeners
-    var commentElm = container.find('#'+ commentId).parent().clone(true, true);
+    var commentElmCloned = commentElm.clone(true, true);
 
-    // clean styles
-    commentElm.children().removeAttr("style");
-
-    // only show the comment of the text selected
-    commentElm.find('note').not('#' + commentId).hide();
-    
-    //show replies
-    commentElm.find('note').find('note').show();
-
-    // before of appending it, we remove the classes that only makes sense on the side-bar
-    commentElm.children().attr('class', '');
+    // before of appending clear the css (like top positionning)
+    commentElmCloned.attr('style', '');
+    // fix checkbox, because as we are duplicating the sidebar-comment, we lose unique input names
+    commentElmCloned.find('.label-suggestion-checkbox').click(function() {
+      $(this).siblings('input[type="checkbox"]').click();
+    })
 
     // hovering comment view
-    getPadOuter().find('.comment-modal-comment').html(commentElm.clone(true));
-
-    // if hideEditAndRemoveCommentWindow is true, it hides the comment edit/remove window
-    getPadOuter().find('.comment-options-wrapper').toggleClass('hidden', hideEditAndRemoveCommentWindow);
-
+    getPadOuter().find('.comment-modal-comment').html('').append(commentElmCloned);
+    var padInner = getPadOuter().find('iframe[name="ace_inner"]')
     // get modal position
     var containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
     var modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
     var targetLeft = e.clientX;
     var targetTop = $(e.target).offset().top;
+    if (editorComment) {
+      targetLeft += padInner.offset().left;
+      targetTop += parseInt(padInner.css('padding-top').split('px')[0])
+      targetTop += parseInt(padOuter.find('#outerdocbody').css('padding-top').split('px')[0])
+    } else {
+      // mean we are clicking from a comment Icon
+      var targetLeft = $(e.target).offset().left - 20;
+    }
+
     // if positioning modal on target left will make part of the modal to be
     // out of screen, we place it closer to the middle of the screen
     if (targetLeft + modalWitdh > containerWidth) {
-      targetLeft = containerWidth - modalWitdh - 2;
+      targetLeft = containerWidth - modalWitdh - 25;
     }
-    getPadOuter().find('.comment-modal').show().css({
-      left: targetLeft +"px",
-      top: targetTop + 25 +"px"
+    var editorCommentHeight = editorComment ? editorComment.outerHeight(true) : 30;
+    getPadOuter().find('.comment-modal').addClass('popup-show').css({
+      left: targetLeft + "px",
+      top: targetTop + editorCommentHeight +"px"
     });
   }
 }
@@ -99,8 +100,7 @@ var highlightComment = function(commentId, e, hideEditAndRemoveCommentWindow){
 // height of the pad text associated to the comment, and return the affected element
 var adjustTopOf = function(commentId, baseTop) {
   var commentElement = getPadOuter().find('#'+commentId);
-  var targetTop = baseTop - 5;
-  commentElement.css("top", targetTop+"px");
+  commentElement.css("top", baseTop+"px");
 
   return commentElement;
 }
@@ -108,7 +108,7 @@ var adjustTopOf = function(commentId, baseTop) {
 // Indicates if comment is on the expected position (baseTop-5)
 var isOnTop = function(commentId, baseTop) {
   var commentElement = getPadOuter().find('#'+commentId);
-  var expectedTop = (baseTop - 5) + "px";
+  var expectedTop = baseTop + "px";
   return commentElement.css("top") === expectedTop;
 }
 
@@ -123,9 +123,6 @@ var shouldNotCloseComment = function(e) {
 
 exports.showComment = showComment;
 exports.hideComment = hideComment;
-exports.showReplies = showReplies;
-exports.hideReplies = hideReplies;
-exports.hideOpenedComments = hideOpenedComments;
 exports.hideAllComments = hideAllComments;
 exports.highlightComment = highlightComment;
 exports.adjustTopOf = adjustTopOf;

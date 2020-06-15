@@ -1,362 +1,210 @@
-note{
-  display:block;
+/* Text commented inside editor */
+#innerdocbody .ace-line .comment {
+  background-color: #fff382;
+  color: #222;
+}
+#innerdocbody .ace-line .comment[data-open="true"]{
+  color: orange !important;
 }
 
-.comment {
-  /*WARNING - if you change this value, you need to change it too on copyPasteEvents.js, otherwise you'll break part of the copy/paste behavior"*/
-  background: #FFFACD !important;
-  border-radius: 0px;
-}
 
-
-.pre-selected-comment {
-  background: #FFE168 !important;
-}
-
-time{
-  display:none;
-}
-
-.comment-modal .comment-text,
-.sidebar-comment:hover .comment-text,
-.sidebar-comment.mouseover .comment-text{
-  height:auto;
-  white-space:normal;
-  text-overflow:auto;
-}
-
-.sidebar-comment{
-  line-height:24px;
-}
-
-.sidebar-comment:hover,
-.sidebar-comment.mouseover{
-  height:auto;
-  white-space:normal;
-  text-overflow:auto;
-}
-
-.sidebar-comment:hover .comment-reply-button,
-.sidebar-comment.mouseover .comment-reply-button {
-  display:block;
-}
-
-.comment-modal{
-  position:absolute;
-  min-width:20px;
-  max-width:50%;
-  min-height:10px;
-  background-color:#fff;
-  z-index:99999;
-  top:0;
-  left:0;
-  border:solid #ccc 1px;
-  display:none;
-  padding:10px 10px 0px 10px;
-  font-size:12px;
-  line-height:24px;
-}
-
-.comment-changeTo-approve{
-  margin:0px 0px 10px 0px;
-}
-
-.reply-suggestion.active {
-  display: block;
-}
-
-/* hide comment elements when displayed on modal, not on sidebar */
-.comment-modal .reply-comment-suggest,
-.comment-modal .comment-reply-input-label,
-.comment-modal .reply-suggestion,
-.comment-modal input,
-.comment-modal .comment-changeTo-approve{
-  display:none;
-}
-
-.sidebar-comment-reply{
-  padding-top:5px;
-  padding-left:10px;
-  margin-bottom: 5px;
+/* Comment right side container */
+#comments {
+  width: 250px;
+  order: 3;
   position: relative;
 }
-
-.sidebar-comment-reply:nth-child(even){
-  background-color:#f1f1f1;
+#comments:not(.active) {
+  display: none;
 }
-
-.comment-reply{
-  margin-bottom:5px;
-}
-
-.comment-reply-input{
-  margin-top:10px;
-  width:187px;
-}
-
-#comments {
-  display:none;
-  width:210px;
-  bottom:0;
-  position:absolute;
-  top:10px;
-  right:0px;
-  font-family: Helvetica, Arial, sans-serif;
-  z-index:1;
-}
-
-#newComments {
-  display:none;
-  width:210px;
-  bottom:0;
-  position:absolute;
-  top:10px;
-  right:0px;
-  font-family: Helvetica, Arial, sans-serif;
-  z-index:1;
-}
-
-#newComments.active {
-  display:block;
-  z-index: 1000;
-}
-
-.comment-reply-button{
-  float:right;
-  display:none;
-}
-
-.comment-reply-button:hover{
-  cursor:pointer;
-  color:#000;
-}
-
-.comment-reply, .suggestion{
-  font-weight:bold;
-  color:#555
-}
-.reply-suggestion .reply-comment-suggest-from, .suggestion .comment-suggest-from, .comment-changeTo-value, .comment-changeFrom-value{
-  font-weight: normal;
-  color: black;
-  padding-left: 0.5em;
-  border:none;
-  border-left: 2px solid #DDD;
-  max-height: 5em;
-  width: 178px;
-  overflow-y: auto;
-  white-space: normal;
-  line-height: 1.3em;
+@media (max-width: 900px) {
+  #commentIcons, #comments {
+    display: none !important;
+  }
 }
 
 .sidebar-comment {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  right:0px;
-  margin-left: 10px;
-  padding: 0px 5px 5px 5px;
-  background: white;
-  width:90%;
-  height:20px;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  -moz-box-shadow: 0 0 2px #888;
-  -webkit-box-shadow: 0 0 2px #888;
-  box-shadow: 0 0 2px #888;
-  position:absolute;
-  font-size:12px;
+  position: absolute;
+  width: 100%;
 }
 
-.sidebar-comment input[type=submit]{
-  padding:2px;
+/* WITH ICONS */
+#comments.with-icons {
+  display: none;
 }
 
-.sidebar-comment:hover,
-.sidebar-comment.mouseover{
-  z-index:999;
+/* NEW COMMENT FORM (included both in popup and reply) */
+.new-comment .comment-content {
+  width: 100%;
+}
+.comment-reply .new-comment:not(.editing) .form-more {
+  display: none;
+}
+input.error, textarea.error {
+  border-color: red;
 }
 
-.sidebar-comment.mouseover {
-
-  z-index:99999;
-  margin: 0px 0 0 14px;
-  white-space:normal;
-  height:auto;
-  -webkit-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-  -moz-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-  -ms-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-  -o-transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-  transition: z-index 100ms ease-in, margin 100ms ease-in, background 100ms ease-in;
-}
-
+/* COMMENT GENERAL STYLE */
 .comment-author-name {
-  color: #555;
-  font-weight:bold;
-  font-size: 1em;
-  display:inline;
+  font-weight: bold;
 }
-
-.comment-changeTo-label, .comment-changeFrom-label{
-  color: #555;
-  font-weight:bold;
-  font-size: 1em;
-  display:inline;
+.comment-created-at {
+  font-size: .8em;
+  opacity: .7;
+  margin-left: 5px;
 }
-
-.comment-text {
-  font-size: 1em;
-  color: #333;
-  word-wrap: break-word;
-  white-space: normal;
-  display: inline;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-comment textarea {
-  border: 2px solid #DDD;
-  background: #fff;
-  width: 170px;
-  height: 40px;
-  padding: 5px;
-  font-size:1em;
-}
-
-.comment-content:focus {
-  border: 2px solid #ccc;
-}
-
-.comment-buttons input {
-  color: #666;
-  border: 2px solid #DDD;
-  background: #EEE;
-  width: 59px;
-  height: 30px;
-  font-size:12px;
-}
-
-.comment-buttons input[type="submit"] {
-  margin-right: 5px;
-  width:120px;
-}
-
-.comment-buttons input:hover {
-  color: #333;
-  cursor: pointer;
-}
-
-#newComment.visible{
-  width:250px;
-  right:0px;
-  -webkit-transition: width 500ms;
-  -moz-transition: width 500ms;
-  -ms-transition: width 500ms;
-  -o-transition: width 500ms;
-  transition: width 500ms;
-  height:auto;
-  min-height:100px;
-}
-
-#newComment.hidden{
-  width:0px;
-  right:-50px;
-  -webkit-transition: right 500ms, width 500ms;
-  -moz-transition: right 500ms, width 500ms;
-  -ms-transition: right 500ms, width 500ms;
-  -o-transition: right 500ms, width 500ms;
-  transition: right 500ms, width 500ms;
-}
-
-#newComment{
-  position:fixed;
-  display:block;
-  width:0px;
-  z-index:1000;
-  font-size:12px;
-}
-
-#outerdocbody{
-  width:1050px;
-}
-
-/* if Page View is disabled, we use the full width. (This is only changed
-  by commentIcons.js) */
-#outerdocbody.pageViewDisabled{
-  width:100%;
-}
-
-/* dont display comments at < 955px wide */
-@media (max-width: 955px) {
-  #outerdocbody{
-    width:100%;
-    padding-right:0px;
-  }
-}
-/* #innerdocbody is inside of another iframe, so needs a new media query */
-@media (max-width: 947px) { /* 955 - 8 (8 is #innerdocbody left position) */
-  #innerdocbody{
-    margin-right:0px;
-  }
-}
-
-/* display comments at > 955px wide */
-@media (min-width: 955px) {
-  #comments.active{
-    display:block;
-  }
-}
-/* #innerdocbody is inside of another iframe, so needs a new media query */
-@media (min-width: 947px) { /* 955 - 8 (8 is #innerdocbody left position) */
-  #innerdocbody.comments:not(.innerPV){
-    margin-right:200px;
-  }
-}
-
-.suggestion, .reply-suggestion{
-  display:none;
-}
-
-.sidebar-comment-reply input{
-  margin-bottom:10px;
-/*  margin-left:40px; */
-}
-
-.comment-options-button{
+.comment-actions-wrapper {
   float: right;
 }
-.comment-options-selected{
-  background-color: #d8d8d8;
+
+/* COMMENT COMPACTED (Visible on right side) */
+.sidebar-comment:not(.full-display) .full-display-content {
+  display: none;
+}
+.compact-display-content {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0 10px;
+  background-color: #eeeeed;
 }
 
-.comment-options-button--icon{
-  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzLjk2OSIgaGVpZ2h0PSIyMC4xNTYiIHZpZXdCb3g9IjAgMCAzLjk2OSAyMC4xNTYiPjxzd2l0Y2g%2BPGcgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiM2RTcwNzIiPjxwYXRoIGQ9Ik0zLjk1NyAyLjk2NWExLjk2NSAxLjk2NSAwIDEgMS0zLjkzIDAgMS45NjUgMS45NjUgMCAwIDEgMy45MyAwTTMuOTU3IDkuOTY1YTEuOTY1IDEuOTY1IDAgMSAxLTMuOTMgMCAxLjk2NSAxLjk2NSAwIDAgMSAzLjkzIDBNMy45NTcgMTYuOTY1YTEuOTY1IDEuOTY1IDAgMSAxLTMuOTMgMCAxLjk2NSAxLjk2NSAwIDAgMSAzLjkzIDAiLz48L2c%2BPC9zd2l0Y2g%2BPC9zdmc%2B);
-  background-repeat: no-repeat;
-  cursor: pointer;
-  padding: 2px;
-  margin: 6px;
-  background-size: contain;
-  background-position: 50% 50%;
+/* COMMENT FULL (when mouse hover) */
+.sidebar-comment.full-display {
+  z-index: 2;
+}
+.sidebar-comment.full-display .full-display-content {
+  display: block;
+  margin-top: -10px;
+}
+.sidebar-comment.full-display .compact-display-content {
+  display: none;
+}
+.full-display-content {
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px #ddd;
+  z-index: 99;
+}
+.full-display-content .comment-title-wrapper,
+.full-display-content .comment-reply {
+  padding: 10px;
+}
+.full-display-content .comment-title-wrapper .comment-text {
+  display: block;
+  margin-top: 10px;
+  white-space: normal;
+}
+.full-display-content .comment-title-wrapper .comment-text.default-text {
+  display: none;
 }
 
-.comment-options{
-  position: absolute;
-  background-color: #dcdcdc;
-  margin-left: 108px;
-  top: 24px;
-  right: 5px;
-  z-index: 999;
+/* SUGGESTION */
+.suggestion, .reply-suggestion {
+  display: none;
 }
-
-.comment-delete, .comment-edit {
+.suggestion-display {
+  margin-top: 5px;
+  white-space: normal;
+}
+.suggestion-display .from-label,
+.suggestion-display .to-label {
+  margin-right: 2px;
+}
+.suggestion-display .from-value,
+.suggestion-display .to-value {
+  opacity: .8;
+  font-style: italic;
+}
+.suggestion-display .from-value:after, .suggestion-display .from-value:before,
+.suggestion-display .to-value:after, .suggestion-display .to-value:before {
+  content: '"';
+}
+.suggestion-create .from-label,
+.suggestion-create .to-label {
   display: block;
   font-weight: bold;
-  cursor: pointer;
-  color: #555;
-  margin-top: 1px;
-  padding: 0 18px;
+  margin: 5px 0;
+}
+.approve-suggestion-btn, .revert-suggestion-btn {
+  display: block;
+  margin-bottom: 10px;
+}
+.suggestion-create textarea.to-value {
+  width: 100%;
+}
+.comment-container .revert-suggestion-btn { display: none; }
+.comment-container.change-accepted .revert-suggestion-btn { display: block; }
+.comment-container.change-accepted .approve-suggestion-btn { display: none; }
+
+.comment-container.change-accepted .comment-replies-container .revert-suggestion-btn { display: none; }
+.comment-container.change-accepted .comment-replies-container .approve-suggestion-btn { display: block; }
+.comment-container.change-accepted .comment-replies-container .comment-container.change-accepted .revert-suggestion-btn { display: block; }
+.comment-container.change-accepted .comment-replies-container .comment-container.change-accepted .approve-suggestion-btn { display: none; }
+/* REPLIES */
+.comment-reply {
+  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
+}
+/* One previous reply */
+.sidebar-comment-reply {
+  margin-bottom: 10px;
+}
+.sidebar-comment-reply .comment-text {
+  display: inline;
+  margin-top: 5px;
+  white-space: normal;
+}
+.sidebar-comment-reply .comment-edit {
+  display: none;
+  margin-left: 5px;
+  font-size: 1em;
+  opacity: .7;
+  transition: opacity .2s;
+}
+.sidebar-comment-reply:hover:not(.editing) .comment-edit {
+  display: inline;
+}
+.sidebar-comment-reply:hover:not(.editing) .comment-edit:hover {
+  opacity: 1;
+}
+.reply-comment-suggest, .comment-suggest {
+  margin-top: 10px;
 }
 
-.comment-edit:hover, .comment-delete:hover{
-  background-color: #b3b3b3;
+/* EDITING COMMENT */
+.comment-edit-text {
+  width: 100%;
+}
+.comment-edit-form + .comment-text {
+  display: none !important;
+}
+
+/* MODAL FOR MOBILES */
+.comment-modal {
+  bottom: auto !important;
+  right: auto !important;
+}
+.comment-modal-comment {
+  padding: 0;
+}
+.comment-modal-comment .sidebar-comment {
+  position: relative;
+  top: 0;
+}
+.comment-modal-comment .compact-display-content {
+  display: none;
+}
+.comment-modal-comment .full-display-content {
+  display: block !important;
+  margin: 0;
+}
+.comment-modal-comment .comment-content {
+  margin-top: 0 !important;
+}
+
+/* OTHER */
+.hidden {
+  display: none;
 }

@@ -113,7 +113,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
       });
     });
 
-    it('creates the comment text field with the same text of the one copied', function(done) {
+    xit('creates the comment text field with the same text of the one copied', function(done) {
       helperFunctions.createdCommentOnLine(SECOND_LINE, function(){
         var commentPastedText = helperFunctions.getTextOfCommentFromLine(SECOND_LINE);
         expect(commentPastedText).to.be(commentText);
@@ -155,8 +155,7 @@ ep_comments_page_test_helper.copyAndPaste = {
   cleanPad: function(callback) {
     var inner$ = helper.padInner$;
     var $padContent = inner$("#innerdocbody");
-    $padContent.html("");
-
+    $padContent.html(" ");
     // wait for Etherpad to re-create first line
     helper.waitFor(function(){
       var lineNumber = inner$("div").length;
@@ -169,8 +168,8 @@ ep_comments_page_test_helper.copyAndPaste = {
       inner$('div').first().sendkeys('something\n anything');
       helper.waitFor(function(){
         var inner$ = helper.padInner$;
-        var lineLength = inner$('div').length;
 
+        var lineLength = inner$('div').length;
         return lineLength > 1;
       }).done(cb);
     });
@@ -188,7 +187,6 @@ ep_comments_page_test_helper.copyAndPaste = {
     //click on the settings button to make settings visible
     var $deleteButton = outer$(".comment-delete");
     $deleteButton.click();
-
     helper.waitFor(function() {
       return chrome$(".sidebar-comment").is(":visible") === false;
     })
@@ -198,7 +196,6 @@ ep_comments_page_test_helper.copyAndPaste = {
     var outer$ = helper.padOuter$;
     var commentId = this.getCommentIdOfLine(line);
     var existingReplies = outer$(".sidebar-comment-reply").length;
-
     // if comment icons are enabled, make sure we display the comment box:
     if (this.commentIconsEnabled()) {
       // click on the icon
@@ -207,11 +204,11 @@ ep_comments_page_test_helper.copyAndPaste = {
     }
 
     // fill reply field
-    var $replyField = outer$(".comment-reply-input");
+    var $replyField = outer$(".comment-content");
     $replyField.val(textOfReply);
 
     // submit reply
-    var $submitReplyButton = outer$("form.comment-reply input[type='submit']").first();
+    var $submitReplyButton = outer$("form.new-comment input[type='submit']").first();
     $submitReplyButton.click();
 
     // wait for the reply to be saved
@@ -232,9 +229,9 @@ ep_comments_page_test_helper.copyAndPaste = {
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = outer$("textarea.comment-content");
+    var $commentField = chrome$("textarea.comment-content");
     $commentField.val(textOfComment);
-    var $submittButton = outer$("input[type=submit]");
+    var $submittButton = chrome$(".comment-buttons input[type=submit]");
     $submittButton.click();
 
     // wait until comment is created and comment id is set
@@ -382,7 +379,7 @@ ep_comments_page_test_helper.copyAndPaste = {
     var keysRequired = ["commentId", "text", "changeTo", "changeFrom", "author", "name", "timestamp", "replyId", "formattedDate"];
     this.checkIfHasAllKeys(keysRequired, keys);
   },
-  testIfHasAllFieldsNecessaryToCreateAComment(event) {
+  testIfHasAllFieldsNecessaryToCreateAComment: function(event) {
     var commentDataValues = this.getCommentDataValues(event);
     var keys = _.keys(commentDataValues);
     var keysRequired = ["author", "name", "text", "timestamp", "commentId", "date", "formattedDate", "originalCommentId"];

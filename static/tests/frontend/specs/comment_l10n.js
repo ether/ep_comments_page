@@ -22,8 +22,8 @@ describe("ep_comments_page - Comment Localization", function(){
       var commentId = getCommentId();
 
       //get the title of the comment
-      var $changeToLabel = outer$(".comment-changeTo-label").first();
-      expect($changeToLabel.text()).to.be("Suggested Change:");
+      var $changeToLabel = outer$(".comment-suggest").first();
+      expect($changeToLabel.text()).to.be("                                  Include suggested change             ");
 
       done();
     });
@@ -36,8 +36,8 @@ describe("ep_comments_page - Comment Localization", function(){
       var commentId = getCommentId();
 
       //get the 'Suggested Change' label
-      var $changeToLabel = outer$("#" + commentId + " .comment-changeTo-label").first();
-      expect($changeToLabel.text()).to.be("Alteração Sugerida:");
+      var $changeToLabel = outer$("#" + commentId + " .to-label").first();
+      expect($changeToLabel.text()).to.be("Para");
 
       done();
     });
@@ -59,7 +59,7 @@ describe("ep_comments_page - Comment Localization", function(){
 
     changeEtherpadLanguageTo('pt-br', function(){
       //get the 'Include suggested change' label
-      var $changeToLabel = outer$('#newComment label[for=suggestion-checkbox]').first();
+      var $changeToLabel = outer$('.new-comment label.label-suggestion-checkbox').first();
       expect($changeToLabel.text()).to.be("Incluir alteração sugerida");
 
       done();
@@ -87,13 +87,13 @@ describe("ep_comments_page - Comment Localization", function(){
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = outer$("textarea.comment-content");
+    var $commentField = chrome$("textarea.comment-content");
     $commentField.val("My comment");
-    var $hasSuggestion = outer$("#suggestion-checkbox");
+    var $hasSuggestion = outer$(".suggestion-checkbox");
     $hasSuggestion.click();
-    var $suggestionField = outer$("textarea.comment-suggest-to");
+    var $suggestionField = outer$("textarea.to-value");
     $suggestionField.val("Change to this suggestion");
-    var $submittButton = outer$("input[type=submit]");
+    var $submittButton = chrome$(".comment-buttons input[type=submit]");
     $submittButton.click();
 
     // wait until comment is created and comment id is set

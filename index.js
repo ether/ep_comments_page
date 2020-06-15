@@ -72,6 +72,15 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
+    socket.on('deleteComment', function(data, callback) {
+      // delete the comment on the database
+      commentManager.deleteComment(data.padId, data.commentId, function (){
+        // Broadcast to all other users that this comment was deleted
+        socket.broadcast.to(data.padId).emit('commentDeleted', data.commentId);
+      });
+
+    });
+
     socket.on('revertChange', function(data, callback) {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
@@ -185,6 +194,11 @@ exports.padInitToolbar = function (hookName, args) {
   toolbar.registerButton('addComment', button);
 };
 
+exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
+  return cb();
+};
+
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
   args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
@@ -199,28 +213,14 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 exports.clientVars = function (hook, context, cb) {
   var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
-  var allowInlineClick = settings.ep_comments_page ? settings.ep_comments_page.allowInlineClick : false;
-  var displayCommentsInModal = settings.ep_comments_page ? settings.ep_comments_page.displayCommentsInModal : false;
   return cb({
     "displayCommentAsIcon": displayCommentAsIcon,
     "highlightSelectedText": highlightSelectedText,
-    "allowInlineClick": allowInlineClick,
-    "displayCommentsInModal": displayCommentsInModal
   });
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {
   args.app.get('/p/:pad/:rev?/comments', function(req, res) {
-    var origin = settings.ep_comments_page.accessControlAllowOrigin;
-    var allowCredentials = settings.ep_comments_page.accessControlAllowCredentials;
-    
-    if (origin) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
-
-    if (allowCredentials) {
-      res.header('Access-Control-Allow-Credentials', true);
-    }
     var fields = req.query;
     // check the api key
     if(!apiUtils.validateApiKey(fields, res)) return;
@@ -267,16 +267,6 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   });
 
   args.app.get('/p/:pad/:rev?/commentReplies', function(req, res){
-    var origin = settings.ep_comments_page.accessControlAllowOrigin;
-    var allowCredentials = settings.ep_comments_page.accessControlAllowCredentials;
-    
-    if (origin) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
-
-    if (allowCredentials) {
-      res.header('Access-Control-Allow-Credentials', true);
-    }
     //it's the same thing as the formidable's fields
     var fields = req.query;
     // check the api key

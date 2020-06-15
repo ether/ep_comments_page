@@ -27,6 +27,23 @@ exports.getComments = function (padId, callback)
   });
 };
 
+exports.deleteComment = function (padId, commentId, callback)
+{
+  db.get('comments:' + padId, function(err, comments)
+  {
+    if(ERR(err, callback)) return;
+
+    // the entry doesn't exist so far, let's create it
+    if(comments == null) comments = {};
+
+    delete comments[commentId];
+    db.set("comments:" + padId, comments);
+
+    callback(padId, commentId);
+
+  });
+};
+
 exports.deleteComments = function (padId, callback)
 {
   db.remove('comments:' + padId, function(err)
@@ -234,10 +251,7 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
 
     //add the entry for this pad
     var comment = comments[commentId];
-    
-    if (!comment) {
-      return;
-    }
+
     if(state){
       comment.changeAccepted = true;
       comment.changeReverted = false;

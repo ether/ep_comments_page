@@ -49,5 +49,5 @@ function rewriteLine(context){
  }
 
 function replaceDataByClass(text) {
-  return text.replace(/data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, "class='comment $1' id='$1'");
+  return text.replace(/data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, "class='comment $1'");
  }
