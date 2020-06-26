@@ -1219,7 +1219,11 @@ var hooks = {
     }
 
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
-    if(context.callstack.docTextChanged) pad.plugins.ep_comments_page.setYofComments();
+    
+    if(context.callstack.docTextChanged && pad.plugins.ep_comments_page){
+      pad.plugins.ep_comments_page.setYofComments();
+    }
+
     // some times on init ep_comments_page is not yet on the plugin list
     if (pad.plugins.ep_comments_page) {
       var commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
