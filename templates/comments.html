@@ -97,10 +97,12 @@
     <!-- When comment contains a suggestion, we display it with an approval button -->
     {{if changeTo}}
     <form class="comment-changeTo-form suggestion-display">
-        <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From</span>
-        <span class="from-value">${changeFrom}</span>
-        <span class="to-label" data-l10n-id="ep_comments_page.comments_template.to">To</span>
-        <span class="to-value">${changeTo}</span>
+        <div>
+            <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From</span>
+            <span class="from-value">${changeFrom}</span>
+            <span class="to-label" data-l10n-id="ep_comments_page.comments_template.to">To</span>
+            <span class="to-value">${changeTo}</span>
+        </div>
         <!-- Approve/revert button -->
         <input type="Submit" class="btn btn-primary approve-suggestion-btn acl-write" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">
         <input type="Submit" class="btn btn-default revert-suggestion-btn acl-write" value="Revert Change" data-l10n-id="ep_comments_page.comments_template.revert_change.value">
