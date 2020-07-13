@@ -269,7 +269,11 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
   });
 }
 
-exports.changeCommentText = function(padId, commentId, commentText, callback){
+exports.changeCommentText = function(padId, commentId, commentText, authorId, callback){
+
+  //CHECK IF USER created the comment
+  if (!authorId) return;
+
   var commentTextIsNotEmpty = commentText.length > 0;
   if(commentTextIsNotEmpty){
     // Given a comment we update the comment text
@@ -291,7 +295,9 @@ exports.changeCommentText = function(padId, commentId, commentText, callback){
     //get the entry
     db.get(prefix + padId, function(err, comments){
       if(ERR(err, callback)) return;
-
+      if (comments[commentId].author !== authorId) {
+        return  callback('unauth');
+      }
       //update the comment text
       comments[commentId].text = commentText;
 
