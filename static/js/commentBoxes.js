@@ -114,8 +114,8 @@ var isOnTop = function(commentId, baseTop) {
 
 // Indicates if event was on one of the elements that does not close comment
 var shouldNotCloseComment = function(e) {
-  if ($(e.target).closest('.sidebar-comment').length // a comment box
-    || $(e.target).closest('.comment-modal').length) { // the comment modal
+  // a comment box
+  if ($(e.target).closest('.sidebar-comment').length || $(e.target).closest('.comment-modal').length) { // the comment modal
     return true;
   }
   return false;

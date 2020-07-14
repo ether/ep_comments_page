@@ -100,8 +100,8 @@ var addListenersToCloseOpenedComment = function() {
 // Close comment if event target was outside of comment or on a comment icon
 var closeOpenedCommentIfNotOnSelectedElements = function(e) {
   // Don't do anything if clicked on the following elements:
-  if (shouldNotCloseComment(e) // any of the comment icons
-    || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
+  // any of the comment icons
+  if (shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
     return;
   }
 

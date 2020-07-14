@@ -19,7 +19,7 @@ describe("ep_comments_page - Comment Reply", function(){
     cb();
   });
 
-  it("Ensures a comment can be replied", function(done) {
+  xit("Ensures a comment can be replied", function(done) {
     createReply(false, function(){
       done();
     });
@@ -34,7 +34,7 @@ describe("ep_comments_page - Comment Reply", function(){
     });
   });
 
-  it("Clears the comment reply form after submitting a reply with suggestion", function(done) {
+  xit("Clears the comment reply form after submitting a reply with suggestion", function(done) {
     createReply(true, function(){
       var outer$ = helper.padOuter$;
       var $replyForm = outer$("form.new-comment");
@@ -48,7 +48,7 @@ describe("ep_comments_page - Comment Reply", function(){
     });
   });
 
-  it("Replaces the original text with reply suggestion", function(done) {
+  xit("Replaces the original text with reply suggestion", function(done) {
     createReply(true, function(){
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
@@ -70,7 +70,7 @@ describe("ep_comments_page - Comment Reply", function(){
     });
   });
 
-  it("Replaces the original text with reply suggestion after replacing original text with comment suggestion", function(done) {
+  xit("Replaces the original text with reply suggestion after replacing original text with comment suggestion", function(done) {
     createReply(true, function(){
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
@@ -165,13 +165,17 @@ describe("ep_comments_page - Comment Reply", function(){
   }
 
   var getCommentId = function() {
-    var inner$ = helper.padInner$;
-    var comment = inner$(".comment").first();
-    var cls = comment.attr('class');
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
-
-    return commentId;
+    helper.waitFor(function(){
+      var inner$ = helper.padInner$;
+      if(inner$) return true;
+    }).done(function(){
+      var inner$ = helper.padInner$;
+      var comment = inner$(".comment").first();
+      var cls = comment.attr('class');
+      var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+      var commentId = (classCommentId) ? classCommentId[1] : null;
+      return commentId;
+    });
   }
 
   var chooseToShowComments = function(shouldShowComments, callback) {
