@@ -20,7 +20,6 @@ var events = require('ep_comments_page/static/js/copyPasteEvents');
 var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 var hasCommentOnSelection = events.hasCommentOnSelection;
 var browser = require('ep_etherpad-lite/static/js/browser');
-var Security = require('ep_etherpad-lite/static/js/security');
 
 var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
 
@@ -174,7 +173,6 @@ ep_comments.prototype.init = function(){
     data.commentId = commentId;
     data.padId = clientVars.padId;
     data.commentText = commentText;
-    data.author = clientVars.userId;
 
     self.socket.emit('updateCommentText', data, function (err){
       if(!err) {
@@ -186,18 +184,6 @@ ep_comments.prototype.init = function(){
         // to update the comment or comment reply variable with the new text saved
         self.setCommentOrReplyNewText(commentId, commentText);
       }
-
-      if (err === 'unauth') {
-        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.unauth"] || "You cannot edit other users comments!",  class_name: "error"})
-      } else {
-        $.gritter.add({
-          title: "Error",
-          text: err,
-          sticky: true,
-          class_name: "error"
-        })
-      }
-
     });
   });
 
@@ -1241,7 +1227,7 @@ var hooks = {
     }
 
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
-
+    
     if(context.callstack.docTextChanged && pad.plugins.ep_comments_page){
       pad.plugins.ep_comments_page.setYofComments();
     }
@@ -1376,7 +1362,6 @@ function getRepFromSelector(selector, container){
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
-  isHeading = _(isHeading).bind(context);
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
   editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);

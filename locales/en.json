@@ -1,8 +1,6 @@
 {
   "ep_comments_page.comment" : "Comment",
   "ep_comments_page.comments" : "Comments",
-  "ep_comments_page.error": "Error",
-  "ep_comments_page.error.unauth": "Editing other users comments is not allowed",
   "ep_comments_page.add_comment.title" : "Add new comment on selection",
   "ep_comments_page.add_comment.hint" : "Please first select the text to comment",
   "ep_comments_page.delete_comment.title" : "Delete this comment",
