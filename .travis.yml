@@ -3,6 +3,11 @@ language: node_js
 node_js:
   - "lts/*"
 
+<<<<<<< HEAD
+=======
+cache: false
+
+>>>>>>> f32c8b8f7aad3a21034b347207c134840bf1471a
 services:
   - docker
 
