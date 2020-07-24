@@ -10,7 +10,8 @@ var shared = require('./shared');
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-var prettyDate = require('ep_comments_page/static/js/timeFormat').prettyDate;
+var readCookie = require('ep_etherpad-lite/static/js/pad_utils').readCookie;
+var moment = require('ep_comments_page/static/js/moment-with-locales.min');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 var commentIcons = require('ep_comments_page/static/js/commentIcons');
 var newComment = require('ep_comments_page/static/js/newComment');
@@ -57,6 +58,7 @@ function ep_comments(context){
 ep_comments.prototype.init = function(){
   var self = this;
   var ace = this.ace;
+  moment.locale(readCookie('language'));
 
   // Init prerequisite
   this.findContainers();
@@ -93,6 +95,7 @@ ep_comments.prototype.init = function(){
   // When language is changed, we need to reload the comments to make sure
   // all templates are localized
   html10n.bind('localized', function() {
+    moment.locale(html10n.getLanguage());
     self.localizeExistingComments();
   });
 
@@ -559,7 +562,7 @@ ep_comments.prototype.collectCommentReplies = function(callback){
 
     reply.replyId = replyId;
     reply.text = reply.text || ""
-    reply.date = prettyDate(reply.timestamp);
+    reply.date = moment(reply.timestamp).fromNow();
     reply.formattedDate = new Date(reply.timestamp).toISOString();
 
     var content = $("#replyTemplate").tmpl(reply);
@@ -713,7 +716,7 @@ ep_comments.prototype.localizeExistingComments = function() {
       // localize comment element...
       commentL10n.localize(commentElm);
       // ... and update its date
-      comment.data.date = prettyDate(comment.data.timestamp);
+      comment.data.date = moment(comment.data.timestamp).fromNow();
       comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
     }
   });
@@ -729,7 +732,7 @@ ep_comments.prototype.setComments = function(comments){
 // Set comment data
 ep_comments.prototype.setComment = function(commentId, comment){
   var comments = this.comments;
-  comment.date = prettyDate(comment.timestamp);
+  comment.date = moment(comment.timestamp).fromNow();
   comment.formattedDate = new Date(comment.timestamp).toISOString();
 
   if (comments[commentId] == null) comments[commentId] = {};
@@ -1219,7 +1222,7 @@ var hooks = {
     }
 
     if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
-    
+
     if(context.callstack.docTextChanged && pad.plugins.ep_comments_page){
       pad.plugins.ep_comments_page.setYofComments();
     }
