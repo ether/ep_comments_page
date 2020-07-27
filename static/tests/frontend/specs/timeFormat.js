@@ -1,10 +1,10 @@
-var prettyDate;
+var moment;
 
 describe("ep_comments_page - Time Formatting", function() {
   _.each({'en': 'English', 'af': 'a language not localized yet'}, function(description, lang) {
     describe("in " + description, function(){
       before(function(cb) {
-        loadPrettyDate(function() {
+        loadMoment(function() {
           changeLanguageTo(lang, cb);
         });
         this.timeout(60000);
@@ -16,316 +16,319 @@ describe("ep_comments_page - Time Formatting", function() {
       });
 
       it("returns '12 seconds ago' when time is 12 seconds in the past", function(done) {
-        expect(prettyDate(secondsInThePast(12))).to.be('12 seconds ago');
+        expect(moment(secondsInThePast(12)).fromNow()).to.be('12 seconds ago');
         done();
       });
 
-      it("returns '12 seconds from now' when time is 12 seconds in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(12))).to.be('12 seconds from now');
+      it("returns 'in 12 seconds' when time is 12 seconds in the future", function(done) {
+        expect(moment(secondsInTheFuture(12)).fromNow()).to.be('in 12 seconds');
         done();
       });
 
-      it("returns '1 minute ago' when time is 75 seconds in the past", function(done) {
-        expect(prettyDate(secondsInThePast(75))).to.be('1 minute ago');
+      it("returns 'a minute ago' when time is 75 seconds in the past", function(done) {
+        expect(moment(secondsInThePast(75)).fromNow()).to.be('a minute ago');
         done();
       });
 
-      it("returns '1 minute from now' when time is 75 seconds in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(75))).to.be('1 minute from now');
+      it("returns 'in a minute' when time is 75 seconds in the future", function(done) {
+        expect(moment(secondsInTheFuture(75)).fromNow()).to.be('in a minute');
         done();
       });
 
       it("returns '17 minutes ago' when time is some seconds before 17 minutes in the past", function(done) {
-        expect(prettyDate(secondsInThePast(minutes(17) + 2))).to.be('17 minutes ago');
+        expect(moment(secondsInThePast(minutes(17) + 2)).fromNow()).to.be('17 minutes ago');
         done();
       });
 
-      it("returns '17 minutes from now' when time is some seconds after 17 minutes in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(minutes(17) + 2))).to.be('17 minutes from now');
+      it("returns 'in 17 minutes' when time is some seconds after 17 minutes in the future", function(done) {
+        expect(moment(secondsInTheFuture(minutes(17) + 2)).fromNow()).to.be('in 17 minutes');
         done();
       });
 
-      it("returns '1 hour ago' when time is some seconds before 1 hour in the past", function(done) {
-        expect(prettyDate(secondsInThePast(hours(1) + 3))).to.be('1 hour ago');
+      it("returns 'an hour ago' when time is some seconds before 1 hour in the past", function(done) {
+        expect(moment(secondsInThePast(hours(1) + 3)).fromNow()).to.be('an hour ago');
         done();
       });
 
-      it("returns '1 hour from now' when time is some seconds after 1 hour in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(hours(1) + 3))).to.be('1 hour from now');
+      it("returns 'in an hour' when time is some seconds after 1 hour in the future", function(done) {
+        expect(moment(secondsInTheFuture(hours(1) + 3)).fromNow()).to.be('in an hour');
         done();
       });
 
       it("returns '2 hours ago' when time is some seconds before 2 hours in the past", function(done) {
-        expect(prettyDate(secondsInThePast(hours(2) + 4))).to.be('2 hours ago');
+        expect(moment(secondsInThePast(hours(2) + 4)).fromNow()).to.be('2 hours ago');
         done();
       });
 
-      it("returns '2 hours from now' when time is some seconds after 2 hours in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(hours(2) + 4))).to.be('2 hours from now');
+      it("returns 'in 2 hours' when time is some seconds after 2 hours in the future", function(done) {
+        expect(moment(secondsInTheFuture(hours(2) + 4)).fromNow()).to.be('in 2 hours');
         done();
       });
 
-      it("returns 'yesterday' when time is some seconds before 24 hours in the past", function(done) {
-        expect(prettyDate(secondsInThePast(hours(24) + 5))).to.be('yesterday');
+      it("returns 'a day ago' when time is some seconds before 24 hours in the past", function(done) {
+        expect(moment(secondsInThePast(hours(24) + 5)).fromNow()).to.be('a day ago');
         done();
       });
 
-      it("returns 'tomorrow' when time is some seconds after 24 hours in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(hours(24) + 5))).to.be('tomorrow');
+      it("returns 'in a day' when time is some seconds after 24 hours in the future", function(done) {
+        expect(moment(secondsInTheFuture(hours(24) + 5)).fromNow()).to.be('in a day');
         done();
       });
 
       it("returns '6 days ago' when time is some seconds before 6 days in the past", function(done) {
-        expect(prettyDate(secondsInThePast(days(6) + 6))).to.be('6 days ago');
+        expect(moment(secondsInThePast(days(6) + 6)).fromNow()).to.be('6 days ago');
         done();
       });
 
-      it("returns '6 days from now' when time is some seconds after 6 days in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(days(6) + 6))).to.be('6 days from now');
+      it("returns 'in 6 days' when time is some seconds after 6 days in the future", function(done) {
+        expect(moment(secondsInTheFuture(days(6) + 6)).fromNow()).to.be('in 6 days');
         done();
       });
 
-      it("returns 'last week' when time is some seconds before 7 days in the past", function(done) {
-        expect(prettyDate(secondsInThePast(days(7) + 7))).to.be('last week');
+      it("returns '7 days ago' when time is some seconds before 7 days in the past", function(done) {
+        expect(moment(secondsInThePast(days(7) + 7)).fromNow()).to.be('7 days ago');
         done();
       });
 
-      it("returns 'next week' when time is some seconds after 7 days in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(days(7) + 7))).to.be('next week');
+      it("returns 'in 7 days' when time is some seconds after 7 days in the future", function(done) {
+        expect(moment(secondsInTheFuture(days(7) + 7)).fromNow()).to.be('in 7 days');
         done();
       });
 
-      it("returns '2 weeks ago' when time is some seconds before 2 weeks in the past", function(done) {
-        expect(prettyDate(secondsInThePast(weeks(2) + 8))).to.be('2 weeks ago');
+      it("returns '14 days ago' when time is some seconds before 2 weeks in the past", function(done) {
+        expect(moment(secondsInThePast(weeks(2) + 8)).fromNow()).to.be('14 days ago');
         done();
       });
 
-      it("returns '2 weeks from now' when time is some seconds after 2 weeks in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(weeks(2) + 8))).to.be('2 weeks from now');
+      it("returns 'in 14 days' when time is some seconds after 2 weeks in the future", function(done) {
+        expect(moment(secondsInTheFuture(weeks(2) + 8)).fromNow()).to.be('in 14 days');
         done();
       });
 
-      it("returns 'last month' when time is some seconds before 4 weeks in the past", function(done) {
-        expect(prettyDate(secondsInThePast(weeks(4) + 9))).to.be('last month');
+      it("returns 'a month ago' when time is some seconds before 4 weeks in the past", function(done) {
+        expect(moment(secondsInThePast(weeks(4) + 9)).fromNow()).to.be('a month ago');
         done();
       });
 
-      it("returns 'next month' when time is some seconds after 4 weeks in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(weeks(4) + 9))).to.be('next month');
+      it("returns 'in a month' when time is some seconds after 4 weeks in the future", function(done) {
+        expect(moment(secondsInTheFuture(weeks(4) + 9)).fromNow()).to.be('in a month');
         done();
       });
 
-      it("returns '9 months ago' when time is some seconds before 9 months in the past", function(done) {
-        expect(prettyDate(secondsInThePast(months(9) + 10))).to.be('9 months ago');
+      it("returns '8 months ago' when time is some seconds before 9 months in the past", function(done) {
+        expect(moment(secondsInThePast(months(9) + 10)).fromNow()).to.be('8 months ago');
         done();
       });
 
-      it("returns '9 months from now' when time is some seconds after 9 months in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(months(9) + 10))).to.be('9 months from now');
+      it("returns 'in 8 months' when time is some seconds after 9 months in the future", function(done) {
+        expect(moment(secondsInTheFuture(months(9) + 10)).fromNow()).to.be('in 8 months');
         done();
       });
 
-      it("returns 'last year' when time is some seconds before 12 months in the past", function(done) {
-        expect(prettyDate(secondsInThePast(months(12) + 11))).to.be('last year');
+      it("returns 'a year ago' when time is some seconds before 12 months in the past", function(done) {
+        expect(moment(secondsInThePast(months(12) + 11)).fromNow()).to.be('a year ago');
         done();
       });
 
-      it("returns 'next year' when time is some seconds after 12 months in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(months(12) + 11))).to.be('next year');
+      it("returns 'in a year' when time is some seconds after 12 months in the future", function(done) {
+        expect(moment(secondsInTheFuture(months(12) + 11)).fromNow()).to.be('in a year');
         done();
       });
 
-      it("returns '15 years ago' when time is some seconds before 15 years in the past", function(done) {
-        expect(prettyDate(secondsInThePast(years(15) + 12))).to.be('15 years ago');
+      it("returns '14 years ago' when time is some seconds before 15 years in the past", function(done) {
+        expect(moment(secondsInThePast(years(15) + 12)).fromNow()).to.be('14 years ago');
         done();
       });
 
-      it("returns '15 years from now' when time is some seconds after 15 years in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(years(15) + 12))).to.be('15 years from now');
+      it("returns ' in 14 years' when time is some seconds after 15 years in the future", function(done) {
+        expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('in 14 years');
         done();
       });
 
+      //momentjs doesn't support century
+/*
       it("returns 'last century' when time is some seconds before 100 years in the past", function(done) {
-        expect(prettyDate(secondsInThePast(years(100) + 13))).to.be('last century');
+        expect(moment(secondsInThePast(years(100) + 13)).fromNow()).to.be('last century');
         done();
       });
 
       it("returns 'next century' when time is some seconds after 100 years in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(years(100) + 13))).to.be('next century');
+        expect(moment(secondsInTheFuture(years(100) + 13)).fromNow()).to.be('next century');
         done();
       });
 
       it("returns '2 centuries ago' when time is some seconds before 2 centuries in the past", function(done) {
-        expect(prettyDate(secondsInThePast(centuries(2) + 14))).to.be('2 centuries ago');
+        expect(moment(secondsInThePast(centuries(2) + 14)).fromNow()).to.be('2 centuries ago');
         done();
       });
 
       it("returns '2 centuries from now' when time is some seconds after 2 centuries in the future", function(done) {
-        expect(prettyDate(secondsInTheFuture(centuries(2) + 14))).to.be('2 centuries from now');
+        expect(moment(secondsInTheFuture(centuries(2) + 14)).fromNow()).to.be('2 centuries from now');
         done();
-      });
+      }); */
 
     })
   });
 
   describe("in Portuguese", function(){
     before(function(cb) {
-      loadPrettyDate(function() {
+      loadMoment(function() {
         changeLanguageTo('pt-br', cb);
+        moment.locale('pt-br');
       });
       this.timeout(60000);
     });
 
-    it("returns '12 segundos atrás' when time is 12 seconds in the past", function(done) {
-      expect(prettyDate(secondsInThePast(12))).to.be('12 segundos atrás');
+    it("returns 'há 12 segundos' when time is 12 seconds in the past", function(done) {
+      expect(moment(secondsInThePast(12)).fromNow()).to.be('há 12 segundos');
       done();
     });
 
-    it("returns 'daqui a 12 segundos' when time is 12 seconds in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(12))).to.be('daqui a 12 segundos');
+    it("returns 'em 12 segundos' when time is 12 seconds in the future", function(done) {
+      expect(moment(secondsInTheFuture(12)).fromNow()).to.be('em 12 segundos');
       done();
     });
 
-    it("returns '1 minuto atrás' when time is 75 seconds in the past", function(done) {
-      expect(prettyDate(secondsInThePast(75))).to.be('1 minuto atrás');
+    it("returns 'há um minuto' when time is 75 seconds in the past", function(done) {
+      expect(moment(secondsInThePast(75)).fromNow()).to.be('há um minuto');
       done();
     });
 
-    it("returns 'daqui a 1 minuto' when time is 75 seconds in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(75))).to.be('daqui a 1 minuto');
+    it("returns 'em um minuto' when time is 75 seconds in the future", function(done) {
+      expect(moment(secondsInTheFuture(75)).fromNow()).to.be('em um minuto');
       done();
     });
 
-    it("returns '17 minutos atrás' when time is some seconds before 17 minutes in the past", function(done) {
-      expect(prettyDate(secondsInThePast(minutes(17) + 2))).to.be('17 minutos atrás');
+    it("returns 'há 17 minutos' when time is some seconds before 17 minutes in the past", function(done) {
+      expect(moment(secondsInThePast(minutes(17) + 2)).fromNow()).to.be('há 17 minutos');
       done();
     });
 
-    it("returns 'daqui a 17 minutos' when time is some seconds after 17 minutes in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(minutes(17) + 2))).to.be('daqui a 17 minutos');
+    it("returns 'em 17 minutos' when time is some seconds after 17 minutes in the future", function(done) {
+      expect(moment(secondsInTheFuture(minutes(17) + 2)).fromNow()).to.be('em 17 minutos');
       done();
     });
 
-    it("returns '1 hora atrás' when time is some seconds before 1 hour in the past", function(done) {
-      expect(prettyDate(secondsInThePast(hours(1) + 3))).to.be('1 hora atrás');
+    it("returns 'há uma hora' when time is some seconds before 1 hour in the past", function(done) {
+      expect(moment(secondsInThePast(hours(1) + 3)).fromNow()).to.be('há uma hora');
       done();
     });
 
-    it("returns 'daqui a 1 hora' when time is some seconds after 1 hour in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(hours(1) + 3))).to.be('daqui a 1 hora');
+    it("returns 'em uma hora' when time is some seconds after 1 hour in the future", function(done) {
+      expect(moment(secondsInTheFuture(hours(1) + 3)).fromNow()).to.be('em uma hora');
       done();
     });
 
-    it("returns '2 horas atrás' when time is some seconds before 2 hours in the past", function(done) {
-      expect(prettyDate(secondsInThePast(hours(2) + 4))).to.be('2 horas atrás');
+    it("returns 'há 2 horas' when time is some seconds before 2 hours in the past", function(done) {
+      expect(moment(secondsInThePast(hours(2) + 4)).fromNow()).to.be('há 2 horas');
       done();
     });
 
-    it("returns 'daqui a 2 horas' when time is some seconds after 2 hours in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(hours(2) + 4))).to.be('daqui a 2 horas');
+    it("returns 'em 2 horas' when time is some seconds after 2 hours in the future", function(done) {
+      expect(moment(secondsInTheFuture(hours(2) + 4)).fromNow()).to.be('em 2 horas');
       done();
     });
 
-    it("returns 'ontem' when time is some seconds before 24 hours in the past", function(done) {
-      expect(prettyDate(secondsInThePast(hours(24) + 5))).to.be('ontem');
+    it("returns 'há um dia' when time is some seconds before 24 hours in the past", function(done) {
+      expect(moment(secondsInThePast(hours(24) + 5)).fromNow()).to.be('há um dia');
       done();
     });
 
-    it("returns 'amanhã' when time is some seconds after 24 hours in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(hours(24) + 5))).to.be('amanhã');
+    it("returns 'em um dia' when time is some seconds after 24 hours in the future", function(done) {
+      expect(moment(secondsInTheFuture(hours(24) + 5)).fromNow()).to.be('em um dia');
       done();
     });
 
-    it("returns '6 dias atrás' when time is some seconds before 6 days in the past", function(done) {
-      expect(prettyDate(secondsInThePast(days(6) + 6))).to.be('6 dias atrás');
+    it("returns 'há 6 dias' when time is some seconds before 6 days in the past", function(done) {
+      expect(moment(secondsInThePast(days(6) + 6)).fromNow()).to.be('há 6 dias');
       done();
     });
 
-    it("returns 'daqui a 6 dias' when time is some seconds after 6 days in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(days(6) + 6))).to.be('daqui a 6 dias');
+    it("returns 'em 6 dias' when time is some seconds after 6 days in the future", function(done) {
+      expect(moment(secondsInTheFuture(days(6) + 6)).fromNow()).to.be('em 6 dias');
       done();
     });
 
-    it("returns 'semana passada' when time is some seconds before 7 days in the past", function(done) {
-      expect(prettyDate(secondsInThePast(days(7) + 7))).to.be('semana passada');
+    it("returns 'há 7 dias' when time is some seconds before 7 days in the past", function(done) {
+      expect(moment(secondsInThePast(days(7) + 7)).fromNow()).to.be('há 7 dias');
       done();
     });
 
-    it("returns 'próxima semana' when time is some seconds after 7 days in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(days(7) + 7))).to.be('próxima semana');
+    it("returns 'em 7 dias' when time is some seconds after 7 days in the future", function(done) {
+      expect(moment(secondsInTheFuture(days(7) + 7)).fromNow()).to.be('em 7 dias');
       done();
     });
 
-    it("returns '2 semanas atrás' when time is some seconds before 2 weeks in the past", function(done) {
-      expect(prettyDate(secondsInThePast(weeks(2) + 8))).to.be('2 semanas atrás');
+    it("returns 'há 14 dias' when time is some seconds before 2 weeks in the past", function(done) {
+      expect(moment(secondsInThePast(weeks(2) + 8)).fromNow()).to.be('há 14 dias');
       done();
     });
 
-    it("returns 'daqui a 2 semanas' when time is some seconds after 2 weeks in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(weeks(2) + 8))).to.be('daqui a 2 semanas');
+    it("returns 'em 14 dias' when time is some seconds after 2 weeks in the future", function(done) {
+      expect(moment(secondsInTheFuture(weeks(2) + 8)).fromNow()).to.be('em 14 dias');
       done();
     });
 
-    it("returns 'mês passado' when time is some seconds before 4 weeks in the past", function(done) {
-      expect(prettyDate(secondsInThePast(weeks(4) + 9))).to.be('mês passado');
+    it("returns 'há um mês' when time is some seconds before 4 weeks in the past", function(done) {
+      expect(moment(secondsInThePast(weeks(4) + 9)).fromNow()).to.be('há um mês');
       done();
     });
 
-    it("returns 'próximo mês' when time is some seconds after 4 weeks in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(weeks(4) + 9))).to.be('próximo mês');
+    it("returns 'em um mês' when time is some seconds after 4 weeks in the future", function(done) {
+      expect(moment(secondsInTheFuture(weeks(4) + 9)).fromNow()).to.be('em um mês');
       done();
     });
 
-    it("returns '9 meses atrás' when time is some seconds before 9 months in the past", function(done) {
-      expect(prettyDate(secondsInThePast(months(9) + 10))).to.be('9 meses atrás');
+    it("returns 'há 8 meses' when time is some seconds before 9 months in the past", function(done) {
+      expect(moment(secondsInThePast(months(9) + 10)).fromNow()).to.be('há 8 meses');
       done();
     });
 
-    it("returns 'daqui a 9 meses' when time is some seconds after 9 months in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(months(9) + 10))).to.be('daqui a 9 meses');
+    it("returns 'em 8 meses' when time is some seconds after 9 months in the future", function(done) {
+      expect(moment(secondsInTheFuture(months(9) + 10)).fromNow()).to.be('em 8 meses');
       done();
     });
 
-    it("returns 'ano passado' when time is some seconds before 12 months in the past", function(done) {
-      expect(prettyDate(secondsInThePast(months(12) + 11))).to.be('ano passado');
+    it("returns 'há um ano' when time is some seconds before 12 months in the past", function(done) {
+      expect(moment(secondsInThePast(months(12) + 11)).fromNow()).to.be('há um ano');
       done();
     });
 
-    it("returns 'próximo ano' when time is some seconds after 12 months in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(months(12) + 11))).to.be('próximo ano');
+    it("returns 'em um ano' when time is some seconds after 12 months in the future", function(done) {
+      expect(moment(secondsInTheFuture(months(12) + 11)).fromNow()).to.be('em um ano');
       done();
     });
 
-    it("returns '15 anos atrás' when time is some seconds before 15 years in the past", function(done) {
-      expect(prettyDate(secondsInThePast(years(15) + 12))).to.be('15 anos atrás');
+    it("returns 'há 14 anos' when time is some seconds before 15 years in the past", function(done) {
+      expect(moment(secondsInThePast(years(15) + 12)).fromNow()).to.be('há 14 anos');
       done();
     });
 
-    it("returns 'daqui a 15 anos' when time is some seconds after 15 years in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(years(15) + 12))).to.be('daqui a 15 anos');
+    it("returns 'em 14 anos' when time is some seconds after 15 years in the future", function(done) {
+      expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('em 14 anos');
       done();
     });
-
+/* Moment doesn't support centuries
     it("returns 'século passado' when time is some seconds before 100 years in the past", function(done) {
-      expect(prettyDate(secondsInThePast(years(100) + 13))).to.be('século passado');
+      expect(moment(secondsInThePast(years(100) + 13)).fromNow()).to.be('século passado');
       done();
     });
 
     it("returns 'próximo século' when time is some seconds after 100 years in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(years(100) + 13))).to.be('próximo século');
+      expect(moment(secondsInTheFuture(years(100) + 13)).fromNow()).to.be('próximo século');
       done();
     });
 
     it("returns '2 séculos atrás' when time is some seconds before 2 centuries in the past", function(done) {
-      expect(prettyDate(secondsInThePast(centuries(2) + 14))).to.be('2 séculos atrás');
+      expect(moment(secondsInThePast(centuries(2) + 14)).fromNow()).to.be('2 séculos atrás');
       done();
     });
 
     it("returns 'daqui a 2 séculos' when time is some seconds after 2 centuries in the future", function(done) {
-      expect(prettyDate(secondsInTheFuture(centuries(2) + 14))).to.be('daqui a 2 séculos');
+      expect(moment(secondsInTheFuture(centuries(2) + 14)).fromNow()).to.be('daqui a 2 séculos');
       done();
     });
-
+*/
   });
 
   /* ********** Helper functions ********** */
@@ -366,15 +369,14 @@ describe("ep_comments_page - Time Formatting", function() {
     return 100 * years(count);
   }
 
-  var loadPrettyDate = function(done) {
+  var loadMoment = function(done) {
     helper.newPad(function() {
       var chrome$ = helper.padChrome$;
-
-      chrome$.getScript('/static/plugins/ep_comments_page/static/js/timeFormat.js')
+      chrome$.getScript('/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js')
       .done(function(code){
         chrome$.window.eval(code);
-        prettyDate = chrome$.window.prettyDate;
-
+        moment = chrome$.window.moment;
+        moment.relativeTimeThreshold('ss', 0);
         done();
       })
       .fail(function(jqxhr, settings, exception) {
