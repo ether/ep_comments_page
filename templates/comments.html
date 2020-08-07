@@ -27,9 +27,8 @@
                 <label for="suggestion-checkbox-${commentId}" class="label-suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
             </p>
             <div class="suggestion suggestion-create">
-                <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggest_change_from">Suggest Change From</span>
-                <span class="from-value">${changeFrom}</span>
-                <span class="to-label" data-l10n-id="ep_comments_page.comments_template.to">To</span>
+                <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggest_change_from"  data-l10n-args='{"changeFrom": "${changeFrom}"}'>Suggest Change From</span>
+                <span class="hidden from-value">${changeFrom}</span>
                 <textarea class="to-value"></textarea>
             </div>
 
@@ -98,10 +97,7 @@
     {{if changeTo}}
     <form class="comment-changeTo-form suggestion-display">
         <div>
-            <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from">Suggested Change From</span>
-            <span class="from-value">${changeFrom}</span>
-            <span class="to-label" data-l10n-id="ep_comments_page.comments_template.to">To</span>
-            <span class="to-value">${changeTo}</span>
+            <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from" data-l10n-args='{"changeFrom": "${changeFrom}", "changeTo": "${changeTo}"}'>Suggested Change From</span>
         </div>
         <!-- Approve/revert button -->
         <input type="Submit" class="btn btn-primary approve-suggestion-btn acl-write" value="Accept Change" data-l10n-id="ep_comments_page.comments_template.accept_change.value">

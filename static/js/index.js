@@ -967,9 +967,6 @@ ep_comments.prototype.displayNewCommentForm = function() {
 
   self.createNewCommentFormIfDontExist(rep);
 
-  // Write the text to the changeFrom form
-  $('#newComment').find(".from-value").text(selectedText);
-
   // Display form
   setTimeout(function() {
     var position = getXYOffsetOfRep($('#newComment') ,rep);
@@ -1051,6 +1048,8 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
   var self = this;
 
   // If a new comment box doesn't already exist, create one
+
+  data.changeFrom = self.getSelectedText(rep);
   newComment.insertNewCommentPopupIfDontExist(data, function(comment, index) {
     if(comment.changeTo){
       data.comment.changeFrom = comment.changeFrom;
