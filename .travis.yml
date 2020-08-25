@@ -5,13 +5,18 @@ node_js:
 
 cache: false
 
+before_install:
+  - sudo add-apt-repository -y ppa:libreoffice/ppa
+  - sudo apt-get update
+  - sudo apt-get -y install libreoffice
+  - sudo apt-get -y install libreoffice-pdfimport
+
 services:
   - docker
 
 install:
   - "bin/installDeps.sh"
   - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-  - "npm install ep_test_line_attrib"
 
 before_script:
   - "tests/frontend/travis/sauce_tunnel.sh"
@@ -28,29 +33,29 @@ jobs:
   include:
     - name: "Run the Backend tests"
       install:
-        - "mkdir ep_comments_page"
-        - "mv !(ep_comments_page) ep_comments_page"
+        - "npm install"
+        - "mkdir ep_draw"
+        - "mv !(ep_draw) ep_draw"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
-        - "mv ../ep_comments_page node_modules"
+        - "mv ../ep_draw node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-        - "npm install ep_test_line_attrib"
         - "cd src && npm install && cd -"
       script:
         - "tests/frontend/travis/runnerBackend.sh"
     - name: "Test the Frontend"
       install:
-        - "mkdir ep_comments_page"
-        - "mv !(ep_comments_page) ep_comments_page"
+        - "npm install"
+        - "mkdir ep_draw"
+        - "mv !(ep_draw) ep_draw"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
-        - "mv ../ep_comments_page node_modules"
+        - "mv ../ep_draw node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-        - "npm install ep_test_line_attrib"
       script:
         - "tests/frontend/travis/runner.sh"
 
