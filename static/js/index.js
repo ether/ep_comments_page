@@ -726,12 +726,13 @@ ep_comments.prototype.localizeExistingComments = function() {
     if (commentId !== null) {
       var commentElm  = self.container.find('#'+ commentId);
       var comment     = comments[commentId];
-
-      // localize comment element...
-      commentL10n.localize(commentElm);
-      // ... and update its date
-      comment.data.date = moment(comment.data.timestamp).fromNow();
-      comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
+      if (comment) {
+        // localize comment element...
+        commentL10n.localize(commentElm);
+        // ... and update its date
+        comment.data.date = moment(comment.data.timestamp).fromNow();
+        comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
+      }
     }
   });
 };
