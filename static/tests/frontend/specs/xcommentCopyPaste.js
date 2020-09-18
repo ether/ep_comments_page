@@ -9,7 +9,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
   });
 
   context('when user copies a text with a comment', function(){
-    this.timeout = 60000;
+    this.timeout(60000);
     var commentText = 'My comment';
     var replyText = 'A reply';
     before(function (cb) {
