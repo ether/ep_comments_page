@@ -206,6 +206,7 @@ describe('create comment replies API', function() {
 describe('create comment reply API broadcast', function() {
   var padID;
   var timesMessageWasReceived;
+  let socket;
 
   // NOTE: this hook will timeout if you don't run your Etherpad in
   // loadTest mode. Be sure to adjust your settings.json when running
@@ -223,7 +224,7 @@ describe('create comment reply API broadcast', function() {
         commentID = comment;
 
         // ... listens to the broadcast message:
-        var socket = io.connect(appUrl + "/comment");
+        socket = io.connect(appUrl + "/comment");
         var req = { padId: padID };
         // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
         socket.emit('getComments', req, function (res){
@@ -236,6 +237,11 @@ describe('create comment reply API broadcast', function() {
       });
     });
   });
+
+  afterEach(function(done){
+    socket.close();
+    done();
+  })
 
   it('broadcasts comment reply creation to other clients of same pad', function(done) {
     // create first reply...
