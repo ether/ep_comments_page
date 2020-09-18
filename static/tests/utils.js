@@ -5,7 +5,7 @@ var supertest = require('ep_etherpad-lite/node_modules/supertest'),
            fs = require('fs'),
          path = require('path'),
       //      io = require('socket.io-client'),
-      request = require('request'),
+      request = require('ep_etherpad-lite/node_modules/request'),
           api = supertest(appUrl),
  randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 

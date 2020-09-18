@@ -1,5 +1,5 @@
 var       supertest = require('ep_etherpad-lite/node_modules/supertest'),
-                 io = require('socket.io-client'),
+                 io = require('ep_etherpad-lite/node_modules/socket.io-client'),
               utils = require('../../../utils'),
           createPad = utils.createPad,
          readOnlyId = utils.readOnlyId,
