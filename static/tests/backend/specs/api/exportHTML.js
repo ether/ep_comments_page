@@ -1,7 +1,7 @@
 var supertest = require('ep_etherpad-lite/node_modules/supertest'),
            fs = require('fs'),
          path = require('path'),
-      request = require('request'),
+      request = require('ep_etherpad-lite/node_modules/request'),
         utils = require('../../../utils'),
        apiKey = utils.apiKey,
     codeToBe0 = utils.codeToBe0,
