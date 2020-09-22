@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Komentarz",
   "ep_comments_page.comments" : "Komentarze",
   "ep_comments_page.add_comment.title" : "Dodaj nowy komentarz do sekcji",
+  "ep_comments_page.add_comment" : "Dodaj nowy komentarz do sekcji",
   "ep_comments_page.add_comment.hint" : "Najpierw wybierz tekst do skomentowania",
   "ep_comments_page.delete_comment.title" : "Usuń komentarz",
   "ep_comments_page.show_comments" : "Pokaż komentarze",

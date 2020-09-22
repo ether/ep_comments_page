@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Примечание",
   "ep_comments_page.comments" : "Примечания",
   "ep_comments_page.add_comment.title" : "Добавьте примечание к выделенному тексту",
+  "ep_comments_page.add_comment" : "Добавьте примечание к выделенному тексту",
   "ep_comments_page.add_comment.hint" : "Выделите текст чтобы создать примечание",
   "ep_comments_page.delete_comment.title" : "Удалить примечание",
   "ep_comments_page.edit_comment.title" : "Отредактировать примечание",
