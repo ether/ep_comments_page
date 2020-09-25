@@ -17,7 +17,7 @@
   "ep_comments_page.comments_template.comment.value" : "Kommentera",
   "ep_comments_page.comments_template.cancel.value" : "Avbryt",
   "ep_comments_page.comments_template.reply.value" : "Svara",
-  "ep_comments_page.comments_template.reply.placeholder" : "Avar",
+  "ep_comments_page.comments_template.reply.placeholder" : "Svar",
   "ep_comments_page.time.seconds.past" : "för {{count}} sekunder sedan",
   "ep_comments_page.time.seconds.future" : "om {{count}} sekunder",
   "ep_comments_page.time.one_minute.past" : "för en minut sedan",
