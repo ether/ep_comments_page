@@ -5,14 +5,12 @@ var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 var shared = require('./static/js/shared');
 
-exports.getComments = function (padId, callback)
+exports.getComments = async function (padId, callback)
 {
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
+    padId = await readOnlyManager.getPadId(padId);
   };
 
   // Not sure if we will encouter race conditions here..  Be careful.
@@ -64,14 +62,12 @@ exports.addComment = function(padId, data, callback)
   });
 };
 
-exports.bulkAddComments = function(padId, data, callback)
+exports.bulkAddComments = async function(padId, data, callback)
 {
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
+    padId = await readOnlyManager.getPadId(padId);
   };
 
   //get the entry
@@ -126,13 +122,11 @@ exports.copyComments = function(originalPadId, newPadID, callback)
   });
 };
 
-exports.getCommentReplies = function (padId, callback){
+exports.getCommentReplies = async function (padId, callback){
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
+    padId = await readOnlyManager.getPadId(padId);
   };
 
   //get the globalComments replies
@@ -163,13 +157,11 @@ exports.addCommentReply = function(padId, data, callback){
   });
 };
 
-exports.bulkAddCommentReplies = function(padId, data, callback){
+exports.bulkAddCommentReplies = async function(padId, data, callback){
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
+    padId = await readOnlyManager.getPadId(padId);
   };
 
   //get the entry
@@ -227,15 +219,13 @@ exports.copyCommentReplies = function(originalPadId, newPadID, callback){
   });
 };
 
-exports.changeAcceptedState = function(padId, commentId, state, callback){
+exports.changeAcceptedState = async function(padId, commentId, state, callback){
   // Given a comment we update that comment to say the change was accepted or reverted
 
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
-    readOnlyManager.getPadId(padId, function(err, rwPadId){
-      padId = rwPadId;
-    });
+    padId = await readOnlyManager.getPadId(padId);
   };
 
   // If we're dealing with comment replies we need to a different query
@@ -269,16 +259,14 @@ exports.changeAcceptedState = function(padId, commentId, state, callback){
   });
 }
 
-exports.changeCommentText = function(padId, commentId, commentText, callback){
+exports.changeCommentText = async function(padId, commentId, commentText, callback){
   var commentTextIsNotEmpty = commentText.length > 0;
   if(commentTextIsNotEmpty){
     // Given a comment we update the comment text
     // We need to change readOnly PadIds to Normal PadIds
     var isReadOnly = padId.indexOf("r.") === 0;
     if(isReadOnly){
-      readOnlyManager.getPadId(padId, function(err, rwPadId){
-        padId = rwPadId;
-      });
+      padId = await readOnlyManager.getPadId(padId);
     };
 
     // If we're dealing with comment replies we need to a different query
