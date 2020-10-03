@@ -35,7 +35,7 @@ jobs:
       install:
         - "npm install"
         - "mkdir ep_comments_page"
-        - "mv !(ep_comments_page) ep_comments_page"
+        - "mv !(ep_comments) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
@@ -49,7 +49,7 @@ jobs:
       install:
         - "npm install"
         - "mkdir ep_comments_page"
-        - "mv !(ep_comments_page) ep_comments_page"
+        - "mv !(ep_comments) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
@@ -63,3 +63,6 @@ notifications:
   irc:
     channels:
       - "irc.freenode.org#etherpad-lite-dev"
+
+##ETHERPAD_TRAVIS_V=3
+## Travis configuration automatically created using bin/plugins/updateAllPluginsScript.sh
