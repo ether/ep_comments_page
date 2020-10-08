@@ -3,11 +3,9 @@ var _ = require('ep_etherpad-lite/static/js/underscore');
 
 
 // Add the props to be supported in export
-exports.exportHtmlAdditionalTagsWithData = function(hook, pad, cb){
+exports.exportHtmlAdditionalTagsWithData = async (hookName, pad) => {
   var comments_used = findAllCommentUsedOn(pad);
-  var tags = transformCommentsIntoTags(comments_used);
-
-  cb(tags);
+  return transformCommentsIntoTags(comments_used);
 };
 
 // Iterate over pad attributes to find only the comment ones
@@ -30,12 +28,7 @@ function transformCommentsIntoTags(comment_names) {
   });
 }
 
-// TODO: when "asyncLineHTMLForExport" hook is available on Etherpad, use it instead of "getLineHTMLForExport"
-// exports.asyncLineHTMLForExport = function (hook, context, cb) {
-//   cb(rewriteLine);
-// }
-
-exports.getLineHTMLForExport = function (hook, context) {
+exports.getLineHTMLForExport = async (hookName, context) => {
   rewriteLine(context);
 }
 
