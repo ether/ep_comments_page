@@ -51,45 +51,57 @@ exports.socketio = function (hook_name, args, cb){
     socket.on('addComment', async (data, respond) => {
       var padId = data.padId;
       var content = data.comment;
-      const [commentId, comment] = await commentManager.addComment(padId, content);
+      const [padIds, commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
-        socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
+        [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+          socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
+        });
         respond(commentId, comment);
       }
     });
 
     socket.on('deleteComment', async (data, respond) => {
       // delete the comment on the database
-      await commentManager.deleteComment(data.padId, data.commentId);
+      const padIds = await commentManager.deleteComment(data.padId, data.commentId);
       // Broadcast to all other users that this comment was deleted
-      socket.broadcast.to(data.padId).emit('commentDeleted', data.commentId);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+      });
     });
 
     socket.on('revertChange', async (data, respond) => {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
-      await commentManager.changeAcceptedState(padId, data.commentId, false);
-      socket.broadcast.to(padId).emit('changeReverted', data.commentId);
+      const padIds = await commentManager.changeAcceptedState(padId, data.commentId, false);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
+      });
     });
 
     socket.on('acceptChange', async (data, respond) => {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
-      await commentManager.changeAcceptedState(padId, data.commentId, true);
-      socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+      const padIds = await commentManager.changeAcceptedState(padId, data.commentId, true);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
+      });
     });
 
     socket.on('bulkAddComment', async (padId, data, respond) => {
-      const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
-      socket.broadcast.to(padId).emit('pushAddCommentInBulk');
+      const [padIds, commentIds, comments] = await commentManager.bulkAddComments(padId, data);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('pushAddCommentInBulk');
+      });
       respond(_.object(commentIds, comments)); // {c-123:data, c-124:data}
     });
 
     socket.on('bulkAddCommentReplies', async (padId, data, respond) => {
-      const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
-      socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
+      const [padIds, repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
+      });
       respond(_.zip(repliesId, replies));
     });
 
@@ -99,16 +111,21 @@ exports.socketio = function (hook_name, args, cb){
       var padId = data.padId;
       var commentId = data.commentId;
       var commentText = data.commentText;
-      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
-      if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+      const [padIds, failed] =
+            await commentManager.changeCommentText(padId, commentId, commentText);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+      });
       respond(failed);
     });
 
     socket.on('addCommentReply', async (data, respond) => {
       const padId = data.padId;
-      const [replyId, reply] = await commentManager.addCommentReply(padId, data);
+      const [padIds, replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
-      socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+      [padIds.padId, padIds.readOnlyPadId].forEach(function(padId) {
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+      });
       respond(replyId, reply);
     });
   });
