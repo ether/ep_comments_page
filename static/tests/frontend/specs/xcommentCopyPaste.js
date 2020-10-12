@@ -17,7 +17,11 @@ describe('ep_comments_page - Comment copy and paste', function () {
         helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
           var $firstLine = helper.padInner$('div').eq(0);
           helper.selectLines($firstLine, $firstLine, 1, 8); //'omethin'
-          event = helperFunctions.copyLine();
+          try{
+            event = helperFunctions.copyLine();
+          }catch(e){
+            // suppress e.preventDefault issue with certain browsers
+          }
           cb();
         });
       });
