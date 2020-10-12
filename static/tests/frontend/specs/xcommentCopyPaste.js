@@ -21,7 +21,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
             event = helperFunctions.copyLine();
           }catch(e){
             // suppress e.preventDefault issue with certain browsers
-          }
+          };
           cb();
         });
       });
@@ -107,7 +107,11 @@ describe('ep_comments_page - Comment copy and paste', function () {
       helperFunctions.createPad(this, function(){
         helperFunctions.enlargeScreen(function(){
           helperFunctions.addComentAndReplyToLine(FIRST_LINE, commentText, replyText, function(){
-            event = helperFunctions.copyLine();
+            try{
+              event = helperFunctions.copyLine();
+            }catch(e){
+              // suppress e.preventDefault issue with certain browsers
+            };
             helperFunctions.pasteTextOnLine(event, SECOND_LINE);
             cb();
           });
