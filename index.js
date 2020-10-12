@@ -24,15 +24,15 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
     if(apool.numToAttrib && apool.numToAttrib[0] && apool.numToAttrib[0][0]){
       if(apool.numToAttrib[0][0] === "comment"){
         // Comment change, allow it to override readonly security model!!
-        callback(true);
+        return callback(true);
       }else{
-        callback();
+        return callback();
       }
     }else{
-      callback();
+      return callback();
     }
   }else{
-    callback();
+    return callback();
   }
 };
 
