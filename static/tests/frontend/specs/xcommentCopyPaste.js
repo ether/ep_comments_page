@@ -112,7 +112,11 @@ describe('ep_comments_page - Comment copy and paste', function () {
             }catch(e){
               // suppress e.preventDefault issue with certain browsers
             };
-            helperFunctions.pasteTextOnLine(event, SECOND_LINE);
+            try{
+              helperFunctions.pasteTextOnLine(event, SECOND_LINE);
+            }catch(e){
+              // allowing helper to fail silently.
+            };
             cb();
           });
         });
