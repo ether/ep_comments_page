@@ -11,11 +11,13 @@ exports.padRemove = function(hook_name, context, callback) {
   commentManager.deleteCommentReplies(context.padID, function() {
     commentManager.deleteComments(context.padID, callback);
   });
+  return callback();
 }
 exports.padCopy = function(hook_name, context, callback) {
   commentManager.copyComments(context.originalPad.id, context.destinationID, function() {
     commentManager.copyCommentReplies(context.originalPad.id, context.destinationID, callback);
   });
+  return callback();
 }
 
 exports.handleMessageSecurity = function(hook_name, context, callback){
@@ -170,6 +172,7 @@ exports.socketio = function (hook_name, args, cb){
     });
 
   });
+  return cb();
 };
 
 exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
@@ -301,7 +304,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       }
     });
   });
-
+  return callback();
 }
 
 var broadcastCommentsAdded = function(padId, commentIds, comments) {
