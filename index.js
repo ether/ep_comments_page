@@ -49,32 +49,32 @@ exports.socketio = function (hook_name, args, cb){
   .on('connection', function (socket) {
 
     // Join the rooms
-    socket.on('getComments', function (data, callback) {
+    socket.on('getComments', (data, respond) => {
       var padId = data.padId;
       socket.join(padId);
       commentManager.getComments(padId, function (err, comments){
-        callback(comments);
+        respond(comments);
       });
     });
 
-    socket.on('getCommentReplies', function (data, callback) {
+    socket.on('getCommentReplies', (data, respond) => {
       var padId = data.padId;
       commentManager.getCommentReplies(padId, function (err, replies){
-        callback(replies);
+        respond(replies);
       });
     });
 
     // On add events
-    socket.on('addComment', function (data, callback) {
+    socket.on('addComment', (data, respond) => {
       var padId = data.padId;
       var content = data.comment;
       commentManager.addComment(padId, content, function (err, commentId, comment){
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
-        callback(commentId, comment);
+        respond(commentId, comment);
       });
     });
 
-    socket.on('deleteComment', function(data, callback) {
+    socket.on('deleteComment', (data, respond) => {
       // delete the comment on the database
       commentManager.deleteComment(data.padId, data.commentId, function (){
         // Broadcast to all other users that this comment was deleted
@@ -83,7 +83,7 @@ exports.socketio = function (hook_name, args, cb){
 
     });
 
-    socket.on('revertChange', function(data, callback) {
+    socket.on('revertChange', (data, respond) => {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
@@ -92,7 +92,7 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
-    socket.on('acceptChange', function(data, callback) {
+    socket.on('acceptChange', (data, respond) => {
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
@@ -101,23 +101,23 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
-    socket.on('bulkAddComment', function (padId, data, callback) {
+    socket.on('bulkAddComment', (padId, data, respond) => {
       commentManager.bulkAddComments(padId, data, function(error, commentsId, comments){
         socket.broadcast.to(padId).emit('pushAddCommentInBulk');
         var commentWithCommentId = _.object(commentsId, comments); // {c-123:data, c-124:data}
-        callback(commentWithCommentId)
+        respond(commentWithCommentId);
       });
     });
 
-    socket.on('bulkAddCommentReplies', function(padId, data, callback){
+    socket.on('bulkAddCommentReplies', (padId, data, respond) => {
       commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
         socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
         var repliesWithReplyId = _.zip(repliesId, replies);
-        callback(repliesWithReplyId);
+        respond(repliesWithReplyId);
       });
     });
 
-    socket.on('updateCommentText', function(data, callback) {
+    socket.on('updateCommentText', (data, respond) => {
       // Broadcast to all other users that the comment text was changed.
       // Note that commentId here can either be the commentId or replyId..
       var padId = data.padId;
@@ -127,11 +127,11 @@ exports.socketio = function (hook_name, args, cb){
         if(!err){
           socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
         }
-        callback(err);
+        respond(err);
       });
     });
 
-    socket.on('addCommentReply', function (data, callback) {
+    socket.on('addCommentReply', (data, respond) => {
       var padId = data.padId;
       var content = data.reply;
       var changeTo = data.changeTo || null;
@@ -142,7 +142,7 @@ exports.socketio = function (hook_name, args, cb){
       commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
         reply.replyId = replyId;
         socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
-        callback(replyId, reply);
+        respond(replyId, reply);
       });
     });
 
