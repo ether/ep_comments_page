@@ -3,7 +3,6 @@ var settings = require('ep_etherpad-lite/node/utils/Settings');
 var formidable = require('ep_etherpad-lite/node_modules/formidable');
 var clientIO = require('ep_etherpad-lite/node_modules/socket.io-client');
 var commentManager = require('./commentManager');
-var comments = require('./comments');
 var apiUtils = require('./apiUtils');
 var _ = require('ep_etherpad-lite/static/js/underscore');
 
@@ -213,10 +212,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     // sanitize pad id before continuing
     var padIdReceived = apiUtils.sanitizePadId(req);
 
-    comments.getPadComments(padIdReceived, function(err, data) {
+    commentManager.getComments(padIdReceived, (err, data) => {
       if(err) {
         res.json({code: 2, message: "internal error", data: null});
-      } else {
+      } else if (data != null) {
         res.json({code: 0, data: data});
       }
     });
@@ -237,10 +236,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       try {
         var data = JSON.parse(fields.data);
 
-        comments.bulkAddPadComments(padIdReceived, data, function(err, commentIds, comments) {
+        commentManager.bulkAddComments(padIdReceived, data, (err, commentIds, comments) => {
           if(err) {
             res.json({code: 2, message: "internal error", data: null});
-          } else {
+          } else if (commentIds != null) {
             broadcastCommentsAdded(padIdReceived, commentIds, comments);
             res.json({code: 0, commentIds: commentIds});
           }
@@ -261,10 +260,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     var padIdReceived = apiUtils.sanitizePadId(req);
 
     // call the route with the pad id sanitized
-    comments.getPadCommentReplies(padIdReceived, function(err, data) {
+    commentManager.getCommentReplies(padIdReceived, (err, data) => {
       if(err) {
         res.json({code: 2, message: "internal error", data:null})
-      } else {
+      } else if (data != null) {
         res.json({code: 0, data: data});
       }
     });
@@ -285,10 +284,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       try {
         var data = JSON.parse(fields.data);
 
-        comments.bulkAddPadCommentReplies(padIdReceived, data, function(err, replyIds, replies) {
+        commentManager.bulkAddCommentReplies(padIdReceived, data, (err, replyIds, replies) => {
           if(err) {
             res.json({code: 2, message: "internal error", data: null});
-          } else {
+          } else if (replyIds != null) {
             broadcastCommentRepliesAdded(padIdReceived, replyIds, replies);
             res.json({code: 0, replyIds: replyIds});
           }
