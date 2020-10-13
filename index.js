@@ -132,16 +132,10 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     socket.on('addCommentReply', (data, respond) => {
-      var padId = data.padId;
-      var content = data.reply;
-      var changeTo = data.changeTo || null;
-      var changeFrom = data.changeFrom || null;
-      var changeAccepted = data.changeAccepted || null;
-      var changeReverted = data.changeReverted || null;
-      var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
+      const padId = data.padId;
+      commentManager.addCommentReply(padId, data, (err, replyId, reply) => {
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
+        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
         respond(replyId, reply);
       });
     });

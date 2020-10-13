@@ -1102,21 +1102,14 @@ ep_comments.prototype.commentListen = function(){
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
-  var self = this;
-  var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply, changeTo, changeFrom){
-    // console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
-    // callback(replyId, reply);
-    // self.collectCommentReplies();
-    self.getCommentReplies(function (replies){
+  this.socket.on('pushAddCommentReply', (replyId, reply) => {
+    this.getCommentReplies((replies) => {
       if (!$.isEmptyObject(replies)){
-        // console.log("collecting comment replies");
-        self.commentReplies = replies;
-        self.collectCommentReplies();
+        this.commentReplies = replies;
+        this.collectCommentReplies();
       }
     });
   });
-
 };
 
 ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
