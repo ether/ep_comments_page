@@ -10,10 +10,9 @@ describe("ep_comments_page - Comment icons", function() {
     this.timeout(60000);
   });
 
-  after(function(cb) {
+  after(async function() {
     // undo frame resize that was done on before()
     $('#iframe-container iframe').css("max-width", "");
-    cb();
   });
 
   it('adds a comment icon on the same height of commented text', async function() {
