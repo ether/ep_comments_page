@@ -59,7 +59,7 @@ describe("ep_comments_page - Comment icons", function() {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
 
-      await new Promise((resolve) => deleteComment(resolve));
+      await deleteComment();
       // check icon is not visible
       var $commentIcons = outer$("#commentIcons .comment-icon:visible");
       expect($commentIcons.length).to.be(0);
@@ -230,7 +230,7 @@ describe("ep_comments_page - Comment icons", function() {
     await helper.waitForPromise(() => getCommentId(numberOfComments) !== null);
   };
 
-  var deleteComment = function(callback) {
+  const deleteComment = async () => {
     var chrome$ = helper.padChrome$;
     var outer$ = helper.padOuter$;
 
@@ -238,11 +238,8 @@ describe("ep_comments_page - Comment icons", function() {
     var $deleteButton = outer$(".comment-delete");
     $deleteButton.click();
 
-    helper.waitFor(function() {
-      return chrome$(".sidebar-comment").is(":visible") === false;
-    })
-    .done(callback);
-  }
+    await helper.waitForPromise(() => chrome$('.sidebar-comment').is(':visible') === false);
+  };
 
 
   var getCommentId = function(numberOfComments) {
