@@ -20,7 +20,7 @@ describe("ep_comments_page - Comment icons", function() {
     await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
-      var commentId = getCommentId();
+      const commentId = await getCommentId();
       var $commentIcon = outer$("#commentIcons #icon-"+commentId);
 
       // check icon exists
@@ -69,7 +69,7 @@ describe("ep_comments_page - Comment icons", function() {
     await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
-      var commentId = getCommentId();
+      const commentId = await getCommentId();
 
       // adds some new lines on the beginning of the text
       var $firstTextElement = inner$("div").first();
@@ -96,7 +96,7 @@ describe("ep_comments_page - Comment icons", function() {
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
-      var commentId = getCommentId();
+      const commentId = await getCommentId();
 
       // click on the icon
       var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
@@ -112,7 +112,7 @@ describe("ep_comments_page - Comment icons", function() {
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
-      var commentId = getCommentId();
+      const commentId = await getCommentId();
 
       // click on the icon to open, then click again to close
       var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
@@ -129,7 +129,7 @@ describe("ep_comments_page - Comment icons", function() {
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
-      var commentId = getCommentId();
+      const commentId = await getCommentId();
 
       // click on the icon to open
       var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
@@ -163,10 +163,10 @@ describe("ep_comments_page - Comment icons", function() {
       await addComment('Second Comment');
 
       // click on the icon of first comment...
-      var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
+      var $firstCommentIcon = outer$("#commentIcons #icon-"+(await getCommentId(0))).first();
       $firstCommentIcon.click();
       // ... then click on the icon of last comment
-      var $secondCommentIcon = outer$("#commentIcons #icon-"+getCommentId(1)).first();
+      var $secondCommentIcon = outer$("#commentIcons #icon-"+(await getCommentId(1))).first();
       $secondCommentIcon.click();
 
       // check modal is visible
@@ -222,7 +222,19 @@ describe("ep_comments_page - Comment icons", function() {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    await helper.waitForPromise(() => getCommentId(numberOfComments) !== null);
+    let running = false;
+    let success = false;
+    await helper.waitForPromise(() => {
+      if (success) return true;
+      if (!running) {
+        running = true;
+        getCommentId(numberOfComments).then((id) => {
+          running = false;
+          success = id != null;
+        });
+      }
+      return success;
+    });
   };
 
   const deleteComment = async () => {
@@ -237,20 +249,18 @@ describe("ep_comments_page - Comment icons", function() {
   };
 
 
-  var getCommentId = function(numberOfComments) {
+  const getCommentId = async (numberOfComments) => {
     var nthComment = numberOfComments || 0;
-    helper.waitFor(function(){
-      var inner$ = helper.padInner$;
-      if(inner$) return true;
-    }).done(function(){
-      var inner$ = helper.padInner$;
-      var comment = inner$(".comment").eq(nthComment);
-      var cls = comment.attr('class');
-      var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-      var commentId = (classCommentId) ? classCommentId[1] : null;
-      return commentId;
-    });
-  }
+    const p = helper.waitFor(() => helper.padInner$);
+    p.fail(() => {}); // Prevent p from throwing an uncatchable exception on error.
+    await p;
+    var inner$ = helper.padInner$;
+    var comment = inner$(".comment").eq(nthComment);
+    var cls = comment.attr('class');
+    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    var commentId = (classCommentId) ? classCommentId[1] : null;
+    return commentId;
+  };
 
   const finishTestIfIconsAreNotEnabled = async (theTest) => {
     // #commentIcons will only be inserted if icons are enabled
