@@ -1,13 +1,12 @@
 describe("ep_comments_page - Comment icons", function() {
   //create a new pad with comment before each test run
-  beforeEach(function(cb){
-    helper.newPad(function() {
-      // make sure Etherpad has enough space to display comment icons
-      enlargeScreen();
-      // force sidebar comments to be shown
-      chooseToShowComments(true);
-      createComment(cb);
-    });
+  beforeEach(async function() {
+    await new Promise((resolve) => helper.newPad(resolve));
+    // make sure Etherpad has enough space to display comment icons
+    enlargeScreen();
+    // force sidebar comments to be shown
+    chooseToShowComments(true);
+    await createComment();
     this.timeout(60000);
   });
 
@@ -179,7 +178,7 @@ describe("ep_comments_page - Comment icons", function() {
 
   /* ********** Helper functions ********** */
 
-  var createComment = function(callback) {
+  const createComment = async () => {
     var inner$ = helper.padInner$;
 
     // get the first text element out of the inner iframe
@@ -190,16 +189,13 @@ describe("ep_comments_page - Comment icons", function() {
     $firstTextElement.sendkeys('{del}'); // clear the first line
     $firstTextElement.sendkeys('This content will receive a comment{enter}'); // insert text
     // wait until the two lines are split into two .ace-line's
-    helper.waitFor(function() {
-      return inner$("div").length > 1;
-    })
-    .done(function() {
-      // add comment to last line of the text
-      var $lastTextElement = inner$("div").first();
-      $lastTextElement.sendkeys('{selectall}'); // need to select content to add comment to
+    await helper.waitForPromise(() => inner$("div").length > 1);
 
-      addComment('My comment').then(callback);
-    });
+    // add comment to last line of the text
+    var $lastTextElement = inner$("div").first();
+    $lastTextElement.sendkeys('{selectall}'); // need to select content to add comment to
+
+    await addComment('My comment');
   }
 
   // Assumes text is already selected, then add comment to the selected text
