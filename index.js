@@ -184,13 +184,13 @@ exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
 };
 
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
+  args.content = args.content + eejs.require('ep_comments_page/templates/comments.html');
+  args.content = args.content + eejs.require('ep_comments_page/templates/commentIcons.html');
   return cb();
 };
 
 exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html", {}, module);
+  args.content = args.content + eejs.require('ep_comments_page/templates/styles.html');
   return cb();
 };
 
