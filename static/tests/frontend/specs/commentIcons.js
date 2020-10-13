@@ -3,12 +3,10 @@ describe("ep_comments_page - Comment icons", function() {
   beforeEach(function(cb){
     helper.newPad(function() {
       // make sure Etherpad has enough space to display comment icons
-      enlargeScreen(function() {
-        // force sidebar comments to be shown
-        chooseToShowComments(true, function() {
-          createComment(cb);
-        });
-      });
+      enlargeScreen();
+      // force sidebar comments to be shown
+      chooseToShowComments(true);
+      createComment(cb);
     });
     this.timeout(60000);
   });
@@ -295,7 +293,7 @@ describe("ep_comments_page - Comment icons", function() {
     else theTest(done);
   }
 
-  var chooseToShowComments = function(shouldShowComments, callback) {
+  const chooseToShowComments = (shouldShowComments) => {
     var chrome$ = helper.padChrome$;
 
     //click on the settings button to make settings visible
@@ -308,13 +306,10 @@ describe("ep_comments_page - Comment icons", function() {
 
     // hide settings again
     $settingsButton.click();
+  };
 
-    callback();
-  }
-
-  var enlargeScreen = function(callback) {
+  const enlargeScreen = () => {
     $('#iframe-container iframe').css("max-width", "1000px");
-    callback();
-  }
+  };
 
 });
