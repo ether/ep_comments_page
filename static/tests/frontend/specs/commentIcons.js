@@ -162,7 +162,7 @@ describe("ep_comments_page - Comment icons", function() {
       // ... then add a comment to second line
       var $secondLine = inner$("div").eq(1);
       $secondLine.sendkeys('{selectall}');
-      await new Promise((resolve) => addComment('Second Comment', resolve));
+      await addComment('Second Comment');
 
       // click on the icon of first comment...
       var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
@@ -198,12 +198,12 @@ describe("ep_comments_page - Comment icons", function() {
       var $lastTextElement = inner$("div").first();
       $lastTextElement.sendkeys('{selectall}'); // need to select content to add comment to
 
-      addComment("My comment", callback);
+      addComment('My comment').then(callback);
     });
   }
 
   // Assumes text is already selected, then add comment to the selected text
-  var addComment = function(commentText, callback) {
+  const addComment = async (commentText) => {
     var inner$ = helper.padInner$;
     var outer$ = helper.padOuter$;
     var chrome$ = helper.padChrome$;
@@ -227,11 +227,8 @@ describe("ep_comments_page - Comment icons", function() {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    helper.waitFor(function() {
-      return getCommentId(numberOfComments) !== null;
-    })
-    .done(callback);
-  }
+    await helper.waitForPromise(() => getCommentId(numberOfComments) !== null);
+  };
 
   var deleteComment = function(callback) {
     var chrome$ = helper.padChrome$;
