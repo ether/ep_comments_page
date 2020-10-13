@@ -17,9 +17,9 @@ describe("ep_comments_page - Comment icons", function() {
     cb();
   });
 
-  it("adds a comment icon on the same height of commented text", function(done) {
+  it('adds a comment icon on the same height of commented text', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
@@ -32,14 +32,12 @@ describe("ep_comments_page - Comment icons", function() {
       var $commentedText = inner$("."+commentId);
       var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
       expect($commentIcon.offset().top).to.be(expectedTop);
-
-      done();
     });
   });
   // TODO: Needs fixing
-  xit("does not show comment icon when commented text is removed", function(done) {
+  xit('does not show comment icon when commented text is removed', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
       // remove commented text
@@ -47,34 +45,30 @@ describe("ep_comments_page - Comment icons", function() {
       $commentedLine.sendkeys('{selectall}'); // select all
       $commentedLine.sendkeys('{del}'); // clear the first line
       // wait until comment deletion is done
-      helper.waitFor(function() {
+      await helper.waitForPromise(() => {
         // check icon is not visible
         var $commentIcons = outer$("#commentIcons .comment-icon:visible");
         return $commentIcons.length === 0;
-      })
-      .done(done);
-    });
-  });
-  // TODO: Needs fixing
-  xit("does not show comment icon when comment is deleted", function(done) {
-    // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
-      var inner$ = helper.padInner$;
-      var outer$ = helper.padOuter$;
-
-      deleteComment(function() {
-        // check icon is not visible
-        var $commentIcons = outer$("#commentIcons .comment-icon:visible");
-        expect($commentIcons.length).to.be(0);
-
-        done();
       });
     });
   });
-
-  it("updates comment icon height when commented text is moved to another line", function(done) {
+  // TODO: Needs fixing
+  xit('does not show comment icon when comment is deleted', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
+      var inner$ = helper.padInner$;
+      var outer$ = helper.padOuter$;
+
+      await new Promise((resolve) => deleteComment(resolve));
+      // check icon is not visible
+      var $commentIcons = outer$("#commentIcons .comment-icon:visible");
+      expect($commentIcons.length).to.be(0);
+    });
+  });
+
+  it('updates comment icon height when commented text is moved to another line', async function() {
+    // we only run test if icons are enabled
+    await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
@@ -84,31 +78,25 @@ describe("ep_comments_page - Comment icons", function() {
       $firstTextElement.sendkeys('{leftarrow}{enter}{enter}');
 
       // wait until the new lines are split into separated .ace-line's
-      helper.waitFor(function() {
-        return inner$("div").length > 2;
-      })
-      .done(function() {
-        // wait until comment is visible again
-        helper.waitFor(function() {
-          var $commentIcons = outer$("#commentIcons .comment-icon:visible");
-          return $commentIcons.length !== 0;
-        })
-        .done(function() {
-          // check height is the same
-          var $commentIcon = outer$("#commentIcons #icon-"+commentId);
-          var $commentedText = inner$("."+commentId);
-          var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
-          expect($commentIcon.offset().top).to.be(expectedTop);
+      await helper.waitForPromise(() => inner$('div').length > 2);
 
-          done();
-        });
+      // wait until comment is visible again
+      await helper.waitForPromise(() => {
+        var $commentIcons = outer$("#commentIcons .comment-icon:visible");
+        return $commentIcons.length !== 0;
       });
+
+      // check height is the same
+      var $commentIcon = outer$("#commentIcons #icon-"+commentId);
+      var $commentedText = inner$("."+commentId);
+      var expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
+      expect($commentIcon.offset().top).to.be(expectedTop);
     });
   });
 
-  it("shows comment when user clicks on comment icon", function(done) {
+  it('shows comment when user clicks on comment icon', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
 
@@ -119,14 +107,12 @@ describe("ep_comments_page - Comment icons", function() {
       // check sidebar comment is visible
       var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
       expect($openedSidebarComments.length).to.be(1);
-
-      done();
     });
   });
 
-  it("hides comment when user clicks on comment icon twice", function(done) {
+  it('hides comment when user clicks on comment icon twice', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
 
@@ -138,14 +124,12 @@ describe("ep_comments_page - Comment icons", function() {
       // check sidebar comment is not visible
       var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
       expect($openedSidebarComments.length).to.be(0);
-
-      done();
     });
   });
 
-  it("hides comment when user clicks outside of comment box", function(done) {
+  it('hides comment when user clicks outside of comment box', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
       var commentId = getCommentId();
 
@@ -159,14 +143,12 @@ describe("ep_comments_page - Comment icons", function() {
       // check sidebar comment is not visible
       var $openedSidebarComments = outer$("#comments .sidebar-comment:visible");
       expect($openedSidebarComments.length).to.be(0);
-
-      done();
     });
   });
 
-  it("hides first comment and shows second comment when user clicks on one icon then on another icon", function(done) {
+  it('hides first comment and shows second comment when user clicks on one icon then on another icon', async function() {
     // we only run test if icons are enabled
-    finishTestIfIconsAreNotEnabled(done, function(){
+    await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
 
@@ -175,29 +157,23 @@ describe("ep_comments_page - Comment icons", function() {
       $lastTextElement.sendkeys('Second line{enter}');
 
       // wait until the new line is split into a separated .ace-line
-      helper.waitFor(function() {
-        return inner$("div").length > 2;
-      })
-      .done(function() {
-        // ... then add a comment to second line
-        var $secondLine = inner$("div").eq(1);
-        $secondLine.sendkeys('{selectall}');
-        addComment("Second Comment", function() {
-          // click on the icon of first comment...
-          var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
-          $firstCommentIcon.click();
-          // ... then click on the icon of last comment
-          var $secondCommentIcon = outer$("#commentIcons #icon-"+getCommentId(1)).first();
-          $secondCommentIcon.click();
+      await helper.waitForPromise(() => inner$('div').length > 2);
 
-          // check modal is visible
-          var $commentText = outer$("#comments .sidebar-comment:visible .comment-text").text();
-          expect($commentText).to.be("Second Comment");
+      // ... then add a comment to second line
+      var $secondLine = inner$("div").eq(1);
+      $secondLine.sendkeys('{selectall}');
+      await new Promise((resolve) => addComment('Second Comment', resolve));
 
-          done();
+      // click on the icon of first comment...
+      var $firstCommentIcon = outer$("#commentIcons #icon-"+getCommentId(0)).first();
+      $firstCommentIcon.click();
+      // ... then click on the icon of last comment
+      var $secondCommentIcon = outer$("#commentIcons #icon-"+getCommentId(1)).first();
+      $secondCommentIcon.click();
 
-        });
-      });
+      // check modal is visible
+      var $commentText = outer$("#comments .sidebar-comment:visible .comment-text").text();
+      expect($commentText).to.be("Second Comment");
     });
   });
 
@@ -287,11 +263,10 @@ describe("ep_comments_page - Comment icons", function() {
     });
   }
 
-  var finishTestIfIconsAreNotEnabled = function(done, theTest) {
+  const finishTestIfIconsAreNotEnabled = async (theTest) => {
     // #commentIcons will only be inserted if icons are enabled
-    if (helper.padOuter$("#commentIcons").length === 0) done();
-    else theTest(done);
-  }
+    if (helper.padOuter$('#commentIcons').length !== 0) await theTest();
+  };
 
   const chooseToShowComments = (shouldShowComments) => {
     var chrome$ = helper.padChrome$;
