@@ -176,7 +176,7 @@ exports.bulkAddCommentReplies = async function(padId, data, callback){
       //create the new reply id
       var replyId = "c-reply-" + randomString(16);
 
-      metadata = replyData.comment || {};
+      const metadata = replyData.comment || {};
 
       var reply = {
         "commentId"  : replyData.commentId,
