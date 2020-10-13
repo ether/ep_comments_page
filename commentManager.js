@@ -1,12 +1,11 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
-var db = require('ep_etherpad-lite/node/db/DB').db;
+var db = require('ep_etherpad-lite/node/db/DB');
 var ERR = require("ep_etherpad-lite/node_modules/async-stacktrace");
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 var shared = require('./static/js/shared');
 
-exports.getComments = async function (padId, callback)
-{
+exports.getComments = async (padId) => {
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
@@ -15,211 +14,154 @@ exports.getComments = async function (padId, callback)
 
   // Not sure if we will encouter race conditions here..  Be careful.
 
-  //get the globalComments
-  db.get("comments:" + padId, function(err, comments)
-  {
-    if(ERR(err, callback)) return;
-    //comment does not exists
-    if(comments == null) comments = {};
-    callback(null, { comments: comments });
-  });
+  // get the globalComments
+  let comments = await db.get('comments:' + padId);
+  if (comments == null) comments = {};
+  return {comments};
 };
 
-exports.deleteComment = function (padId, commentId, callback)
-{
-  db.get('comments:' + padId, function(err, comments)
-  {
-    if(ERR(err, callback)) return;
-
-    // the entry doesn't exist so far, let's create it
-    if(comments == null) comments = {};
-
-    delete comments[commentId];
-    db.set("comments:" + padId, comments);
-
-    callback(padId, commentId);
-
-  });
+exports.deleteComment = async (padId, commentId) => {
+  let comments = await db.get('comments:' + padId);
+  // the entry doesn't exist so far, let's create it
+  if (comments == null) comments = {};
+  delete comments[commentId];
+  await db.set('comments:' + padId, comments);
 };
 
-exports.deleteComments = function (padId, callback)
-{
-  db.remove('comments:' + padId, function(err)
-  {
-    if(ERR(err, callback)) return;
-    callback(null);
-  });
+exports.deleteComments = async (padId) => {
+  await db.remove('comments:' + padId);
 };
 
-exports.addComment = function(padId, data, callback)
-{
-  exports.bulkAddComments(padId, [data], function(err, commentIds, comments) {
-    if(ERR(err, callback)) return;
-
-    if(commentIds && commentIds.length > 0 && comments && comments.length > 0) {
-      callback(null, commentIds[0], comments[0]);
-    }
-  });
+exports.addComment = async (padId, data) => {
+  const [commentIds, comments] = await exports.bulkAddComments(padId, [data]);
+  return [commentIds[0], comments[0]];
 };
 
-exports.bulkAddComments = async function(padId, data, callback)
-{
+exports.bulkAddComments = async (padId, data) => {
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
     padId = await readOnlyManager.getPadId(padId);
   };
 
-  //get the entry
-  db.get("comments:" + padId, function(err, comments) {
-    if(ERR(err, callback)) return;
+  // get the entry
+  let comments = await db.get('comments:' + padId);
 
-    // the entry doesn't exist so far, let's create it
-    if(comments == null) comments = {};
+  // the entry doesn't exist so far, let's create it
+  if (comments == null) comments = {};
 
-    var newComments = [];
-    var commentIds = _.map(data, function(commentData) {
-      //if the comment was copied it already has a commentID, so we don't need create one
-      var commentId = commentData.commentId || shared.generateCommentId();
+  const newComments = [];
+  const commentIds = data.map((commentData) => {
+    // if the comment was copied it already has a commentID, so we don't need create one
+    const commentId = commentData.commentId || shared.generateCommentId();
 
-      var comment = {
-        "author": commentData.author || "empty",
-        "name": commentData.name,
-        "text": commentData.text,
-        "changeTo": commentData.changeTo,
-        "changeFrom": commentData.changeFrom,
-        "timestamp": parseInt(commentData.timestamp) || new Date().getTime()
-      };
-      //add the entry for this pad
-      comments[commentId] = comment;
+    const comment = {
+      author: commentData.author || 'empty',
+      name: commentData.name,
+      text: commentData.text,
+      changeTo: commentData.changeTo,
+      changeFrom: commentData.changeFrom,
+      timestamp: parseInt(commentData.timestamp) || new Date().getTime(),
+    };
+    // add the entry for this pad
+    comments[commentId] = comment;
 
-      newComments.push(comment);
-      return commentId;
-    });
-
-    //save the new element back
-    db.set("comments:" + padId, comments);
-
-    callback(null, commentIds, newComments);
+    newComments.push(comment);
+    return commentId;
   });
+
+  // save the new element back
+  await db.set('comments:' + padId, comments);
+
+  return [commentIds, newComments];
 };
 
-exports.copyComments = function(originalPadId, newPadID, callback)
-{
-  //get the comments of original pad
-  db.get('comments:' + originalPadId, function(err, originalComments) {
-    if(ERR(err, callback)) return;
+exports.copyComments = async (originalPadId, newPadID) => {
+  // get the comments of original pad
+  const originalComments = await db.get('comments:' + originalPadId);
+  // make sure we have different copies of the comment between pads
+  const copiedComments = _.mapObject(originalComments, (thisComment) => _.clone(thisComment));
 
-    var copiedComments = _.mapObject(originalComments, function(thisComment, thisCommentId) {
-      // make sure we have different copies of the comment between pads
-      return _.clone(thisComment);
-    });
-
-    //save the comments on new pad
-    db.set('comments:' + newPadID, copiedComments);
-
-    callback(null);
-  });
+  // save the comments on new pad
+  await db.set('comments:' + newPadID, copiedComments);
 };
 
-exports.getCommentReplies = async function (padId, callback){
+exports.getCommentReplies = async (padId) => {
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
     padId = await readOnlyManager.getPadId(padId);
   };
 
-  //get the globalComments replies
-  db.get("comment-replies:" + padId, function(err, replies)
-  {
-    if(ERR(err, callback)) return;
-    //comment does not exists
-    if(replies == null) replies = {};
-    callback(null, { replies: replies });
-  });
+  // get the globalComments replies
+  let replies = await db.get('comment-replies:' + padId);
+  // comment does not exist
+  if (replies == null) replies = {};
+  return {replies};
 };
 
-exports.deleteCommentReplies = function (padId, callback){
-  db.remove('comment-replies:' + padId, function(err)
-  {
-    if(ERR(err, callback)) return;
-    callback(null);
-  });
+exports.deleteCommentReplies = async (padId) => {
+  await db.remove('comment-replies:' + padId);
 };
 
-exports.addCommentReply = function(padId, data, callback){
-  exports.bulkAddCommentReplies(padId, [data], function(err, replyIds, replies) {
-    if(ERR(err, callback)) return;
-
-    if(replyIds && replyIds.length > 0 && replies && replies.length > 0) {
-      callback(null, replyIds[0], replies[0]);
-    }
-  });
+exports.addCommentReply = async (padId, data) => {
+  const [replyIds, replies] = await exports.bulkAddCommentReplies(padId, [data]);
+  return [replyIds[0], replies[0]];
 };
 
-exports.bulkAddCommentReplies = async function(padId, data, callback){
+exports.bulkAddCommentReplies = async (padId, data) => {
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){
     padId = await readOnlyManager.getPadId(padId);
   };
 
-  //get the entry
-  db.get("comment-replies:" + padId, function(err, replies){
-    if(ERR(err, callback)) return;
+  // get the entry
+  let replies = await db.get('comment-replies:' + padId);
+  // the entry doesn't exist so far, let's create it
+  if (replies == null) replies = {};
 
-    // the entry doesn't exist so far, let's create it
-    if(replies == null) replies = {};
+  const newReplies = [];
+  const replyIds = data.map((replyData) => {
+    // create the new reply id
+    const replyId = "c-reply-" + randomString(16);
 
-    var newReplies = [];
-    var replyIds = _.map(data, function(replyData) {
-      //create the new reply id
-      var replyId = "c-reply-" + randomString(16);
+    const metadata = replyData.comment || {};
 
-      const metadata = replyData.comment || {};
+    const reply = {
+      commentId: replyData.commentId,
+      text: replyData.reply || replyData.text,
+      changeTo: replyData.changeTo || null,
+      changeFrom: replyData.changeFrom || null,
+      author: metadata.author || 'empty',
+      name: metadata.name || replyData.name,
+      timestamp: parseInt(replyData.timestamp) || new Date().getTime()
+    };
 
-      var reply = {
-        "commentId"  : replyData.commentId,
-        "text"       : replyData.reply               || replyData.text,
-        "changeTo"   : replyData.changeTo            || null,
-        "changeFrom" : replyData.changeFrom          || null,
-        "author"     : metadata.author               || "empty",
-        "name"       : metadata.name                 || replyData.name,
-        "timestamp"  : parseInt(replyData.timestamp) || new Date().getTime()
-      };
+    // add the entry for this pad
+    replies[replyId] = reply;
 
-      //add the entry for this pad
-      replies[replyId] = reply;
-
-      newReplies.push(reply);
-      return replyId;
-    });
-
-    //save the new element back
-    db.set("comment-replies:" + padId, replies);
-
-    callback(null, replyIds, newReplies);
+    newReplies.push(reply);
+    return replyId;
   });
+
+  // save the new element back
+  await db.set('comment-replies:' + padId, replies);
+
+  return [replyIds, newReplies];
 };
 
-exports.copyCommentReplies = function(originalPadId, newPadID, callback){
-  //get the replies of original pad
-  db.get('comment-replies:' + originalPadId, function(err, originalReplies){
-    if(ERR(err, callback)) return;
+exports.copyCommentReplies = async (originalPadId, newPadID) => {
+  // get the replies of original pad
+  const originalReplies = await db.get('comment-replies:' + originalPadId);
+  // make sure we have different copies of the reply between pads
+  const copiedReplies = _.mapObject(originalReplies, (thisReply) => _.clone(thisReply));
 
-    var copiedReplies = _.mapObject(originalReplies, function(thisReply, thisReplyId) {
-      // make sure we have different copies of the reply between pads
-      return _.clone(thisReply);
-    });
-
-    //save the comment replies on new pad
-    db.set('comment-replies:' + newPadID, copiedReplies);
-
-    callback(null);
-  });
+  // save the comment replies on new pad
+  await db.set('comment-replies:' + newPadID, copiedReplies);
 };
 
-exports.changeAcceptedState = async function(padId, commentId, state, callback){
+exports.changeAcceptedState = async (padId, commentId, state) => {
   // Given a comment we update that comment to say the change was accepted or reverted
 
   // We need to change readOnly PadIds to Normal PadIds
@@ -234,61 +176,48 @@ exports.changeAcceptedState = async function(padId, commentId, state, callback){
     prefix = "comment-replies:";
   }
 
-  //get the entry
-  db.get(prefix + padId, function(err, comments){
+  // get the entry
+  const comments = await db.get(prefix + padId);
 
-    if(ERR(err, callback)) return;
+  // add the entry for this pad
+  const comment = comments[commentId];
 
-    //add the entry for this pad
-    var comment = comments[commentId];
-
-    if(state){
-      comment.changeAccepted = true;
-      comment.changeReverted = false;
-    }else{
-      comment.changeAccepted = false;
-      comment.changeReverted = true;
-    }
-
-    comments[commentId] = comment;
-
-    //save the new element back
-    db.set(prefix + padId, comments);
-
-    callback(null, commentId, comment);
-  });
-}
-
-exports.changeCommentText = async function(padId, commentId, commentText, callback){
-  var commentTextIsNotEmpty = commentText.length > 0;
-  if(commentTextIsNotEmpty){
-    // Given a comment we update the comment text
-    // We need to change readOnly PadIds to Normal PadIds
-    var isReadOnly = padId.indexOf("r.") === 0;
-    if(isReadOnly){
-      padId = await readOnlyManager.getPadId(padId);
-    };
-
-    // If we're dealing with comment replies we need to a different query
-    var prefix = "comments:";
-    if(commentId.substring(0,7) === "c-reply"){
-      prefix = "comment-replies:";
-    }
-
-
-    //get the entry
-    db.get(prefix + padId, function(err, comments){
-      if(ERR(err, callback)) return;
-
-      //update the comment text
-      comments[commentId].text = commentText;
-
-      //save the comment updated back
-      db.set(prefix + padId, comments);
-
-      callback(null);
-    });
-  }else{// don't save comment text blank
-    callback(true);
+  if (state) {
+    comment.changeAccepted = true;
+    comment.changeReverted = false;
+  } else {
+    comment.changeAccepted = false;
+    comment.changeReverted = true;
   }
-}
+
+  comments[commentId] = comment;
+
+  //save the new element back
+  await db.set(prefix + padId, comments);
+};
+
+exports.changeCommentText = async (padId, commentId, commentText) => {
+  if (commentText.length <= 0) return;
+
+  // Given a comment we update the comment text
+  // We need to change readOnly PadIds to Normal PadIds
+  var isReadOnly = padId.indexOf("r.") === 0;
+  if(isReadOnly){
+    padId = await readOnlyManager.getPadId(padId);
+  };
+
+  // If we're dealing with comment replies we need to a different query
+  var prefix = 'comments:';
+  if (commentId.substring(0,7) === 'c-reply') {
+    prefix = 'comment-replies:';
+  }
+
+  // get the entry
+  const comments = await db.get(prefix + padId);
+
+  // update the comment text
+  comments[commentId].text = commentText;
+
+  // save the comment updated back
+  await db.set(prefix + padId, comments);
+};
