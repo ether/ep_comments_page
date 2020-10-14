@@ -2,22 +2,11 @@ var appUrl = 'http://localhost:9001';
 var apiVersion = 1;
 
 var supertest = require('ep_etherpad-lite/node_modules/supertest'),
-           fs = require('fs'),
-         path = require('path'),
-      //      io = require('socket.io-client'),
       request = require('ep_etherpad-lite/node_modules/request'),
           api = supertest(appUrl),
  randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-// Loads the APIKEY.txt content into a string, and returns it.
-var getApiKey = function() {
-  var etherpad_root = '/../../../ep_etherpad-lite/../..';
-  var filePath = path.join(__dirname, etherpad_root + '/APIKEY.txt');
-  var apiKey = fs.readFileSync(filePath,  {encoding: 'utf-8'});
-  return apiKey.replace(/\n$/, "");
-}
-
-var apiKey = getApiKey();
+const apiKey = require('ep_etherpad-lite/node/handler/APIHandler.js').exportedForTestingOnly.apiKey;
 
 // Functions to validate API responses:
 var codeToBe = function(expectedCode, res) {
