@@ -39,11 +39,10 @@ exports.socketio = function (hook_name, args, cb){
 
     // Join the rooms
     socket.on('getComments', async (data, respond) => {
-      // Don't translate a read-only pad ID to a normal pad ID here. This makes it possible to
-      // control which messages get sent to read-only users vs. normal users.
-      socket.join(data.padId);
       const {padId} = await readOnlyManager.getIds(data.padId);
-      // This, however, should use the normal pad ID because that's what commentManager expects.
+      // Put read-only and read-write users in the same socket.io "room" so that they can see each
+      // other's updates.
+      socket.join(padId);
       respond(await commentManager.getComments(padId));
     });
 
@@ -54,85 +53,69 @@ exports.socketio = function (hook_name, args, cb){
 
     // On add events
     socket.on('addComment', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
+      const {padId} = await readOnlyManager.getIds(data.padId);
       var content = data.comment;
-      const [commentId, comment] = await commentManager.addComment(padIds.padId, content);
+      const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
-        [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-          socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
-        });
+        socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
         respond(commentId, comment);
       }
     });
 
     socket.on('deleteComment', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // delete the comment on the database
-      await commentManager.deleteComment(padIds.padId, data.commentId);
+      await commentManager.deleteComment(padId, data.commentId);
       // Broadcast to all other users that this comment was deleted
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
-      });
+      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
     });
 
     socket.on('revertChange', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      await commentManager.changeAcceptedState(padIds.padId, data.commentId, false);
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
-      });
+      await commentManager.changeAcceptedState(padId, data.commentId, false);
+      socket.broadcast.to(padId).emit('changeReverted', data.commentId);
     });
 
     socket.on('acceptChange', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      await commentManager.changeAcceptedState(padIds.padId, data.commentId, true);
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-      });
+      await commentManager.changeAcceptedState(padId, data.commentId, true);
+      socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
     });
 
     socket.on('bulkAddComment', async (padId, data, respond) => {
-      const padIds = await readOnlyManager.getIds(padId);
-      const [commentIds, comments] = await commentManager.bulkAddComments(padIds.padId, data);
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-      });
+      padId = (await readOnlyManager.getIds(padId)).padId;
+      const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
+      socket.broadcast.to(padId).emit('pushAddCommentInBulk');
       respond(_.object(commentIds, comments)); // {c-123:data, c-124:data}
     });
 
     socket.on('bulkAddCommentReplies', async (padId, data, respond) => {
-      const padIds = await readOnlyManager.getIds(padId);
-      const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padIds.padId, data);
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-      });
+      padId = (await readOnlyManager.getIds(padId)).padId;
+      const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
+      socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
       respond(_.zip(repliesId, replies));
     });
 
     socket.on('updateCommentText', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that the comment text was changed.
       // Note that commentId here can either be the commentId or replyId..
       var commentId = data.commentId;
       var commentText = data.commentText;
-      const failed = await commentManager.changeCommentText(padIds.padId, commentId, commentText);
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
-      });
+      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
+      if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
       respond(failed);
     });
 
     socket.on('addCommentReply', async (data, respond) => {
-      const padIds = await readOnlyManager.getIds(data.padId);
-      const [replyId, reply] = await commentManager.addCommentReply(padIds.padId, data);
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      const [replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-      });
+      socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
       respond(replyId, reply);
     });
   });
@@ -181,14 +164,11 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
-    // Get the normal pad ID in case padIdReceived is a read-only pad ID.
-    const {padId} = await readOnlyManager.getIds(padIdReceived);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     let data;
     try {
-      // Use the normal pad ID here because that's what commentManager expects.
-      data = await commentManager.getComments(padId);
+      data = await commentManager.getComments(padIdReceived);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: 'internal error', data: null});
@@ -213,9 +193,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
-    // Get the normal pad ID in case padIdReceived is a read-only pad ID.
-    const padIds = await readOnlyManager.getIds(padIdReceived);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // create data to hold comment information:
     let data;
@@ -228,8 +206,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
 
     let commentIds, comments;
     try {
-      // Use the normal pad ID here because that's what commentManager expects.
-      [commentIds, comments] = await commentManager.bulkAddComments(padIds.padId, data);
+      [commentIds, comments] = await commentManager.bulkAddComments(padIdReceived, data);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data: null});
@@ -237,9 +214,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     }
     if (commentIds == null) return;
     for (let i = 0; i < commentIds.length; i++) {
-      [padIds.padId, padIds.readOnlyPadId].forEach(padId) => {
-        io.to(padId).emit('pushAddComment', commentIds[i], comments[i]);
-      });
+      io.to(padIdReceived).emit('pushAddComment', commentIds[i], comments[i]);
     }
     res.json({code: 0, commentIds: commentIds});
   });
@@ -251,15 +226,12 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     //sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
-    // Get the normal pad ID in case padIdReceived is a read-only pad ID.
-    const {padId} = await readOnlyManager.getIds(padIdReceived);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // call the route with the pad id sanitized
     let data;
     try {
-      // Use the normal pad ID here because that's what commentManager expects.
-      data = await commentManager.getCommentReplies(padId);
+      data = await commentManager.getCommentReplies(padIdReceived);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data:null});
@@ -284,9 +256,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
-    // Get the normal pad ID in case padIdReceived is a read-only pad ID.
-    const padIds = await readOnlyManager.getIds(padIdReceived);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // create data to hold comment reply information:
     let data;
@@ -299,8 +269,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
 
     let replyIds, replies;
     try {
-      // Use the normal pad ID here because that's what commentManager expects.
-      [replyIds, replies] = await commentManager.bulkAddCommentReplies(padIds.padId, data);
+      [replyIds, replies] = await commentManager.bulkAddCommentReplies(padIdReceived, data);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data: null});
@@ -309,9 +278,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if (replyIds == null) return;
     for (let i = 0; i < replyIds.length; i++) {
       replies[i].replyId = replyIds[i];
-      [padIds.padId, padIds.readOnlyPadId].forEach((padId) => {
-        io.to(padId).emit('pushAddCommentReply', replyIds[i], replies[i]);
-      });
+      io.to(padIdReceived).emit('pushAddCommentReply', replyIds[i], replies[i]);
     }
     res.json({code: 0, replyIds: replyIds});
   });
