@@ -111,14 +111,9 @@ exports.socketio = function (hook_name, args, cb){
       var padId = data.padId;
       var commentId = data.commentId;
       var commentText = data.commentText;
-      try {
-        await commentManager.changeCommentText(padId, commentId, commentText);
-      } catch (err) {
-        respond(err);
-        return;
-      }
-      socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
-      respond(null);
+      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
+      if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+      respond(failed);
     });
 
     socket.on('addCommentReply', async (data, respond) => {

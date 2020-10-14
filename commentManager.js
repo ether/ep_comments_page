@@ -197,7 +197,7 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 };
 
 exports.changeCommentText = async (padId, commentId, commentText) => {
-  if (commentText.length <= 0) return;
+  if (commentText.length <= 0) return true;
 
   // Given a comment we update the comment text
   // We need to change readOnly PadIds to Normal PadIds
@@ -220,4 +220,6 @@ exports.changeCommentText = async (padId, commentId, commentText) => {
 
   // save the comment updated back
   await db.set(prefix + padId, comments);
+
+  return null;
 };
