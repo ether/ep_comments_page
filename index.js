@@ -201,6 +201,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     try {
       data = await commentManager.getComments(padIdReceived);
     } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: 'internal error', data: null});
       return;
     }
@@ -238,6 +239,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     try {
       [commentIds, comments] = await commentManager.bulkAddComments(padIdReceived, data);
     } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data: null});
       return;
     }
@@ -260,6 +262,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     try {
       data = await commentManager.getCommentReplies(padIdReceived);
     } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data:null});
       return;
     }
@@ -297,6 +300,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     try {
       [replyIds, replies] = await commentManager.bulkAddCommentReplies(padIdReceived, data);
     } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
       res.json({code: 2, message: "internal error", data: null});
       return;
     }

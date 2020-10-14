@@ -122,7 +122,7 @@ exports.bulkAddCommentReplies = async (padId, data) => {
   if (replies == null) replies = {};
 
   const newReplies = [];
-  const replyIds = data.map((replyData) => {
+  const replyIds = _.map(data, (replyData) => {
     // create the new reply id
     const replyId = "c-reply-" + randomString(16);
 
