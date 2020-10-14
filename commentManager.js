@@ -3,14 +3,9 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var db = require('ep_etherpad-lite/node/db/DB');
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 var shared = require('./static/js/shared');
 
 exports.getComments = async (padId) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
   // Not sure if we will encouter race conditions here..  Be careful.
 
   // get the globalComments
@@ -20,17 +15,11 @@ exports.getComments = async (padId) => {
 };
 
 exports.deleteComment = async (padId, commentId) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
   let comments = await db.get('comments:' + padId);
   // the entry doesn't exist so far, let's create it
   if (comments == null) comments = {};
   delete comments[commentId];
   await db.set('comments:' + padId, comments);
-
-  return padIds;
 };
 
 exports.deleteComments = async (padId) => {
@@ -38,15 +27,11 @@ exports.deleteComments = async (padId) => {
 };
 
 exports.addComment = async (padId, data) => {
-  const [padIds, commentIds, comments] = await exports.bulkAddComments(padId, [data]);
-  return [padIds, commentIds[0], comments[0]];
+  const [commentIds, comments] = await exports.bulkAddComments(padId, [data]);
+  return [commentIds[0], comments[0]];
 };
 
 exports.bulkAddComments = async (padId, data) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
   // get the entry
   let comments = await db.get('comments:' + padId);
 
@@ -76,7 +61,7 @@ exports.bulkAddComments = async (padId, data) => {
   // save the new element back
   await db.set('comments:' + padId, comments);
 
-  return [padIds, commentIds, newComments];
+  return [commentIds, newComments];
 };
 
 exports.copyComments = async (originalPadId, newPadID) => {
@@ -90,10 +75,6 @@ exports.copyComments = async (originalPadId, newPadID) => {
 };
 
 exports.getCommentReplies = async (padId) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
   // get the globalComments replies
   let replies = await db.get('comment-replies:' + padId);
   // comment does not exist
@@ -106,15 +87,11 @@ exports.deleteCommentReplies = async (padId) => {
 };
 
 exports.addCommentReply = async (padId, data) => {
-  const [padIds, replyIds, replies] = await exports.bulkAddCommentReplies(padId, [data]);
-  return [padIds, replyIds[0], replies[0]];
+  const [replyIds, replies] = await exports.bulkAddCommentReplies(padId, [data]);
+  return [replyIds[0], replies[0]];
 };
 
 exports.bulkAddCommentReplies = async (padId, data) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
   // get the entry
   let replies = await db.get('comment-replies:' + padId);
   // the entry doesn't exist so far, let's create it
@@ -147,7 +124,7 @@ exports.bulkAddCommentReplies = async (padId, data) => {
   // save the new element back
   await db.set('comment-replies:' + padId, replies);
 
-  return [padIds, replyIds, newReplies];
+  return [replyIds, newReplies];
 };
 
 exports.copyCommentReplies = async (originalPadId, newPadID) => {
@@ -162,10 +139,6 @@ exports.copyCommentReplies = async (originalPadId, newPadID) => {
 
 exports.changeAcceptedState = async (padId, commentId, state) => {
   // Given a comment we update that comment to say the change was accepted or reverted
-
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
 
   // If we're dealing with comment replies we need to a different query
   var prefix = "comments:";
@@ -191,16 +164,10 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 
   //save the new element back
   await db.set(prefix + padId, comments);
-
-  return padIds;
 };
 
 exports.changeCommentText = async (padId, commentId, commentText) => {
-  // We might need to change readOnly PadIds to Normal PadIds
-  var padIds = await readOnlyManager.getIds(padId);
-  padId = padIds.padId;
-
-  if (commentText.length <= 0) return [padIds, true];
+  if (commentText.length <= 0) return true;
 
   // Given a comment we update the comment text
 
@@ -219,5 +186,5 @@ exports.changeCommentText = async (padId, commentId, commentText) => {
   // save the comment updated back
   await db.set(prefix + padId, comments);
 
-  return [padIds, null];
+  return null;
 };
