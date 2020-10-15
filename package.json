@@ -22,11 +22,11 @@
     }
   ],
   "dependencies": {
-    "formidable": "*",
-    "socket.io-client": "*"
+    "formidable": "*"
   },
   "devDependencies": {
-    "request": "*"
+    "request": "*",
+    "socket.io-client": "*"
   },
   "engines": {
     "node": "*"
