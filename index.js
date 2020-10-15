@@ -1,3 +1,5 @@
+/* global exports, require */
+
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
 var formidable = require('ep_etherpad-lite/node_modules/formidable');
@@ -39,14 +41,8 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
 };
 
 exports.socketio = function (hook_name, args, cb){
-  var app = args.app;
-  var io = args.io;
-  var pushComment;
-  var padComment = io;
-
-  var commentSocket = io
-  .of('/comment')
-  .on('connection', function (socket) {
+  const io = args.io.of('/comment');
+  io.on('connection', (socket) => {
 
     // Join the rooms
     socket.on('getComments', async (data, respond) => {
