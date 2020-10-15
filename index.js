@@ -3,10 +3,11 @@
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
 var formidable = require('ep_etherpad-lite/node_modules/formidable');
-var clientIO = require('ep_etherpad-lite/node_modules/socket.io-client');
 var commentManager = require('./commentManager');
 var apiUtils = require('./apiUtils');
 var _ = require('ep_etherpad-lite/static/js/underscore');
+
+let io;
 
 exports.padRemove = async (hookName, context) => {
   await Promise.all([
@@ -32,7 +33,7 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
 };
 
 exports.socketio = function (hook_name, args, cb){
-  const io = args.io.of('/comment');
+  io = args.io.of('/comment');
   io.on('connection', (socket) => {
 
     // Join the rooms
@@ -110,32 +111,6 @@ exports.socketio = function (hook_name, args, cb){
       socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
       respond(replyId, reply);
     });
-
-    // comment added via API
-    socket.on('apiAddComments', function (data) {
-      var padId = data.padId;
-      var commentIds = data.commentIds;
-      var comments = data.comments;
-
-      for (var i = 0, len = commentIds.length; i < len; i++) {
-        socket.broadcast.to(padId).emit('pushAddComment', commentIds[i], comments[i]);
-      }
-    });
-
-    // comment reply added via API
-    socket.on('apiAddCommentReplies', function (data) {
-      var padId = data.padId;
-      var replyIds = data.replyIds;
-      var replies = data.replies;
-
-      for (var i = 0, len = replyIds.length; i < len; i++) {
-        var reply = replies[i];
-        var replyId = replyIds[i];
-        reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-      }
-    });
-
   });
   return cb();
 };
@@ -231,7 +206,9 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       return;
     }
     if (commentIds == null) return;
-    broadcastCommentsAdded(padIdReceived, commentIds, comments);
+    for (let i = 0; i < commentIds.length; i++) {
+      io.to(padIdReceived).emit('pushAddComment', commentIds[i], comments[i]);
+    }
     res.json({code: 0, commentIds: commentIds});
   });
 
@@ -292,34 +269,11 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       return;
     }
     if (replyIds == null) return;
-    broadcastCommentRepliesAdded(padIdReceived, replyIds, replies);
+    for (let i = 0; i < replyIds.length; i++) {
+      replies[i].replyId = replyIds[i];
+      io.to(padIdReceived).emit('pushAddCommentReply', replyIds[i], replies[i]);
+    }
     res.json({code: 0, replyIds: replyIds});
   });
   return callback();
 }
-
-var broadcastCommentsAdded = function(padId, commentIds, comments) {
-  var socket = clientIO.connect(broadcastUrl);
-
-  var data = {
-    padId: padId,
-    commentIds: commentIds,
-    comments: comments
-  };
-
-  socket.emit('apiAddComments', data);
-}
-
-var broadcastCommentRepliesAdded = function(padId, replyIds, replies) {
-  var socket = clientIO.connect(broadcastUrl);
-
-  var data = {
-    padId: padId,
-    replyIds: replyIds,
-    replies: replies
-  };
-
-  socket.emit('apiAddCommentReplies', data);
-}
-
-var broadcastUrl = apiUtils.broadcastUrlFor("/comment");
