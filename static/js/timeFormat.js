@@ -37,12 +37,7 @@ var time_formats = [
 ];
 
 function prettyDate(time){
-  /*
-  var time = ('' + date_str).replace(/-/g,"/").replace(/[TZ]/g," ").replace(/^\s\s*/   /*rappel   , '').replace(/\s\s*$/, '');
-  if(time.substr(time.length-4,1)==".") time =time.substr(0,time.length-4);
-  */
   var seconds = (new Date() - new Date(time)) / 1000;
-  // var seconds = new Date() - new Date(time) / 1000;
   var     token = 'ago',
     list_choice = 1,
   l10n_appendix = '.past';
