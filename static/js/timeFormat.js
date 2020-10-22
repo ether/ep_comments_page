@@ -1,6 +1,6 @@
-var localizable = typeof html10n !== "undefined";
+const localizable = typeof html10n !== 'undefined';
 
-l10nKeys = {
+const l10nKeys = {
   "seconds"           : "ep_comments_page.time.seconds",
   "1 minute ago"      : "ep_comments_page.time.one_minute",
   "minutes"           : "ep_comments_page.time.minutes",
@@ -18,7 +18,7 @@ l10nKeys = {
   "centuries"         : "ep_comments_page.time.centuries"
 }
 
-var time_formats = [
+const time_formats = [
   [60, 'seconds', 1], // 60
   [120, '1 minute ago', '1 minute from now'], // 60*2
   [3600, 'minutes', 60], // 60*60, 60
@@ -37,25 +37,20 @@ var time_formats = [
 ];
 
 function prettyDate(time){
-  var seconds = (new Date() - new Date(time)) / 1000;
-  var     token = 'ago',
-    list_choice = 1,
-  l10n_appendix = '.past';
+  const now = new Date();
+  const then = new Date(time);
+  const seconds = Math.abs((now - then) / 1000);
+  const future = now < then;
+  const token = future ? 'from now' : 'ago';
+  const list_choice = future ? 2 : 1;
+  const l10n_appendix = future ? '.future' : '.past';
 
-  if (seconds < 0) {
-    seconds = Math.abs(seconds);
-    token = 'from now';
-    l10n_appendix = '.future';
-    list_choice = 2;
-  }
-
-  var i = 0, format;
-  while (format = time_formats[i++])
+  for (const format of time_formats)
     if (seconds < format[0]) {
-      var count = Math.floor(seconds / format[2]);
-      var formatted_time;
+      const count = Math.floor(seconds / format[2]);
+      let formatted_time;
       if (localizable) {
-        var key = l10nKeys[format[1]] + l10n_appendix;
+        const key = l10nKeys[format[1]] + l10n_appendix;
         formatted_time = html10n.get(key, { count: count });
       }
 
