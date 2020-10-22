@@ -3,16 +3,9 @@
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var db = require('ep_etherpad-lite/node/db/DB');
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-var readOnlyManager = require("ep_etherpad-lite/node/db/ReadOnlyManager.js");
 var shared = require('./static/js/shared');
 
 exports.getComments = async (padId) => {
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
-
   // Not sure if we will encouter race conditions here..  Be careful.
 
   // get the globalComments
@@ -39,12 +32,6 @@ exports.addComment = async (padId, data) => {
 };
 
 exports.bulkAddComments = async (padId, data) => {
- // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
-
   // get the entry
   let comments = await db.get('comments:' + padId);
 
@@ -88,12 +75,6 @@ exports.copyComments = async (originalPadId, newPadID) => {
 };
 
 exports.getCommentReplies = async (padId) => {
- // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
-
   // get the globalComments replies
   let replies = await db.get('comment-replies:' + padId);
   // comment does not exist
@@ -111,12 +92,6 @@ exports.addCommentReply = async (padId, data) => {
 };
 
 exports.bulkAddCommentReplies = async (padId, data) => {
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
-
   // get the entry
   let replies = await db.get('comment-replies:' + padId);
   // the entry doesn't exist so far, let's create it
@@ -165,12 +140,6 @@ exports.copyCommentReplies = async (originalPadId, newPadID) => {
 exports.changeAcceptedState = async (padId, commentId, state) => {
   // Given a comment we update that comment to say the change was accepted or reverted
 
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
-
   // If we're dealing with comment replies we need to a different query
   var prefix = "comments:";
   if(commentId.substring(0,7) === "c-reply"){
@@ -201,11 +170,6 @@ exports.changeCommentText = async (padId, commentId, commentText) => {
   if (commentText.length <= 0) return true;
 
   // Given a comment we update the comment text
-  // We need to change readOnly PadIds to Normal PadIds
-  var isReadOnly = padId.indexOf("r.") === 0;
-  if(isReadOnly){
-    padId = await readOnlyManager.getPadId(padId);
-  };
 
   // If we're dealing with comment replies we need to a different query
   var prefix = 'comments:';

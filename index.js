@@ -6,6 +6,7 @@ var formidable = require('ep_etherpad-lite/node_modules/formidable');
 var commentManager = require('./commentManager');
 var apiUtils = require('./apiUtils');
 var _ = require('ep_etherpad-lite/static/js/underscore');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
 
@@ -38,18 +39,21 @@ exports.socketio = function (hook_name, args, cb){
 
     // Join the rooms
     socket.on('getComments', async (data, respond) => {
-      const padId = data.padId;
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      // Put read-only and read-write users in the same socket.io "room" so that they can see each
+      // other's updates.
       socket.join(padId);
       respond(await commentManager.getComments(padId));
     });
 
     socket.on('getCommentReplies', async (data, respond) => {
-      respond(await commentManager.getCommentReplies(data.padId));
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      respond(await commentManager.getCommentReplies(padId));
     });
 
     // On add events
     socket.on('addComment', async (data, respond) => {
-      var padId = data.padId;
+      const {padId} = await readOnlyManager.getIds(data.padId);
       var content = data.comment;
       const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
@@ -59,44 +63,47 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     socket.on('deleteComment', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // delete the comment on the database
-      await commentManager.deleteComment(data.padId, data.commentId);
+      await commentManager.deleteComment(padId, data.commentId);
       // Broadcast to all other users that this comment was deleted
-      socket.broadcast.to(data.padId).emit('commentDeleted', data.commentId);
+      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
     });
 
     socket.on('revertChange', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
       await commentManager.changeAcceptedState(padId, data.commentId, false);
       socket.broadcast.to(padId).emit('changeReverted', data.commentId);
     });
 
     socket.on('acceptChange', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
       await commentManager.changeAcceptedState(padId, data.commentId, true);
       socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
     });
 
     socket.on('bulkAddComment', async (padId, data, respond) => {
+      padId = (await readOnlyManager.getIds(padId)).padId;
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
       respond(_.object(commentIds, comments)); // {c-123:data, c-124:data}
     });
 
     socket.on('bulkAddCommentReplies', async (padId, data, respond) => {
+      padId = (await readOnlyManager.getIds(padId)).padId;
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
       respond(_.zip(repliesId, replies));
     });
 
     socket.on('updateCommentText', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that the comment text was changed.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
       var commentId = data.commentId;
       var commentText = data.commentText;
       const failed = await commentManager.changeCommentText(padId, commentId, commentText);
@@ -105,7 +112,7 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     socket.on('addCommentReply', async (data, respond) => {
-      const padId = data.padId;
+      const {padId} = await readOnlyManager.getIds(data.padId);
       const [replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
       socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
@@ -157,7 +164,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     let data;
     try {
@@ -186,7 +193,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // create data to hold comment information:
     let data;
@@ -219,7 +226,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     //sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // call the route with the pad id sanitized
     let data;
@@ -249,7 +256,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // create data to hold comment reply information:
     let data;
