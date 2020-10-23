@@ -1,0 +1,18 @@
+{
+  "ep_comments_page.time.seconds.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.seconds.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.minutes.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.minutes.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.hours.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.hours.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.days.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.days.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.weeks.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.weeks.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.months.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.months.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.years.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.years.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.centuries.past": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro",
+  "ep_comments_page.time.centuries.future": "See https://github.com/marcelklehr/html10n.js#pluralization for how to use the 'plural' macro"
+}
