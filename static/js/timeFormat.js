@@ -48,21 +48,9 @@ function prettyDate(time){
   for (const format of time_formats) {
     if (seconds < format[0]) {
       const count = Math.floor(seconds / format[2]);
-      let formatted_time;
-      if (localizable) {
-        const key = l10nKeys[format[1]] + l10n_appendix;
-        formatted_time = html10n.get(key, { count: count });
-      }
-
-      // Wasn't able to localize properly the date, so use the default:
-      if (formatted_time === undefined) {
-        if (typeof format[2] == 'string') {
-          formatted_time =  format[list_choice];
-        } else {
-          formatted_time = count + ' ' + format[1] + ' ' + token;
-        }
-      }
-      return formatted_time;
+      if (localizable) return html10n.get(l10nKeys[format[1]] + l10n_appendix, {count});
+      if (typeof format[2] === 'string') return format[list_choice];
+      return `${count} ${format[1]} ${token}`;
     }
   }
   return time;
