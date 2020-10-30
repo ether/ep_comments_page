@@ -36,12 +36,12 @@ jobs:
         - sudo apt-get -y install libreoffice-pdfimport
        install:
         - "npm install"
-        - "mkdir ep_comments"
-        - "mv !(ep_comments) ep_comments"
+        - "mkdir ep_comments_page"
+        - "mv !(ep_comments_page) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
-        - "mv ../ep_comments node_modules"
+        - "mv ../ep_comments_page node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
         - "cd src && npm install && cd -"
@@ -52,12 +52,12 @@ jobs:
         - "tests/frontend/travis/sauce_tunnel.sh"
        install:
         - "npm install"
-        - "mkdir ep_comments"
-        - "mv !(ep_comments) ep_comments"
+        - "mkdir ep_comments_page"
+        - "mv !(ep_comments_page) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
-        - "mv ../ep_comments node_modules"
+        - "mv ../ep_comments_page node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
        script:
@@ -68,5 +68,5 @@ notifications:
     channels:
       - "irc.freenode.org#etherpad-lite-dev"
 
-##ETHERPAD_TRAVIS_V=7
+##ETHERPAD_TRAVIS_V=999
 ## Travis configuration automatically created using bin/plugins/updateAllPluginsScript.sh
