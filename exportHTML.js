@@ -18,4 +18,3 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   context.lineContent = context.lineContent.replace(/data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi,
                                                     'class="comment $1"');
 };
-
