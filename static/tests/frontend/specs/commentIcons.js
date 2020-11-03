@@ -66,6 +66,16 @@ describe("ep_comments_page - Comment icons", function() {
 
   it('updates comment icon height when commented text is moved to another line', async function() {
     // we only run test if icons are enabled
+    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('safari') != -1) {
+      if (ua.indexOf('chrome') > -1) {
+        // Chrome
+      } else {
+        return this.skip();
+      }
+    }
+
     await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
       var outer$ = helper.padOuter$;
