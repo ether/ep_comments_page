@@ -26,6 +26,7 @@
         "clientVars": "ep_comments_page/index",
         "exportHtmlAdditionalTagsWithData": "ep_comments_page/exportHTML",
         "getLineHTMLForExport": "ep_comments_page/exportHTML",
+        "exportEtherpadAdditionalContent": "ep_comments_page/index",
         "handleMessageSecurity": "ep_comments_page/index"
       }
     }
