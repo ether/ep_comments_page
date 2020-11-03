@@ -119,6 +119,16 @@ describe("ep_comments_page - Comment icons", function() {
   });
 
   it('hides comment when user clicks on comment icon twice', async function() {
+    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('safari') != -1) {
+      if (ua.indexOf('chrome') > -1) {
+        // Chrome
+      } else {
+        return this.skip();
+      }
+    }
+
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
@@ -136,6 +146,16 @@ describe("ep_comments_page - Comment icons", function() {
   });
 
   it('hides comment when user clicks outside of comment box', async function() {
+    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('safari') != -1) {
+      if (ua.indexOf('chrome') > -1) {
+        // Chrome
+      } else {
+        return this.skip();
+      }
+    }
+
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var outer$ = helper.padOuter$;
@@ -155,6 +175,16 @@ describe("ep_comments_page - Comment icons", function() {
   });
 
   it('hides first comment and shows second comment when user clicks on one icon then on another icon', async function() {
+    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('safari') != -1) {
+      if (ua.indexOf('chrome') > -1) {
+        // Chrome
+      } else {
+        return this.skip();
+      }
+    }
+
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
       var inner$ = helper.padInner$;
