@@ -27,6 +27,7 @@
         "exportHtmlAdditionalTagsWithData": "ep_comments_page/exportHTML",
         "getLineHTMLForExport": "ep_comments_page/exportHTML",
         "exportEtherpadAdditionalContent": "ep_comments_page/index",
+        "exportHTMLAdditionalContent": "ep_comments_page/exportHTML",
         "handleMessageSecurity": "ep_comments_page/index"
       }
     }

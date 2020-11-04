@@ -1,7 +1,7 @@
 const _ = require('ep_etherpad-lite/static/js/underscore');
 const eejs = require('ep_etherpad-lite/node/eejs/');
-const rehype = require('ep_etherpad-lite/node_modules/rehype');
 const cheerio = require('ep_etherpad-lite/node_modules/cheerio');
+const commentManager = require('./commentManager');
 
 // Add the props to be supported in export
 exports.exportHtmlAdditionalTagsWithData = async (hookName, pad) => {
@@ -12,7 +12,6 @@ exports.exportHtmlAdditionalTagsWithData = async (hookName, pad) => {
 function findAllCommentUsedOn(pad) {
   const commentsUsed = [];
   pad.pool.eachAttrib((key, value) => { if (key === 'comment') commentsUsed.push(value); });
-  console.warn(commentsUsed);
   return commentsUsed;
 }
 
@@ -32,3 +31,22 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   });
 
 };
+
+exports.exportHTMLAdditionalContent = async (hookName, context) => {
+  let padId = context;
+  let comments = await commentManager.getComments(padId)
+  if(!comments.comments) return;
+  comments = comments.comments;
+  let html = "<div id=comments>";
+
+  for (const commentId in comments){
+    // prolly should escape text here?
+    html += '<p class="comment" id="' + commentId + '">* '+comments[commentId].text+'</p>';
+  }
+
+  html += '</div>'
+
+  // adds additional HTML to the body, we get this HTML from the database of comments:padId
+  return html;
+
+}
