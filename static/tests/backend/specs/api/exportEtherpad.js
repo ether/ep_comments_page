@@ -28,7 +28,7 @@ describe(__filename, function() {
           .expect('Content-Type', /json/);
     });
 
-    it('Tries to import .etherpad', function(done) {
+    it('imports .etherpad incuding a comment', function(done) {
       api.post(`/p/${testPadId}/import`)
         .attach('file', etherpadDoc, {
           filename: '/test.etherpad',
@@ -42,7 +42,7 @@ describe(__filename, function() {
 
     });
 
-    it('exports Etherpad and includes comments section in export', async function() {
+    it('exports .etherpad and checks it includes comments', async function() {
       await api.get(`/p/${testPadId}/export/etherpad`)
         .buffer(true).parse(superagent.parse.text)
         .expect(200)
