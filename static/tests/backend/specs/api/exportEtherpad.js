@@ -5,6 +5,7 @@
  */
 
 const supertest = require('ep_etherpad-lite/node_modules/supertest'),
+     superagent = require('ep_etherpad-lite/node_modules/superagent'),
              fs = require('fs'),
            path = require('path'),
         request = require('ep_etherpad-lite/node_modules/request'),
@@ -41,11 +42,11 @@ describe(__filename, function() {
 
     });
 
-    it('exports Etherpad', async function() {
+    it('exports Etherpad and includes comments section in export', async function() {
       await api.get(`/p/${testPadId}/export/etherpad`)
-          .buffer(true).parse(superapi.parse.text)
-          .expect(200)
-          .expect(/hello/);
+        .buffer(true).parse(superagent.parse.text)
+        .expect(200)
+        .expect(/comments:/)
     });
 
 /*
