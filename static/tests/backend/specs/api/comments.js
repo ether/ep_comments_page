@@ -1,5 +1,5 @@
 var       supertest = require('ep_etherpad-lite/node_modules/supertest'),
-                 io = require('socket.io-client'),
+                 io = require('ep_etherpad-lite/node_modules/socket.io-client'),
               utils = require('../../../utils'),
           createPad = utils.createPad,
          readOnlyId = utils.readOnlyId,
@@ -192,6 +192,7 @@ describe('create comments API', function(){
 describe('create comment API broadcast', function(){
   var padID;
   var timesMessageWasReceived;
+  let socket;
 
   // NOTE: this hook will timeout if you don't run your Etherpad in
   // loadTest mode. Be sure to adjust your settings.json when running
@@ -205,7 +206,7 @@ describe('create comment API broadcast', function(){
       padID = newPadID;
 
       // ... and listens to the broadcast message:
-      var socket = io.connect(appUrl + "/comment");
+      socket = io.connect(appUrl + "/comment");
       var req = { padId: padID };
       // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
       socket.emit('getComments', req, function (res){
@@ -217,6 +218,10 @@ describe('create comment API broadcast', function(){
       });
     });
   });
+  afterEach(function(done){
+    socket.close();
+    done();
+  })
 
   it('broadcasts comment creation to other clients of same pad', function(done) {
     // create first comment...

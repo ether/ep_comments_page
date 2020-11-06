@@ -1,0 +1,23 @@
+{
+  "ep_comments_page.comment" : "Kommentar",
+  "ep_comments_page.comments" : "Kommentarer",
+  "ep_comments_page.add_comment.title" : "Lägg till ny kommentar till markering",
+  "ep_comments_page.add_comment.hint" : "Markera först den text du vill kommentera",
+  "ep_comments_page.delete_comment.title" : "Radera den här kommentaren",
+  "ep_comments_page.edit_comment.title" : "Redigera den här kommentaren",
+  "ep_comments_page.show_comments" : "Visa kommentarer",
+  "ep_comments_page.comments_template.suggested_change" : "Föreslagen ändring",
+  "ep_comments_page.comments_template.from" : "Från",
+  "ep_comments_page.comments_template.accept_change.value" : "Godkänn ändringsförslag",
+  "ep_comments_page.comments_template.revert_change.value" : "Avslå ändringsförslag",
+  "ep_comments_page.comments_template.suggested_change_from" : "Förslag att ändra från",
+  "ep_comments_page.comments_template.suggest_change_from" : "Föreslå att ändring från",
+  "ep_comments_page.comments_template.to" : "Till",
+  "ep_comments_page.comments_template.include_suggestion" : "Bifoga ändringsförslag",
+  "ep_comments_page.comments_template.comment.value" : "Kommentera",
+  "ep_comments_page.comments_template.cancel.value" : "Avbryt",
+  "ep_comments_page.comments_template.reply.value" : "Svara",
+  "ep_comments_page.comments_template.reply.placeholder" : "Svar",
+  "ep_comments_page.comments_template.edit_comment.save" : "spara",
+  "ep_comments_page.comments_template.edit_comment.cancel" :"avbryt"
+}

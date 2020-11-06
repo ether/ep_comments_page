@@ -9,15 +9,10 @@ services:
   - docker
 
 install:
-  - "bin/installDeps.sh"
   - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-  - "npm install ep_test_line_attrib"
 
-before_script:
-  - "tests/frontend/travis/sauce_tunnel.sh"
-
-script:
-  - "tests/frontend/travis/runner.sh"
+#script:
+#  - "tests/frontend/travis/runner.sh"
 
 env:
   global:
@@ -26,8 +21,21 @@ env:
 
 jobs:
   include:
-    - name: "Run the Backend tests"
-      install:
+     - name: "Lint test package-lock"
+       install:
+        - "npm install lockfile-lint"
+       script:
+        - npx lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm
+     - name: "Run the Backend tests"
+       before_script:
+        - "tests/frontend/travis/sauce_tunnel.sh"
+       before_install:
+        - sudo add-apt-repository -y ppa:libreoffice/ppa
+        - sudo apt-get update
+        - sudo apt-get -y install libreoffice
+        - sudo apt-get -y install libreoffice-pdfimport
+       install:
+        - "npm install"
         - "mkdir ep_comments_page"
         - "mv !(ep_comments_page) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
@@ -36,12 +44,14 @@ jobs:
         - "mv ../ep_comments_page node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-        - "npm install ep_test_line_attrib"
         - "cd src && npm install && cd -"
-      script:
+       script:
         - "tests/frontend/travis/runnerBackend.sh"
-    - name: "Test the Frontend"
-      install:
+     - name: "Test the Frontend"
+       before_script:
+        - "tests/frontend/travis/sauce_tunnel.sh"
+       install:
+        - "npm install"
         - "mkdir ep_comments_page"
         - "mv !(ep_comments_page) ep_comments_page"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
@@ -50,11 +60,13 @@ jobs:
         - "mv ../ep_comments_page node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-        - "npm install ep_test_line_attrib"
-      script:
+       script:
         - "tests/frontend/travis/runner.sh"
 
 notifications:
   irc:
     channels:
       - "irc.freenode.org#etherpad-lite-dev"
+
+##ETHERPAD_TRAVIS_V=999
+## Travis configuration automatically created using bin/plugins/updateAllPluginsScript.sh

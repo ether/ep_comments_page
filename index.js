@@ -1,175 +1,125 @@
+/* global exports, require */
+
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
-var formidable = require('formidable');
-var clientIO = require('socket.io-client');
+var formidable = require('ep_etherpad-lite/node_modules/formidable');
 var commentManager = require('./commentManager');
-var comments = require('./comments');
 var apiUtils = require('./apiUtils');
 var _ = require('ep_etherpad-lite/static/js/underscore');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
-exports.padRemove = function(hook_name, context, callback) {
-  commentManager.deleteCommentReplies(context.padID, function() {
-    commentManager.deleteComments(context.padID, callback);
-  });
-}
-exports.padCopy = function(hook_name, context, callback) {
-  commentManager.copyComments(context.originalPad.id, context.destinationID, function() {
-    commentManager.copyCommentReplies(context.originalPad.id, context.destinationID, callback);
-  });
-}
+let io;
+
+exports.padRemove = async (hookName, context) => {
+  await Promise.all([
+    commentManager.deleteCommentReplies(context.padID),
+    commentManager.deleteComments(context.padID),
+  ]);
+};
+
+exports.padCopy = async (hookName, context) => {
+  await Promise.all([
+    commentManager.copyComments(context.originalPad.id, context.destinationID),
+    commentManager.copyCommentReplies(context.originalPad.id, context.destinationID),
+  ]);
+};
 
 exports.handleMessageSecurity = function(hook_name, context, callback){
-  if(context.message && context.message.data && context.message.data.apool){
-    var apool = context.message.data.apool;
-    if(apool.numToAttrib && apool.numToAttrib[0] && apool.numToAttrib[0][0]){
-      if(apool.numToAttrib[0][0] === "comment"){
-        // Comment change, allow it to override readonly security model!!
-        callback(true);
-      }else{
-        callback();
-      }
-    }else{
-      callback();
-    }
-  }else{
-    callback();
+  const {message: {data: {apool} = {}} = {}} = context;
+  if (apool && apool[0] && apool[0][0] === 'comment') {
+    // Comment change, allow it to override readonly security model!!
+    return callback(true);
   }
+  return callback();
 };
 
 exports.socketio = function (hook_name, args, cb){
-  var app = args.app;
-  var io = args.io;
-  var pushComment;
-  var padComment = io;
-
-  var commentSocket = io
-  .of('/comment')
-  .on('connection', function (socket) {
+  io = args.io.of('/comment');
+  io.on('connection', (socket) => {
 
     // Join the rooms
-    socket.on('getComments', function (data, callback) {
-      var padId = data.padId;
+    socket.on('getComments', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      // Put read-only and read-write users in the same socket.io "room" so that they can see each
+      // other's updates.
       socket.join(padId);
-      commentManager.getComments(padId, function (err, comments){
-        callback(comments);
-      });
+      respond(await commentManager.getComments(padId));
     });
 
-    socket.on('getCommentReplies', function (data, callback) {
-      var padId = data.padId;
-      commentManager.getCommentReplies(padId, function (err, replies){
-        callback(replies);
-      });
+    socket.on('getCommentReplies', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      respond(await commentManager.getCommentReplies(padId));
     });
 
     // On add events
-    socket.on('addComment', function (data, callback) {
-      var padId = data.padId;
+    socket.on('addComment', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       var content = data.comment;
-      commentManager.addComment(padId, content, function (err, commentId, comment){
+      const [commentId, comment] = await commentManager.addComment(padId, content);
+      if (commentId != null && comment != null) {
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
-        callback(commentId, comment);
-      });
+        respond(commentId, comment);
+      }
     });
 
-    socket.on('deleteComment', function(data, callback) {
+    socket.on('deleteComment', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // delete the comment on the database
-      commentManager.deleteComment(data.padId, data.commentId, function (){
-        // Broadcast to all other users that this comment was deleted
-        socket.broadcast.to(data.padId).emit('commentDeleted', data.commentId);
-      });
-
+      await commentManager.deleteComment(padId, data.commentId);
+      // Broadcast to all other users that this comment was deleted
+      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
     });
 
-    socket.on('revertChange', function(data, callback) {
+    socket.on('revertChange', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
-      commentManager.changeAcceptedState(padId, data.commentId, false, function(){
-        socket.broadcast.to(padId).emit('changeReverted', data.commentId);
-      });
+      await commentManager.changeAcceptedState(padId, data.commentId, false);
+      socket.broadcast.to(padId).emit('changeReverted', data.commentId);
     });
 
-    socket.on('acceptChange', function(data, callback) {
+    socket.on('acceptChange', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
-      commentManager.changeAcceptedState(padId, data.commentId, true, function(){
-        socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-      });
+      await commentManager.changeAcceptedState(padId, data.commentId, true);
+      socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
     });
 
-    socket.on('bulkAddComment', function (padId, data, callback) {
-      commentManager.bulkAddComments(padId, data, function(error, commentsId, comments){
-        socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-        var commentWithCommentId = _.object(commentsId, comments); // {c-123:data, c-124:data}
-        callback(commentWithCommentId)
-      });
+    socket.on('bulkAddComment', async (padId, data, respond) => {
+      padId = (await readOnlyManager.getIds(padId)).padId;
+      const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
+      socket.broadcast.to(padId).emit('pushAddCommentInBulk');
+      respond(_.object(commentIds, comments)); // {c-123:data, c-124:data}
     });
 
-    socket.on('bulkAddCommentReplies', function(padId, data, callback){
-      commentManager.bulkAddCommentReplies(padId, data, function (err, repliesId, replies){
-        socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-        var repliesWithReplyId = _.zip(repliesId, replies);
-        callback(repliesWithReplyId);
-      });
+    socket.on('bulkAddCommentReplies', async (padId, data, respond) => {
+      padId = (await readOnlyManager.getIds(padId)).padId;
+      const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
+      socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
+      respond(_.zip(repliesId, replies));
     });
 
-    socket.on('updateCommentText', function(data, callback) {
+    socket.on('updateCommentText', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that the comment text was changed.
       // Note that commentId here can either be the commentId or replyId..
-      var padId = data.padId;
       var commentId = data.commentId;
       var commentText = data.commentText;
-      commentManager.changeCommentText(padId, commentId, commentText, function(err) {
-        if(!err){
-          socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
-        }
-        callback(err);
-      });
+      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
+      if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+      respond(failed);
     });
 
-    socket.on('addCommentReply', function (data, callback) {
-      var padId = data.padId;
-      var content = data.reply;
-      var changeTo = data.changeTo || null;
-      var changeFrom = data.changeFrom || null;
-      var changeAccepted = data.changeAccepted || null;
-      var changeReverted = data.changeReverted || null;
-      var commentId = data.commentId;
-      commentManager.addCommentReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
-        reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
-        callback(replyId, reply);
-      });
+    socket.on('addCommentReply', async (data, respond) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      const [replyId, reply] = await commentManager.addCommentReply(padId, data);
+      reply.replyId = replyId;
+      socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
+      respond(replyId, reply);
     });
-
-    // comment added via API
-    socket.on('apiAddComments', function (data) {
-      var padId = data.padId;
-      var commentIds = data.commentIds;
-      var comments = data.comments;
-
-      for (var i = 0, len = commentIds.length; i < len; i++) {
-        socket.broadcast.to(padId).emit('pushAddComment', commentIds[i], comments[i]);
-      }
-    });
-
-    // comment reply added via API
-    socket.on('apiAddCommentReplies', function (data) {
-      var padId = data.padId;
-      var replyIds = data.replyIds;
-      var replies = data.replies;
-
-      for (var i = 0, len = replyIds.length; i < len; i++) {
-        var reply = replies[i];
-        var replyId = replyIds[i];
-        reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-      }
-    });
-
   });
+  return cb();
 };
 
 exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
@@ -188,13 +138,13 @@ exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
 };
 
 exports.eejsBlock_scripts = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/comments.html", {}, module);
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html", {}, module);
+  args.content = args.content + eejs.require("ep_comments_page/templates/comments.html");
+  args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html");
   return cb();
 };
 
 exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html", {}, module);
+  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html");
   return cb();
 };
 
@@ -208,124 +158,129 @@ exports.clientVars = function (hook, context, cb) {
 };
 
 exports.expressCreateServer = function (hook_name, args, callback) {
-  args.app.get('/p/:pad/:rev?/comments', function(req, res) {
+  args.app.get('/p/:pad/:rev?/comments', async (req, res) => {
     var fields = req.query;
     // check the api key
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     // sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
-    comments.getPadComments(padIdReceived, function(err, data) {
-      if(err) {
-        res.json({code: 2, message: "internal error", data: null});
-      } else {
-        res.json({code: 0, data: data});
-      }
-    });
+    let data;
+    try {
+      data = await commentManager.getComments(padIdReceived);
+    } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
+      res.json({code: 2, message: 'internal error', data: null});
+      return;
+    }
+    if (data == null) return;
+    res.json({code: 0, data});
   });
 
-  args.app.post('/p/:pad/:rev?/comments', function(req, res) {
-    new formidable.IncomingForm().parse(req, function (err, fields, files) {
-      // check the api key
-      if(!apiUtils.validateApiKey(fields, res)) return;
-
-      // check required fields from comment data
-      if(!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
-
-      // sanitize pad id before continuing
-      var padIdReceived = apiUtils.sanitizePadId(req);
-
-      // create data to hold comment information:
-      try {
-        var data = JSON.parse(fields.data);
-
-        comments.bulkAddPadComments(padIdReceived, data, function(err, commentIds, comments) {
-          if(err) {
-            res.json({code: 2, message: "internal error", data: null});
-          } else {
-            broadcastCommentsAdded(padIdReceived, commentIds, comments);
-            res.json({code: 0, commentIds: commentIds});
-          }
-        });
-      } catch(e) {
-        res.json({code: 1, message: "data must be a JSON", data: null});
-      }
+  args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
+    const [fields, files] = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+        if (err != null) return reject(err);
+        resolve([fields, files]);
+      });
     });
+
+    // check the api key
+    if (!apiUtils.validateApiKey(fields, res)) return;
+
+    // check required fields from comment data
+    if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
+
+    // sanitize pad id before continuing
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
+
+    // create data to hold comment information:
+    let data;
+    try {
+      data = JSON.parse(fields.data);
+    } catch (err) {
+      res.json({code: 1, message: "data must be a JSON", data: null});
+      return;
+    }
+
+    let commentIds, comments;
+    try {
+      [commentIds, comments] = await commentManager.bulkAddComments(padIdReceived, data);
+    } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
+      res.json({code: 2, message: "internal error", data: null});
+      return;
+    }
+    if (commentIds == null) return;
+    for (let i = 0; i < commentIds.length; i++) {
+      io.to(padIdReceived).emit('pushAddComment', commentIds[i], comments[i]);
+    }
+    res.json({code: 0, commentIds: commentIds});
   });
 
-  args.app.get('/p/:pad/:rev?/commentReplies', function(req, res){
+  args.app.get('/p/:pad/:rev?/commentReplies', async (req, res) => {
     //it's the same thing as the formidable's fields
     var fields = req.query;
     // check the api key
     if(!apiUtils.validateApiKey(fields, res)) return;
 
     //sanitize pad id before continuing
-    var padIdReceived = apiUtils.sanitizePadId(req);
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // call the route with the pad id sanitized
-    comments.getPadCommentReplies(padIdReceived, function(err, data) {
-      if(err) {
-        res.json({code: 2, message: "internal error", data:null})
-      } else {
-        res.json({code: 0, data: data});
-      }
-    });
+    let data;
+    try {
+      data = await commentManager.getCommentReplies(padIdReceived);
+    } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
+      res.json({code: 2, message: "internal error", data:null});
+      return;
+    }
+    if (data == null) return;
+    res.json({code: 0, data: data});
   });
 
-  args.app.post('/p/:pad/:rev?/commentReplies', function(req, res) {
-    new formidable.IncomingForm().parse(req, function (err, fields, files) {
-      // check the api key
-      if(!apiUtils.validateApiKey(fields, res)) return;
-
-      // check required fields from comment data
-      if(!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
-
-      // sanitize pad id before continuing
-      var padIdReceived = apiUtils.sanitizePadId(req);
-
-      // create data to hold comment reply information:
-      try {
-        var data = JSON.parse(fields.data);
-
-        comments.bulkAddPadCommentReplies(padIdReceived, data, function(err, replyIds, replies) {
-          if(err) {
-            res.json({code: 2, message: "internal error", data: null});
-          } else {
-            broadcastCommentRepliesAdded(padIdReceived, replyIds, replies);
-            res.json({code: 0, replyIds: replyIds});
-          }
-        });
-      } catch(e) {
-        res.json({code: 1, message: "data must be a JSON", data: null});
-      }
+  args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
+    const [fields, files] = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+        if (err != null) return reject(err);
+        resolve([fields, files]);
+      });
     });
+
+    // check the api key
+    if (!apiUtils.validateApiKey(fields, res)) return;
+
+    // check required fields from comment data
+    if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
+
+    // sanitize pad id before continuing
+    const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
+
+    // create data to hold comment reply information:
+    let data;
+    try {
+        data = JSON.parse(fields.data);
+    } catch (err) {
+      res.json({code: 1, message: "data must be a JSON", data: null});
+      return;
+    }
+
+    let replyIds, replies;
+    try {
+      [replyIds, replies] = await commentManager.bulkAddCommentReplies(padIdReceived, data);
+    } catch (err) {
+      console.error(err.stack ? err.stack : err.toString());
+      res.json({code: 2, message: "internal error", data: null});
+      return;
+    }
+    if (replyIds == null) return;
+    for (let i = 0; i < replyIds.length; i++) {
+      replies[i].replyId = replyIds[i];
+      io.to(padIdReceived).emit('pushAddCommentReply', replyIds[i], replies[i]);
+    }
+    res.json({code: 0, replyIds: replyIds});
   });
-
+  return callback();
 }
-
-var broadcastCommentsAdded = function(padId, commentIds, comments) {
-  var socket = clientIO.connect(broadcastUrl);
-
-  var data = {
-    padId: padId,
-    commentIds: commentIds,
-    comments: comments
-  };
-
-  socket.emit('apiAddComments', data);
-}
-
-var broadcastCommentRepliesAdded = function(padId, replyIds, replies) {
-  var socket = clientIO.connect(broadcastUrl);
-
-  var data = {
-    padId: padId,
-    replyIds: replyIds,
-    replies: replies
-  };
-
-  socket.emit('apiAddCommentReplies', data);
-}
-
-var broadcastUrl = apiUtils.broadcastUrlFor("/comment");
