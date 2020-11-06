@@ -1,6 +1,6 @@
 # Comments and annotations for Etherpad
 
-![Screen shot](http://i.imgur.com/sbiJ4xz.png)
+![Screen shot](https://user-images.githubusercontent.com/220864/98013526-617ff900-1df2-11eb-88b6-cf259372f6ca.PNG)
 
 ## Installing this plugin with npm.
 ```

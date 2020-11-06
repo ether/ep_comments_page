@@ -1,11 +1,12 @@
 {
   "description": "Adds comments on sidebar and link it to the text.  For no-skin use ep_page_view.",
   "name": "ep_comments_page",
-  "version": "0.1.5",
+  "version": "0.1.17",
   "author": {
     "name": "Nicolas Lescop",
     "email": "limplementeur@gmail.com"
   },
+  "license": "Apache-2.0",
   "contributors": [
     {
       "name": "Nicolas Lescop",
@@ -21,11 +22,11 @@
     }
   ],
   "dependencies": {
-    "formidable": "*",
-    "socket.io-client": "*"
+    "formidable": "*"
   },
   "devDependencies": {
-    "request": "*"
+    "request": "*",
+    "socket.io-client": "*"
   },
   "engines": {
     "node": "*"
@@ -33,5 +34,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ether/ep_comments"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "http://etherpad.org/"
   }
 }

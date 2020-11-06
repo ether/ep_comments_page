@@ -1,3 +1,5 @@
+/* global clearTimeout, clientVars, exports, html10n, pad, require, setTimeout */
+
 /* TODO:
 - lable reply textarea
 - Make the chekbox appear above the suggested changes even when activated
@@ -1102,21 +1104,14 @@ ep_comments.prototype.commentListen = function(){
 
 // Listen for comment replies
 ep_comments.prototype.commentRepliesListen = function(){
-  var self = this;
-  var socket = this.socket;
-  socket.on('pushAddCommentReply', function (replyId, reply, changeTo, changeFrom){
-    // console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
-    // callback(replyId, reply);
-    // self.collectCommentReplies();
-    self.getCommentReplies(function (replies){
+  this.socket.on('pushAddCommentReply', (replyId, reply) => {
+    this.getCommentReplies((replies) => {
       if (!$.isEmptyObject(replies)){
-        // console.log("collecting comment replies");
-        self.commentReplies = replies;
-        self.collectCommentReplies();
+        this.commentReplies = replies;
+        this.collectCommentReplies();
       }
     });
   });
-
 };
 
 ep_comments.prototype.updateCommentBoxText = function (commentId, commentText) {
@@ -1193,7 +1188,7 @@ ep_comments.prototype.pushComment = function(eventType, callback){
 var hooks = {
 
   // Init pad comments
-  postAceInit: function(hook, context){
+  postAceInit: function(hookName, context, cb) {
     if(!pad.plugins) pad.plugins = {};
     var Comments = new ep_comments(context);
     pad.plugins.ep_comments_page = Comments;
@@ -1206,17 +1201,19 @@ var hooks = {
         class_name: "error"
       })
     }
+    return cb();
   },
 
-  postToolbarInit: function (hookName, args) {
+  postToolbarInit: function (hookName, args, cb) {
     var editbar = args.toolbar;
 
     editbar.registerCommand('addComment', function () {
       pad.plugins.ep_comments_page.displayNewCommentForm();
     });
+    return cb();
   },
 
-  aceEditEvent: function(hook, context){
+  aceEditEvent: function(hookName, context, cb) {
     if(!pad.plugins) pad.plugins = {};
     // first check if some text is being marked/unmarked to add comment to it
     var eventType = context.callstack.editEvent.eventType;
@@ -1226,8 +1223,8 @@ var hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    if(eventType == "setup" || eventType == "setBaseText" || eventType == "importText") return;
-    
+    if (eventType == 'setup' || eventType == 'setBaseText' || eventType == 'importText') return cb();
+
     if(context.callstack.docTextChanged && pad.plugins.ep_comments_page){
       pad.plugins.ep_comments_page.setYofComments();
     }
@@ -1244,21 +1241,23 @@ var hooks = {
         });
       }
     }
+    return cb();
   },
 
   // Insert comments classes
-  aceAttribsToClasses: function(hook, context){
+  aceAttribsToClasses: function(hookName, context, cb) {
     if(context.key === 'comment' && context.value !== "comment-deleted") {
-      return ['comment', context.value];
+      return cb(['comment', context.value]);
     }
     // only read marks made by current user
     if(context.key === preCommentMark.MARK_CLASS && context.value === clientVars.userId) {
-      return [preCommentMark.MARK_CLASS, context.value];
+      return cb([preCommentMark.MARK_CLASS, context.value]);
     }
+    return cb();
   },
 
-  aceEditorCSS: function(){
-    return cssFiles;
+  aceEditorCSS: function(hookName, context, cb) {
+    return cb(cssFiles);
   }
 
 };
@@ -1360,10 +1359,10 @@ function getRepFromSelector(selector, container){
   return repArr;
 }
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
-exports.aceInitialized = function(hook, context){
+exports.aceInitialized = function(hookName, context, cb) {
   var editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
   editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
+  return cb();
 }
-

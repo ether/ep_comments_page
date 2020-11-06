@@ -1,6 +1,6 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-var collectContentPre = function(hook, context){
+var collectContentPre = function(hookName, context, cb) {
   var comment = /(?:^| )(c-[A-Za-z0-9]*)/.exec(context.cls);
   var fakeComment = /(?:^| )(fakecomment-[A-Za-z0-9]*)/.exec(context.cls);
 
@@ -17,6 +17,7 @@ var collectContentPre = function(hook, context){
     var commentId = mapFakeComments[fakeCommentId];
     context.cc.doAttrib(context.state, "comment::" + commentId);
   }
+  return cb();
 };
 
 exports.collectContentPre = collectContentPre;
