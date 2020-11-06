@@ -5,6 +5,7 @@
       "pre": ["ep_etherpad-lite/webaccess", "ep_page_view/page_view"],
       "post": ["ep_etherpad-lite/static"],
       "client_hooks": {
+        "postToolbarInit": "ep_comments_page/static/js/index",
         "postAceInit": "ep_comments_page/static/js/index",
         "collectContentPre": "ep_comments_page/static/js/shared",
         "aceAttribsToClasses": "ep_comments_page/static/js/index",
@@ -13,13 +14,13 @@
         "aceInitialized": "ep_comments_page/static/js/index"
       },
       "hooks": {
+        "padInitToolbar": "ep_comments_page/index",
         "padRemove": "ep_comments_page/index",
         "padCopy": "ep_comments_page/index",
         "socketio": "ep_comments_page/index",
         "expressCreateServer": "ep_comments_page/index",
         "collectContentPre": "ep_comments_page/static/js/shared",
         "eejsBlock_editbarMenuLeft": "ep_comments_page/index",
-        "eejsBlock_dd_insert": "ep_comments_page/index",
         "eejsBlock_scripts": "ep_comments_page/index",
         "eejsBlock_mySettings": "ep_comments_page/index",
         "eejsBlock_styles": "ep_comments_page/index",

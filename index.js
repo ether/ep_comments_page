@@ -126,17 +126,28 @@ exports.socketio = function (hook_name, args, cb){
   return cb();
 };
 
-exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/menuButtons.ejs");
-  return cb();
-};
-
 exports.eejsBlock_mySettings = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_comments_page/templates/settings.ejs");
   return cb();
 };
 
+exports.padInitToolbar = function (hookName, args) {
+  var toolbar = args.toolbar;
+
+  var button = toolbar.button({
+      command: 'addComment',
+      localizationId: 'ep_comments_page.add_comment.title',
+      class: 'buttonicon buttonicon-comment-medical'
+  });
+
+  toolbar.registerButton('addComment', button);
+};
+
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
+  //check if custom button is used
+  if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1 ) {
+    return cb();
+  }
   args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
   return cb();
 };

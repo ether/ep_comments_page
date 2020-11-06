@@ -41,7 +41,7 @@ exports.exportHTMLAdditionalContent = async (hookName, context) => {
 
   for (const commentId in comments){
     // prolly should escape text here?
-    html += '<p class="comment" id="' + commentId + '">* '+comments[commentId].text+'</p>';
+    html += '<p role="comment" class="comment" id="' + commentId + '">* '+comments[commentId].text+'</p>';
   }
 
   html += '</div>'
