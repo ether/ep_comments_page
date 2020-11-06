@@ -1204,6 +1204,15 @@ var hooks = {
     return cb();
   },
 
+  postToolbarInit: function (hookName, args, cb) {
+    var editbar = args.toolbar;
+
+    editbar.registerCommand('addComment', function () {
+      pad.plugins.ep_comments_page.displayNewCommentForm();
+    });
+    return cb();
+  },
+
   aceEditEvent: function(hookName, context, cb) {
     if(!pad.plugins) pad.plugins = {};
     // first check if some text is being marked/unmarked to add comment to it
@@ -1255,6 +1264,7 @@ var hooks = {
 
 exports.aceEditorCSS          = hooks.aceEditorCSS;
 exports.postAceInit           = hooks.postAceInit;
+exports.postToolbarInit       = hooks.postToolbarInit;
 exports.aceAttribsToClasses   = hooks.aceAttribsToClasses;
 exports.aceEditEvent          = hooks.aceEditEvent;
 
