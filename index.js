@@ -10,6 +10,10 @@ const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
 
+exports.exportEtherpadAdditionalContent = function(hook_name, context, callback){
+  return callback(["comments"]);
+};
+
 exports.padRemove = async (hookName, context) => {
   await Promise.all([
     commentManager.deleteCommentReplies(context.padID),
