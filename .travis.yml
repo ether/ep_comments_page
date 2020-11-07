@@ -21,20 +21,20 @@ env:
 
 jobs:
   include:
-     - name: "Lint test package-lock"
-       install:
+    - name: "Lint test package-lock"
+      install:
         - "npm install lockfile-lint"
-       script:
+      script:
         - npx lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm
-     - name: "Run the Backend tests"
-       before_script:
+    - name: "Run the Backend tests"
+      before_script:
         - "tests/frontend/travis/sauce_tunnel.sh"
-       before_install:
+      before_install:
         - sudo add-apt-repository -y ppa:libreoffice/ppa
         - sudo apt-get update
         - sudo apt-get -y install libreoffice
         - sudo apt-get -y install libreoffice-pdfimport
-       install:
+      install:
         - "npm install"
         - "mkdir ep_comments_page"
         - "mv !(ep_comments_page) ep_comments_page"
@@ -45,12 +45,12 @@ jobs:
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
         - "cd src && npm install && cd -"
-       script:
+      script:
         - "tests/frontend/travis/runnerBackend.sh"
-     - name: "Test the Frontend"
-       before_script:
+    - name: "Test the Frontend"
+      before_script:
         - "tests/frontend/travis/sauce_tunnel.sh"
-       install:
+      install:
         - "npm install"
         - "mkdir ep_comments_page"
         - "mv !(ep_comments_page) ep_comments_page"
@@ -60,7 +60,7 @@ jobs:
         - "mv ../ep_comments_page node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-       script:
+      script:
         - "tests/frontend/travis/runner.sh"
 
 notifications:
