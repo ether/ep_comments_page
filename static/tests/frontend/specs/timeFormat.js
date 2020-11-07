@@ -144,29 +144,6 @@ describe("ep_comments_page - Time Formatting", function() {
         expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('in 14 years');
         done();
       });
-
-      //momentjs doesn't support century
-/*
-      it("returns 'last century' when time is some seconds before 100 years in the past", function(done) {
-        expect(moment(secondsInThePast(years(100) + 13)).fromNow()).to.be('last century');
-        done();
-      });
-
-      it("returns 'next century' when time is some seconds after 100 years in the future", function(done) {
-        expect(moment(secondsInTheFuture(years(100) + 13)).fromNow()).to.be('next century');
-        done();
-      });
-
-      it("returns '2 centuries ago' when time is some seconds before 2 centuries in the past", function(done) {
-        expect(moment(secondsInThePast(centuries(2) + 14)).fromNow()).to.be('2 centuries ago');
-        done();
-      });
-
-      it("returns '2 centuries from now' when time is some seconds after 2 centuries in the future", function(done) {
-        expect(moment(secondsInTheFuture(centuries(2) + 14)).fromNow()).to.be('2 centuries from now');
-        done();
-      }); */
-
     })
   });
 
@@ -308,27 +285,6 @@ describe("ep_comments_page - Time Formatting", function() {
       expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('em 14 anos');
       done();
     });
-/* Moment doesn't support centuries
-    it("returns 'século passado' when time is some seconds before 100 years in the past", function(done) {
-      expect(moment(secondsInThePast(years(100) + 13)).fromNow()).to.be('século passado');
-      done();
-    });
-
-    it("returns 'próximo século' when time is some seconds after 100 years in the future", function(done) {
-      expect(moment(secondsInTheFuture(years(100) + 13)).fromNow()).to.be('próximo século');
-      done();
-    });
-
-    it("returns '2 séculos atrás' when time is some seconds before 2 centuries in the past", function(done) {
-      expect(moment(secondsInThePast(centuries(2) + 14)).fromNow()).to.be('2 séculos atrás');
-      done();
-    });
-
-    it("returns 'daqui a 2 séculos' when time is some seconds after 2 centuries in the future", function(done) {
-      expect(moment(secondsInTheFuture(centuries(2) + 14)).fromNow()).to.be('daqui a 2 séculos');
-      done();
-    });
-*/
   });
 
   /* ********** Helper functions ********** */
@@ -363,10 +319,6 @@ describe("ep_comments_page - Time Formatting", function() {
 
   var years = function(count) {
     return 12 * months(count);
-  }
-
-  var centuries = function(count) {
-    return 100 * years(count);
   }
 
   var loadMoment = function(done) {
