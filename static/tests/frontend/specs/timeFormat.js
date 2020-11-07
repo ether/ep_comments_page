@@ -291,55 +291,30 @@ describe('ep_comments_page - Time Formatting', function() {
 
   /* ********** Helper functions ********** */
 
-  const secondsInThePast = function(seconds) {
-    return Date.now() - seconds * 1000;
-  };
+  const secondsInThePast = (seconds) => Date.now() - seconds * 1000;
+  const secondsInTheFuture = (seconds) => Date.now() + seconds * 1000;
+  const minutes = (count) => 60 * count;
+  const hours = (count) => 60 * minutes(count);
+  const days = (count) => 24 * hours(count);
+  const weeks = (count) => 7 * days(count);
+  const months = (count) => 4 * weeks(count);
+  const years = (count) => 12 * months(count);
 
-  const secondsInTheFuture = function(seconds) {
-    return Date.now() + seconds * 1000;
-  };
-
-  const minutes = function(count) {
-    return 60 * count;
-  };
-
-  const hours = function(count) {
-    return 60 * minutes(count);
-  };
-
-  const days = function(count) {
-    return 24 * hours(count);
-  };
-
-  const weeks = function(count) {
-    return 7 * days(count);
-  };
-
-  const months = function(count) {
-    return 4 * weeks(count);
-  };
-
-  const years = function(count) {
-    return 12 * months(count);
-  };
-
-  const loadMoment = function(done) {
-    helper.newPad(function() {
+  const loadMoment = (done) => {
+    helper.newPad(() => {
       const chrome$ = helper.padChrome$;
       chrome$.getScript('/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js')
-      .done(function(code){
+      .done((code) => {
         chrome$.window.eval(code);
         moment = chrome$.window.moment;
         moment.relativeTimeThreshold('ss', 0);
         done();
       })
-      .fail(function(jqxhr, settings, exception) {
-        done(exception);
-      });
+      .fail((jqxhr, settings, exception) => done(exception));
     });
   };
 
-  const changeLanguageTo = function(lang, callback) {
+  const changeLanguageTo = (lang, callback) => {
     const boldTitles = {
       'en' : 'Bold (Ctrl+B)',
       'pt-br' : 'Negrito (Ctrl-B)',
@@ -359,9 +334,7 @@ describe('ep_comments_page - Time Formatting', function() {
     // hide settings again
     $settingsButton.click();
 
-    helper.waitFor(function() {
-      return chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang];
-     })
+    helper.waitFor(() => chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang])
     .done(callback);
   };
 });
