@@ -5,16 +5,15 @@ let moment;
 describe('ep_comments_page - Time Formatting', function() {
   _.each({'en': 'English', 'af': 'a language not localized yet'}, function(description, lang) {
     describe('in ' + description, function() {
-      before(function(cb) {
-        loadMoment(function() {
-          changeLanguageTo(lang, cb);
-        });
+      before(async function() {
         this.timeout(60000);
+        await loadMoment();
+        await changeLanguageTo(lang);
       });
 
       // ensure we go back to English to avoid breaking other tests:
-      after(function(cb){
-        changeLanguageTo('en', cb);
+      after(async function() {
+        await changeLanguageTo('en');
       });
 
       it('returns "12 seconds ago" when time is 12 seconds in the past', function() {
@@ -124,12 +123,11 @@ describe('ep_comments_page - Time Formatting', function() {
   });
 
   describe('in Portuguese', function() {
-    before(function(cb) {
-      loadMoment(function() {
-        changeLanguageTo('pt-br', cb);
-        moment.locale('pt-br');
-      });
+    before(async function() {
       this.timeout(60000);
+      await loadMoment();
+      await changeLanguageTo('pt-br');
+      moment.locale('pt-br');
     });
 
     it('returns "há 12 segundos" when time is 12 seconds in the past', function() {
@@ -248,21 +246,17 @@ describe('ep_comments_page - Time Formatting', function() {
   const months = (count) => 4 * weeks(count);
   const years = (count) => 12 * months(count);
 
-  const loadMoment = (done) => {
-    helper.newPad(() => {
-      const chrome$ = helper.padChrome$;
-      chrome$.getScript('/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js')
-      .done((code) => {
-        chrome$.window.eval(code);
-        moment = chrome$.window.moment;
-        moment.relativeTimeThreshold('ss', 0);
-        done();
-      })
-      .fail((jqxhr, settings, exception) => done(exception));
-    });
+  const loadMoment = async () => {
+    await new Promise((resolve) => helper.newPad(resolve));
+    const chrome$ = helper.padChrome$;
+    const code = await chrome$.getScript(
+        '/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js');
+    chrome$.window.eval(code);
+    moment = chrome$.window.moment;
+    moment.relativeTimeThreshold('ss', 0);
   };
 
-  const changeLanguageTo = (lang, callback) => {
+  const changeLanguageTo = async (lang) => {
     const boldTitles = {
       'en' : 'Bold (Ctrl+B)',
       'pt-br' : 'Negrito (Ctrl-B)',
@@ -282,7 +276,7 @@ describe('ep_comments_page - Time Formatting', function() {
     // hide settings again
     $settingsButton.click();
 
-    helper.waitFor(() => chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang])
-    .done(callback);
+    await helper.waitForPromise(
+        () => chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang]);
   };
 });
