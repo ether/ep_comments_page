@@ -259,17 +259,17 @@ describe('ep_comments_page - Time Formatting', function() {
 
   const changeLanguageTo = async (lang) => {
     const boldTitles = {
-      'en' : 'Bold (Ctrl+B)',
-      'pt-br' : 'Negrito (Ctrl-B)',
-      'af' : 'Vet (Ctrl-B)'
+      'en': 'Bold (Ctrl+B)',
+      'pt-br': 'Negrito (Ctrl-B)',
+      'af': 'Vet (Ctrl-B)',
     };
     const chrome$ = helper.padChrome$;
 
-    //click on the settings button to make settings visible
+    // click on the settings button to make settings visible
     const $settingsButton = chrome$('.buttonicon-settings');
     $settingsButton.click();
 
-    //select the language
+    // select the language
     const $language = chrome$('#languagemenu');
     $language.val(lang);
     $language.change();
