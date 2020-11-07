@@ -146,7 +146,7 @@ describe('ep_comments_page - Time Formatting', function() {
         expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('in 14 years');
         done();
       });
-    })
+    });
   });
 
   describe('in Portuguese', function() {
@@ -293,35 +293,35 @@ describe('ep_comments_page - Time Formatting', function() {
 
   var secondsInThePast = function(seconds) {
     return Date.now() - seconds * 1000;
-  }
+  };
 
   var secondsInTheFuture = function(seconds) {
     return Date.now() + seconds * 1000;
-  }
+  };
 
   var minutes = function(count) {
     return 60 * count;
-  }
+  };
 
   var hours = function(count) {
     return 60 * minutes(count);
-  }
+  };
 
   var days = function(count) {
     return 24 * hours(count);
-  }
+  };
 
   var weeks = function(count) {
     return 7 * days(count);
-  }
+  };
 
   var months = function(count) {
     return 4 * weeks(count);
-  }
+  };
 
   var years = function(count) {
     return 12 * months(count);
-  }
+  };
 
   var loadMoment = function(done) {
     helper.newPad(function() {
@@ -337,7 +337,7 @@ describe('ep_comments_page - Time Formatting', function() {
         done(exception);
       });
     });
-  }
+  };
 
   var changeLanguageTo = function(lang, callback) {
     var boldTitles = {
@@ -363,5 +363,5 @@ describe('ep_comments_page - Time Formatting', function() {
       return chrome$('.buttonicon-bold').parent()[0]['title'] == boldTitles[lang];
      })
     .done(callback);
-  }
+  };
 });
