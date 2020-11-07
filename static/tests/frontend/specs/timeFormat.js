@@ -1,9 +1,10 @@
-/* global _, after, before, describe, expect, helper, it */
+/* global after, before, describe, expect, helper, it */
 
 let moment;
 
 describe('ep_comments_page - Time Formatting', function() {
-  _.each({'en': 'English', 'af': 'a language not localized yet'}, function(description, lang) {
+  for (const [lang, description] of
+       Object.entries({'en': 'English', 'af': 'a language not localized yet'})) {
     describe('in ' + description, function() {
       before(async function() {
         this.timeout(60000);
@@ -120,7 +121,7 @@ describe('ep_comments_page - Time Formatting', function() {
         expect(moment(secondsInTheFuture(years(15) + 12)).fromNow()).to.be('in 14 years');
       });
     });
-  });
+  }
 
   describe('in Portuguese', function() {
     before(async function() {
