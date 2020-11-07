@@ -1,6 +1,6 @@
 /* global _, after, before, describe, expect, helper, it */
 
-var moment;
+let moment;
 
 describe('ep_comments_page - Time Formatting', function() {
   _.each({'en': 'English', 'af': 'a language not localized yet'}, function(description, lang) {
@@ -291,41 +291,41 @@ describe('ep_comments_page - Time Formatting', function() {
 
   /* ********** Helper functions ********** */
 
-  var secondsInThePast = function(seconds) {
+  const secondsInThePast = function(seconds) {
     return Date.now() - seconds * 1000;
   };
 
-  var secondsInTheFuture = function(seconds) {
+  const secondsInTheFuture = function(seconds) {
     return Date.now() + seconds * 1000;
   };
 
-  var minutes = function(count) {
+  const minutes = function(count) {
     return 60 * count;
   };
 
-  var hours = function(count) {
+  const hours = function(count) {
     return 60 * minutes(count);
   };
 
-  var days = function(count) {
+  const days = function(count) {
     return 24 * hours(count);
   };
 
-  var weeks = function(count) {
+  const weeks = function(count) {
     return 7 * days(count);
   };
 
-  var months = function(count) {
+  const months = function(count) {
     return 4 * weeks(count);
   };
 
-  var years = function(count) {
+  const years = function(count) {
     return 12 * months(count);
   };
 
-  var loadMoment = function(done) {
+  const loadMoment = function(done) {
     helper.newPad(function() {
-      var chrome$ = helper.padChrome$;
+      const chrome$ = helper.padChrome$;
       chrome$.getScript('/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js')
       .done(function(code){
         chrome$.window.eval(code);
@@ -339,20 +339,20 @@ describe('ep_comments_page - Time Formatting', function() {
     });
   };
 
-  var changeLanguageTo = function(lang, callback) {
-    var boldTitles = {
+  const changeLanguageTo = function(lang, callback) {
+    const boldTitles = {
       'en' : 'Bold (Ctrl+B)',
       'pt-br' : 'Negrito (Ctrl-B)',
       'af' : 'Vet (Ctrl-B)'
     };
-    var chrome$ = helper.padChrome$;
+    const chrome$ = helper.padChrome$;
 
     //click on the settings button to make settings visible
-    var $settingsButton = chrome$('.buttonicon-settings');
+    const $settingsButton = chrome$('.buttonicon-settings');
     $settingsButton.click();
 
     //select the language
-    var $language = chrome$('#languagemenu');
+    const $language = chrome$('#languagemenu');
     $language.val(lang);
     $language.change();
 
