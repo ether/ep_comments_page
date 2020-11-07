@@ -1,3 +1,5 @@
+/* global _, after, before, describe, expect, helper, it */
+
 var moment;
 
 describe("ep_comments_page - Time Formatting", function() {
