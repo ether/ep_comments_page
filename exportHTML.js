@@ -40,15 +40,15 @@ exports.getLineHTMLForExport = async (hookName, context) => {
 exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
   const {comments} = await commentManager.getComments(padId);
   if (!comments) return;
-  let html = '<div id=comments>';
-
+  const div = $('<div>').attr('id', 'comments');
   for (const [commentId, comment] of Object.entries(comments)) {
-    // prolly should escape text here?
-    html += `<p role="comment" class="comment" id="${commentId}">* ${comment.text}</p>`;
+    div.append(
+        $('<p>')
+            .attr('role', 'comment')
+            .addClass('comment')
+            .attr('id', commentId)
+            .text(`* ${comment.text}`));
   }
-
-  html += '</div>';
-
   // adds additional HTML to the body, we get this HTML from the database of comments:padId
-  return html;
+  return $.html(div);
 };
