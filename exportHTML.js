@@ -26,12 +26,11 @@ exports.getLineHTMLForExport = async (hookName, context) => {
     if (!commentId) return; // not a comment.  please optimize me in selector
     if (!comments[commentId]) return; // if this comment has been deleted..
     $(this).append(`<sup><a href='#${commentId}'>*</a></sup>`);
-    context.lineContent = content.html();
-
     // Replace data-comment="foo" with class="comment foo".
     context.lineContent = context.lineContent.replace(
         /data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, 'class="comment $1"');
   });
+  context.lineContent = content.html();
 };
 
 exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
