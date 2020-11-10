@@ -32,8 +32,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
 
 };
 
-exports.exportHTMLAdditionalContent = async (hookName, context) => {
-  let padId = context;
+exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
   let comments = await commentManager.getComments(padId)
   if(!comments.comments) return;
   comments = comments.comments;
