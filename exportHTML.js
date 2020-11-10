@@ -1,6 +1,6 @@
 'use strict';
 
-const cheerio = require('ep_etherpad-lite/node_modules/cheerio');
+const $ = require('ep_etherpad-lite/node_modules/cheerio');
 const commentManager = require('./commentManager');
 
 // Add the props to be supported in export
@@ -17,16 +17,16 @@ const findAllCommentUsedOn = (pad) => {
 exports.getLineHTMLForExport = async (hookName, context) => {
   // I'm not sure how optimal this is - it will do a database lookup for each line..
   const {comments} = await commentManager.getComments(context.padId);
-
-  const $ = cheerio.load(context.lineContent); // gives us a jquery selector for the html! :)
-
+  // Load the HTML into a throwaway div instead of calling $.load() to avoid
+  // https://github.com/cheeriojs/cheerio/issues/1031
+  const content = $('<div>').html(context.lineContent);
   // include links for each comment which we will add content later.
-  $('span').each(function () {
+  content.find('span').each(function () {
     const commentId = $(this).data('comment');
     if (!commentId) return; // not a comment.  please optimize me in selector
     if (!comments[commentId]) return; // if this comment has been deleted..
     $(this).append(`<sup><a href='#${commentId}'>*</a></sup>`);
-    context.lineContent = $.html();
+    context.lineContent = content.html();
 
     // Replace data-comment="foo" with class="comment foo".
     context.lineContent = context.lineContent.replace(
