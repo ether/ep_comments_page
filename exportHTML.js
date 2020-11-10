@@ -22,10 +22,11 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   const content = $('<div>').html(context.lineContent);
   // include links for each comment which we will add content later.
   content.find('span').each(function () {
-    const commentId = $(this).data('comment');
+    const span = $(this);
+    const commentId = span.data('comment');
     if (!commentId) return; // not a comment.  please optimize me in selector
     if (!comments[commentId]) return; // if this comment has been deleted..
-    $(this).append(`<sup><a href='#${commentId}'>*</a></sup>`);
+    span.append(`<sup><a href="#${commentId}">*</a></sup>`);
     // Replace data-comment="foo" with class="comment foo".
     context.lineContent = context.lineContent.replace(
         /data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, 'class="comment $1"');
