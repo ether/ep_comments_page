@@ -16,7 +16,7 @@ const findAllCommentUsedOn = (pad) => {
 
 exports.getLineHTMLForExport = async (hookName, context) => {
   // I'm not sure how optimal this is - it will do a database lookup for each line..
-  const comments = await commentManager.getComments(context.padId);
+  const {comments} = await commentManager.getComments(context.padId);
 
   const $ = cheerio.load(context.lineContent); // gives us a jquery selector for the html! :)
 
@@ -24,7 +24,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   $('span').each(function () {
     const commentId = $(this).data('comment');
     if (!commentId) return; // not a comment.  please optimize me in selector
-    if (!comments.comments[commentId]) return; // if this comment has been deleted..
+    if (!comments[commentId]) return; // if this comment has been deleted..
     $(this).append(`<sup><a href='#${commentId}'>*</a></sup>`);
     context.lineContent = $.html();
 
@@ -35,9 +35,8 @@ exports.getLineHTMLForExport = async (hookName, context) => {
 };
 
 exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
-  let comments = await commentManager.getComments(padId);
-  if (!comments.comments) return;
-  comments = comments.comments;
+  const {comments} = await commentManager.getComments(padId);
+  if (!comments) return;
   let html = '<div id=comments>';
 
   for (const [commentId, comment] of Object.entries(comments)) {
