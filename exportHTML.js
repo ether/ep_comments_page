@@ -16,6 +16,8 @@ function findAllCommentUsedOn(pad) {
 }
 
 exports.getLineHTMLForExport = async (hookName, context) => {
+  // I'm not sure how optimal this is - it will do a database lookup for each line..
+  let comments = await commentManager.getComments(context.padId);
 
   var $ = cheerio.load(context.lineContent); // gives us a jquery selector for the html! :)
 
@@ -23,6 +25,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   $("span").each(function(){
     let commentId = $(this).data("comment");
     if(!commentId) return; // not a comment.  please optimize me in selector
+    if(!comments.comments[commentId]) return; // if this comment has been deleted..
     $(this).append("<sup><a href='#"+commentId+"'>*</a></sup>");
     context.lineContent = $.html();
 
