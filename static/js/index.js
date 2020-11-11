@@ -71,48 +71,48 @@ ep_comments.prototype.init = function () {
   // Get all comments
   this.getComments((comments) => {
     if (!$.isEmptyObject(comments)) {
-      self.setComments(comments);
-      self.collectComments();
+      this.setComments(comments);
+      this.collectComments();
     }
   });
 
   this.getCommentReplies((replies) => {
     if (!$.isEmptyObject(replies)) {
       // console.log("collecting comment replies");
-      self.commentReplies = replies;
-      self.collectCommentReplies();
+      this.commentReplies = replies;
+      this.collectCommentReplies();
     }
-    self.commentRepliesListen();
-    self.commentListen();
+    this.commentRepliesListen();
+    this.commentListen();
   });
 
   // Init add push event
   this.pushComment('add', (commentId, comment) => {
-    self.setComment(commentId, comment);
+    this.setComment(commentId, comment);
     // console.log('pushComment', comment);
-    self.collectCommentsAfterSomeIntervalsOfTime();
+    this.collectCommentsAfterSomeIntervalsOfTime();
   });
 
   // When language is changed, we need to reload the comments to make sure
   // all templates are localized
   html10n.bind('localized', () => {
     moment.locale(html10n.getLanguage());
-    self.localizeExistingComments();
+    this.localizeExistingComments();
   });
 
   // Recalculate position when editor is resized
   $('#settings input, #skin-variant-full-width').on('change', (e) => {
-    self.setYofComments();
+    this.setYofComments();
   });
   this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e) => {
-    self.setYofComments();
+    this.setYofComments();
   });
-  $(window).resize(_.debounce(() => { self.setYofComments(); }, 100));
+  $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
 
   // On click comment icon toolbar
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
-    self.displayNewCommentForm();
+    this.displayNewCommentForm();
   });
 
   // Import for below listener : we are using this.container.parent() so we include
@@ -336,7 +336,7 @@ ep_comments.prototype.init = function () {
 
   // Enable and handle cookies
   if (padcookie.getPref('comments') === false) {
-    self.padOuter.find('#comments, #commentIcons').removeClass('active');
+    this.padOuter.find('#comments, #commentIcons').removeClass('active');
     $('#options-comments').attr('checked', 'unchecked');
     $('#options-comments').attr('checked', false);
   } else {
@@ -351,19 +351,19 @@ ep_comments.prototype.init = function () {
     }
   });
 
-  function enableComments() {
+  const enableComments = () => {
     padcookie.setPref('comments', true);
-    self.padOuter.find('#comments, #commentIcons').addClass('active');
+    this.padOuter.find('#comments, #commentIcons').addClass('active');
     $('body').addClass('comments-active');
     $('iframe[name="ace_outer"]').contents().find('body').addClass('comments-active');
-  }
+  };
 
-  function disableComments() {
+  const disableComments = () => {
     padcookie.setPref('comments', false);
-    self.padOuter.find('#comments, #commentIcons').removeClass('active');
+    this.padOuter.find('#comments, #commentIcons').removeClass('active');
     $('body').removeClass('comments-active');
     $('iframe[name="ace_outer"]').contents().find('body').removeClass('comments-active');
-  }
+  };
 
   // Check to see if we should show already..
   $('#options-comments').trigger('change');
@@ -377,15 +377,15 @@ ep_comments.prototype.init = function () {
   // The same does not occur when the user selects more than the span, for example:
   // text<comment class='comment'><span>to be copied</span></comment>
   if (browser.chrome || browser.firefox) {
-    self.padInner.contents().on('copy', (e) => {
-      events.addTextOnClipboard(e, self.ace, self.padInner, false, self.comments, self.commentReplies);
+    this.padInner.contents().on('copy', (e) => {
+      events.addTextOnClipboard(e, this.ace, this.padInner, false, this.comments, this.commentReplies);
     });
 
-    self.padInner.contents().on('cut', (e) => {
-      events.addTextOnClipboard(e, self.ace, self.padInner, true);
+    this.padInner.contents().on('cut', (e) => {
+      events.addTextOnClipboard(e, this.ace, this.padInner, true);
     });
 
-    self.padInner.contents().on('paste', (e) => {
+    this.padInner.contents().on('paste', (e) => {
       events.saveCommentsAndReplies(e);
     });
   }
@@ -533,24 +533,22 @@ ep_comments.prototype.collectComments = function (callback) {
     }
   });
 
-  self.addListenersToCloseOpenedComment();
+  this.addListenersToCloseOpenedComment();
 
-  self.setYofComments();
+  this.setYofComments();
   if (callback) callback();
 };
 
 ep_comments.prototype.addListenersToCloseOpenedComment = function () {
-  const self = this;
-
   // we need to add listeners to the different iframes of the page
   $(document).on('touchstart click', (e) => {
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
+    this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
   this.padOuter.find('html').on('touchstart click', (e) => {
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
+    this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
   this.padInner.contents().find('html').on('touchstart click', (e) => {
-    self.closeOpenedCommentIfNotOnSelectedElements(e);
+    this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
 };
 
@@ -573,7 +571,6 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function (e) {
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function (callback) {
-  const self = this;
   const container = this.container;
   const commentReplies = this.commentReplies;
   const padComment = this.padInner.contents().find('.comment');
@@ -835,7 +832,6 @@ function parseMultiline(text) {
 }
 
 ep_comments.prototype.displayNewCommentForm = function () {
-  const self = this;
   const rep = {};
   const ace = this.ace;
 
@@ -847,7 +843,7 @@ ep_comments.prototype.displayNewCommentForm = function () {
     rep.selEnd = saveRep.selEnd;
   }, 'saveCommentedSelection', true);
 
-  const selectedText = self.getSelectedText(rep);
+  const selectedText = this.getSelectedText(rep);
   // we have nothing selected, do nothing
   const noTextSelected = (selectedText.length === 0);
   if (noTextSelected) {
@@ -855,7 +851,7 @@ ep_comments.prototype.displayNewCommentForm = function () {
     return;
   }
 
-  self.createNewCommentFormIfDontExist(rep);
+  this.createNewCommentFormIfDontExist(rep);
 
   // Write the text to the changeFrom form
   $('#newComment').find('.from-value').text(selectedText);
@@ -864,11 +860,11 @@ ep_comments.prototype.displayNewCommentForm = function () {
   newComment.showNewCommentPopup();
 
   // Check if the first element selected is visible in the viewport
-  const $firstSelectedElement = self.getFirstElementSelected();
-  const firstSelectedElementInViewport = self.isElementInViewport($firstSelectedElement);
+  const $firstSelectedElement = this.getFirstElementSelected();
+  const firstSelectedElementInViewport = this.isElementInViewport($firstSelectedElement);
 
   if (!firstSelectedElementInViewport) {
-    self.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
+    this.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
   }
 
   // Adjust focus on the form
@@ -933,10 +929,9 @@ ep_comments.prototype.checkNoTextSelected = function (rep) {
 // Create form to add comment
 ep_comments.prototype.createNewCommentFormIfDontExist = function (rep) {
   const data = this.getCommentData();
-  const self = this;
 
   // If a new comment box doesn't already exist, create one
-  data.changeFrom = parseMultiline(self.getSelectedText(rep));
+  data.changeFrom = parseMultiline(this.getSelectedText(rep));
   newComment.insertNewCommentPopupIfDontExist(data, (comment, index) => {
     if (comment.changeTo) {
       data.comment.changeFrom = comment.changeFrom;
@@ -944,15 +939,14 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function (rep) {
     }
     data.comment.text = comment.text;
 
-    self.saveComment(data, rep);
+    this.saveComment(data, rep);
   });
 };
 
 // Get a string representation of the text selected on the editor
 ep_comments.prototype.getSelectedText = function (rep) {
-  const self = this;
   const firstLine = rep.selStart[0];
-  const lastLine = self.getLastLine(firstLine, rep);
+  const lastLine = this.getLastLine(firstLine, rep);
   let selectedText = '';
 
   _(_.range(firstLine, lastLine + 1)).each((lineNumber) => {
@@ -987,7 +981,7 @@ ep_comments.prototype.getSelectedText = function (rep) {
     if (lineNumber > firstLine) {
       // if the selection takes the very beginning of line, and the element has a lineMarker,
       // it means we select the * as well, so we need to clean it from the text selected
-      lineText = self.cleanLine(line, lineText);
+      lineText = this.cleanLine(line, lineText);
       lineText = `\n${lineText}`;
     }
     selectedText += lineText;
@@ -1031,34 +1025,31 @@ ep_comments.prototype.cleanLine = function (line, lineText) {
 
 // Save comment
 ep_comments.prototype.saveComment = function (data, rep) {
-  const self = this;
-  self.socket.emit('addComment', data, (commentId, comment) => {
+  this.socket.emit('addComment', data, (commentId, comment) => {
     comment.commentId = commentId;
 
-    self.ace.callWithAce((ace) => {
+    this.ace.callWithAce((ace) => {
       // console.log('addComment :: ', rep, comment);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
     }, 'insertComment', true);
 
-    self.setComment(commentId, comment);
-    self.collectComments();
+    this.setComment(commentId, comment);
+    this.collectComments();
   });
 };
 
 // commentData = {c-newCommentId123: data:{author:..., date:..., ...}, c-newCommentId124: data:{...}}
 ep_comments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
-  const self = this;
-  const data = self.buildComments(commentData);
-  self.socket.emit('bulkAddComment', padId, data, (comments) => {
-    self.setComments(comments);
-    self.shouldCollectComment = true;
+  const data = this.buildComments(commentData);
+  this.socket.emit('bulkAddComment', padId, data, (comments) => {
+    this.setComments(comments);
+    this.shouldCollectComment = true;
   });
 };
 
 ep_comments.prototype.buildComments = function (commentsData) {
-  const self = this;
-  const comments = _.map(commentsData, (commentData, commentId) => self.buildComment(commentId, commentData.data));
+  const comments = _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
   return comments;
 };
 
@@ -1082,19 +1073,17 @@ ep_comments.prototype.getMapfakeComments = function () {
 
 // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
 ep_comments.prototype.saveCommentReplies = function (padId, commentReplyData) {
-  const self = this;
-  const data = self.buildCommentReplies(commentReplyData);
-  self.socket.emit('bulkAddCommentReplies', padId, data, (replies) => {
+  const data = this.buildCommentReplies(commentReplyData);
+  this.socket.emit('bulkAddCommentReplies', padId, data, (replies) => {
     _.each(replies, (reply) => {
-      self.setCommentReply(reply);
+      this.setCommentReply(reply);
     });
-    self.shouldCollectComment = true; // force collect the comment replies saved
+    this.shouldCollectComment = true; // force collect the comment replies saved
   });
 };
 
 ep_comments.prototype.buildCommentReplies = function (repliesData) {
-  const self = this;
-  const replies = _.map(repliesData, (replyData) => self.buildCommentReply(replyData));
+  const replies = _.map(repliesData, (replyData) => this.buildCommentReply(replyData));
   return replies;
 };
 
@@ -1115,10 +1104,9 @@ ep_comments.prototype.buildCommentReply = function (replyData) {
 
 // Listen for comment
 ep_comments.prototype.commentListen = function () {
-  const self = this;
   const socket = this.socket;
   socket.on('pushAddCommentInBulk', () => {
-    self.getComments((allComments) => {
+    this.getComments((allComments) => {
       if (!$.isEmptyObject(allComments)) {
         // we get the comments in this format {c-123:{author:...}, c-124:{author:...}}
         // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
@@ -1128,8 +1116,8 @@ ep_comments.prototype.commentListen = function () {
           commentsProcessed[commentId] = {};
           commentsProcessed[commentId].data = comment;
         });
-        self.comments = commentsProcessed;
-        self.collectCommentsAfterSomeIntervalsOfTime(); // here we collect on the collaborators
+        this.comments = commentsProcessed;
+        this.collectCommentsAfterSomeIntervalsOfTime(); // here we collect on the collaborators
       }
     });
   });
@@ -1172,31 +1160,29 @@ ep_comments.prototype.showChangeAsAccepted = function (commentId) {
 };
 
 ep_comments.prototype.showChangeAsReverted = function (commentId) {
-  const self = this;
   // Get the comment
-  const comment = self.container.parent().find(`[data-commentid='${commentId}']`);
+  const comment = this.container.parent().find(`[data-commentid='${commentId}']`);
   comment.removeClass('change-accepted');
 };
 
 // Push comment from collaborators
 ep_comments.prototype.pushComment = function (eventType, callback) {
   const socket = this.socket;
-  const self = this;
 
   socket.on('textCommentUpdated', (commentId, commentText) => {
-    self.updateCommentBoxText(commentId, commentText);
+    this.updateCommentBoxText(commentId, commentText);
   });
 
   socket.on('commentDeleted', (commentId) => {
-    self.deleteComment(commentId);
+    this.deleteComment(commentId);
   });
 
   socket.on('changeAccepted', (commentId) => {
-    self.showChangeAsAccepted(commentId);
+    this.showChangeAsAccepted(commentId);
   });
 
   socket.on('changeReverted', (commentId) => {
-    self.showChangeAsReverted(commentId);
+    this.showChangeAsReverted(commentId);
   });
 
   // On collaborator add a comment in the current pad
