@@ -394,7 +394,7 @@ ep_comments.prototype.init = function () {
 ep_comments.prototype.findCommentText = function ($commentBox) {
   const isReply = $commentBox.hasClass('sidebar-comment-reply');
   if (isReply) return $commentBox.find('.comment-text');
-  else return $commentBox.find('.compact-display-content .comment-text, .full-display-content .comment-title-wrapper .comment-text');
+  return $commentBox.find('.compact-display-content .comment-text, .full-display-content .comment-title-wrapper .comment-text');
 };
 // This function is useful to collect new comments on the collaborators
 ep_comments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
