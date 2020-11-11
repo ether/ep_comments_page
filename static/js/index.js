@@ -42,7 +42,7 @@ function ep_comments(context) {
   // This probably needs some work for instances running on root or not on /p/
   const loc = document.location;
   const port = loc.port == '' ? (loc.protocol == 'https:' ? 443 : 80) : loc.port;
-  const url = `${loc.protocol}//${loc.hostname}:${port}/` + 'comment';
+  const url = `${loc.protocol}//${loc.hostname}:${port}/comment`;
   this.socket = io.connect(url);
 
   this.padId = clientVars.padId;
