@@ -581,7 +581,7 @@ ep_comments.prototype.collectCommentReplies = function (callback) {
   $.each(this.commentReplies, (replyId, reply) => {
     const commentId = reply.commentId;
     if (commentId) {
-    // tell comment icon that this comment has 1+ replies
+      // tell comment icon that this comment has 1+ replies
       commentIcons.commentHasReply(commentId);
 
       const existsAlready = $('iframe[name="ace_outer"]').contents().find(`#${replyId}`).length;
