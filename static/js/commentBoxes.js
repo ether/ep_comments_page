@@ -1,3 +1,5 @@
+'use strict';
+
 // Easier access to outter pad
 var padOuter;
 var getPadOuter = function () {

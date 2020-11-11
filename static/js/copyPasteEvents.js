@@ -1,3 +1,5 @@
+'use strict';
+
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var shared = require('./shared');

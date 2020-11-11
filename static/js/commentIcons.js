@@ -1,3 +1,5 @@
+'use strict';
+
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var commentBoxes = require('ep_comments_page/static/js/commentBoxes');

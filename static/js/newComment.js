@@ -1,3 +1,5 @@
+'use strict';
+
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var commentL10n = require('ep_comments_page/static/js/commentL10n');
 

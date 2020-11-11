@@ -1,3 +1,5 @@
+'use strict';
+
 describe('ep_comments_page - Comment Edit', function () {
   let helperFunctions;
   const textOfComment = 'original comment';

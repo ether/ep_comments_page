@@ -1,3 +1,5 @@
+'use strict';
+
 describe('ep_comments_page - Comment copy and paste', function () {
   let helperFunctions, event;
 

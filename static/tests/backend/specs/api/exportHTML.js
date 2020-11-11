@@ -1,3 +1,5 @@
+'use strict';
+
 const supertest = require('ep_etherpad-lite/node_modules/supertest');
 const fs = require('fs');
 const path = require('path');

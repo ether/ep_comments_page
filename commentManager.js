@@ -1,3 +1,5 @@
+'use strict';
+
 /* global exports, require */
 
 const _ = require('ep_etherpad-lite/static/js/underscore');

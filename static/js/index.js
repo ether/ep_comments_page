@@ -1,3 +1,5 @@
+'use strict';
+
 /* global clearTimeout, clientVars, exports, html10n, pad, require, setTimeout */
 
 /* TODO:

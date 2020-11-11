@@ -1,3 +1,5 @@
+'use strict';
+
 /* global after, before, describe, expect, helper, it */
 
 let moment;

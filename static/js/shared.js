@@ -1,3 +1,5 @@
+'use strict';
+
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
 var collectContentPre = function (hookName, context, cb) {

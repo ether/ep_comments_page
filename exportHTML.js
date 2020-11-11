@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('ep_etherpad-lite/static/js/underscore');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const cheerio = require('ep_etherpad-lite/node_modules/cheerio');

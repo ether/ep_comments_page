@@ -1,3 +1,5 @@
+'use strict';
+
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
 exports.MARK_CLASS = 'pre-selected-comment';

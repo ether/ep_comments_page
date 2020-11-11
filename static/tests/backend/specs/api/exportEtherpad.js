@@ -1,3 +1,5 @@
+'use strict';
+
 /* global __dirname, __filename, afterEach, before, beforeEach, describe, it, require */
 
 /*

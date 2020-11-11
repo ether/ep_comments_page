@@ -1,3 +1,5 @@
+'use strict';
+
 const appUrl = 'http://localhost:9001';
 const apiVersion = 1;
 

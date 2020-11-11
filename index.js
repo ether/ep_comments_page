@@ -1,3 +1,5 @@
+'use strict';
+
 /* global exports, require */
 
 const eejs = require('ep_etherpad-lite/node/eejs/');

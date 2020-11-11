@@ -1,3 +1,5 @@
+'use strict';
+
 describe('ep_comments_page - Pre-comment text mark', function () {
   let padId;
 

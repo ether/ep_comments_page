@@ -1,3 +1,5 @@
+'use strict';
+
 const supertest = require('ep_etherpad-lite/node_modules/supertest');
 const io = require('ep_etherpad-lite/node_modules/socket.io-client');
 const request = require('ep_etherpad-lite/node_modules/request');

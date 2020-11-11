@@ -1,3 +1,5 @@
+'use strict';
+
 describe('ep_comments_page - Comment Suggestion', function () {
   // create a new pad before each test run
   beforeEach(function (cb) {

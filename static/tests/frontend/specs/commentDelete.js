@@ -1,3 +1,5 @@
+'use strict';
+
 describe('ep_comments_page - Comment Delete', function () {
   let helperFunctions;
   const textOfComment = 'original comment';

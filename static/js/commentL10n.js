@@ -1,3 +1,5 @@
+'use strict';
+
 /* ***** Public methods: ***** */
 
 var localize = function (element) {
