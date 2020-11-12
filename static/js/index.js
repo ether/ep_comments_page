@@ -33,7 +33,7 @@ const UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
  ******************************************************************** */
 
 // Container
-function EpComments(context) {
+const EpComments = function (context) {
   this.container = null;
   this.padOuter = null;
   this.padInner = null;
@@ -54,7 +54,7 @@ function EpComments(context) {
   this.shouldCollectComment = false;
   this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
-}
+};
 
 // Init Etherpad plugin comment pads
 EpComments.prototype.init = function () {
@@ -792,11 +792,11 @@ EpComments.prototype.deleteComment = function (commentId) {
   $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
-function parseMultiline(text) {
+const parseMultiline = function (text) {
   if (!text) return text;
   text = JSON.stringify(text);
   return text.substr(1, (text.length - 2));
-}
+};
 
 EpComments.prototype.displayNewCommentForm = function () {
   const rep = {};
@@ -1270,7 +1270,7 @@ exports.aceEditEvent = hooks.aceEditEvent;
 1:...
 */
 // Alas we follow the Etherpad convention of using tuples here.
-function getRepFromSelector(selector, container) {
+const getRepFromSelector = function (selector, container) {
   const attributeManager = this.documentAttributeManager;
 
   const repArr = [];
@@ -1340,7 +1340,8 @@ function getRepFromSelector(selector, container) {
     repArr.push(rep);
   });
   return repArr;
-}
+};
+
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
 exports.aceInitialized = function (hookName, context, cb) {
   const editorInfo = context.editorInfo;
