@@ -9,9 +9,6 @@
 const supertest = require('ep_etherpad-lite/node_modules/supertest');
 const superagent = require('ep_etherpad-lite/node_modules/superagent');
 const fs = require('fs');
-const path = require('path');
-const request = require('ep_etherpad-lite/node_modules/request');
-const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
 // test doc
 const etherpadDoc = fs.readFileSync(`${__dirname}/test.etherpad`);

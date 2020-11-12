@@ -1,9 +1,5 @@
 'use strict';
 
-const supertest = require('ep_etherpad-lite/node_modules/supertest');
-const fs = require('fs');
-const path = require('path');
-const request = require('ep_etherpad-lite/node_modules/request');
 const utils = require('../../../utils');
 const apiKey = utils.apiKey;
 const codeToBe0 = utils.codeToBe0;
