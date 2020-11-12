@@ -46,7 +46,7 @@ describe(__filename, function () {
 }); // End of tests.
 
 
-var endPoint = function (point, version) {
+const endPoint = function (point, version) {
   version = version || apiVersion;
   return `/api/${version}/${point}?apikey=${apiKey}`;
 };

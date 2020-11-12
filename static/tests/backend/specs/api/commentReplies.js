@@ -289,7 +289,7 @@ describe('create comment reply API broadcast', function () {
   });
 });
 
-var listCommentRepliesEndPointFor = function (padID, apiKey) {
+const listCommentRepliesEndPointFor = function (padID, apiKey) {
   let extraParams = '';
   if (apiKey) {
     extraParams = `?apikey=${apiKey}`;
@@ -297,12 +297,12 @@ var listCommentRepliesEndPointFor = function (padID, apiKey) {
   return commentRepliesEndPointFor(padID) + extraParams;
 };
 
-var repliesData = function (replies) {
+const repliesData = function (replies) {
   if (!replies) replies = [replyData()];
 
   return JSON.stringify(replies);
 };
 
-var replyData = function (commentId) {
+const replyData = function (commentId) {
   return {commentId, name: 'The Author', text: 'The Comment Text'};
 };

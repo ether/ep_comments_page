@@ -8,23 +8,27 @@
 */
 
 
-var $ = require('ep_etherpad-lite/static/js/rjquery').$;
-var _ = require('ep_etherpad-lite/static/js/underscore');
-var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-var moment = require('ep_comments_page/static/js/moment-with-locales.min');
-var commentBoxes = require('ep_comments_page/static/js/commentBoxes');
-var commentIcons = require('ep_comments_page/static/js/commentIcons');
-var newComment = require('ep_comments_page/static/js/newComment');
-var preCommentMark = require('ep_comments_page/static/js/preCommentMark');
-var commentL10n = require('ep_comments_page/static/js/commentL10n');
-var events = require('ep_comments_page/static/js/copyPasteEvents');
-var getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
-var hasCommentOnSelection = events.hasCommentOnSelection;
-var browser = require('ep_etherpad-lite/static/js/browser');
+const $ = require('ep_etherpad-lite/static/js/rjquery').$;
+const _ = require('ep_etherpad-lite/static/js/underscore');
+const browser = require('ep_etherpad-lite/static/js/browser');
+const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
+const commentIcons = require('ep_comments_page/static/js/commentIcons');
+const commentL10n = require('ep_comments_page/static/js/commentL10n');
+const events = require('ep_comments_page/static/js/copyPasteEvents');
+const moment = require('ep_comments_page/static/js/moment-with-locales.min');
+const newComment = require('ep_comments_page/static/js/newComment');
+const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 
-var cssFiles = ['ep_comments_page/static/css/comment.css', 'ep_comments_page/static/css/commentIcon.css'];
+const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
+const hasCommentOnSelection = events.hasCommentOnSelection;
 
-var UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
+const cssFiles = [
+  'ep_comments_page/static/css/comment.css',
+  'ep_comments_page/static/css/commentIcon.css',
+];
+
+const UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
 /* ********************************************************************
  *                         ep_comments Plugin                         *
@@ -447,7 +451,7 @@ ep_comments.prototype.collectComments = function (callback) {
     const $this = $(this);
     const cls = $this.attr('class');
     const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
+    const commentId = (classCommentId) ? classCommentId[1] : null;
     if (!commentId) return;
 
     self.padInner.contents().find('#innerdocbody').addClass('comments');
@@ -937,20 +941,22 @@ ep_comments.prototype.getSelectedText = function (rep) {
      }
      */
     const line = rep.lines.atIndex(lineNumber);
+    let posStart = undefined;
     // If we span over multiple lines
     if (rep.selStart[0] === lineNumber) {
       // Is this the first line?
       if (rep.selStart[1] > 0) {
-        var posStart = rep.selStart[1];
+        posStart = rep.selStart[1];
       } else {
-        var posStart = 0;
+        posStart = 0;
       }
     }
+    let posEnd = undefined;
     if (rep.selEnd[0] === lineNumber) {
       if (rep.selEnd[1] <= line.text.length) {
-        var posEnd = rep.selEnd[1];
+        posEnd = rep.selEnd[1];
       } else {
-        var posEnd = 0;
+        posEnd = 0;
       }
     }
     let lineText = line.text.substring(posStart, posEnd);
@@ -1182,7 +1188,7 @@ ep_comments.prototype.pushComment = function (eventType, callback) {
  *                           Etherpad Hooks                           *
  ******************************************************************** */
 
-var hooks = {
+const hooks = {
 
   // Init pad comments
   postAceInit(hookName, context, cb) {

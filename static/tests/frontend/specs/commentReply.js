@@ -93,7 +93,7 @@ describe('ep_comments_page - Comment Reply', function () {
     });
   });
 
-  var createComment = function (callback) {
+  const createComment = function (callback) {
     const inner$ = helper.padInner$;
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
@@ -126,7 +126,7 @@ describe('ep_comments_page - Comment Reply', function () {
         .done(callback);
   };
 
-  var createReply = function (withSuggestion, callback) {
+  const createReply = function (withSuggestion, callback) {
     const outer$ = helper.padOuter$;
     const commentId = getCommentId();
     const existingReplies = outer$('.sidebar-comment-reply').length;
@@ -162,7 +162,7 @@ describe('ep_comments_page - Comment Reply', function () {
         .done(callback);
   };
 
-  var getCommentId = function () {
+  const getCommentId = function () {
     helper.waitFor(() => {
       const inner$ = helper.padInner$;
       if (inner$) return true;
@@ -176,7 +176,7 @@ describe('ep_comments_page - Comment Reply', function () {
     });
   };
 
-  var chooseToShowComments = function (shouldShowComments, callback) {
+  const chooseToShowComments = function (shouldShowComments, callback) {
     const chrome$ = helper.padChrome$;
 
     // click on the settings button to make settings visible
@@ -193,7 +193,7 @@ describe('ep_comments_page - Comment Reply', function () {
     callback();
   };
 
-  var commentIconsEnabled = function () {
+  const commentIconsEnabled = function () {
     return helper.padOuter$('#commentIcons').length > 0;
   };
 });

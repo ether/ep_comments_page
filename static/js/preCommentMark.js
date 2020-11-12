@@ -4,7 +4,7 @@ var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
 exports.MARK_CLASS = 'pre-selected-comment';
 
-var preCommentMarker = function (ace) {
+const preCommentMarker = function (ace) {
   this.ace = ace;
   const self = this;
 
@@ -95,7 +95,7 @@ preCommentMarker.prototype.removeMarks = function (editorInfo, rep, callstack) {
 };
 
 // we do nothing on callWithAce; actions will be handled on aceEditEvent
-var doNothing = function () {};
+const doNothing = function () {};
 
 exports.init = function (ace) {
   return new preCommentMarker(ace);

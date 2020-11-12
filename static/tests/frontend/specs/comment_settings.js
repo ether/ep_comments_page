@@ -61,7 +61,7 @@ describe('ep_comments_page - Comment settings', function () {
 
   /* ********** Helper functions ********** */
 
-  var chooseToShowComments = function (shouldShowComments, callback) {
+  const chooseToShowComments = function (shouldShowComments, callback) {
     const chrome$ = helper.padChrome$;
 
     // click on the settings button to make settings visible
@@ -83,7 +83,7 @@ describe('ep_comments_page - Comment settings', function () {
     callback();
   };
 
-  var createComment = function (callback) {
+  const createComment = function (callback) {
     const inner$ = helper.padInner$;
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
@@ -116,7 +116,7 @@ describe('ep_comments_page - Comment settings', function () {
         .done(callback);
   };
 
-  var getCommentId = function () {
+  const getCommentId = function () {
     helper.waitFor(() => {
       const inner$ = helper.padInner$;
       if (inner$) return true;

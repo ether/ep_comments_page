@@ -1,8 +1,8 @@
 'use strict';
 
-var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-var collectContentPre = function (hookName, context, cb) {
+const collectContentPre = function (hookName, context, cb) {
   const comment = /(?:^| )(c-[A-Za-z0-9]*)/.exec(context.cls);
   const fakeComment = /(?:^| )(fakecomment-[A-Za-z0-9]*)/.exec(context.cls);
 

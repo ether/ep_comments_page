@@ -190,7 +190,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
   });
 
   /* ********** Helper functions ********** */
-  var createPadWithTwoLines = function (callback) {
+  const createPadWithTwoLines = function (callback) {
     const inner$ = helper.padInner$;
 
     // replace the first text element of pad with two lines
@@ -204,7 +204,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     }).done(callback);
   };
 
-  var selectLineAndOpenCommentForm = function (lineNumber, callback) {
+  const selectLineAndOpenCommentForm = function (lineNumber, callback) {
     const chrome$ = helper.padChrome$;
 
     // select first line to add comment to
@@ -218,7 +218,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     callback();
   };
 
-  var getCommentId = function () {
+  const getCommentId = function () {
     const inner$ = helper.padInner$;
     const comment = inner$('.comment').first();
     const cls = comment.attr('class');
@@ -228,7 +228,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     return commentId;
   };
 
-  var getLine = function (lineNumber) {
+  const getLine = function (lineNumber) {
     const inner$ = helper.padInner$;
     let line = inner$('div').first();
     for (let i = lineNumber - 1; i >= 0; i--) {
@@ -237,7 +237,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     return line;
   };
 
-  var textHighlightIsDisabled = function () {
+  const textHighlightIsDisabled = function () {
     return !helper.padChrome$.window.clientVars.highlightSelectedText;
   };
 });

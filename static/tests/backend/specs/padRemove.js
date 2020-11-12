@@ -68,7 +68,7 @@ describe('padRemove hook', function () {
   });
 });
 
-var deletePad = function (padID, callback) {
+const deletePad = function (padID, callback) {
   const deletePadRoute = `/api/1/deletePad?apikey=${apiKey}&padID=${padID}`;
   api.get(deletePadRoute).end((err, res) => {
     if (err || res.body.code !== 0) {

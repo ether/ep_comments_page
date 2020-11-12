@@ -1,8 +1,8 @@
 'use strict';
 
-var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-var _ = require('ep_etherpad-lite/static/js/underscore');
-var shared = require('./shared');
+const _ = require('ep_etherpad-lite/static/js/underscore');
+const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const shared = require('./shared');
 
 exports.addTextOnClipboard = function (e, ace, padInner, removeSelection, comments, replies) {
   let commentIdOnFirstPositionSelected;
@@ -46,7 +46,7 @@ exports.addTextOnClipboard = function (e, ace, padInner, removeSelection, commen
   }
 };
 
-var getReplyData = function (replies, commentIds) {
+const getReplyData = function (replies, commentIds) {
   let replyData = {};
   _.each(commentIds, (commentId) => {
     replyData = _.extend(getRepliesFromCommentId(replies, commentId), replyData);
@@ -54,7 +54,7 @@ var getReplyData = function (replies, commentIds) {
   return replyData;
 };
 
-var getRepliesFromCommentId = function (replies, commentId) {
+const getRepliesFromCommentId = function (replies, commentId) {
   const repliesFromCommentID = {};
   _.each(replies, (reply, replyId) => {
     if (reply.commentId === commentId) {
@@ -64,7 +64,7 @@ var getRepliesFromCommentId = function (replies, commentId) {
   return repliesFromCommentID;
 };
 
-var buildCommentIdToFakeIdMap = function (commentsData) {
+const buildCommentIdToFakeIdMap = function (commentsData) {
   const commentIdToFakeId = {};
   _.each(commentsData, (comment, fakeCommentId) => {
     const commentId = comment.data.originalCommentId;
@@ -73,7 +73,7 @@ var buildCommentIdToFakeIdMap = function (commentsData) {
   return commentIdToFakeId;
 };
 
-var replaceCommentIdsWithFakeIds = function (commentsData, html) {
+const replaceCommentIdsWithFakeIds = function (commentsData, html) {
   const commentIdToFakeId = buildCommentIdToFakeIdMap(commentsData);
   _.each(commentIdToFakeId, (fakeCommentId, commentId) => {
     $(html).find(`.${commentId}`).removeClass(commentId).addClass(fakeCommentId);
@@ -82,7 +82,7 @@ var replaceCommentIdsWithFakeIds = function (commentsData, html) {
   return htmlWithFakeCommentIds;
 };
 
-var buildCommentsData = function (html, comments) {
+const buildCommentsData = function (html, comments) {
   const commentsData = {};
   const originalCommentIds = getCommentIds(html);
   _.each(originalCommentIds, (originalCommentId) => {
@@ -94,12 +94,12 @@ var buildCommentsData = function (html, comments) {
   return commentsData;
 };
 
-var generateFakeCommentId = function () {
+const generateFakeCommentId = function () {
   const commentId = `fakecomment-${randomString(16)}`;
   return commentId;
 };
 
-var getCommentIds = function (html) {
+const getCommentIds = function (html) {
   const allSpans = $(html).find('span');
   const commentIds = [];
   _.each(allSpans, (span) => {
@@ -114,25 +114,25 @@ var getCommentIds = function (html) {
   return uniqueCommentIds;
 };
 
-var createHiddenDiv = function (range) {
+const createHiddenDiv = function (range) {
   const content = range.cloneContents();
   const div = document.createElement('div');
   const hiddenDiv = $(div).html(content);
   return hiddenDiv;
 };
 
-var getHtml = function (hiddenDiv) {
+const getHtml = function (hiddenDiv) {
   return $(hiddenDiv).html();
 };
 
-var selectionHasOnlyText = function (rawHtml) {
+const selectionHasOnlyText = function (rawHtml) {
   const html = getHtml(rawHtml);
   const htmlDecoded = htmlDecode(html);
   const text = $(rawHtml).text();
   return htmlDecoded === text;
 };
 
-var buildHtmlToCopyWhenSelectionHasOnlyText = function (text, range, commentId) {
+const buildHtmlToCopyWhenSelectionHasOnlyText = function (text, range, commentId) {
   const htmlWithSpans = buildHtmlWithTwoSpanTags(text, commentId);
   const html = buildHtmlWithFormattingTagsOfSelection(htmlWithSpans, range);
 
@@ -140,7 +140,7 @@ var buildHtmlToCopyWhenSelectionHasOnlyText = function (text, range, commentId) 
   return htmlToCopy;
 };
 
-var buildHtmlWithFormattingTagsOfSelection = function (html, range) {
+const buildHtmlWithFormattingTagsOfSelection = function (html, range) {
   const htmlOfParentNode = range.commonAncestorContainer.parentNode;
   const tags = getTagsInSelection(htmlOfParentNode);
 
@@ -159,14 +159,14 @@ var buildHtmlWithFormattingTagsOfSelection = function (html, range) {
 // chrome keeps the background-color. To avoid this we create two spans. The first one, <span class='comment c-124'>thi</span>
 // has the text until the last but one character and second one with the last character <span class='comment c-124'>g</span>.
 // Etherpad does a good job joining the two spans into one after the paste is triggered.
-var buildHtmlWithTwoSpanTags = function (text, commentId) {
+const buildHtmlWithTwoSpanTags = function (text, commentId) {
   const firstSpan = `<span class="comment ${commentId}">${text.slice(0, -1)}</span>`; // text until before last char
   const secondSpan = `<span class="comment ${commentId}">${text.slice(-1)}</span>`; // last char
 
   return firstSpan + secondSpan;
 };
 
-var buildOpenTags = function (tags) {
+const buildOpenTags = function (tags) {
   let openTags = '';
   tags.forEach((tag) => {
     openTags += `<${tag}>`;
@@ -174,7 +174,7 @@ var buildOpenTags = function (tags) {
   return openTags;
 };
 
-var buildCloseTags = function (tags) {
+const buildCloseTags = function (tags) {
   let closeTags = '';
   var tags = tags.reverse();
   tags.forEach((tag) => {
@@ -183,7 +183,7 @@ var buildCloseTags = function (tags) {
   return closeTags;
 };
 
-var getTagsInSelection = function (htmlObject) {
+const getTagsInSelection = function (htmlObject) {
   const tags = [];
   let tag;
   while ($(htmlObject)[0].localName !== 'span') {
@@ -207,7 +207,7 @@ exports.saveCommentsAndReplies = function (e) {
   }
 };
 
-var saveComments = function (comments) {
+const saveComments = function (comments) {
   const commentsToSave = {};
   const padId = clientVars.padId;
 
@@ -224,7 +224,7 @@ var saveComments = function (comments) {
   pad.plugins.ep_comments_page.saveCommentWithoutSelection(padId, commentsToSave);
 };
 
-var saveReplies = function (replies) {
+const saveReplies = function (replies) {
   const repliesToSave = {};
   const padId = clientVars.padId;
   const mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
@@ -238,7 +238,7 @@ var saveReplies = function (replies) {
 };
 
 // copied from https://css-tricks.com/snippets/javascript/unescape-html-in-js/
-var htmlDecode = function (input) {
+const htmlDecode = function (input) {
   const e = document.createElement('div');
   e.innerHTML = input;
   return e.childNodes.length === 0 ? '' : e.childNodes[0].nodeValue;
@@ -275,7 +275,7 @@ exports.hasCommentOnSelection = function () {
   return hasComment;
 };
 
-var hasCommentOnMultipleLineSelection = function (firstLineOfSelection, lastLineOfSelection, rep, attributeManager) {
+const hasCommentOnMultipleLineSelection = function (firstLineOfSelection, lastLineOfSelection, rep, attributeManager) {
   let foundLineWithComment = false;
   for (let line = firstLineOfSelection; line <= lastLineOfSelection && !foundLineWithComment; line++) {
     const firstColumn = getFirstColumnOfSelection(line, rep, firstLineOfSelection);
@@ -288,11 +288,11 @@ var hasCommentOnMultipleLineSelection = function (firstLineOfSelection, lastLine
   return foundLineWithComment;
 };
 
-var getFirstColumnOfSelection = function (line, rep, firstLineOfSelection) {
+const getFirstColumnOfSelection = function (line, rep, firstLineOfSelection) {
   return line !== firstLineOfSelection ? 0 : rep.selStart[1];
 };
 
-var getLastColumnOfSelection = function (line, rep, lastLineOfSelection) {
+const getLastColumnOfSelection = function (line, rep, lastLineOfSelection) {
   let lastColumnOfSelection;
   if (line !== lastLineOfSelection) {
     lastColumnOfSelection = getLength(line, rep); // length of line
@@ -302,7 +302,7 @@ var getLastColumnOfSelection = function (line, rep, lastLineOfSelection) {
   return lastColumnOfSelection;
 };
 
-var hasCommentOnLine = function (lineNumber, firstColumn, lastColumn, attributeManager) {
+const hasCommentOnLine = function (lineNumber, firstColumn, lastColumn, attributeManager) {
   let foundCommentOnLine = false;
   for (let column = firstColumn; column <= lastColumn && !foundCommentOnLine; column++) {
     const commentId = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).comment;
@@ -313,11 +313,11 @@ var hasCommentOnLine = function (lineNumber, firstColumn, lastColumn, attributeM
   return foundCommentOnLine;
 };
 
-var hasMultipleLineSelected = function (firstLineOfSelection, lastLineOfSelection) {
+const hasMultipleLineSelected = function (firstLineOfSelection, lastLineOfSelection) {
   return firstLineOfSelection !== lastLineOfSelection;
 };
 
-var getLength = function (line, rep) {
+const getLength = function (line, rep) {
   const nextLine = line + 1;
   const startLineOffset = rep.lines.offsetOfIndex(line);
   const endLineOffset = rep.lines.offsetOfIndex(nextLine);

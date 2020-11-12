@@ -1,26 +1,26 @@
 'use strict';
 
 // Easier access to outter pad
-var padOuter;
-var getPadOuter = function () {
+let padOuter;
+const getPadOuter = function () {
   padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
   return padOuter;
 };
 
-var getCommentsContainer = function () {
+const getCommentsContainer = function () {
   return getPadOuter().find('#comments');
 };
 
 /* ***** Public methods: ***** */
 
-var showComment = function (commentId, e) {
+const showComment = function (commentId, e) {
   const commentElm = getCommentsContainer().find(`#${commentId}`);
   commentElm.show();
 
   highlightComment(commentId, e);
 };
 
-var hideComment = function (commentId, hideCommentTitle) {
+const hideComment = function (commentId, hideCommentTitle) {
   const commentElm = getCommentsContainer().find(`#${commentId}`);
   commentElm.removeClass('full-display');
 
@@ -33,15 +33,15 @@ var hideComment = function (commentId, hideCommentTitle) {
   getPadOuter().find('.comment-modal').removeClass('popup-show');
 };
 
-var hideAllComments = function () {
+const hideAllComments = function () {
   getCommentsContainer().find('.sidebar-comment').removeClass('full-display');
   getPadOuter().find('.comment-modal').removeClass('popup-show');
 };
 
-var highlightComment = function (commentId, e, editorComment) {
+const highlightComment = function (commentId, e, editorComment) {
   const container = getCommentsContainer();
   const commentElm = container.find(`#${commentId}`);
-  var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+  const inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
 
   if (container.is(':visible')) {
     // hide all other comments
@@ -73,7 +73,7 @@ var highlightComment = function (commentId, e, editorComment) {
     // get modal position
     const containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
     const modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
-    var targetLeft = e.clientX;
+    let targetLeft = e.clientX;
     let targetTop = $(e.target).offset().top;
     if (editorComment) {
       targetLeft += padInner.offset().left;
@@ -81,7 +81,7 @@ var highlightComment = function (commentId, e, editorComment) {
       targetTop += parseInt(padOuter.find('#outerdocbody').css('padding-top').split('px')[0]);
     } else {
       // mean we are clicking from a comment Icon
-      var targetLeft = $(e.target).offset().left - 20;
+      targetLeft = $(e.target).offset().left - 20;
     }
 
     // if positioning modal on target left will make part of the modal to be
@@ -99,7 +99,7 @@ var highlightComment = function (commentId, e, editorComment) {
 
 // Adjust position of the comment detail on the container, to be on the same
 // height of the pad text associated to the comment, and return the affected element
-var adjustTopOf = function (commentId, baseTop) {
+const adjustTopOf = function (commentId, baseTop) {
   const commentElement = getPadOuter().find(`#${commentId}`);
   commentElement.css('top', `${baseTop}px`);
 
@@ -107,14 +107,14 @@ var adjustTopOf = function (commentId, baseTop) {
 };
 
 // Indicates if comment is on the expected position (baseTop-5)
-var isOnTop = function (commentId, baseTop) {
+const isOnTop = function (commentId, baseTop) {
   const commentElement = getPadOuter().find(`#${commentId}`);
   const expectedTop = `${baseTop}px`;
   return commentElement.css('top') === expectedTop;
 };
 
 // Indicates if event was on one of the elements that does not close comment
-var shouldNotCloseComment = function (e) {
+const shouldNotCloseComment = function (e) {
   // a comment box
   if ($(e.target).closest('.sidebar-comment').length || $(e.target).closest('.comment-modal').length) { // the comment modal
     return true;

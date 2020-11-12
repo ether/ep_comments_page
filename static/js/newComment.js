@@ -1,10 +1,10 @@
 'use strict';
 
-var $ = require('ep_etherpad-lite/static/js/rjquery').$;
-var commentL10n = require('ep_comments_page/static/js/commentL10n');
+const $ = require('ep_etherpad-lite/static/js/rjquery').$;
+const commentL10n = require('ep_comments_page/static/js/commentL10n');
 
 // Create a comment object with data filled on the given form
-var buildCommentFrom = function (form) {
+const buildCommentFrom = function (form) {
   const text = form.find('.comment-content').val();
   const changeFrom = form.find('.from-value').text();
   const changeTo = form.find('.to-value').val() || null;
@@ -20,12 +20,12 @@ var buildCommentFrom = function (form) {
 };
 
 // Callback for new comment Cancel
-var cancelNewComment = function () {
+const cancelNewComment = function () {
   hideNewCommentPopup();
 };
 
 // Callback for new comment Submit
-var submitNewComment = function (callback) {
+const submitNewComment = function (callback) {
   const index = 0;
   const form = $('#newComment');
   const comment = buildCommentFrom(form);
@@ -42,17 +42,17 @@ var submitNewComment = function (callback) {
 
 /* ***** Public methods: ***** */
 
-var localizenewCommentPopup = function () {
+const localizenewCommentPopup = function () {
   const newCommentPopup = $('#newComment');
   if (newCommentPopup.length !== 0) commentL10n.localize(newCommentPopup);
 };
 
 // Insert new Comment Form
-var insertNewCommentPopupIfDontExist = function (comment, callback) {
+const insertNewCommentPopupIfDontExist = function (comment, callback) {
   $('#newComment').remove();
 
   comment.commentId = '';
-  var newCommentPopup = $('#newCommentTemplate').tmpl(comment);
+  const newCommentPopup = $('#newCommentTemplate').tmpl(comment);
   newCommentPopup.appendTo($('#editorcontainerbox'));
 
   localizenewCommentPopup();
@@ -75,7 +75,7 @@ var insertNewCommentPopupIfDontExist = function (comment, callback) {
   return newCommentPopup;
 };
 
-var showNewCommentPopup = function () {
+const showNewCommentPopup = function () {
   // position below comment icon
   $('#newComment').css('left', $('.toolbar .addComment').offset().left);
 
@@ -91,7 +91,7 @@ var showNewCommentPopup = function () {
   pad.plugins.ep_comments_page.preCommentMarker.markSelectedText();
 };
 
-var hideNewCommentPopup = function () {
+const hideNewCommentPopup = function () {
   $('#newComment').removeClass('popup-show');
 
   // force focus to be lost, so virtual keyboard is hidden on mobile devices

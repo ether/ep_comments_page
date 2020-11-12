@@ -70,7 +70,7 @@ describe('padCopy hook', function () {
   });
 });
 
-var copyPad = function (originalPadID, copiedPadID, callback) {
+const copyPad = function (originalPadID, copiedPadID, callback) {
   const copyPadRoute = `/api/1.2.9/copyPad?apikey=${apiKey}&sourceID=${originalPadID}&destinationID=${copiedPadID}`;
   api.get(copyPadRoute).end((err, res) => {
     if (err || res.body.code !== 0) {
