@@ -218,22 +218,6 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     callback();
   };
 
-
-  var getCommentId = function () {
-    const inner$ = helper.padInner$;
-    helper.waitFor(() => {
-      const inner$ = helper.padInner$;
-      return inner$;
-    }).done(() => {
-      const comment = inner$('.comment').first();
-      const cls = comment.attr('class');
-      const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-      const commentId = (classCommentId) ? classCommentId[1] : null;
-
-      return commentId;
-    });
-  };
-
   var getCommentId = function () {
     const inner$ = helper.padInner$;
     const comment = inner$('.comment').first();

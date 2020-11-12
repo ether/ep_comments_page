@@ -452,24 +452,17 @@ ep_comments.prototype.collectComments = function (callback) {
 
     self.padInner.contents().find('#innerdocbody').addClass('comments');
 
-    if (commentId === null) {
-      const isAuthorClassName = /(?:^| )(a.[A-Za-z0-9]*)/.exec(cls);
-      if (isAuthorClassName) self.removeComment(isAuthorClassName[1], it);
-      return;
-    }
     const commentElm = container.find(`#${commentId}`);
 
     const comment = comments[commentId];
     if (comment) {
       comment.data.changeFrom = parseMultiline(comment.data.changeFrom);
-      if (comment !== null) {
-        // If comment is not in sidebar insert it
-        if (commentElm.length == 0) {
-          self.insertComment(commentId, comment.data, it);
-        }
-        // localize comment element
-        commentL10n.localize(commentElm);
+      // If comment is not in sidebar insert it
+      if (commentElm.length == 0) {
+        self.insertComment(commentId, comment.data, it);
       }
+      // localize comment element
+      commentL10n.localize(commentElm);
     }
     const prevCommentElm = commentElm.prev();
     let commentPos;
