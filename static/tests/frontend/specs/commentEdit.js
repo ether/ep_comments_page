@@ -16,7 +16,7 @@ describe('ep_comments_page - Comment Edit', function () {
   });
 
   context('when user presses the button edit on a comment', function () {
-    before(function () {
+    before(async function () {
       helperFunctions.clickEditCommentButton();
     });
 
@@ -32,7 +32,7 @@ describe('ep_comments_page - Comment Edit', function () {
     });
 
     context('and presses edit button again', function () {
-      before(function () {
+      before(async function () {
         helperFunctions.clickEditCommentButton();
       });
 
@@ -43,7 +43,7 @@ describe('ep_comments_page - Comment Edit', function () {
     });
 
     context('and presses cancel', function () {
-      before(function () {
+      before(async function () {
         helperFunctions.pressCancel();
       });
 
@@ -55,13 +55,13 @@ describe('ep_comments_page - Comment Edit', function () {
 
     context('and writes a new comment text', function () {
       const updatedText = 'this comment was edited';
-      before(function () {
+      before(async function () {
         helperFunctions.clickEditCommentButton();
         helperFunctions.writeCommentText(updatedText);
       });
 
       context('and presses save', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           helperFunctions.pressSave();
         });
 
@@ -240,7 +240,7 @@ ep_comments_page_test_helper.commentEdit = {
   },
   createdCommentOnLine(line, cb) {
     const self = this;
-    helper.waitFor(() => self.getCommentIdOfLine(line) !== null).done(cb);
+    helper.waitFor(() => self.getCommentIdOfLine(line) != null).done(cb);
   },
   getCommentIdOfLine(line) {
     const $line = this.getLine(line);

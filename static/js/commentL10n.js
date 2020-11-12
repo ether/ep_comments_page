@@ -2,7 +2,7 @@
 
 /* ***** Public methods: ***** */
 
-const localize = function (element) {
+const localize = (element) => {
   html10n.translateElement(html10n.translations, element.get(0));
 };
 

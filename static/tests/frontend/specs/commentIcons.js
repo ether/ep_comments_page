@@ -30,7 +30,8 @@ describe('ep_comments_page - Comment icons', function () {
 
       // check height is the same
       const $commentedText = inner$(`.${commentId}`);
-      const expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
+      // all icons are +5px down to adjust position
+      const expectedTop = $commentedText.offset().top + 5;
       expect($commentIcon.offset().top).to.be(expectedTop);
     });
   });
@@ -67,9 +68,10 @@ describe('ep_comments_page - Comment icons', function () {
 
   it('updates comment icon height when commented text is moved to another line', async function () {
     // we only run test if icons are enabled
-    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    // don't run this test in safari. borrowed from
+    // https://stackoverflow.com/questions/7944460/detect-safari-browser
     const ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('safari') != -1) {
+    if (ua.indexOf('safari') !== -1) {
       if (ua.indexOf('chrome') > -1) {
         // Chrome
       } else {
@@ -98,7 +100,8 @@ describe('ep_comments_page - Comment icons', function () {
       // check height is the same
       const $commentIcon = outer$(`#commentIcons #icon-${commentId}`);
       const $commentedText = inner$(`.${commentId}`);
-      const expectedTop = $commentedText.offset().top + 5; // all icons are +5px down to adjust position
+      // all icons are +5px down to adjust position
+      const expectedTop = $commentedText.offset().top + 5;
       expect($commentIcon.offset().top).to.be(expectedTop);
     });
   });
@@ -120,9 +123,10 @@ describe('ep_comments_page - Comment icons', function () {
   });
 
   it('hides comment when user clicks on comment icon twice', async function () {
-    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    // don't run this test in safari. borrowed from
+    // https://stackoverflow.com/questions/7944460/detect-safari-browser
     const ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('safari') != -1) {
+    if (ua.indexOf('safari') !== -1) {
       if (ua.indexOf('chrome') > -1) {
         // Chrome
       } else {
@@ -147,9 +151,10 @@ describe('ep_comments_page - Comment icons', function () {
   });
 
   it('hides comment when user clicks outside of comment box', async function () {
-    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+    // don't run this test in safari. borrowed from
+    // https://stackoverflow.com/questions/7944460/detect-safari-browser
     const ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('safari') != -1) {
+    if (ua.indexOf('safari') !== -1) {
       if (ua.indexOf('chrome') > -1) {
         // Chrome
       } else {
@@ -175,10 +180,11 @@ describe('ep_comments_page - Comment icons', function () {
     });
   });
 
-  it('hides first comment and shows second comment when user clicks on one icon then on another icon', async function () {
-    // don't run this test in safari.  borrowed from https://stackoverflow.com/questions/7944460/detect-safari-browser
+  it('hides 1st, shows 2nd comment when user clicks on one then another icon', async function () {
+    // don't run this test in safari. borrowed from
+    // https://stackoverflow.com/questions/7944460/detect-safari-browser
     const ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('safari') != -1) {
+    if (ua.indexOf('safari') !== -1) {
       if (ua.indexOf('chrome') > -1) {
         // Chrome
       } else {

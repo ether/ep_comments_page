@@ -53,7 +53,9 @@ describe('get comments replies', function () {
       createCommentReply(padID, comment, {}, (err, replyId) => {
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
             .expect((res) => {
-              if (res.body.data.replies === undefined) throw new Error('Response expected to have a list of comment replies');
+              if (res.body.data.replies === undefined) {
+                throw new Error('Response expected to have a list of comment replies');
+              }
               const replies = Object.keys(res.body.data.replies);
               if (replies.length !== 1) throw new Error('Response expected to have one reply');
             }).end(done);
@@ -80,12 +82,30 @@ describe('get comments replies', function () {
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
             .expect((res) => {
               const commentReplyData = res.body.data.replies[replyId];
-              if (commentReplyData.commentId != comment) throw new Error(`Wrong commentId. Expected: ${comment}, got: ${commentReplyData.commentId}`);
-              if (commentReplyData.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${commentReplyData.text}`);
-              if (commentReplyData.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${commentReplyData.changeTo}`);
-              if (commentReplyData.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${commentReplyData.changeFrom}`);
-              if (commentReplyData.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${commentReplyData.name}`);
-              if (commentReplyData.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${commentReplyData.timestamp}`);
+              if (commentReplyData.commentId !== comment) {
+                throw new Error(`Wrong commentId. Expected: ${comment}, ` +
+                                `got: ${commentReplyData.commentId}`);
+              }
+              if (commentReplyData.text !== text) {
+                throw new Error(`Wrong text. Expected: ${text}, ` +
+                                `got: ${commentReplyData.text}`);
+              }
+              if (commentReplyData.changeTo !== changeTo) {
+                throw new Error(`Wrong changeTo. Expected: ${changeTo}, ` +
+                                `got: ${commentReplyData.changeTo}`);
+              }
+              if (commentReplyData.changeFrom !== changeFrom) {
+                throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, ` +
+                                `got: ${commentReplyData.changeFrom}`);
+              }
+              if (commentReplyData.name !== name) {
+                throw new Error(`Wrong name. Expected: ${name}, ` +
+                                `got: ${commentReplyData.name}`);
+              }
+              if (commentReplyData.timestamp !== timestamp) {
+                throw new Error(`Wrong timestamp. Expected: ${timestamp}, ` +
+                                `got: ${commentReplyData.timestamp}`);
+              }
             }).end(done);
       });
     });
@@ -106,7 +126,10 @@ describe('get comments replies', function () {
                 api.get(listCommentRepliesEndPointFor(roPadId, apiKey))
                     .expect((res) => {
                       const roData = JSON.stringify(res.body.data);
-                      if (roData != rwData) throw new Error(`Read-only and read-write data don't match. Read-only data: ${roData}, read-write data: ${rwData}`);
+                      if (roData !== rwData) {
+                        throw new Error("Read-only and read-write data don't match. " +
+                                        `Read-only data: ${roData}, read-write data: ${rwData}`);
+                      }
                     })
                     .end(done);
               });
@@ -182,7 +205,9 @@ describe('create comment replies API', function () {
         .field('data', twoReplies)
         .expect((res) => {
           if (res.body.replyIds === undefined) throw new Error('Response should have replyIds.');
-          if (res.body.replyIds.length !== 2) throw new Error('Response should have two reply ids.');
+          if (res.body.replyIds.length !== 2) {
+            throw new Error('Response should have two reply ids.');
+          }
         })
         .end(done);
   });
@@ -195,8 +220,12 @@ describe('create comment replies API', function () {
             .field('apikey', apiKey)
             .field('data', twoReplies)
             .expect((res) => {
-              if (res.body.replyIds === undefined) throw new Error('Response should have replyIds.');
-              if (res.body.replyIds.length !== 2) throw new Error('Response should have two reply ids.');
+              if (res.body.replyIds === undefined) {
+                throw new Error('Response should have replyIds.');
+              }
+              if (res.body.replyIds.length !== 2) {
+                throw new Error('Response should have two reply ids.');
+              }
             })
             .end(done);
       });
@@ -227,7 +256,8 @@ describe('create comment reply API broadcast', function () {
         // ... listens to the broadcast message:
         socket = io.connect(`${appUrl}/comment`);
         const req = {padId: padID};
-        // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
+        // needs to get comments to be able to join the pad room, where the messages will be
+        // broadcast to:
         socket.emit('getComments', req, (res) => {
           socket.on('pushAddCommentReply', (data) => {
             ++timesMessageWasReceived;
@@ -280,7 +310,9 @@ describe('create comment reply API broadcast', function () {
           if (!replyId) throw new Error('Reply should had been created');
 
           setTimeout(() => { // give it some time to process the message on the client
-            if (timesMessageWasReceived !== 0) throw new Error(`Message should had been received only for pad ${padID}`);
+            if (timesMessageWasReceived !== 0) {
+              throw new Error(`Message should had been received only for pad ${padID}`);
+            }
             done();
           }, 100);
         });

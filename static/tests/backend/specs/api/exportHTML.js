@@ -22,7 +22,7 @@ describe('export comments to HTML', function () {
   });
 
   context('when pad text has one comment', function () {
-    before(function () {
+    before(async function () {
       html = function () {
         return buildHTML(textWithComment('c-1234'));
       };
@@ -42,13 +42,16 @@ describe('export comments to HTML', function () {
             const expectedComments = new RegExp(expectedRegex);
             const html = res.body.data.html;
             const foundComment = html.match(expectedComments);
-            if (!foundComment) throw new Error(`Comment not exported. Regex used: ${expectedRegex}, html exported: ${html}`);
+            if (!foundComment) {
+              throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
+                              `html exported: ${html}`);
+            }
           })
           .end(done);
     });
   });
   context('when pad text has two comments in a single line', function () {
-    before(function () {
+    before(async function () {
       html = function () {
         return buildHTML(textWithComment('c-1234') + textWithComment('c-82a3'));
       };
@@ -64,14 +67,17 @@ describe('export comments to HTML', function () {
 
             const html = res.body.data.html;
             const foundComment = html.match(expectedComments);
-            if (!foundComment) throw new Error(`Comment not exported. Regex used: ${expectedRegex}, html exported: ${html}`);
+            if (!foundComment) {
+              throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
+                              `html exported: ${html}`);
+            }
           })
           .end(done);
     });
   });
 
   context('when pad text has no comments', function () {
-    before(function () {
+    before(async function () {
       html = function () {
         return buildHTML('empty pad');
       };
@@ -85,57 +91,74 @@ describe('export comments to HTML', function () {
 
             const html = res.body.data.html;
             const foundComment = html.match(noComment);
-            if (!foundComment) throw new Error(`Comment exported, should not have any. Regex used: ${expectedRegex}, html exported: ${html}`);
+            if (!foundComment) {
+              throw new Error('Comment exported, should not have any. ' +
+                              `Regex used: ${expectedRegex}, html exported: ${html}`);
+            }
           })
           .end(done);
     });
   });
 
   context('when pad text has comment inside strong', function () {
-    before(function () {
+    before(async function () {
       html = function () {
-        return buildHTML(`<strong>${textWithComment('c-2342', 'this is a comment and bold')}</strong>`);
+        return buildHTML(
+            `<strong>${textWithComment('c-2342', 'this is a comment and bold')}</strong>`);
       };
     });
 
-    // Etherpad exports tags using the order they are defined on the array (bold is always inside comment)
+    // Etherpad exports tags using the order they are defined on the array (bold is always inside
+    // comment)
     xit('returns HTML with strong and comment, in any order', function (done) {
       api.get(getHTMLEndPointFor(padID))
           .expect((res) => {
-            const strongInsideCommentRegex = regexWithComment('c-2342', '<strong>this is a comment and bold<\/strong>');
-            const commentInsideStrongRegex = `<strong>${regexWithComment('c-2342', 'this is a comment and bold')}<\/strong>`;
+            const strongInsideCommentRegex =
+                regexWithComment('c-2342', '<strong>this is a comment and bold</strong>');
+            const commentInsideStrongRegex =
+                `<strong>${regexWithComment('c-2342', 'this is a comment and bold')}</strong>`;
             const expectedStrongInsideComment = new RegExp(strongInsideCommentRegex);
             const expectedCommentInsideStrong = new RegExp(commentInsideStrongRegex);
 
             const html = res.body.data.html;
-            const foundComment = html.match(expectedStrongInsideComment) || html.match(expectedCommentInsideStrong);
-            if (!foundComment) throw new Error(`Comment not exported. Regex used: [${strongInsideCommentRegex} || ${commentInsideStrongRegex}], html exported: ${html}`);
+            const foundComment =
+                html.match(expectedStrongInsideComment) || html.match(expectedCommentInsideStrong);
+            if (!foundComment) {
+              throw new Error('Comment not exported. Regex used: ' +
+                              `[${strongInsideCommentRegex} || ${commentInsideStrongRegex}], ` +
+                              `html exported: ${html}`);
+            }
           })
           .end(done);
     });
   });
 
   context('when pad text has comment in strong', function () {
-    before(function () {
+    before(async function () {
       html = function () {
         return buildHTML(textWithComment('c-2342', '<strong>this is a comment and bold</strong>'));
       };
     });
 
-    // Etherpad exports tags using the order they are defined on the array (bold is always inside comment)
+    // Etherpad exports tags using the order they are defined on the array (bold is always inside
+    // comment)
     it('returns HTML with strong and comment, in any order', function (done) {
       api.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const html = res.body.data.html;
             const foundComment = (html.indexOf('<strong>') !== -1);
-            if (!foundComment) throw new Error(`Comment not exported. Regex used: [${strongInsideCommentRegex} || ${commentInsideStrongRegex}], html exported: ${html}`);
+            if (!foundComment) {
+              throw new Error('Comment not exported. Regex used: ' +
+                              `[${strongInsideCommentRegex} || ${commentInsideStrongRegex}], ` +
+                              `html exported: ${html}`);
+            }
           })
           .end(done);
     });
   });
 
   context('when pad text has part with comment and part without it', function () {
-    before(function () {
+    before(async function () {
       html = function () {
         return buildHTML(`no comment here ${textWithComment('c-2342')}`);
       };
@@ -148,7 +171,10 @@ describe('export comments to HTML', function () {
             const expectedComments = new RegExp(expectedRegex);
             const html = res.body.data.html;
             const foundComment = html.match(expectedComments);
-            if (!foundComment) throw new Error(`Comment not exported. Regex used: ${expectedRegex}, html exported: ${html}`);
+            if (!foundComment) {
+              throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
+                              `html exported: ${html}`);
+            }
           })
           .end(done);
     });

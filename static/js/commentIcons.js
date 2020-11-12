@@ -4,25 +4,23 @@ const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
 // Indicates if Etherpad is configured to display icons
-const displayIcons = function () {
-  return clientVars.displayCommentAsIcon;
-};
+const displayIcons = () => clientVars.displayCommentAsIcon;
 
 // Easier access to outer pad
 let padOuter;
-const getPadOuter = function () {
+const getPadOuter = () => {
   padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
   return padOuter;
 };
 
 // Easier access to inner pad
 let padInner;
-const getPadInner = function () {
+const getPadInner = () => {
   padInner = padInner || getPadOuter().find('iframe[name="ace_inner"]').contents();
   return padInner;
 };
 
-const getOrCreateIconsContainerAt = function (top) {
+const getOrCreateIconsContainerAt = (top) => {
   const iconContainer = getPadOuter().find('#commentIcons');
   const iconClass = `icon-at-${top}`;
 
@@ -40,23 +38,22 @@ const getOrCreateIconsContainerAt = function (top) {
   return iconsAtLine;
 };
 
-const targetCommentIdOf = function (e) {
-  return e.currentTarget.getAttribute('data-commentid');
+const targetCommentIdOf = (e) => e.currentTarget.getAttribute('data-commentid');
+
+const highlightTargetTextOf = (commentId) => {
+  getPadInner().find('head').append(
+      `<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
 };
 
-const highlightTargetTextOf = function (commentId) {
-  getPadInner().find('head').append(`<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
-};
-
-const removeHighlightTargetText = function () {
+const removeHighlightTargetText = () => {
   getPadInner().find('head .comment-style').remove();
 };
 
-const toggleActiveCommentIcon = function (target) {
+const toggleActiveCommentIcon = (target) => {
   target.toggleClass('active').toggleClass('inactive');
 };
 
-const addListenersToCommentIcons = function () {
+const addListenersToCommentIcons = () => {
   getPadOuter().find('#commentIcons').on('mouseover', '.comment-icon', (e) => {
     removeHighlightTargetText();
     const commentId = targetCommentIdOf(e);
@@ -84,7 +81,7 @@ const addListenersToCommentIcons = function () {
 
 // Listen to clicks on the page to be able to close comment when clicking
 // outside of it
-const addListenersToCloseOpenedComment = function () {
+const addListenersToCloseOpenedComment = () => {
   // we need to add listeners to the different iframes of the page
   $(document).on('touchstart click', (e) => {
     closeOpenedCommentIfNotOnSelectedElements(e);
@@ -98,10 +95,11 @@ const addListenersToCloseOpenedComment = function () {
 };
 
 // Close comment if event target was outside of comment or on a comment icon
-const closeOpenedCommentIfNotOnSelectedElements = function (e) {
+const closeOpenedCommentIfNotOnSelectedElements = (e) => {
   // Don't do anything if clicked on the following elements:
   // any of the comment icons
-  if (shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
+  if (shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) {
+    // a comment box or the comment modal
     return;
   }
 
@@ -116,14 +114,12 @@ const closeOpenedCommentIfNotOnSelectedElements = function (e) {
 };
 
 // Search on the page for an opened comment
-const findOpenedComment = function () {
-  return getPadOuter().find('#commentIcons .comment-icon.active').get(0);
-};
+const findOpenedComment = () => getPadOuter().find('#commentIcons .comment-icon.active').get(0);
 
 /* ***** Public methods: ***** */
 
 // Create container to hold comment icons
-const insertContainer = function () {
+const insertContainer = () => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
@@ -134,7 +130,7 @@ const insertContainer = function () {
 };
 
 // Create a new comment icon
-const addIcon = function (commentId, comment) {
+const addIcon = (commentId, comment) => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
@@ -147,7 +143,7 @@ const addIcon = function (commentId, comment) {
 };
 
 // Hide comment icons from container
-const hideIcons = function () {
+const hideIcons = () => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
@@ -158,7 +154,7 @@ const hideIcons = function () {
 
 // Adjust position of the comment icon on the container, to be on the same
 // height of the pad text associated to the comment, and return the affected icon
-const adjustTopOf = function (commentId, baseTop) {
+const adjustTopOf = (commentId, baseTop) => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
@@ -167,7 +163,7 @@ const adjustTopOf = function (commentId, baseTop) {
   const iconsAtLine = getOrCreateIconsContainerAt(targetTop);
 
   // move icon from one line to the other
-  if (iconsAtLine != icon.parent()) icon.appendTo(iconsAtLine);
+  if (iconsAtLine !== icon.parent()) icon.appendTo(iconsAtLine);
 
   icon.show();
 
@@ -176,7 +172,7 @@ const adjustTopOf = function (commentId, baseTop) {
 
 // Indicate if comment detail currently opened was shown by a click on
 // comment icon.
-const isCommentOpenedByClickOnIcon = function () {
+const isCommentOpenedByClickOnIcon = () => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return false;
 
@@ -188,7 +184,7 @@ const isCommentOpenedByClickOnIcon = function () {
 
 // Mark comment as a comment-with-reply, so it can be displayed with a
 // different icon
-const commentHasReply = function (commentId) {
+const commentHasReply = (commentId) => {
   // we're only doing something if icons will be displayed at all
   if (!displayIcons()) return;
 
@@ -199,7 +195,7 @@ const commentHasReply = function (commentId) {
 
 // Indicate if sidebar comment should be shown, checking if it had the characteristics
 // of a comment that was being displayed on the screen
-const shouldShow = function (sidebarComent) {
+const shouldShow = (sidebarComent) => {
   let shouldShowComment = false;
 
   if (!displayIcons()) {
@@ -213,10 +209,9 @@ const shouldShow = function (sidebarComent) {
   return shouldShowComment;
 };
 
-// Indicates if event was on one of the elements that does not close comment (any of the comment icons)
-const shouldNotCloseComment = function (e) {
-  return $(e.target).closest('.comment-icon').length !== 0;
-};
+// Indicates if event was on one of the elements that does not close comment (any of the comment
+// icons)
+const shouldNotCloseComment = (e) => $(e.target).closest('.comment-icon').length !== 0;
 
 exports.insertContainer = insertContainer;
 exports.addIcon = addIcon;

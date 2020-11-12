@@ -42,7 +42,7 @@ const EpComments = function (context) {
   // Required for instances running on weird ports
   // This probably needs some work for instances running on root or not on /p/
   const loc = document.location;
-  const port = loc.port == '' ? (loc.protocol == 'https:' ? 443 : 80) : loc.port;
+  const port = loc.port === '' ? (loc.protocol === 'https:' ? 443 : 80) : loc.port;
   const url = `${loc.protocol}//${loc.hostname}:${port}/comment`;
   this.socket = io.connect(url);
 
@@ -168,7 +168,7 @@ EpComments.prototype.init = function () {
     const textBox = self.findCommentText($commentBox).last();
 
     // if edit form not already there
-    if (textBox.siblings('.comment-edit-form').length == 0) {
+    if (textBox.siblings('.comment-edit-form').length === 0) {
       // add a form to edit the field
       const data = {};
       data.text = textBox.text();
@@ -258,9 +258,11 @@ EpComments.prototype.init = function () {
 
     // Are we reverting a change?
     const isRevert = commentEl.hasClass('change-accepted');
-    let newString = isRevert ? $(this).find('.from-value').html() : $(this).find('.to-value').html();
+    let newString =
+      isRevert ? $(this).find('.from-value').html() : $(this).find('.to-value').html();
 
-    // In case of suggested change is inside a reply, the parentId is different from the commentId (=replyId)
+    // In case of suggested change is inside a reply, the parentId is different from the commentId
+    // (=replyId)
     const parentId = $(this).closest('.sidebar-comment').data('commentid');
     // Nuke all that aren't first lines of this comment
     padInner.find(`.${parentId}:not(:first)`).html('');
@@ -357,12 +359,14 @@ EpComments.prototype.init = function () {
   // When an user copies a comment and selects only the span, or part of it, Google chrome
   // does not copy the classes only the styles, for example:
   // <comment class='comment'><span>text to be copied</span></comment>
-  // As the comment classes are not only used for styling we have to add these classes when it pastes the content
+  // As the comment classes are not only used for styling we have to add these classes when it
+  // pastes the content
   // The same does not occur when the user selects more than the span, for example:
   // text<comment class='comment'><span>to be copied</span></comment>
   if (browser.chrome || browser.firefox) {
     this.padInner.contents().on('copy', (e) => {
-      events.addTextOnClipboard(e, this.ace, this.padInner, false, this.comments, this.commentReplies);
+      events.addTextOnClipboard(
+          e, this.ace, this.padInner, false, this.comments, this.commentReplies);
     });
 
     this.padInner.contents().on('cut', (e) => {
@@ -378,7 +382,8 @@ EpComments.prototype.init = function () {
 EpComments.prototype.findCommentText = function ($commentBox) {
   const isReply = $commentBox.hasClass('sidebar-comment-reply');
   if (isReply) return $commentBox.find('.comment-text');
-  return $commentBox.find('.compact-display-content .comment-text, .full-display-content .comment-title-wrapper .comment-text');
+  return $commentBox.find('.compact-display-content .comment-text, ' +
+                          '.full-display-content .comment-title-wrapper .comment-text');
 };
 // This function is useful to collect new comments on the collaborators
 EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
@@ -446,18 +451,16 @@ EpComments.prototype.collectComments = function (callback) {
     if (comment) {
       comment.data.changeFrom = parseMultiline(comment.data.changeFrom);
       // If comment is not in sidebar insert it
-      if (commentElm.length == 0) {
+      if (commentElm.length === 0) {
         self.insertComment(commentId, comment.data, it);
       }
       // localize comment element
       commentL10n.localize(commentElm);
     }
     const prevCommentElm = commentElm.prev();
-    let commentPos;
+    let commentPos = 0;
 
-    if (prevCommentElm.length == 0) {
-      commentPos = 0;
-    } else {
+    if (prevCommentElm.length !== 0) {
       const prevCommentPos = prevCommentElm.css('top');
       const prevCommentHeight = prevCommentElm.innerHeight();
 
@@ -535,9 +538,7 @@ EpComments.prototype.closeOpenedComment = function (e) {
 EpComments.prototype.closeOpenedCommentIfNotOnSelectedElements = function (e) {
   // Don't do anything if clicked on the allowed elements:
   // any of the comment icons
-  if (commentIcons.shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) { // a comment box or the comment modal
-    return;
-  }
+  if (commentIcons.shouldNotCloseComment(e) || commentBoxes.shouldNotCloseComment(e)) return;
   // All clear, can close the comment
   this.closeOpenedComment(e);
 };
@@ -564,7 +565,8 @@ EpComments.prototype.collectCommentReplies = function (callback) {
       }
       // localize comment reply
       commentL10n.localize(content);
-      const repliesContainer = $('iframe[name="ace_outer"]').contents().find(`#${commentId} .comment-replies-container`);
+      const repliesContainer =
+        $('iframe[name="ace_outer"]').contents().find(`#${commentId} .comment-replies-container`);
       repliesContainer.append(content);
     }
   });
@@ -629,7 +631,8 @@ EpComments.prototype.setYofComments = function () {
   const commentsToBeShown = [];
 
   $.each(inlineComments, function () {
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className); // classname is the ID of the comment
+    // classname is the ID of the comment
+    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
     if (!commentId || !commentId[1]) return;
     const commentEle = padOuter.find(`#${commentId[1]}`);
 
@@ -658,7 +661,8 @@ EpComments.prototype.getFirstOcurrenceOfCommentIds = function () {
   const padOuter = $('iframe[name="ace_outer"]').contents();
   const padInner = padOuter.find('iframe[name="ace_inner"]').contents();
   const commentsId = this.getUniqueCommentsId(padInner);
-  const firstOcurrenceOfCommentIds = _.map(commentsId, (commentId) => padInner.find(`.${commentId}`).first().get(0));
+  const firstOcurrenceOfCommentIds =
+    _.map(commentsId, (commentId) => padInner.find(`.${commentId}`).first().get(0));
   return firstOcurrenceOfCommentIds;
 };
 
@@ -706,7 +710,7 @@ EpComments.prototype.localizeExistingComments = function () {
     const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     const commentId = (classCommentId) ? classCommentId[1] : null;
 
-    if (commentId !== null) {
+    if (commentId != null) {
       const commentElm = self.container.find(`#${commentId}`);
       const comment = comments[commentId];
 
@@ -722,8 +726,8 @@ EpComments.prototype.localizeExistingComments = function () {
 
 // Set comments content data
 EpComments.prototype.setComments = function (comments) {
-  for (const commentId in comments) {
-    this.setComment(commentId, comments[commentId]);
+  for (const [commentId, comment] of Object.entries(comments)) {
+    this.setComment(commentId, comment);
   }
 };
 
@@ -794,7 +798,7 @@ EpComments.prototype.deleteComment = function (commentId) {
   $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
-const parseMultiline = function (text) {
+const parseMultiline = (text) => {
   if (!text) return text;
   text = JSON.stringify(text);
   return text.substr(1, (text.length - 2));
@@ -816,7 +820,10 @@ EpComments.prototype.displayNewCommentForm = function () {
   // we have nothing selected, do nothing
   const noTextSelected = (selectedText.length === 0);
   if (noTextSelected) {
-    $.gritter.add({text: html10n.translations['ep_comments_page.add_comment.hint'] || 'Please first select the text to comment'});
+    $.gritter.add({
+      text: html10n.translations['ep_comments_page.add_comment.hint'] ||
+          'Please first select the text to comment',
+    });
     return;
   }
 
@@ -850,17 +857,19 @@ EpComments.prototype.scrollViewportIfSelectedTextIsNotVisible = function ($first
 
 EpComments.prototype.isElementInViewport = function (element) {
   const elementPosition = element.getBoundingClientRect();
-  const scrollTopFirefox = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').parent().scrollTop(); // works only on firefox
-  const scrolltop = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').scrollTop() || scrollTopFirefox;
+  const outerdocbody = $('iframe[name="ace_outer"]').contents().find('#outerdocbody');
+  const scrolltop = (outerdocbody.scrollTop() ||
+                     // Works only on Firefox:
+                     outerdocbody.parent().scrollTop());
   // position relative to the current viewport
   const elementPositionTopOnViewport = elementPosition.top - scrolltop;
   const elementPositionBottomOnViewport = elementPosition.bottom - scrolltop;
 
-  const $ace_outer = $('iframe[name="ace_outer"]');
-  const ace_outerHeight = $ace_outer.height();
-  const ace_outerPaddingTop = this.getIntValueOfCSSProperty($ace_outer, 'padding-top');
+  const $aceOuter = $('iframe[name="ace_outer"]');
+  const aceOuterHeight = $aceOuter.height();
+  const aceOuterPaddingTop = this.getIntValueOfCSSProperty($aceOuter, 'padding-top');
 
-  const clientHeight = ace_outerHeight - ace_outerPaddingTop;
+  const clientHeight = aceOuterHeight - aceOuterPaddingTop;
 
   const elementAboveViewportTop = elementPositionTopOnViewport < 0;
   const elementBelowViewportBottom = elementPositionBottomOnViewport > clientHeight;
@@ -890,7 +899,8 @@ EpComments.prototype.getFirstElementSelected = function () {
 
 // Indicates if user selected some text on editor
 EpComments.prototype.checkNoTextSelected = function (rep) {
-  const noTextSelected = ((rep.selStart[0] == rep.selEnd[0]) && (rep.selStart[1] == rep.selEnd[1]));
+  const noTextSelected = ((rep.selStart[0] === rep.selEnd[0]) &&
+                          (rep.selStart[1] === rep.selEnd[1]));
 
   return noTextSelected;
 };
@@ -1009,7 +1019,8 @@ EpComments.prototype.saveComment = function (data, rep) {
   });
 };
 
-// commentData = {c-newCommentId123: data:{author:..., date:..., ...}, c-newCommentId124: data:{...}}
+// commentData = {c-newCommentId123: data:{author:..., date:..., ...},
+//                c-newCommentId124: data:{...}}
 EpComments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
   const data = this.buildComments(commentData);
   this.socket.emit('bulkAddComment', padId, data, (comments) => {
@@ -1019,7 +1030,8 @@ EpComments.prototype.saveCommentWithoutSelection = function (padId, commentData)
 };
 
 EpComments.prototype.buildComments = function (commentsData) {
-  const comments = _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
+  const comments =
+    _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
   return comments;
 };
 
@@ -1156,14 +1168,11 @@ EpComments.prototype.pushComment = function (eventType, callback) {
   });
 
   // On collaborator add a comment in the current pad
-  if (eventType == 'add') {
+  if (eventType === 'add') {
     socket.on('pushAddComment', (commentId, comment) => {
       callback(commentId, comment);
     });
-  }
-
-  // On reply
-  else if (eventType == 'addCommentReply') {
+  } else if (eventType === 'addCommentReply') {
     socket.on('pushAddCommentReply', (replyId, reply) => {
       callback(replyId, reply);
     });
@@ -1177,7 +1186,7 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 const hooks = {
 
   // Init pad comments
-  postAceInit(hookName, context, cb) {
+  postAceInit: (hookName, context, cb) => {
     if (!pad.plugins) pad.plugins = {};
     const Comments = new EpComments(context);
     pad.plugins.ep_comments_page = Comments;
@@ -1185,7 +1194,8 @@ const hooks = {
     if (!$('#editorcontainerbox').hasClass('flex-layout')) {
       $.gritter.add({
         title: 'Error',
-        text: 'Ep_comments_page: Please upgrade to etherpad 1.8.3 for this plugin to work correctly',
+        text: 'Ep_comments_page: Please upgrade to etherpad 1.8.3 ' +
+            'for this plugin to work correctly',
         sticky: true,
         class_name: 'error',
       });
@@ -1193,7 +1203,7 @@ const hooks = {
     return cb();
   },
 
-  postToolbarInit(hookName, args, cb) {
+  postToolbarInit: (hookName, args, cb) => {
     const editbar = args.toolbar;
 
     editbar.registerCommand('addComment', () => {
@@ -1202,7 +1212,7 @@ const hooks = {
     return cb();
   },
 
-  aceEditEvent(hookName, context, cb) {
+  aceEditEvent: (hookName, context, cb) => {
     if (!pad.plugins) pad.plugins = {};
     // first check if some text is being marked/unmarked to add comment to it
     const eventType = context.callstack.editEvent.eventType;
@@ -1212,7 +1222,7 @@ const hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    if (eventType == 'setup' || eventType == 'setBaseText' || eventType == 'importText') return cb();
+    if (['setup', 'setBaseText', 'importText'].includes(eventType)) return cb();
 
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.setYofComments();
@@ -1222,7 +1232,8 @@ const hooks = {
     if (pad.plugins.ep_comments_page) {
       const commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
       const domClean = context.callstack.domClean;
-      // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class 'c-123'
+      // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class
+      // 'c-123'
       if (commentWasPasted && domClean) {
         pad.plugins.ep_comments_page.collectComments(() => {
           pad.plugins.ep_comments_page.collectCommentReplies();
@@ -1234,7 +1245,7 @@ const hooks = {
   },
 
   // Insert comments classes
-  aceAttribsToClasses(hookName, context, cb) {
+  aceAttribsToClasses: (hookName, context, cb) => {
     if (context.key === 'comment' && context.value !== 'comment-deleted') {
       return cb(['comment', context.value]);
     }
@@ -1245,10 +1256,7 @@ const hooks = {
     return cb();
   },
 
-  aceEditorCSS(hookName, context, cb) {
-    return cb(cssFiles);
-  },
-
+  aceEditorCSS: (hookName, context, cb) => cb(cssFiles),
 };
 
 exports.aceEditorCSS = hooks.aceEditorCSS;
@@ -1345,10 +1353,11 @@ const getRepFromSelector = function (selector, container) {
 };
 
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
-exports.aceInitialized = function (hookName, context, cb) {
+exports.aceInitialized = (hookName, context, cb) => {
   const editorInfo = context.editorInfo;
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
-  editorInfo.ace_getCommentIdOnFirstPositionSelected = _(getCommentIdOnFirstPositionSelected).bind(context);
+  editorInfo.ace_getCommentIdOnFirstPositionSelected =
+    _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
   return cb();
 };

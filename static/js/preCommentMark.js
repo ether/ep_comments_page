@@ -95,8 +95,6 @@ preCommentMarker.prototype.removeMarks = function (editorInfo, rep, callstack) {
 };
 
 // we do nothing on callWithAce; actions will be handled on aceEditEvent
-const doNothing = function () {};
+const doNothing = () => {};
 
-exports.init = function (ace) {
-  return new preCommentMarker(ace);
-};
+exports.init = (ace) => new preCommentMarker(ace);

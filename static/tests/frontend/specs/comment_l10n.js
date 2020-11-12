@@ -23,7 +23,8 @@ describe('ep_comments_page - Comment Localization', function () {
 
       // get the title of the comment
       const $changeToLabel = outer$('.comment-suggest').first();
-      expect($changeToLabel.text()).to.be('                                  Include suggested change             ');
+      expect($changeToLabel.text()).to.be(
+          '                                  Include suggested change             ');
 
       done();
     });
@@ -96,7 +97,7 @@ describe('ep_comments_page - Comment Localization', function () {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    helper.waitFor(() => getCommentId() !== null)
+    helper.waitFor(() => getCommentId() != null)
         .done(callback);
   };
 
@@ -120,7 +121,7 @@ describe('ep_comments_page - Comment Localization', function () {
     // hide settings again
     $settingsButton.click();
 
-    helper.waitFor(() => chrome$('.buttonicon-bold').parent()[0].title == boldTitles[lang])
+    helper.waitFor(() => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang])
         .done(callback);
   };
 

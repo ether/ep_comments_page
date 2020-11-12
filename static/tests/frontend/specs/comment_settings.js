@@ -35,7 +35,7 @@ describe('ep_comments_page - Comment settings', function () {
       });
     });
 
-    xit('sidebar comments should not be visible when adding a new comment to a new pad', function (done) {
+    xit('sidebar comments not visible when adding a new comment to a new pad', function (done) {
       this.timeout(60000);
       // force to create a new pad, so validation would be on brand new pads
       helper.newPad(() => {
@@ -61,7 +61,7 @@ describe('ep_comments_page - Comment settings', function () {
 
   /* ********** Helper functions ********** */
 
-  const chooseToShowComments = function (shouldShowComments, callback) {
+  const chooseToShowComments = (shouldShowComments, callback) => {
     const chrome$ = helper.padChrome$;
 
     // click on the settings button to make settings visible
@@ -83,7 +83,7 @@ describe('ep_comments_page - Comment settings', function () {
     callback();
   };
 
-  const createComment = function (callback) {
+  const createComment = (callback) => {
     const inner$ = helper.padInner$;
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
@@ -112,11 +112,11 @@ describe('ep_comments_page - Comment settings', function () {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    helper.waitFor(() => getCommentId() !== null)
+    helper.waitFor(() => getCommentId() != null)
         .done(callback);
   };
 
-  const getCommentId = function () {
+  const getCommentId = () => {
     helper.waitFor(() => {
       const inner$ = helper.padInner$;
       if (inner$) return true;

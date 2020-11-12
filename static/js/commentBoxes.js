@@ -2,25 +2,23 @@
 
 // Easier access to outter pad
 let padOuter;
-const getPadOuter = function () {
+const getPadOuter = () => {
   padOuter = padOuter || $('iframe[name="ace_outer"]').contents();
   return padOuter;
 };
 
-const getCommentsContainer = function () {
-  return getPadOuter().find('#comments');
-};
+const getCommentsContainer = () => getPadOuter().find('#comments');
 
 /* ***** Public methods: ***** */
 
-const showComment = function (commentId, e) {
+const showComment = (commentId, e) => {
   const commentElm = getCommentsContainer().find(`#${commentId}`);
   commentElm.show();
 
   highlightComment(commentId, e);
 };
 
-const hideComment = function (commentId, hideCommentTitle) {
+const hideComment = (commentId, hideCommentTitle) => {
   const commentElm = getCommentsContainer().find(`#${commentId}`);
   commentElm.removeClass('full-display');
 
@@ -33,12 +31,12 @@ const hideComment = function (commentId, hideCommentTitle) {
   getPadOuter().find('.comment-modal').removeClass('popup-show');
 };
 
-const hideAllComments = function () {
+const hideAllComments = () => {
   getCommentsContainer().find('.sidebar-comment').removeClass('full-display');
   getPadOuter().find('.comment-modal').removeClass('popup-show');
 };
 
-const highlightComment = function (commentId, e, editorComment) {
+const highlightComment = (commentId, e, editorComment) => {
   const container = getCommentsContainer();
   const commentElm = container.find(`#${commentId}`);
   const inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
@@ -55,7 +53,8 @@ const highlightComment = function (commentId, e, editorComment) {
     // now if we apply a class such as mouseover to the editor it will go shitty
     // so what we need to do is add CSS for the specific ID to the document...
     // It's fucked up but that's how we do it..
-    inner.contents().find('head').append(`<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
+    inner.contents().find('head').append(
+        `<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
   } else {
     // make a full copy of the html, including listeners
     const commentElmCloned = commentElm.clone(true, true);
@@ -99,7 +98,7 @@ const highlightComment = function (commentId, e, editorComment) {
 
 // Adjust position of the comment detail on the container, to be on the same
 // height of the pad text associated to the comment, and return the affected element
-const adjustTopOf = function (commentId, baseTop) {
+const adjustTopOf = (commentId, baseTop) => {
   const commentElement = getPadOuter().find(`#${commentId}`);
   commentElement.css('top', `${baseTop}px`);
 
@@ -107,16 +106,17 @@ const adjustTopOf = function (commentId, baseTop) {
 };
 
 // Indicates if comment is on the expected position (baseTop-5)
-const isOnTop = function (commentId, baseTop) {
+const isOnTop = (commentId, baseTop) => {
   const commentElement = getPadOuter().find(`#${commentId}`);
   const expectedTop = `${baseTop}px`;
   return commentElement.css('top') === expectedTop;
 };
 
 // Indicates if event was on one of the elements that does not close comment
-const shouldNotCloseComment = function (e) {
+const shouldNotCloseComment = (e) => {
   // a comment box
-  if ($(e.target).closest('.sidebar-comment').length || $(e.target).closest('.comment-modal').length) { // the comment modal
+  if ($(e.target).closest('.sidebar-comment').length ||
+      $(e.target).closest('.comment-modal').length) { // the comment modal
     return true;
   }
   return false;

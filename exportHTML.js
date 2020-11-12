@@ -4,14 +4,15 @@ const cheerio = require('ep_etherpad-lite/node_modules/cheerio');
 const commentManager = require('./commentManager');
 
 // Add the props to be supported in export
-exports.exportHtmlAdditionalTagsWithData = async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
+exports.exportHtmlAdditionalTagsWithData =
+  async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
 
 // Iterate over pad attributes to find only the comment ones
-function findAllCommentUsedOn(pad) {
+const findAllCommentUsedOn = (pad) => {
   const commentsUsed = [];
   pad.pool.eachAttrib((key, value) => { if (key === 'comment') commentsUsed.push(value); });
   return commentsUsed;
-}
+};
 
 exports.getLineHTMLForExport = async (hookName, context) => {
   // I'm not sure how optimal this is - it will do a database lookup for each line..
@@ -28,7 +29,8 @@ exports.getLineHTMLForExport = async (hookName, context) => {
     context.lineContent = $.html();
 
     // Replace data-comment="foo" with class="comment foo".
-    context.lineContent = context.lineContent.replace(/data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, 'class="comment $1"');
+    context.lineContent = context.lineContent.replace(
+        /data-comment=["|'](c-[0-9a-zA-Z]+)["|']/gi, 'class="comment $1"');
   });
 };
 

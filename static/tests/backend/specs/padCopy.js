@@ -71,7 +71,8 @@ describe('padCopy hook', function () {
 });
 
 const copyPad = function (originalPadID, copiedPadID, callback) {
-  const copyPadRoute = `/api/1.2.9/copyPad?apikey=${apiKey}&sourceID=${originalPadID}&destinationID=${copiedPadID}`;
+  const copyPadRoute =
+    `/api/1.2.9/copyPad?apikey=${apiKey}&sourceID=${originalPadID}&destinationID=${copiedPadID}`;
   api.get(copyPadRoute).end((err, res) => {
     if (err || res.body.code !== 0) {
       throw (err || res.body.message || `unknown error while calling API route ${copyPadRoute}`);

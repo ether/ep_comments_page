@@ -152,7 +152,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
       $submittButton.click();
 
       // wait until comment is created and comment id is set
-      helper.waitFor(() => getCommentId() !== null).done(cb);
+      helper.waitFor(() => getCommentId() != null).done(cb);
     });
 
     it('unmarks text', function (done) {
@@ -190,7 +190,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
   });
 
   /* ********** Helper functions ********** */
-  const createPadWithTwoLines = function (callback) {
+  const createPadWithTwoLines = (callback) => {
     const inner$ = helper.padInner$;
 
     // replace the first text element of pad with two lines
@@ -204,7 +204,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     }).done(callback);
   };
 
-  const selectLineAndOpenCommentForm = function (lineNumber, callback) {
+  const selectLineAndOpenCommentForm = (lineNumber, callback) => {
     const chrome$ = helper.padChrome$;
 
     // select first line to add comment to
@@ -218,7 +218,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     callback();
   };
 
-  const getCommentId = function () {
+  const getCommentId = () => {
     const inner$ = helper.padInner$;
     const comment = inner$('.comment').first();
     const cls = comment.attr('class');
@@ -228,7 +228,7 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     return commentId;
   };
 
-  const getLine = function (lineNumber) {
+  const getLine = (lineNumber) => {
     const inner$ = helper.padInner$;
     let line = inner$('div').first();
     for (let i = lineNumber - 1; i >= 0; i--) {
@@ -237,7 +237,5 @@ describe('ep_comments_page - Pre-comment text mark', function () {
     return line;
   };
 
-  const textHighlightIsDisabled = function () {
-    return !helper.padChrome$.window.clientVars.highlightSelectedText;
-  };
+  const textHighlightIsDisabled = () => !helper.padChrome$.window.clientVars.highlightSelectedText;
 });

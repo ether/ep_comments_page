@@ -11,9 +11,9 @@ describe('ep_comments_page - Comment Suggestion', function () {
     const chrome$ = helper.padChrome$;
 
     // As in the function openCommentFormWithSuggestion we send all the text and call 'selectall',
-    // we select the beginning of line as well. This situation does not happen in the browser, it's not possible
-    // to select the beginning of first line of a selection. To fix this we add a first text without line attribute,
-    // in this case  a <span>, to avoid select a '*'
+    // we select the beginning of line as well. This situation does not happen in the browser, it's
+    // not possible to select the beginning of first line of a selection. To fix this we add a first
+    // text without line attribute, in this case a <span>, to avoid select a '*'
     const targetText = '<span>A</span><ul><li> text with</li><li> line attributes</li></ul>';
 
     openCommentFormWithSuggestion(targetText);
@@ -22,7 +22,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
     done();
   });
 
-  it('Fills suggestion Change From field when canceling and trying again to add comment with suggestion', function (done) {
+  it('Cancel suggestion and try again fills suggestion Change From field', function (done) {
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
 
@@ -78,7 +78,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
   });
 });
 
-function openCommentFormWithSuggestion(targetText) {
+const openCommentFormWithSuggestion = (targetText) => {
   const inner$ = helper.padInner$;
   const chrome$ = helper.padChrome$;
 
@@ -92,7 +92,8 @@ function openCommentFormWithSuggestion(targetText) {
   // at the same line. The sendkeys will be run before the line break.
   $firstTextElement.html(targetText).sendkeys('{selectall}');
   chrome$('.addComment').first().click();
-  helper.waitFor(() => chrome$('#newComment.popup-show').find('.suggestion-checkbox').length).done(() => {
-    chrome$('#newComment.popup-show').find('.suggestion-checkbox').first().click();
-  });
-}
+  helper.waitFor(() => chrome$('#newComment.popup-show').find('.suggestion-checkbox').length)
+      .done(() => {
+        chrome$('#newComment.popup-show').find('.suggestion-checkbox').first().click();
+      });
+};

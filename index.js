@@ -10,9 +10,7 @@ const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
 
-exports.exportEtherpadAdditionalContent = function (hookName, context, callback) {
-  return callback(['comments']);
-};
+exports.exportEtherpadAdditionalContent = (hookName, context, callback) => callback(['comments']);
 
 exports.padRemove = async (hookName, context) => {
   await Promise.all([
@@ -28,7 +26,7 @@ exports.padCopy = async (hookName, context) => {
   ]);
 };
 
-exports.handleMessageSecurity = function (hookName, context, callback) {
+exports.handleMessageSecurity = (hookName, context, callback) => {
   const {message: {data: {apool} = {}} = {}} = context;
   if (apool && apool[0] && apool[0][0] === 'comment') {
     // Comment change, allow it to override readonly security model!!
@@ -37,7 +35,7 @@ exports.handleMessageSecurity = function (hookName, context, callback) {
   return callback();
 };
 
-exports.socketio = function (hookName, args, cb) {
+exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
   io.on('connection', (socket) => {
     // Join the rooms
@@ -129,17 +127,17 @@ exports.socketio = function (hookName, args, cb) {
   return cb();
 };
 
-exports.eejsBlock_dd_insert = function (hookName, args, cb) {
+exports.eejsBlock_dd_insert = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/menuButtons.ejs');
   return cb();
 };
 
-exports.eejsBlock_mySettings = function (hookName, args, cb) {
+exports.eejsBlock_mySettings = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/settings.ejs');
   return cb();
 };
 
-exports.padInitToolbar = function (hookName, args) {
+exports.padInitToolbar = (hookName, args) => {
   const toolbar = args.toolbar;
 
   const button = toolbar.button({
@@ -151,7 +149,7 @@ exports.padInitToolbar = function (hookName, args) {
   toolbar.registerButton('addComment', button);
 };
 
-exports.eejsBlock_editbarMenuLeft = function (hookName, args, cb) {
+exports.eejsBlock_editbarMenuLeft = (hookName, args, cb) => {
   // check if custom button is used
   if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1) {
     return cb();
@@ -160,27 +158,29 @@ exports.eejsBlock_editbarMenuLeft = function (hookName, args, cb) {
   return cb();
 };
 
-exports.eejsBlock_scripts = function (hookName, args, cb) {
+exports.eejsBlock_scripts = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/comments.html');
   args.content += eejs.require('ep_comments_page/templates/commentIcons.html');
   return cb();
 };
 
-exports.eejsBlock_styles = function (hookName, args, cb) {
+exports.eejsBlock_styles = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/styles.html');
   return cb();
 };
 
-exports.clientVars = function (hook, context, cb) {
-  const displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
-  const highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+exports.clientVars = (hook, context, cb) => {
+  const displayCommentAsIcon =
+    settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
+  const highlightSelectedText =
+    settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
   return cb({
     displayCommentAsIcon,
     highlightSelectedText,
   });
 };
 
-exports.expressCreateServer = function (hookName, args, callback) {
+exports.expressCreateServer = (hookName, args, callback) => {
   args.app.get('/p/:pad/:rev?/comments', async (req, res) => {
     const fields = req.query;
     // check the api key

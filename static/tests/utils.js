@@ -68,10 +68,10 @@ const createComment = function (pad, commentData, done) {
       (error, res, body) => {
         if (error) {
           throw error;
-        } else if (res.statusCode != 200) {
+        } else if (res.statusCode !== 200) {
           throw new Error(`Failed on calling API. Status code: ${res.statusCode}`);
         } else {
-          json = JSON.parse(body);
+          const json = JSON.parse(body);
           if (json.code !== 0) {
             throw new Error(`Failed on calling API. Response was: ${res.body}`);
           }
@@ -98,10 +98,10 @@ const createCommentReply = function (pad, comment, replyData, done) {
       (error, res, body) => {
         if (error) {
           throw error;
-        } else if (res.statusCode != 200) {
+        } else if (res.statusCode !== 200) {
           throw new Error(`Failed on calling API. Status code: ${res.statusCode}`);
         } else {
-          json = JSON.parse(body);
+          const json = JSON.parse(body);
           if (json.code !== 0) {
             throw new Error(`Failed on calling API. Response was: ${res.body}`);
           }

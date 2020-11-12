@@ -23,15 +23,14 @@ describe(__filename, function () {
           .expect('Content-Type', /json/);
     });
 
-    it('imports .etherpad incuding a comment', function (done) {
-      api.post(`/p/${testPadId}/import`)
+    it('imports .etherpad incuding a comment', async function () {
+      await api.post(`/p/${testPadId}/import`)
           .attach('file', etherpadDoc, {
             filename: '/test.etherpad',
             contentType: 'application/etherpad',
           })
           .expect(200)
-          .expect(/FrameCall\('true', 'ok'\);/)
-          .then(() => done());
+          .expect(/FrameCall\('true', 'ok'\);/);
     });
 
     it('exports .etherpad and checks it includes comments', async function () {

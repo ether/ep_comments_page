@@ -54,7 +54,9 @@ describe('get comments API', function () {
         // ... and finally checks if comments are returned
         api.get(listCommentsEndPointFor(padID, apiKey))
             .expect((res) => {
-              if (res.body.data.comments === undefined) throw new Error('Response should have list of comments.');
+              if (res.body.data.comments === undefined) {
+                throw new Error('Response should have list of comments.');
+              }
               const commentIds = Object.keys(res.body.data.comments);
               if (commentIds.length !== 2) throw new Error('Response should have two comments.');
             })
@@ -80,11 +82,24 @@ describe('get comments API', function () {
       api.get(listCommentsEndPointFor(padID, apiKey))
           .expect((res) => {
             const commentData = res.body.data.comments[commentId];
-            if (commentData.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${commentData.name}`);
-            if (commentData.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${commentData.text}`);
-            if (commentData.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${commentData.timestamp}`);
-            if (commentData.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${commentData.changeTo}`);
-            if (commentData.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${commentData.changeFrom}`);
+            if (commentData.name !== name) {
+              throw new Error(`Wrong name. Expected: ${name}, got: ${commentData.name}`);
+            }
+            if (commentData.text !== text) {
+              throw new Error(`Wrong text. Expected: ${text}, got: ${commentData.text}`);
+            }
+            if (commentData.timestamp !== timestamp) {
+              throw new Error(`Wrong timestamp. Expected: ${timestamp}, ` +
+                              `got: ${commentData.timestamp}`);
+            }
+            if (commentData.changeTo !== changeTo) {
+              throw new Error(`Wrong changeTo. Expected: ${changeTo}, ` +
+                              `got: ${commentData.changeTo}`);
+            }
+            if (commentData.changeFrom !== changeFrom) {
+              throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, ` +
+                              `got: ${commentData.changeFrom}`);
+            }
           })
           .end(done);
     });
@@ -99,7 +114,10 @@ describe('get comments API', function () {
               api.get(listCommentsEndPointFor(roPadId, apiKey))
                   .expect((res) => {
                     const roData = JSON.stringify(res.body.data);
-                    if (roData != rwData) throw new Error(`Read-only and read-write data don't match. Read-only data: ${roData}, read-write data: ${rwData}`);
+                    if (roData !== rwData) {
+                      throw new Error("Read-only and read-write data don't match. " +
+                                      `Read-only data: ${roData}, read-write data: ${rwData}`);
+                    }
                   })
                   .end(done);
             });
@@ -168,8 +186,12 @@ describe('create comments API', function () {
         .field('apikey', apiKey)
         .field('data', twoComments)
         .expect((res) => {
-          if (res.body.commentIds === undefined) throw new Error('Response should have commentIds.');
-          if (res.body.commentIds.length !== 2) throw new Error('Response should have two comment ids.');
+          if (res.body.commentIds === undefined) {
+            throw new Error('Response should have commentIds.');
+          }
+          if (res.body.commentIds.length !== 2) {
+            throw new Error('Response should have two comment ids.');
+          }
         })
         .end(done);
   });
@@ -182,8 +204,12 @@ describe('create comments API', function () {
             .field('apikey', apiKey)
             .field('data', twoComments)
             .expect((res) => {
-              if (res.body.commentIds === undefined) throw new Error('Response should have commentIds.');
-              if (res.body.commentIds.length !== 2) throw new Error('Response should have two comment ids.');
+              if (res.body.commentIds === undefined) {
+                throw new Error('Response should have commentIds.');
+              }
+              if (res.body.commentIds.length !== 2) {
+                throw new Error('Response should have two comment ids.');
+              }
             })
             .end(done);
       });
@@ -210,7 +236,8 @@ describe('create comment API broadcast', function () {
       // ... and listens to the broadcast message:
       socket = io.connect(`${appUrl}/comment`);
       const req = {padId: padID};
-      // needs to get comments to be able to join the pad room, where the messages will be broadcast to:
+      // needs to get comments to be able to join the pad room, where the messages will be broadcast
+      // to:
       socket.emit('getComments', req, (res) => {
         socket.on('pushAddComment', (data) => {
           ++timesMessageWasReceived;
@@ -256,7 +283,9 @@ describe('create comment API broadcast', function () {
         if (!commentId) throw new Error('Comment should had been created');
 
         setTimeout(() => { // give it some time to process the message on the client
-          if (timesMessageWasReceived !== 0) throw new Error(`Message should had been received only for pad ${padID}`);
+          if (timesMessageWasReceived !== 0) {
+            throw new Error(`Message should had been received only for pad ${padID}`);
+          }
           done();
         }, 100);
       });

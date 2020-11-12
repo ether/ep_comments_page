@@ -4,7 +4,7 @@ const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
 
 // Create a comment object with data filled on the given form
-const buildCommentFrom = function (form) {
+const buildCommentFrom = (form) => {
   const text = form.find('.comment-content').val();
   const changeFrom = form.find('.from-value').text();
   const changeTo = form.find('.to-value').val() || null;
@@ -20,12 +20,12 @@ const buildCommentFrom = function (form) {
 };
 
 // Callback for new comment Cancel
-const cancelNewComment = function () {
+const cancelNewComment = () => {
   hideNewCommentPopup();
 };
 
 // Callback for new comment Submit
-const submitNewComment = function (callback) {
+const submitNewComment = (callback) => {
   const index = 0;
   const form = $('#newComment');
   const comment = buildCommentFrom(form);
@@ -34,15 +34,15 @@ const submitNewComment = function (callback) {
     hideNewCommentPopup();
     callback(comment, index);
   } else {
-    if (comment.text.length == 0) form.find('.comment-content').addClass('error');
-    if (comment.changeTo && comment.changeTo.length == 0) form.find('.to-value').addClass('error');
+    if (comment.text.length === 0) form.find('.comment-content').addClass('error');
+    if (comment.changeTo && comment.changeTo.length === 0) form.find('.to-value').addClass('error');
   }
   return false;
 };
 
 /* ***** Public methods: ***** */
 
-const localizenewCommentPopup = function () {
+const localizenewCommentPopup = () => {
   const newCommentPopup = $('#newComment');
   if (newCommentPopup.length !== 0) commentL10n.localize(newCommentPopup);
 };
@@ -75,7 +75,7 @@ const insertNewCommentPopupIfDontExist = function (comment, callback) {
   return newCommentPopup;
 };
 
-const showNewCommentPopup = function () {
+const showNewCommentPopup = () => {
   // position below comment icon
   $('#newComment').css('left', $('.toolbar .addComment').offset().left);
 
@@ -91,7 +91,7 @@ const showNewCommentPopup = function () {
   pad.plugins.ep_comments_page.preCommentMarker.markSelectedText();
 };
 
-const hideNewCommentPopup = function () {
+const hideNewCommentPopup = () => {
   $('#newComment').removeClass('popup-show');
 
   // force focus to be lost, so virtual keyboard is hidden on mobile devices

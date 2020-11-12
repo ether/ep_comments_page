@@ -33,7 +33,8 @@ describe('padRemove hook', function () {
             .expect((res) => {
               const commentsFound = Object.keys(res.body.data.comments);
               if (commentsFound.length !== 0) {
-                throw new Error(`Comments from pad should had been removed. Found ${commentsFound.length} comment(s)`);
+                throw new Error('Comments from pad should had been removed. ' +
+                                `Found ${commentsFound.length} comment(s)`);
               }
             })
             .end(done);
@@ -58,7 +59,8 @@ describe('padRemove hook', function () {
               .expect((res) => {
                 const repliesFound = Object.keys(res.body.data.replies);
                 if (repliesFound.length !== 0) {
-                  throw new Error(`Comment replies from pad should had been removed. Found ${repliesFound.length} reply(ies)`);
+                  throw new Error('Comment replies from pad should had been removed. ' +
+                                  `Found ${repliesFound.length} reply(ies)`);
                 }
               })
               .end(done);

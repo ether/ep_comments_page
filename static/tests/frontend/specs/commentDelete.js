@@ -155,7 +155,7 @@ ep_comments_page_test_helper.commentDelete = {
   },
   createdCommentOnLine(line, cb) {
     const self = this;
-    helper.waitFor(() => self.getCommentIdOfLine(line) !== null).done(cb);
+    helper.waitFor(() => self.getCommentIdOfLine(line) != null).done(cb);
   },
   getCommentIdOfLine(line) {
     const $line = this.getLine(line);

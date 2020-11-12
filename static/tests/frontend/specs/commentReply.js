@@ -56,7 +56,8 @@ describe('ep_comments_page - Comment Reply', function () {
       const outer$ = helper.padOuter$;
 
       // click to accept suggested change of the reply
-      const $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']")[0];
+      const $replyAcceptChangeButton =
+          outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']")[0];
       $replyAcceptChangeButton.click();
 
       // check the pad text
@@ -72,17 +73,19 @@ describe('ep_comments_page - Comment Reply', function () {
     });
   });
 
-  xit('Replaces the original text with reply suggestion after replacing original text with comment suggestion', function (done) {
+  xit('Replaces orig with reply sugg. after replacing orig with comment sugg.', function (done) {
     createReply(true, () => {
       const inner$ = helper.padInner$;
       const outer$ = helper.padOuter$;
 
       // click to accept suggested change of the original comment
-      const $commentAcceptChangeButton = outer$(".sidebar-comment .comment-changeTo-form input[type='submit']").first();
+      const $commentAcceptChangeButton =
+          outer$(".sidebar-comment .comment-changeTo-form input[type='submit']").first();
       $commentAcceptChangeButton.click();
 
       // click to accept suggested change of the reply
-      const $replyAcceptChangeButton = outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']");
+      const $replyAcceptChangeButton =
+          outer$(".sidebar-comment-reply .comment-changeTo-form input[type='submit']");
       $replyAcceptChangeButton.click();
 
       // check the pad text
@@ -93,7 +96,7 @@ describe('ep_comments_page - Comment Reply', function () {
     });
   });
 
-  const createComment = function (callback) {
+  const createComment = (callback) => {
     const inner$ = helper.padInner$;
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
@@ -122,11 +125,11 @@ describe('ep_comments_page - Comment Reply', function () {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    helper.waitFor(() => getCommentId() !== null)
+    helper.waitFor(() => getCommentId() != null)
         .done(callback);
   };
 
-  const createReply = function (withSuggestion, callback) {
+  const createReply = (withSuggestion, callback) => {
     const outer$ = helper.padOuter$;
     const commentId = getCommentId();
     const existingReplies = outer$('.sidebar-comment-reply').length;
@@ -162,7 +165,7 @@ describe('ep_comments_page - Comment Reply', function () {
         .done(callback);
   };
 
-  const getCommentId = function () {
+  const getCommentId = () => {
     helper.waitFor(() => {
       const inner$ = helper.padInner$;
       if (inner$) return true;
@@ -176,7 +179,7 @@ describe('ep_comments_page - Comment Reply', function () {
     });
   };
 
-  const chooseToShowComments = function (shouldShowComments, callback) {
+  const chooseToShowComments = (shouldShowComments, callback) => {
     const chrome$ = helper.padChrome$;
 
     // click on the settings button to make settings visible
@@ -193,7 +196,5 @@ describe('ep_comments_page - Comment Reply', function () {
     callback();
   };
 
-  const commentIconsEnabled = function () {
-    return helper.padOuter$('#commentIcons').length > 0;
-  };
+  const commentIconsEnabled = () => helper.padOuter$('#commentIcons').length > 0;
 });

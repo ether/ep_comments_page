@@ -2,7 +2,7 @@
 
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-const collectContentPre = function (hookName, context, cb) {
+const collectContentPre = (hookName, context, cb) => {
   const comment = /(?:^| )(c-[A-Za-z0-9]*)/.exec(context.cls);
   const fakeComment = /(?:^| )(fakecomment-[A-Za-z0-9]*)/.exec(context.cls);
 
@@ -25,7 +25,7 @@ const collectContentPre = function (hookName, context, cb) {
 exports.collectContentPre = collectContentPre;
 
 
-exports.generateCommentId = function () {
+exports.generateCommentId = () => {
   const commentId = `c-${randomString(16)}`;
   return commentId;
 };

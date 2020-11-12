@@ -14,7 +14,7 @@ try {
 
 // Checks if api key is correct and prepare response if it is not.
 // Returns true if valid, false otherwise.
-const validateApiKey = function (fields, res) {
+const validateApiKey = (fields, res) => {
   let valid = true;
 
   const apiKeyReceived = fields.apikey || fields.api_key;
@@ -27,15 +27,13 @@ const validateApiKey = function (fields, res) {
   return valid;
 };
 
-const validateRequiredField = function (originalFields, fieldName) {
-  return (typeof originalFields[fieldName] !== 'undefined');
-};
+const validateRequiredField =
+  (originalFields, fieldName) => typeof originalFields[fieldName] !== 'undefined';
 
 // Checks if required fields are present, and prepare response if any of them
 // is not. Returns true if valid, false otherwise.
-const validateRequiredFields = function (originalFields, requiredFields, res) {
-  for (const i in requiredFields) {
-    const requiredField = requiredFields[i];
+const validateRequiredFields = (originalFields, requiredFields, res) => {
+  for (const requiredField of requiredFields) {
     if (!validateRequiredField(originalFields, requiredField)) {
       const errorMessage = `${requiredField} is required`;
       res.json({code: 1, message: errorMessage, data: null});
@@ -46,7 +44,7 @@ const validateRequiredFields = function (originalFields, requiredFields, res) {
 };
 
 // Sanitizes pad id and returns it:
-const sanitizePadId = function (req) {
+const sanitizePadId = (req) => {
   let padIdReceived = req.params.pad;
   padManager.sanitizePadId(padIdReceived, (padId) => {
     padIdReceived = padId;
@@ -57,7 +55,7 @@ const sanitizePadId = function (req) {
 
 // Builds url for message broadcasting, based on settings.json and on the
 // given endPoint:
-const broadcastUrlFor = function (endPoint) {
+const broadcastUrlFor = (endPoint) => {
   let url = '';
   if (settings.ssl) {
     url += 'https://';

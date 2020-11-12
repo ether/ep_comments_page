@@ -6,7 +6,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
   const FIRST_LINE = 0;
   const SECOND_LINE = 1;
 
-  before(function () {
+  before(async function () {
     helperFunctions = ep_comments_page_test_helper.copyAndPaste;
   });
 
@@ -35,10 +35,12 @@ describe('ep_comments_page - Comment copy and paste', function () {
       const $dataFromGetData = $(dataFromGetData);
       const textCopied = helperFunctions.cleanText($dataFromGetData.text());
 
-      // we create two spans to avoid error on paste on chrome, when we copy only a text without tags
+      // we create two spans to avoid error on paste on chrome, when we copy only a text without
+      // tags
       const hasCopiedSpanTag = $dataFromGetData.filter('span').length === 2;
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       expect(textCopied).to.be('omethin');
@@ -48,7 +50,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('generates a fake comment class', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       const dataFromGetData = event.originalEvent.clipboardData.getData('text/html');
@@ -60,7 +63,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('puts the comment data on the clipboardData', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       const commentDataValues = helperFunctions.getCommentDataValues(event);
@@ -74,7 +78,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('puts the comment reply data on the clipboardData', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       const commentReplyDataValues = helperFunctions.getCommentReplyDataValues(event);
@@ -85,7 +90,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('has the fields required to build a comment', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.testIfHasAllFieldsNecessaryToCreateAComment(event);
@@ -94,7 +100,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('has the fields required to build a comment reply', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.testIfHasAllFieldsNecessaryToCreateACommementReply(event);
@@ -128,7 +135,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('generates a different comment id for the comment pasted', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       const commentIdOriginal = helperFunctions.getCommentIdOfLine(FIRST_LINE);
@@ -136,10 +144,11 @@ describe('ep_comments_page - Comment copy and paste', function () {
       // wait for the new comment to be created
       helper.waitFor(() => {
         commentIdLinePasted = helperFunctions.getCommentIdOfLine(SECOND_LINE);
-        return commentIdLinePasted !== null;
+        return commentIdLinePasted != null;
       }).done(() => {
         // Skip if Edge
-        if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+        if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+            /Edge/.test(navigator.userAgent)) {
           done();
         }
         expect(commentIdLinePasted).to.not.be(commentIdOriginal);
@@ -149,7 +158,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
 
     xit('creates a new icon for the comment pasted', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.finishTestIfIconsAreNotEnabled(done, () => {
@@ -172,9 +182,10 @@ describe('ep_comments_page - Comment copy and paste', function () {
       });
     });
 
-    xit('creates the comment reply text field with the same text of the one copied', function (done) {
+    xit('creates comment reply text field with the same text of the one copied', function (done) {
       // Skip if Edge
-      if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+      if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+          /Edge/.test(navigator.userAgent)) {
         done();
       }
       helperFunctions.createdCommentOnLine(SECOND_LINE, () => {
@@ -187,7 +198,8 @@ describe('ep_comments_page - Comment copy and paste', function () {
     context('when user removes the original comment', function () {
       xit('does not remove the comment pasted', function (done) {
         // Skip if Edge
-        if (document.documentMode || /Safari/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
+        if (document.documentMode || /Safari/.test(navigator.userAgent) ||
+            /Edge/.test(navigator.userAgent)) {
           done();
         }
         helperFunctions.removeCommentFromLine(FIRST_LINE, () => {
@@ -307,7 +319,7 @@ ep_comments_page_test_helper.copyAndPaste = {
   },
   createdCommentOnLine(line, cb) {
     const self = this;
-    helper.waitFor(() => self.getCommentIdOfLine(line) !== null).done(cb);
+    helper.waitFor(() => self.getCommentIdOfLine(line) != null).done(cb);
   },
   copyLine() {
     const chrome$ = helper.padChrome$;
@@ -324,7 +336,7 @@ ep_comments_page_test_helper.copyAndPaste = {
       },
     };
 
-    const event = jQuery.Event('copy');
+    const event = new jQuery.Event('copy');
     const e = {clipboardData: clipboardDataMock};
     event.originalEvent = e;
 
@@ -343,8 +355,8 @@ ep_comments_page_test_helper.copyAndPaste = {
     // so we use "chrome$(inner$("div")[0])" instead of simply "inner$("div)"
     chrome$(inner$('div')[0]).trigger(event);
 
-    // as we can't trigger the paste on browser(chrome) natively using execCommand, we firstly trigger
-    // the event and then insert the html.
+    // as we can't trigger the paste on browser(chrome) natively using execCommand, we firstly
+    // trigger the event and then insert the html.
     this.placeCaretOnLine(line, () => {
       const copiedHTML = event.originalEvent.clipboardData.getData('text/html');
       helper.padInner$.document.execCommand('insertHTML', false, copiedHTML);
@@ -407,7 +419,8 @@ ep_comments_page_test_helper.copyAndPaste = {
     $secondCommentIcon.click();
 
     // check modal is visible
-    const commentPastedText = outer$('#comments .sidebar-comment:visible .comment-text').first().text();
+    const commentPastedText =
+      outer$('#comments .sidebar-comment:visible .comment-text').first().text();
     return commentPastedText;
   },
   getTextOfCommentReplyFromLine(line) {
@@ -415,7 +428,8 @@ ep_comments_page_test_helper.copyAndPaste = {
     const $secondCommentIcon = outer$(`#commentIcons #icon-${this.getCommentIdOfLine(line)}`);
     $secondCommentIcon.click();
 
-    const commentPastedText = outer$(`#${this.getCommentIdOfLine(line)} .comment-reply .comment-text`).text();
+    const commentPastedText =
+      outer$(`#${this.getCommentIdOfLine(line)} .comment-reply .comment-text`).text();
     return commentPastedText;
   },
   finishTestIfIconsAreNotEnabled(done, theTest) {
@@ -429,13 +443,32 @@ ep_comments_page_test_helper.copyAndPaste = {
   testIfHasAllFieldsNecessaryToCreateACommementReply(event) {
     const commentReplyDataValues = this.getCommentReplyDataValues(event);
     const keys = _.keys(commentReplyDataValues);
-    const keysRequired = ['commentId', 'text', 'changeTo', 'changeFrom', 'author', 'name', 'timestamp', 'replyId', 'formattedDate'];
+    const keysRequired = [
+      'commentId',
+      'text',
+      'changeTo',
+      'changeFrom',
+      'author',
+      'name',
+      'timestamp',
+      'replyId',
+      'formattedDate',
+    ];
     this.checkIfHasAllKeys(keysRequired, keys);
   },
   testIfHasAllFieldsNecessaryToCreateAComment(event) {
     const commentDataValues = this.getCommentDataValues(event);
     const keys = _.keys(commentDataValues);
-    const keysRequired = ['author', 'name', 'text', 'timestamp', 'commentId', 'date', 'formattedDate', 'originalCommentId'];
+    const keysRequired = [
+      'author',
+      'name',
+      'text',
+      'timestamp',
+      'commentId',
+      'date',
+      'formattedDate',
+      'originalCommentId',
+    ];
     this.checkIfHasAllKeys(keysRequired, keys);
   },
   checkIfHasAllKeys(keysRequired, keys) {
