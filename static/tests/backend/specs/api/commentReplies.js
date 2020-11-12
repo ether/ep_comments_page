@@ -79,13 +79,13 @@ describe('get comments replies', function () {
       createCommentReply(padID, comment, data, (err, replyId) => {
         api.get(listCommentRepliesEndPointFor(padID, apiKey))
             .expect((res) => {
-              const comment_reply_data = res.body.data.replies[replyId];
-              if (comment_reply_data.commentId != comment) throw new Error(`Wrong commentId. Expected: ${comment}, got: ${comment_reply_data.commentId}`);
-              if (comment_reply_data.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${comment_reply_data.text}`);
-              if (comment_reply_data.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${comment_reply_data.changeTo}`);
-              if (comment_reply_data.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${comment_reply_data.changeFrom}`);
-              if (comment_reply_data.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${comment_reply_data.name}`);
-              if (comment_reply_data.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${comment_reply_data.timestamp}`);
+              const commentReplyData = res.body.data.replies[replyId];
+              if (commentReplyData.commentId != comment) throw new Error(`Wrong commentId. Expected: ${comment}, got: ${commentReplyData.commentId}`);
+              if (commentReplyData.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${commentReplyData.text}`);
+              if (commentReplyData.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${commentReplyData.changeTo}`);
+              if (commentReplyData.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${commentReplyData.changeFrom}`);
+              if (commentReplyData.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${commentReplyData.name}`);
+              if (commentReplyData.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${commentReplyData.timestamp}`);
             }).end(done);
       });
     });

@@ -79,12 +79,12 @@ describe('get comments API', function () {
     createComment(padID, data, (err, commentId) => {
       api.get(listCommentsEndPointFor(padID, apiKey))
           .expect((res) => {
-            const comment_data = res.body.data.comments[commentId];
-            if (comment_data.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${comment_data.name}`);
-            if (comment_data.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${comment_data.text}`);
-            if (comment_data.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${comment_data.timestamp}`);
-            if (comment_data.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${comment_data.changeTo}`);
-            if (comment_data.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${comment_data.changeFrom}`);
+            const commentData = res.body.data.comments[commentId];
+            if (commentData.name != name) throw new Error(`Wrong name. Expected: ${name}, got: ${commentData.name}`);
+            if (commentData.text != text) throw new Error(`Wrong text. Expected: ${text}, got: ${commentData.text}`);
+            if (commentData.timestamp != timestamp) throw new Error(`Wrong timestamp. Expected: ${timestamp}, got: ${commentData.timestamp}`);
+            if (commentData.changeTo != changeTo) throw new Error(`Wrong changeTo. Expected: ${changeTo}, got: ${commentData.changeTo}`);
+            if (commentData.changeFrom != changeFrom) throw new Error(`Wrong changeFrom. Expected: ${changeFrom}, got: ${commentData.changeFrom}`);
           })
           .end(done);
     });
