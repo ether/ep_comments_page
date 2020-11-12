@@ -391,8 +391,7 @@ EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
   window.setTimeout(function () {
     self.collectComments();
 
-    let countComments = 0;
-    for (const key of Object.keys(self.comments)) { countComments++; }
+    const countComments = Object.keys(self.comments).length;
     const padOuter = $('iframe[name="ace_outer"]').contents();
     this.padOuter = padOuter;
     this.padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -400,14 +399,12 @@ EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
     if (countComments > padComment.length) {
       window.setTimeout(function () {
         self.collectComments();
-        let countComments = 0;
-        for (const key of Object.keys(self.comments)) { countComments++; }
+        const countComments = Object.keys(self.comments).length;
         const padComment = this.padInner.contents().find('.comment');
         if (countComments > padComment.length) {
           window.setTimeout(function () {
             self.collectComments();
-            let countComments = 0;
-            for (const key of Object.keys(self.comments)) { countComments++; }
+            const countComments = Object.keys(self.comments).length;
             const padComment = this.padInner.contents().find('.comment');
             if (countComments > padComment.length) {
               window.setTimeout(() => {
