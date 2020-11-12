@@ -344,26 +344,12 @@ EpComments.prototype.init = function () {
   }
 
   $('#options-comments').on('change', () => {
-    if ($('#options-comments').is(':checked')) {
-      enableComments();
-    } else {
-      disableComments();
-    }
+    const checked = $('#options-comments').is(':checked');
+    padcookie.setPref('comments', checked);
+    this.padOuter.find('#comments, #commentIcons').toggleClass('active', checked);
+    $('body').toggleClass('comments-active', checked);
+    $('iframe[name="ace_outer"]').contents().find('body').toggleClass('comments-active', checked);
   });
-
-  const enableComments = () => {
-    padcookie.setPref('comments', true);
-    this.padOuter.find('#comments, #commentIcons').addClass('active');
-    $('body').addClass('comments-active');
-    $('iframe[name="ace_outer"]').contents().find('body').addClass('comments-active');
-  };
-
-  const disableComments = () => {
-    padcookie.setPref('comments', false);
-    this.padOuter.find('#comments, #commentIcons').removeClass('active');
-    $('body').removeClass('comments-active');
-    $('iframe[name="ace_outer"]').contents().find('body').removeClass('comments-active');
-  };
 
   // Check to see if we should show already..
   $('#options-comments').trigger('change');
