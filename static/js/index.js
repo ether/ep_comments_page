@@ -582,10 +582,12 @@ EpComments.prototype.insertContainers = function () {
   const target = $('iframe[name="ace_outer"]').contents().find('#outerdocbody');
 
   // Create hover modal
-  target.prepend('<div class="comment-modal popup"><div class="popup-content comment-modal-comment"></div></div>');
+  target.prepend(
+      $('<div>').addClass('comment-modal popup').append(
+          $('<div>').addClass('popup-content comment-modal-comment')));
 
   // Add comments side bar container
-  target.prepend('<div id="comments"></div>');
+  target.prepend($('<div>').attr('id', 'comments'));
 
   this.container = this.padOuter.find('#comments');
 };
