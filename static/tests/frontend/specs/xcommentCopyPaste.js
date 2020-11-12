@@ -277,7 +277,6 @@ ep_comments_page_test_helper.copyAndPaste = {
     return helper.padOuter$('#commentIcons').length > 0;
   },
   addCommentToLine(line, textOfComment, callback) {
-    const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
     const $line = this.getLine(line);
     $line.sendkeys('{selectall}'); // needs to select content to add comment to

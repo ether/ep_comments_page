@@ -8,7 +8,6 @@ describe('ep_comments_page - Comment Suggestion', function () {
   });
 
   it('Fills suggestion Change From field when adding a comment with suggestion', function (done) {
-    const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
 
     // As in the function openCommentFormWithSuggestion we send all the text and call 'selectall',
@@ -81,7 +80,6 @@ describe('ep_comments_page - Comment Suggestion', function () {
 
 function openCommentFormWithSuggestion(targetText) {
   const inner$ = helper.padInner$;
-  const outer$ = helper.padOuter$;
   const chrome$ = helper.padChrome$;
 
   // get the first text element out of the inner iframe

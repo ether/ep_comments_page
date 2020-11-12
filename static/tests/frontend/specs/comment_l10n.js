@@ -19,9 +19,7 @@ describe('ep_comments_page - Comment Localization', function () {
 
   it('uses default values when language was not localized yet', function (done) {
     changeEtherpadLanguageTo('oc', () => {
-      const chrome$ = helper.padChrome$;
       const outer$ = helper.padOuter$;
-      const commentId = getCommentId();
 
       // get the title of the comment
       const $changeToLabel = outer$('.comment-suggest').first();
@@ -33,7 +31,6 @@ describe('ep_comments_page - Comment Localization', function () {
 
   it('localizes comment when Etherpad language is changed', function (done) {
     changeEtherpadLanguageTo('pt-br', () => {
-      const chrome$ = helper.padChrome$;
       const outer$ = helper.padOuter$;
       const commentId = getCommentId();
 

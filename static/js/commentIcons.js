@@ -48,7 +48,7 @@ var highlightTargetTextOf = function (commentId) {
   getPadInner().find('head').append(`<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
 };
 
-var removeHighlightTargetText = function (commentId) {
+var removeHighlightTargetText = function () {
   getPadInner().find('head .comment-style').remove();
 };
 
@@ -62,7 +62,6 @@ var addListenersToCommentIcons = function () {
     const commentId = targetCommentIdOf(e);
     highlightTargetTextOf(commentId);
   }).on('mouseout', '.comment-icon', (e) => {
-    const commentId = targetCommentIdOf(e);
     removeHighlightTargetText();
   }).on('click', '.comment-icon.active', function (e) {
     toggleActiveCommentIcon($(this));

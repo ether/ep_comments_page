@@ -1,6 +1,6 @@
 'use strict';
 
-/* global __dirname, __filename, afterEach, before, beforeEach, describe, it, require */
+/* global __dirname, __filename, describe, it, require */
 
 /*
  * Import and Export tests for comments in .etherpad format
@@ -19,8 +19,6 @@ const api = supertest('http://localhost:9001');
 
 describe(__filename, function () {
   describe('Imports and Exports', function () {
-    const backups = {};
-
     it('creates a new Pad, imports content to it, checks that content', async function () {
       await api.get(`${endPoint('createPad')}&padID=${testPadId}`)
           .expect(200)

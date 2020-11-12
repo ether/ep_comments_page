@@ -8,8 +8,6 @@
 */
 
 
-var _, $, jQuery;
-
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
@@ -59,7 +57,6 @@ function ep_comments(context) {
 // Init Etherpad plugin comment pads
 ep_comments.prototype.init = function () {
   const self = this;
-  const ace = this.ace;
   moment.locale(html10n.getLanguage());
 
   // Init prerequisite
@@ -572,10 +569,6 @@ ep_comments.prototype.closeOpenedCommentIfNotOnSelectedElements = function (e) {
 
 // Collect Comments and link text content to the comments div
 ep_comments.prototype.collectCommentReplies = function (callback) {
-  const container = this.container;
-  const commentReplies = this.commentReplies;
-  const padComment = this.padInner.contents().find('.comment');
-
   $.each(this.commentReplies, (replyId, reply) => {
     const commentId = reply.commentId;
     if (commentId) {
@@ -1369,10 +1362,6 @@ function getRepFromSelector(selector, container) {
       leftOffset += spanOffset;
     });
     rep[0][1] = leftOffset;
-
-    // All we need to know is span text length and it's left offset in chars
-    const spanLength = $(span).text().length;
-
     rep[1][1] = rep[0][1] + $(span).text().length; // Easy!
     repArr.push(rep);
   });

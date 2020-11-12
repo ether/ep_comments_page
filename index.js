@@ -204,10 +204,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   });
 
   args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
-    const [fields, files] = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+    const fields = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields) => {
         if (err != null) return reject(err);
-        resolve([fields, files]);
+        resolve(fields);
       });
     });
 
@@ -267,10 +267,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   });
 
   args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
-    const [fields, files] = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+    const fields = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields) => {
         if (err != null) return reject(err);
-        resolve([fields, files]);
+        resolve(fields);
       });
     });
 

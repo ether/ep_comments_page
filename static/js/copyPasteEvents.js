@@ -215,7 +215,6 @@ var saveComments = function (comments) {
   const mapFakeComments = pad.plugins.ep_comments_page.mapFakeComments;
 
   _.each(comments, (comment, fakeCommentId) => {
-    const commentData = buildCommentData(comment, fakeCommentId);
     const newCommentId = shared.generateCommentId();
     mapFakeComments[fakeCommentId] = newCommentId;
     const originalCommentId = comment.data.originalCommentId;
@@ -236,14 +235,6 @@ var saveReplies = function (replies) {
     repliesToSave[replyId] = reply;
   });
   pad.plugins.ep_comments_page.saveCommentReplies(padId, repliesToSave);
-};
-
-var buildCommentData = function (comment, fakeCommentId) {
-  const commentData = {};
-  commentData.padId = clientVars.padId;
-  commentData.comment = comment.data;
-  commentData.comment.commentId = fakeCommentId;
-  return commentData;
 };
 
 // copied from https://css-tricks.com/snippets/javascript/unescape-html-in-js/

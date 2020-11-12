@@ -23,7 +23,6 @@ describe('ep_comments_page - Comment settings', function () {
         }).done(() => {
           helper.waitFor(() => {
             const outer$ = helper.padOuter$;
-            const comments$ = outer$('#comments');
             // hidden
             if (outer$('#comments').is(':visible') === false) {
               return true;
@@ -117,8 +116,7 @@ describe('ep_comments_page - Comment settings', function () {
         .done(callback);
   };
 
-  var getCommentId = function (numberOfComments) {
-    const nthComment = numberOfComments || 0;
+  var getCommentId = function () {
     helper.waitFor(() => {
       const inner$ = helper.padInner$;
       if (inner$) return true;

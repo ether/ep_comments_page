@@ -209,7 +209,6 @@ describe('ep_comments_page - Pre-comment text mark', function () {
   };
 
   var selectLineAndOpenCommentForm = function (lineNumber, callback) {
-    const inner$ = helper.padInner$;
     const chrome$ = helper.padChrome$;
 
     // select first line to add comment to

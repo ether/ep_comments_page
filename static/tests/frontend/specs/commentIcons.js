@@ -56,7 +56,6 @@ describe('ep_comments_page - Comment icons', function () {
   xit('does not show comment icon when comment is deleted', async function () {
     // we only run test if icons are enabled
     await finishTestIfIconsAreNotEnabled(async () => {
-      const inner$ = helper.padInner$;
       const outer$ = helper.padOuter$;
 
       await deleteComment();
@@ -242,7 +241,6 @@ describe('ep_comments_page - Comment icons', function () {
   // Assumes text is already selected, then add comment to the selected text
   const addComment = async (commentText) => {
     const inner$ = helper.padInner$;
-    const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
 
     // get original number of comments, so can check if a new comment was created
