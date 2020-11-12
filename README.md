@@ -7,6 +7,9 @@
 npm install ep_comments_page
 ```
 
+[![ep_comments_page](https://nodei.co/npm/ep_comments_page.png)](https://www.npmjs.com/package/ep_comments_page)
+
+
 ## Extra settings
 This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
 
