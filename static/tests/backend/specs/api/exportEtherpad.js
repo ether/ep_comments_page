@@ -42,15 +42,6 @@ describe(__filename, function () {
           .expect(200)
           .expect(/comments:/);
     });
-
-    /*
-    it('exports HTML for this Etherpad file', async function() {
-      await api.get(`/p/${testPadId}/export/html`)
-          .expect(200)
-          .expect('content-type', 'text/html; charset=utf-8')
-          .expect(/<ul class="bullet"><li><ul class="bullet"><li>hello<\/ul><\/li><\/ul>/);
-    });
-*/
   });
 }); // End of tests.
 

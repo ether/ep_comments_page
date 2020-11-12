@@ -76,7 +76,6 @@ ep_comments.prototype.init = function () {
 
   this.getCommentReplies((replies) => {
     if (!$.isEmptyObject(replies)) {
-      // console.log("collecting comment replies");
       this.commentReplies = replies;
       this.collectCommentReplies();
     }
@@ -87,7 +86,6 @@ ep_comments.prototype.init = function () {
   // Init add push event
   this.pushComment('add', (commentId, comment) => {
     this.setComment(commentId, comment);
-    // console.log('pushComment', comment);
     this.collectCommentsAfterSomeIntervalsOfTime();
   });
 
@@ -450,10 +448,7 @@ ep_comments.prototype.collectComments = function (callback) {
     const cls = $this.attr('class');
     const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId = (classCommentId) ? classCommentId[1] : null;
-    if (!commentId) {
-      // console.log("returning due to no comment id, probably due to a deleted comment");
-      return;
-    }
+    if (!commentId) return;
 
     self.padInner.contents().find('#innerdocbody').addClass('comments');
 
@@ -630,7 +625,6 @@ ep_comments.prototype.insertComment = function (commentId, comment, index) {
 
   // position doesn't seem to be relative to rep
 
-  // console.log('position', index, commentAfterIndex);
   if (index === 0) {
     content.prependTo(container);
   } else if (commentAfterIndex.length === 0) {
@@ -790,7 +784,6 @@ ep_comments.prototype.getComments = function (callback) {
 ep_comments.prototype.getCommentReplies = function (callback) {
   const req = {padId: this.padId};
   this.socket.emit('getCommentReplies', req, (res) => {
-    // console.log("res.replies", res.replies);
     callback(res.replies);
   });
 };
@@ -1022,7 +1015,6 @@ ep_comments.prototype.saveComment = function (data, rep) {
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
-      // console.log('addComment :: ', rep, comment);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
     }, 'insertComment', true);

@@ -25,12 +25,6 @@ describe('ep_comments_page - Comment Edit', function () {
       done();
     });
 
-    it('should hide the author and the comment text', function (done) {
-      // helperFunctions.checkIfCommentFieldIsHidden('comment-author-name')
-      // helperFunctions.checkIfCommentFieldIsHidden('comment-author-text')
-      done();
-    });
-
     it('should show the original comment text on the edit form', function (done) {
       const editFormText = helperFunctions.getEditForm().find('.comment-edit-text').text();
       expect(editFormText).to.be(textOfComment);
@@ -136,67 +130,6 @@ describe('ep_comments_page - Comment Edit', function () {
       });
     });
   });
-  // Commented out due to Firefox test failure
-/*
-  context('when user presses the button edit on a comment reply', function(){
-    before(function () {
-      helperFunctions.clickEditCommentReplyButton();
-    });
-
-    it('should show the edit form', function (done) {
-      helperFunctions.checkIfOneFormEditWasAdded();
-      done();
-    });
-
-    it('should show the original comment reply text on the edit form', function (done) {
-      var editFormText = helperFunctions.getEditForm().find('.comment-edit-text').text();
-      expect(editFormText).to.be(textOfReply);
-      done();
-    });
-
-    context('and user writes a new comment reply text', function(){
-      var updatedText = 'comment reply edited';
-      context('and presses save', function(){
-        before(function () {
-          helperFunctions.writeCommentText(updatedText);
-          helperFunctions.pressSave();
-          this.timeout(10000);
-        });
-
-        it('should update the comment text', function (done) {
-          this.timeout(10000);
-          helper.waitFor(function () {
-            var outer$ = helper.padOuter$;
-            var commentReplyText = outer$('.comment-text').last().text();
-            return commentReplyText.length;
-          }).done(function(){
-            var outer$ = helper.padOuter$;
-            var commentReplyText = outer$('.comment-text').last().text();
-            helper.waitFor(function(){
-              var commentReplyText = outer$('.comment-text').last().text();
-              return (commentReplyText === updatedText);
-            });
-            expect(commentReplyText).to.be(updatedText);
-            done();
-          });
-        });
-
-        context('and reloads the page', function(){
-          before(function (done) {
-            helperFunctions.reloadPad(this, done);
-          });
-
-          it('should update the comment text', function(done){
-            var outer$ = helper.padOuter$;
-            var commentReplyText = outer$('.comment-text').last().text();
-            expect(commentReplyText).to.be(updatedText);
-            done();
-          });
-        });
-      });
-    });
-  });
-*/
 });
 
 var ep_comments_page_test_helper = ep_comments_page_test_helper || {};

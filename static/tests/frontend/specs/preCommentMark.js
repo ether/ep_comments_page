@@ -6,10 +6,6 @@ describe('ep_comments_page - Pre-comment text mark', function () {
   // create a new pad before each test run
   beforeEach(function (cb) {
     padId = helper.newPad(() => {
-      // can only run this suite if text highlight is enabled
-      if (textHighlightIsDisabled()) {
-        // throw new Error("Cannot test pre-comment text mark. Feature disabled. Please change your settings.json");
-      }
       createPadWithTwoLines(() => {
         selectLineAndOpenCommentForm(0, cb);
       });
