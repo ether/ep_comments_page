@@ -462,7 +462,6 @@ ep_comments.prototype.collectComments = function (callback) {
       if (isAuthorClassName) self.removeComment(isAuthorClassName[1], it);
       return;
     }
-    var commentId = classCommentId[1];
     const commentElm = container.find(`#${commentId}`);
 
     const comment = comments[commentId];

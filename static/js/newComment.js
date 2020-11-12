@@ -50,7 +50,6 @@ var localizenewCommentPopup = function () {
 // Insert new Comment Form
 var insertNewCommentPopupIfDontExist = function (comment, callback) {
   $('#newComment').remove();
-  var newCommentPopup = $('#newComment');
 
   comment.commentId = '';
   var newCommentPopup = $('#newCommentTemplate').tmpl(comment);

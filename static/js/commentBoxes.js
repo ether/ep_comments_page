@@ -55,7 +55,6 @@ var highlightComment = function (commentId, e, editorComment) {
     // now if we apply a class such as mouseover to the editor it will go shitty
     // so what we need to do is add CSS for the specific ID to the document...
     // It's fucked up but that's how we do it..
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
     inner.contents().find('head').append(`<style class='comment-style'>.${commentId}{ color: #a7680c !important }</style>`);
   } else {
     // make a full copy of the html, including listeners
