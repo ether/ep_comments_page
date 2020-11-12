@@ -921,50 +921,30 @@ EpComments.prototype.createNewCommentFormIfDontExist = function (rep) {
 
 // Get a string representation of the text selected on the editor
 EpComments.prototype.getSelectedText = function (rep) {
-  const firstLine = rep.selStart[0];
-  const lastLine = this.getLastLine(firstLine, rep);
-  let selectedText = '';
-
-  _(_.range(firstLine, lastLine + 1)).each((lineNumber) => {
-    // rep looks like -- starts at line 2, character 1, ends at line 4 char 1
-    /*
-     {
-        rep.selStart[2,0],
-        rep.selEnd[4,2]
-     }
-     */
+  // The selection representation looks like this if it starts with the fifth character in the
+  // second line and ends at (but does not include) the third character in the eighth line:
+  //     rep.selStart = [1, 4]; // 2nd line 5th char
+  //     rep.selEnd = [7, 2]; // 8th line 3rd char
+  const selectedTextLines = [];
+  const lastLine = this.getLastLine(rep.selStart[0], rep);
+  for (let lineNumber = rep.selStart[0]; lineNumber <= lastLine; ++lineNumber) {
     const line = rep.lines.atIndex(lineNumber);
-    let posStart = undefined;
-    // If we span over multiple lines
-    if (rep.selStart[0] === lineNumber) {
-      // Is this the first line?
-      if (rep.selStart[1] > 0) {
-        posStart = rep.selStart[1];
-      } else {
-        posStart = 0;
-      }
-    }
-    let posEnd = undefined;
-    if (rep.selEnd[0] === lineNumber) {
-      if (rep.selEnd[1] <= line.text.length) {
-        posEnd = rep.selEnd[1];
-      } else {
-        posEnd = 0;
-      }
-    }
-    let lineText = line.text.substring(posStart, posEnd);
-    // When it has a selection with more than one line we select at least the beginning
-    // of the next line after the first line. As it is not possible to select the beginning
-    // of the first line, we skip it.
-    if (lineNumber > firstLine) {
-      // if the selection takes the very beginning of line, and the element has a lineMarker,
-      // it means we select the * as well, so we need to clean it from the text selected
-      lineText = this.cleanLine(line, lineText);
-      lineText = `\n${lineText}`;
-    }
-    selectedText += lineText;
-  });
-  return selectedText;
+    const selStartsAfterLine = rep.selStart[0] > lineNumber ||
+      (rep.selStart[0] === lineNumber && rep.selStart[1] >= line.text.length);
+    if (selStartsAfterLine) continue; // Nothing in this line is selected.
+    const selEndsBeforeLine = rep.selEnd[0] < lineNumber ||
+      (rep.selEnd[0] === lineNumber && rep.selEnd[1] <= 0);
+    if (selEndsBeforeLine) continue; // Nothing in this line is selected.
+    const selStartsBeforeLine = rep.selStart[0] < lineNumber || rep.selStart[1] < 0;
+    const posStart = selStartsBeforeLine ? 0 : rep.selStart[1];
+    const selEndsAfterLine = rep.selEnd[0] > lineNumber || rep.selEnd[1] > line.text.length;
+    const posEnd = selEndsAfterLine ? line.text.length : rep.selEnd[1];
+    // If the selection includes the very beginning of line, and the line has a line marker, it
+    // means the line marker was selected as well. Exclude it from the selected text.
+    selectedTextLines.push(
+        line.text.substring((posStart === 0 && this.lineHasMarker(line)) ? 1 : posStart, posEnd));
+  }
+  return selectedTextLines.join('\n');
 };
 
 EpComments.prototype.getLastLine = function (firstLine, rep) {
@@ -991,14 +971,6 @@ EpComments.prototype.lastLineSelectedIsEmpty = function (rep, lastLineSelected) 
 
 EpComments.prototype.lineHasMarker = function (line) {
   return line.lineMarker === 1;
-};
-
-EpComments.prototype.cleanLine = function (line, lineText) {
-  const hasALineMarker = this.lineHasMarker(line);
-  if (hasALineMarker) {
-    lineText = lineText.substring(1);
-  }
-  return lineText;
 };
 
 // Save comment
