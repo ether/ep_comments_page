@@ -1,7 +1,5 @@
 'use strict';
 
-/* global exports, require */
-
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const formidable = require('ep_etherpad-lite/node_modules/formidable');

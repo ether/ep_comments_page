@@ -1,7 +1,5 @@
 'use strict';
 
-/* global __dirname, __filename, describe, it, require */
-
 /*
  * Import and Export tests for comments in .etherpad format
  */

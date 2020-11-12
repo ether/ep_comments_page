@@ -1,7 +1,5 @@
 'use strict';
 
-/* global clearTimeout, clientVars, exports, html10n, pad, require, setTimeout */
-
 /* TODO:
 - lable reply textarea
 - Make the chekbox appear above the suggested changes even when activated

@@ -1,7 +1,5 @@
 'use strict';
 
-/* global after, before, describe, expect, helper, it */
-
 let moment;
 
 describe('ep_comments_page - Time Formatting', function () {
