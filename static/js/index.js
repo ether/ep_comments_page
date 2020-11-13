@@ -16,9 +16,9 @@ const moment = require('ep_comments_page/static/js/moment-with-locales.min');
 const newComment = require('ep_comments_page/static/js/newComment');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
-
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
+const Security = require('ep_etherpad-lite/static/js/security');
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -790,7 +790,85 @@ EpComments.prototype.deleteComment = function (commentId) {
   $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
-const parseMultiline = (text) => {
+const cloneLine = function (line) {
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const padInner = padOuter.find('iframe[name="ace_inner"]');
+
+  const lineElem = $(line.lineNode);
+  const lineClone = lineElem.clone();
+  const innerdocbodyMargin = $(padInner).offset().left + parseInt(padInner.css('padding-left') + lineElem.offset().left) || 0;
+  padInner.contents().find('body').append(lineClone);
+  lineClone.css({position: 'absolute'});
+  lineClone.css(lineElem.offset());
+  lineClone.css({left: innerdocbodyMargin});
+  lineClone.width(lineElem.width());
+
+  return lineClone;
+};
+
+let isHeading = function (index) {
+  const attribs = this.documentAttributeManager.getAttributesOnLine(index);
+  for (let i=0; i<attribs.length; i++) {
+    if (attribs[i][0] === 'heading') {
+      const value = attribs[i][1];
+      i = attribs.length;
+      return value;
+    }
+  }
+  return false;
+}
+
+function getXYOffsetOfRep(el, rep){
+  const selStart = rep.selStart;
+  const selEnd = rep.selEnd;
+
+  if (selStart[0] > selEnd [0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) { //make sure end is after start
+    selEnd = selStart;
+    selStart = _.clone(selStart);
+  }
+
+  let startIndex = 0;
+  const endIndex = selEnd[1];
+  const lineIndex = selEnd[0];
+  if (selStart[0] === selEnd[0]) {
+    startIndex = selStart[1];
+  }
+
+  const padInner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+
+  // Get the target Line
+  const startLine = rep.lines.atIndex(selStart[0]);
+  const endLine = rep.lines.atIndex(selEnd[0]);
+  const clone = cloneLine(endLine);
+  let lineText = Security.escapeHTML($(endLine.lineNode).text()).split('');
+  lineText.splice(endIndex, 0, '</span>');
+  lineText.splice(startIndex, 0, '<span id="selectWorker">');
+  lineText = lineText.join('');
+
+  const heading = isHeading(lineIndex);
+  if (heading) {
+    lineText = '<' + heading + '>' + lineText + '</' + heading + '>';
+  }
+  $(clone).html(lineText);
+
+  // Is the line visible yet?
+  if ( $(startLine.lineNode).length !== 0 ) {
+    const worker =  $(clone).find('#selectWorker');
+    let top = worker.offset().top + padInner.offset().top + parseInt(padInner.css('padding-top')); // A standard generic offset'
+    let left = worker.offset().left;
+    //adjust position
+    top = top + worker[0].offsetHeight;
+
+    if (left < 0) {
+      left = 0;
+    }
+    // Remove the clone element
+    $(clone).remove();
+    return [left, top];
+  }
+}
+
+function parseMultiline (text) {
   if (!text) return text;
   text = JSON.stringify(text);
   return text.substr(1, (text.length - 2));
@@ -825,7 +903,10 @@ EpComments.prototype.displayNewCommentForm = function () {
   $('#newComment').find('.from-value').text(selectedText);
 
   // Display form
-  newComment.showNewCommentPopup();
+  setTimeout(function() {
+    const position = getXYOffsetOfRep($('#newComment') ,rep);
+    newComment.showNewCommentPopup(position);
+  });
 
   // Check if the first element selected is visible in the viewport
   const $firstSelectedElement = this.getFirstElementSelected();
@@ -1320,8 +1401,9 @@ const getRepFromSelector = function (selector, container) {
 };
 
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
-exports.aceInitialized = (hookName, context, cb) => {
+exports.aceInitialized = function(hookName, context, cb) {
   const editorInfo = context.editorInfo;
+  isHeading = _(isHeading).bind(context);
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
   editorInfo.ace_getCommentIdOnFirstPositionSelected =
     _(getCommentIdOnFirstPositionSelected).bind(context);
