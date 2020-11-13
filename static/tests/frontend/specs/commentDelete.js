@@ -5,7 +5,7 @@ describe('ep_comments_page - Comment Delete', function(){
   var FIRST_LINE = 0;
 
   // create pad with a comment and a reply
-  before(function (done) {
+  beforeEach(function (done) {
     helper.waitFor(function(){
       return (ep_comments_page_test_helper !== 'undefined')
     });
@@ -22,11 +22,36 @@ describe('ep_comments_page - Comment Delete', function(){
       outer$('.comment-delete').click();
       helper.waitFor(function(){
         return inner$('.comment').length === 0;
+      }).done(function () {
+        if(inner$('.comment').length !== 0) throw new Error("Error deleting comment");
+        done();
       });
-      if(inner$('.comment').length !== 0) throw new Error("Error deleting comment");
-      done();
-    })
+    });
 
+  });
+
+  context('when user presses the delete button on other users comment', function(){
+    it("should not delete comment", function(done){
+      var outer$ = helper.padOuter$;
+      setTimeout(function () {
+        helper.newPad({}, helperFunctions.padId);
+        helper.waitFor(function () {
+          outer$ = helper.padOuter$;
+          return !!outer$ && outer$('.comment-delete').length;
+        }).done(function () {
+            outer$('.comment-delete').click();
+            helper.waitFor(function () {
+              var chrome$ = helper.padChrome$;
+
+              return chrome$('#gritter-container').find('.error').length > 0;
+            }).done(function () {
+              var inner$ = helper.padInner$;
+              if(inner$('.comment').length === 0) throw new Error("Error deleting comment");
+              done();
+            });
+        });
+      }, 500);
+    });
   });
 });
 

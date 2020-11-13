@@ -69,9 +69,12 @@ exports.socketio = function (hook_name, args, cb){
     socket.on('deleteComment', async (data, respond) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       // delete the comment on the database
-      await commentManager.deleteComment(padId, data.commentId);
+      const failed = await commentManager.deleteComment(padId, data.commentId, data.authorId);
       // Broadcast to all other users that this comment was deleted
-      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+      if (!failed) {
+        socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+      }
+      respond(failed);
     });
 
     socket.on('revertChange', async (data, respond) => {
