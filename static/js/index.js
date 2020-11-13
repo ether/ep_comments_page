@@ -177,6 +177,7 @@ ep_comments.prototype.init = function(){
     data.commentId = commentId;
     data.padId = clientVars.padId;
     data.commentText = commentText;
+    data.authorId = clientVars.userId;
 
     self.socket.emit('updateCommentText', data, function (err){
       if(!err) {
@@ -188,6 +189,18 @@ ep_comments.prototype.init = function(){
         // to update the comment or comment reply variable with the new text saved
         self.setCommentOrReplyNewText(commentId, commentText);
       }
+
+      if (err === 'unauth') {
+        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.unauth"] || "You cannot edit other users comments!",  class_name: "error"})
+      } else {
+        $.gritter.add({
+          title: "Error",
+          text: err,
+          sticky: true,
+          class_name: "error"
+        })
+      }
+
     });
   });
 

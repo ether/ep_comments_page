@@ -110,7 +110,8 @@ exports.socketio = function (hook_name, args, cb){
       // Note that commentId here can either be the commentId or replyId..
       var commentId = data.commentId;
       var commentText = data.commentText;
-      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
+      var authorId = data.authorId;
+      const failed = await commentManager.changeCommentText(padId, commentId, commentText, authorId);
       if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
       respond(failed);
     });
