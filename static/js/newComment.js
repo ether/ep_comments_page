@@ -1,6 +1,5 @@
 'use strict';
 
-const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
 
 // Create a comment object with data filled on the given form

@@ -1,6 +1,5 @@
 'use strict';
 
-const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 
 // Indicates if Etherpad is configured to display icons

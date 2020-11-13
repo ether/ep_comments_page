@@ -6,7 +6,6 @@
 */
 
 
-const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 const _ = require('ep_etherpad-lite/static/js/underscore');
 const browser = require('ep_etherpad-lite/static/js/browser');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
