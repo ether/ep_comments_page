@@ -704,8 +704,8 @@ ep_comments.prototype.localizeExistingComments = function() {
   var padComments = this.padInner.contents().find('.comment');
   var comments    = this.comments;
 
-  padComments.each(function(it) {
-    var $this           = $(this);
+  padComments.each(function(key, it) {
+    var $this           = $(it);
     var cls             = $this.attr('class');
     var classCommentId  = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     var commentId       = (classCommentId) ? classCommentId[1] : null;
@@ -719,6 +719,7 @@ ep_comments.prototype.localizeExistingComments = function() {
       // ... and update its date
       comment.data.date = moment(comment.data.timestamp).fromNow();
       comment.data.formattedDate = new Date(comment.data.timestamp).toISOString();
+      $(commentElm).find('.comment-created-at').html(comment.data.date);
     }
   });
 };
