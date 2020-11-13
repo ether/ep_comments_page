@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Comentário",
   "ep_comments_page.comments" : "Comentários",
   "ep_comments_page.add_comment.title" : "Adicionar novo comentário ao texto selecionado",
+  "ep_comments_page.add_comment" : "Adicionar novo comentário ao texto selecionado",
   "ep_comments_page.add_comment.hint" : "Por favor, selecione primeiro o texto para comentar",
   "ep_comments_page.delete_comment.title" : "Apagar este comentário",
   "ep_comments_page.edit_comment.title" : "Editar este comentário",

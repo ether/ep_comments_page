@@ -36,8 +36,8 @@ describe("ep_comments_page - Comment Localization", function(){
       var commentId = getCommentId();
 
       //get the 'Suggested Change' label
-      var $changeToLabel = outer$("#" + commentId + " .to-label").first();
-      expect($changeToLabel.text()).to.be("Para");
+      var $changeToLabel = outer$("#" + commentId + " .from-label").first();
+      expect($changeToLabel.text()).to.be("Sugerir alteração de");
 
       done();
     });

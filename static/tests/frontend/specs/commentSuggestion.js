@@ -44,6 +44,46 @@ describe("ep_comments_page - Comment Suggestion", function(){
     });
   });
 
+  it("Fills suggestion Change From field, adds sugestion", async function() {
+    var outer$ = helper.padOuter$;
+    var inner$ = helper.padInner$;
+    var chrome$ = helper.padChrome$;
+    var suggestedText = 'A new suggested text';
+    openCommentFormWithSuggestion('This content will receive a comment');
+
+    await new Promise(function (resolve) {
+      helper.waitFor(function () {
+        return chrome$("#newComment.popup-show").is(':visible')
+      }).done(function () {
+        chrome$("#newComment").find('textarea.comment-content').val('A new comment text');
+        chrome$("#newComment").find('textarea.to-value').val(suggestedText);
+        chrome$('#comment-create-btn').click();
+        return helper.waitFor(function () {
+          return inner$("div").first().find('.comment').length;
+        }).done(function () {
+          var comment$ = inner$("div").first().find('.comment');
+          comment$.click();
+          resolve();
+        })
+      });
+    });
+    await new Promise(function (resolve) {
+      helper.waitFor(function () {
+        outer$('.approve-suggestion-btn:visible').click();
+        return true;
+      }).done(resolve);
+    });
+    await new Promise(function (resolve) {
+      var comment$ = inner$("div").first().find('.comment');
+      helper.waitFor(function () {
+        return comment$.text() === suggestedText;
+      }).done(function () {
+        expect(comment$.text()).to.be(suggestedText);
+        resolve();
+      });
+    })
+
+  });
 });
 
 function openCommentFormWithSuggestion(targetText) {
@@ -60,11 +100,11 @@ function openCommentFormWithSuggestion(targetText) {
   // to simulate a selection with more than one line we have to send the sendkeys selectall
   // at the same line. The sendkeys will be run before the line break.
   $firstTextElement.html(targetText).sendkeys("{selectall}");
+  chrome$(".addComment").first().click();
+  helper.waitFor(function() {
+    return chrome$("#newComment.popup-show").find('.suggestion-checkbox').length;
+  }).done(function () {
+    chrome$("#newComment.popup-show").find(".suggestion-checkbox").first().click();
+  });
 
-  var $commentButton = chrome$(".addComment");
-  $commentButton.click();
-
-  // check suggestion box
-  var $hasSuggestion = chrome$(".suggestion-checkbox");
-  $hasSuggestion.click();
 }

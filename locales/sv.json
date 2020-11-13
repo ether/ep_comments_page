@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Kommentar",
   "ep_comments_page.comments" : "Kommentarer",
   "ep_comments_page.add_comment.title" : "Lägg till ny kommentar till markering",
+  "ep_comments_page.add_comment" : "Lägg till ny kommentar till markering",
   "ep_comments_page.add_comment.hint" : "Markera först den text du vill kommentera",
   "ep_comments_page.delete_comment.title" : "Radera den här kommentaren",
   "ep_comments_page.edit_comment.title" : "Redigera den här kommentaren",

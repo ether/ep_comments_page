@@ -443,6 +443,7 @@ ep_comments.prototype.collectComments = function(callback){
 
     var comment     = comments[commentId];
     if(comment){
+      comment.data.changeFrom = parseMultiline(comment.data.changeFrom);
       if (comment !== null) {
         // If comment is not in sidebar insert it
         if (commentElm.length == 0) {
@@ -799,6 +800,12 @@ ep_comments.prototype.deleteComment = function(commentId){
   $('iframe[name="ace_outer"]').contents().find('#' + commentId).remove();
 }
 
+function parseMultiline (text) {
+  if (!text) return text;
+  text = JSON.stringify(text);
+  return text.substr(1, (text.length-2));
+}
+
 ep_comments.prototype.displayNewCommentForm = function() {
   var self = this;
   var rep = {};
@@ -902,6 +909,7 @@ ep_comments.prototype.createNewCommentFormIfDontExist = function(rep) {
   var self = this;
 
   // If a new comment box doesn't already exist, create one
+  data.changeFrom = parseMultiline(self.getSelectedText(rep));
   newComment.insertNewCommentPopupIfDontExist(data, function(comment, index) {
     if(comment.changeTo){
       data.comment.changeFrom = comment.changeFrom;
