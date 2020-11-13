@@ -75,10 +75,15 @@ var insertNewCommentPopupIfDontExist = function(comment, callback) {
   return newCommentPopup;
 };
 
-var showNewCommentPopup = function() {
+var showNewCommentPopup = function(position) {
   // position below comment icon
-  $('#newComment').css('left', $('.toolbar .addComment').offset().left)
-
+  position = position || [];
+  var left = position[0] || $('.toolbar .addComment').offset().left;
+  var top = position[1];
+  $('#newComment').css('left', left);
+  if (top) {
+    $('#newComment').css('top', top);
+  }
   // Reset form to make sure it is all clear
   $('#newComment').find('.suggestion-checkbox').prop('checked', false).trigger('change');
   $('#newComment').find('textarea').val("");
