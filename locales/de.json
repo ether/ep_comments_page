@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Kommentar",
   "ep_comments_page.comments" : "Kommentare",
   "ep_comments_page.add_comment.title" : "Kommentar zur Auswahl hinzufügen",
+  "ep_comments_page.add_comment" : "Kommentar zur Auswahl hinzufügen",
   "ep_comments_page.add_comment.hint" : "Bitte wählen Sie zuerst den zu kommentierenden Text aus",
   "ep_comments_page.delete_comment.title" : "Diesen Kommentar löschen",
   "ep_comments_page.show_comments" : "Kommentare anzeigen",

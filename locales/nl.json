@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Opmerking",
   "ep_comments_page.comments" : "Opmerkingen",
   "ep_comments_page.add_comment.title" : "Voeg opmerking toe aan selectie",
+  "ep_comments_page.add_comment" : "Voeg opmerking toe aan selectie",
   "ep_comments_page.add_comment.hint" : "Selecteer eerst een stuk tekst om een opmerking aan toe te voegen",
   "ep_comments_page.delete_comment.title" : "Verwijder deze opmerking",
   "ep_comments_page.edit_comment.title" : "Bewerk deze opmerking",

@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Megjegyzés",
   "ep_comments_page.comments" : "Megjegyzések",
   "ep_comments_page.add_comment.title" : "Új megjegyzés hozzáadása a kijelöléshez",
+  "ep_comments_page.add_comment" : "Új megjegyzés hozzáadása a kijelöléshez",
   "ep_comments_page.add_comment.hint" : "Először jelölje meg a szöveget a megjegyzéshez",
   "ep_comments_page.delete_comment.title" : "Megjegyzés törlése",
   "ep_comments_page.edit_comment.title" : "Megjegyzés szerkesztése",

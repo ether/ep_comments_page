@@ -2,6 +2,7 @@
   "ep_comments_page.comment" : "Annotation",
   "ep_comments_page.comments" : "Annotations",
   "ep_comments_page.add_comment.title" : "Annoter la sélection",
+  "ep_comments_page.add_comment" : "Annoter la sélection",
   "ep_comments_page.add_comment.hint" : "Vous devez d'abord sélectionner un texte à annoter",
   "ep_comments_page.delete_comment.title" : "Supprimer cette annotation",
   "ep_comments_page.show_comments" : "Afficher les annotations",
