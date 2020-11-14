@@ -14,10 +14,14 @@ exports.getComments = async (padId) => {
   return {comments};
 };
 
-exports.deleteComment = async (padId, commentId) => {
+exports.deleteComment = async (padId, commentId, authorId) => {
   let comments = await db.get('comments:' + padId);
   // the entry doesn't exist so far, let's create it
   if (comments == null) comments = {};
+  // get the entry
+  if (comments[commentId].author !== authorId) {
+    return 'unauth';
+  }
   delete comments[commentId];
   await db.set('comments:' + padId, comments);
 };
@@ -166,7 +170,7 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
   await db.set(prefix + padId, comments);
 };
 
-exports.changeCommentText = async (padId, commentId, commentText) => {
+exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
   if (commentText.length <= 0) return true;
 
   // Given a comment we update the comment text
@@ -179,7 +183,9 @@ exports.changeCommentText = async (padId, commentId, commentText) => {
 
   // get the entry
   const comments = await db.get(prefix + padId);
-
+  if (comments[commentId].author !== authorId) {
+    return 'unauth';
+  }
   // update the comment text
   comments[commentId].text = commentText;
 

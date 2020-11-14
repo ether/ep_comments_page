@@ -105,6 +105,42 @@ describe('ep_comments_page - Comment Edit', function(){
         });
       });
     });
+
+    context('new user tries editing', function(){
+      var updatedText2 = 'this comment was edited again';
+
+      it('should not update the comment text', function (done) {
+        var outer$ = helper.padOuter$;
+        setTimeout(function () {
+          helper.newPad({}, helperFunctions.padId);
+          helper.waitFor(function () {
+            outer$ = helper.padOuter$;
+            return !!outer$ && outer$('#comments').find('.comment-edit').length;
+          }).done(function () {
+            helperFunctions.clickEditCommentButton();
+            helperFunctions.writeCommentText(updatedText2)
+            helperFunctions.pressSave();
+
+            helper.waitFor(function () {
+              //Error message is shown
+              var chrome$ = helper.padChrome$;
+              return chrome$('#gritter-container').find('.error').length > 0;
+            }).done(function () {
+              helper.waitFor(function () {
+                outer$ = helper.padOuter$;
+                var commentText = outer$('.comment-text').first().text();
+                return (commentText !== updatedText2);
+              }).done(function(){
+                var commentText = outer$('.comment-text').first().text();
+                expect(commentText).to.not.be(updatedText2);
+                done();
+              });
+            });
+
+          });
+        }, 500);
+      });
+    });
   });
 // Commented out due to Firefox test failure
 /*
