@@ -148,9 +148,7 @@ describe('export comments to HTML', function () {
             const html = res.body.data.html;
             const foundComment = (html.indexOf('<strong>') !== -1);
             if (!foundComment) {
-              throw new Error('Comment not exported. Regex used: ' +
-                              `[${strongInsideCommentRegex} || ${commentInsideStrongRegex}], ` +
-                              `html exported: ${html}`);
+              throw new Error(`Comment not exported. Regex used: <strong>, html exported: ${html}`);
             }
           })
           .end(done);
