@@ -8,8 +8,7 @@ describe('ep_comments_page - Comment Delete', function () {
 
   // create pad with a comment and a reply
   beforeEach(function (done) {
-    helper.waitFor(() => (ep_comments_page_test_helper !== 'undefined'));
-    helperFunctions = ep_comments_page_test_helper.commentDelete;
+    helperFunctions = commentDelete;
     helperFunctions.createPad(this, () => {
       helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
     });
@@ -47,8 +46,7 @@ describe('ep_comments_page - Comment Delete', function () {
   });
 });
 
-var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
-ep_comments_page_test_helper.commentDelete = {
+const commentDelete = {
   padId: undefined,
   createPad(test, cb) {
     const self = this;

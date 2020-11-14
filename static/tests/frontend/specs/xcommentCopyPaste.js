@@ -7,7 +7,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
   const SECOND_LINE = 1;
 
   before(async function () {
-    helperFunctions = ep_comments_page_test_helper.copyAndPaste;
+    helperFunctions = copyAndPaste;
   });
 
   context('when user copies a text with a comment', function () {
@@ -213,8 +213,7 @@ describe('ep_comments_page - Comment copy and paste', function () {
   });
 });
 
-var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
-ep_comments_page_test_helper.copyAndPaste = {
+const copyAndPaste = {
   createPad(test, cb) {
     const self = this;
     helper.newPad(() => {
