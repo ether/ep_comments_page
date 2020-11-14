@@ -235,6 +235,7 @@ describe('create comment replies API', function () {
 
 describe('create comment reply API broadcast', function () {
   let padID;
+  let commentID;
   let timesMessageWasReceived;
   let socket;
 
