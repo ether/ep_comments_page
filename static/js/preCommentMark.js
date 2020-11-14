@@ -2,7 +2,7 @@
 
 exports.MARK_CLASS = 'pre-selected-comment';
 
-const preCommentMarker = function (ace) {
+const PreCommentMarker = function (ace) {
   this.ace = ace;
   const self = this;
 
@@ -18,31 +18,31 @@ const preCommentMarker = function (ace) {
 };
 
 // Indicates if Etherpad is configured to highlight text
-preCommentMarker.prototype.highlightSelectedText = function () {
+PreCommentMarker.prototype.highlightSelectedText = function () {
   return clientVars.highlightSelectedText;
 };
 
-preCommentMarker.prototype.markSelectedText = function () {
+PreCommentMarker.prototype.markSelectedText = function () {
   // do nothing if this feature is not enabled
   if (!this.highlightSelectedText()) return;
 
   this.ace.callWithAce(doNothing, 'markPreSelectedTextToComment', true);
 };
 
-preCommentMarker.prototype.unmarkSelectedText = function () {
+PreCommentMarker.prototype.unmarkSelectedText = function () {
   // do nothing if this feature is not enabled
   if (!this.highlightSelectedText()) return;
 
   this.ace.callWithAce(doNothing, 'unmarkPreSelectedTextToComment', true);
 };
 
-preCommentMarker.prototype.performNonUnduableEvent = function (eventType, callstack, action) {
+PreCommentMarker.prototype.performNonUnduableEvent = function (eventType, callstack, action) {
   callstack.startNewEvent('nonundoable');
   action();
   callstack.startNewEvent(eventType);
 };
 
-preCommentMarker.prototype.handleMarkText = function (context) {
+PreCommentMarker.prototype.handleMarkText = function (context) {
   const editorInfo = context.editorInfo;
   const rep = context.rep;
   const callstack = context.callstack;
@@ -53,7 +53,7 @@ preCommentMarker.prototype.handleMarkText = function (context) {
   this.addMark(editorInfo, callstack);
 };
 
-preCommentMarker.prototype.handleUnmarkText = function (context) {
+PreCommentMarker.prototype.handleUnmarkText = function (context) {
   const editorInfo = context.editorInfo;
   const rep = context.rep;
   const callstack = context.callstack;
@@ -61,7 +61,7 @@ preCommentMarker.prototype.handleUnmarkText = function (context) {
   this.removeMarks(editorInfo, rep, callstack);
 };
 
-preCommentMarker.prototype.addMark = function (editorInfo, callstack) {
+PreCommentMarker.prototype.addMark = function (editorInfo, callstack) {
   const eventType = callstack.editEvent.eventType;
 
   // we don't want the text marking to be undoable
@@ -70,7 +70,7 @@ preCommentMarker.prototype.addMark = function (editorInfo, callstack) {
   });
 };
 
-preCommentMarker.prototype.removeMarks = function (editorInfo, rep, callstack) {
+PreCommentMarker.prototype.removeMarks = function (editorInfo, rep, callstack) {
   const eventType = callstack.editEvent.eventType;
   const originalSelStart = rep.selStart;
   const originalSelEnd = rep.selEnd;
@@ -95,4 +95,4 @@ preCommentMarker.prototype.removeMarks = function (editorInfo, rep, callstack) {
 // we do nothing on callWithAce; actions will be handled on aceEditEvent
 const doNothing = () => {};
 
-exports.init = (ace) => new preCommentMarker(ace);
+exports.init = (ace) => new PreCommentMarker(ace);
