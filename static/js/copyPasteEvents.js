@@ -179,10 +179,9 @@ const buildOpenTags = (tags) => {
 
 const buildCloseTags = (tags) => {
   let closeTags = '';
-  var tags = tags.reverse();
-  tags.forEach((tag) => {
+  for (const tag of tags.slice().reverse()) {
     closeTags += `</${tag}>`;
-  });
+  }
   return closeTags;
 };
 
