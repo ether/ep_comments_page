@@ -68,7 +68,7 @@ describe('ep_comments_page - Comment Localization', function () {
 
   /* ********** Helper functions ********** */
 
-  const createComment = function (callback) {
+  const createComment = (callback) => {
     const inner$ = helper.padInner$;
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
@@ -101,7 +101,7 @@ describe('ep_comments_page - Comment Localization', function () {
         .done(callback);
   };
 
-  const changeEtherpadLanguageTo = function (lang, callback) {
+  const changeEtherpadLanguageTo = (lang, callback) => {
     const boldTitles = {
       'en': 'Bold (Ctrl+B)',
       'pt-br': 'Negrito (Ctrl-B)',
@@ -125,7 +125,7 @@ describe('ep_comments_page - Comment Localization', function () {
         .done(callback);
   };
 
-  const getCommentId = function () {
+  const getCommentId = () => {
     const inner$ = helper.padInner$;
     const comment = inner$('.comment').first();
     const cls = comment.attr('class');
