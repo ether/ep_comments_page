@@ -40,9 +40,9 @@ exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
   comments = comments.comments;
   let html = '<div id=comments>';
 
-  for (const commentId in comments) {
+  for (const [commentId, comment] of Object.entries(comments)) {
     // prolly should escape text here?
-    html += `<p role="comment" class="comment" id="${commentId}">* ${comments[commentId].text}</p>`;
+    html += `<p role="comment" class="comment" id="${commentId}">* ${comment.text}</p>`;
   }
 
   html += '</div>';
