@@ -22,7 +22,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
     done();
   });
 
-  it('Cancel suggestion and try again fills suggestion Change From field', function (done) {
+  it('Cancel suggestion and try again fills suggestion Change From field', async function () {
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
 
@@ -33,14 +33,11 @@ describe('ep_comments_page - Comment Suggestion', function () {
     $cancelButton.click();
 
     // wait for comment form to close
-    helper.waitFor(() => outer$('#newComments.active').length === 0)
-        .done(() => {
-          openCommentFormWithSuggestion('New target for comment');
+    await helper.waitForPromise(() => outer$('#newComments.active').length === 0);
+    openCommentFormWithSuggestion('New target for comment');
 
-          const $suggestionFrom = chrome$('.from-value');
-          expect($suggestionFrom.text()).to.be('New target for comment');
-          done();
-        });
+    const $suggestionFrom = chrome$('.from-value');
+    expect($suggestionFrom.text()).to.be('New target for comment');
   });
 
   it('Fills suggestion Change From field, adds sugestion', async function () {
@@ -50,35 +47,24 @@ describe('ep_comments_page - Comment Suggestion', function () {
     const suggestedText = 'A new suggested text';
     openCommentFormWithSuggestion('This content will receive a comment');
 
-    await new Promise(((resolve) => {
-      helper.waitFor(() => chrome$('#newComment.popup-show').is(':visible')).done(() => {
-        chrome$('#newComment').find('textarea.comment-content').val('A new comment text');
-        chrome$('#newComment').find('textarea.to-value').val(suggestedText);
-        chrome$('#comment-create-btn').click();
-        return helper.waitFor(() => inner$('div').first().find('.comment').length).done(() => {
-          const comment$ = inner$('div').first().find('.comment');
-          comment$.click();
-          resolve();
-        });
-      });
-    }));
-    await new Promise(((resolve) => {
-      helper.waitFor(() => {
-        outer$('.approve-suggestion-btn:visible').click();
-        return true;
-      }).done(resolve);
-    }));
-    await new Promise(((resolve) => {
-      const comment$ = inner$('div').first().find('.comment');
-      helper.waitFor(() => comment$.text() === suggestedText).done(() => {
-        expect(comment$.text()).to.be(suggestedText);
-        resolve();
-      });
-    }));
+    await helper.waitForPromise(() => chrome$('#newComment.popup-show').is(':visible'));
+    chrome$('#newComment').find('textarea.comment-content').val('A new comment text');
+    chrome$('#newComment').find('textarea.to-value').val(suggestedText);
+    chrome$('#comment-create-btn').click();
+    await helper.waitForPromise(() => inner$('div').first().find('.comment').length);
+    let comment$ = inner$('div').first().find('.comment');
+    comment$.click();
+    await helper.waitForPromise(() => {
+      outer$('.approve-suggestion-btn:visible').click();
+      return true;
+    });
+    comment$ = inner$('div').first().find('.comment');
+    await helper.waitForPromise(() => comment$.text() === suggestedText);
+    expect(comment$.text()).to.be(suggestedText);
   });
 });
 
-const openCommentFormWithSuggestion = (targetText) => {
+const openCommentFormWithSuggestion = async (targetText) => {
   const inner$ = helper.padInner$;
   const chrome$ = helper.padChrome$;
 
@@ -92,8 +78,7 @@ const openCommentFormWithSuggestion = (targetText) => {
   // at the same line. The sendkeys will be run before the line break.
   $firstTextElement.html(targetText).sendkeys('{selectall}');
   chrome$('.addComment').first().click();
-  helper.waitFor(() => chrome$('#newComment.popup-show').find('.suggestion-checkbox').length)
-      .done(() => {
-        chrome$('#newComment.popup-show').find('.suggestion-checkbox').first().click();
-      });
+  await helper.waitForPromise(
+      () => chrome$('#newComment.popup-show').find('.suggestion-checkbox').length);
+  chrome$('#newComment.popup-show').find('.suggestion-checkbox').first().click();
 };
