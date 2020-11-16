@@ -45,7 +45,7 @@ describe('ep_comments_page - Comment Delete', function(){
         return chrome$('#gritter-container').find('.error').length > 0;
       });
       const inner$ = helper.padInner$;
-      if (inner$('.comment').length === 0) throw new Error('Error deleting comment');
+      if (inner$('.comment').length === 0) throw new Error('Comment should not have been deleted');
     });
   });
 });
