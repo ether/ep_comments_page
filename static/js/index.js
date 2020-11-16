@@ -143,6 +143,7 @@ ep_comments.prototype.init = function(){
             });
           });
         },'deleteCommentedSelection', true);
+        return;
       }
 
       if (err === 'unauth') {
@@ -203,6 +204,7 @@ ep_comments.prototype.init = function(){
         // although the comment or reply was saved on the data base successfully, it needs
         // to update the comment or comment reply variable with the new text saved
         self.setCommentOrReplyNewText(commentId, commentText);
+        return;
       }
 
       if (err === 'unauth') {
