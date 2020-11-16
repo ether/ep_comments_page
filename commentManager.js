@@ -21,12 +21,12 @@ exports.deleteComment = async (padId, commentId, authorId) => {
   const comments = await db.get(`comments:${padId}`);
   if (comments == null || comments[commentId] == null) {
     logger.debug(`ignoring attempt to delete non-existent comment ${commentId}`);
-    return 'no_such_comment';
+    throw new Error('no_such_comment');
   }
   if (comments[commentId].author !== authorId) {
     logger.debug(`author ${authorId} attempted to delete comment ${commentId} ` +
                  `belonging to author ${comments[commentId].author}`);
-    return 'unauth';
+    throw new Error('unauth');
   }
   delete comments[commentId];
   await db.set('comments:' + padId, comments);
@@ -179,7 +179,7 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
   if (commentText.length <= 0) {
     logger.debug(`ignoring attempt to change comment ${commentId} to the empty string`);
-    return 'comment_cannot_be_empty';
+    throw new Error('comment_cannot_be_empty');
   }
 
   // Given a comment we update the comment text
@@ -194,18 +194,16 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
   const comments = await db.get(prefix + padId);
   if (comments == null || comments[commentId] == null) {
     logger.debug(`ignoring attempt to edit non-existent comment ${commentId}`);
-    return 'no_such_comment';
+    throw new Error('no_such_comment');
   }
   if (comments[commentId].author !== authorId) {
     logger.debug(`author ${authorId} attempted to edit comment ${commentId} ` +
                  `belonging to author ${comments[commentId].author}`);
-    return 'unauth';
+    throw new Error('unauth');
   }
   // update the comment text
   comments[commentId].text = commentText;
 
   // save the comment updated back
   await db.set(prefix + padId, comments);
-
-  return null;
 };
