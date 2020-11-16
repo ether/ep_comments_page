@@ -123,26 +123,41 @@ ep_comments.prototype.init = function(){
   // All this does is remove the comment attr on the selection
   this.container.parent().on("click", ".comment-delete", function(){
     var commentId = $(this).closest('.comment-container')[0].id;
-    self.deleteComment(commentId);
-    var padOuter = $('iframe[name="ace_outer"]').contents();
-    var padInner = padOuter.find('iframe[name="ace_inner"]');
-    var selector = "."+commentId;
-    var ace = self.ace;
-    ace.callWithAce(function(aceTop){
-      var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
-      // rep is an array of reps..  I will need to iterate over each to do something meaningful..
-      $.each(repArr, function(index, rep){
-        // I don't think we need this nested call
-        ace.callWithAce(function (ace){
-          ace.ace_performSelectionChange(rep[0],rep[1],true);
-          ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
-          // Note that this is the correct way of doing it, instead of there being
-          // a commentId we now flag it as "comment-deleted"
-        });
-      });
-    },'deleteCommentedSelection', true);
-    // dispatch event
-    self.socket.emit('deleteComment', {padId: self.padId, commentId: commentId}, function (){});
+    self.socket.emit('deleteComment', {padId: self.padId, commentId: commentId, authorId: clientVars.userId}, function (err){
+      if (!err) {
+        self.deleteComment(commentId);
+        var padOuter = $('iframe[name="ace_outer"]').contents();
+        var padInner = padOuter.find('iframe[name="ace_inner"]');
+        var selector = "."+commentId;
+        var ace = self.ace;
+
+        ace.callWithAce(function(aceTop){
+          var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+          // rep is an array of reps..  I will need to iterate over each to do something meaningful..
+          $.each(repArr, function(index, rep){
+            // I don't think we need this nested call
+            ace.callWithAce(function (ace){
+              ace.ace_performSelectionChange(rep[0],rep[1],true);
+              ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+              // Note that this is the correct way of doing it, instead of there being
+              // a commentId we now flag it as "comment-deleted"
+            });
+          });
+        },'deleteCommentedSelection', true);
+      }
+
+      if (err === 'unauth') {
+        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.delete_unauth"] || "You cannot delete other users comments!",  class_name: "error"})
+      } else {
+        $.gritter.add({
+          title: "Error",
+          text: err,
+          sticky: true,
+          class_name: "error"
+        })
+      }
+    });
+
   });
 
   // Listen for events to edit a comment
@@ -178,6 +193,7 @@ ep_comments.prototype.init = function(){
     data.commentId = commentId;
     data.padId = clientVars.padId;
     data.commentText = commentText;
+    data.authorId = clientVars.userId;
 
     self.socket.emit('updateCommentText', data, function (err){
       if(!err) {
@@ -189,6 +205,18 @@ ep_comments.prototype.init = function(){
         // to update the comment or comment reply variable with the new text saved
         self.setCommentOrReplyNewText(commentId, commentText);
       }
+
+      if (err === 'unauth') {
+        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.edit_unauth"] || "You cannot edit other users comments!",  class_name: "error"})
+      } else {
+        $.gritter.add({
+          title: "Error",
+          text: err,
+          sticky: true,
+          class_name: "error"
+        })
+      }
+
     });
   });
 
@@ -569,6 +597,9 @@ ep_comments.prototype.collectCommentReplies = function(callback){
     reply.formattedDate = new Date(reply.timestamp).toISOString();
 
     var content = $("#replyTemplate").tmpl(reply);
+    if (reply.author !== clientVars.userId) {
+      $(content).find('.comment-edit').remove();
+    }
     // localize comment reply
     commentL10n.localize(content);
     var repliesContainer = $('iframe[name="ace_outer"]').contents().find('#'+commentId + ' .comment-replies-container');
@@ -606,7 +637,9 @@ ep_comments.prototype.insertComment = function(commentId, comment, index){
   comment.commentId = commentId;
   comment.reply = true;
   content = $('#commentsTemplate').tmpl(comment);
-
+  if (comment.author !== clientVars.userId) {
+    $(content).find('.comment-actions-wrapper').addClass('hidden');
+  }
   commentL10n.localize(content);
 
   // position doesn't seem to be relative to rep

@@ -69,9 +69,12 @@ exports.socketio = function (hook_name, args, cb){
     socket.on('deleteComment', async (data, respond) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       // delete the comment on the database
-      await commentManager.deleteComment(padId, data.commentId);
+      const failed = await commentManager.deleteComment(padId, data.commentId, data.authorId);
       // Broadcast to all other users that this comment was deleted
-      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+      if (!failed) {
+        socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+      }
+      respond(failed);
     });
 
     socket.on('revertChange', async (data, respond) => {
@@ -110,7 +113,8 @@ exports.socketio = function (hook_name, args, cb){
       // Note that commentId here can either be the commentId or replyId..
       var commentId = data.commentId;
       var commentText = data.commentText;
-      const failed = await commentManager.changeCommentText(padId, commentId, commentText);
+      var authorId = data.authorId;
+      const failed = await commentManager.changeCommentText(padId, commentId, commentText, authorId);
       if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
       respond(failed);
     });
