@@ -169,7 +169,7 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 };
 
 exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
-  if (commentText.length <= 0) return true;
+  if (commentText.length <= 0) return 'comment_cannot_be_empty';
 
   // Given a comment we update the comment text
 
