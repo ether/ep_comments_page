@@ -15,10 +15,8 @@ exports.getComments = async (padId) => {
 };
 
 exports.deleteComment = async (padId, commentId, authorId) => {
-  let comments = await db.get('comments:' + padId);
-  // the entry doesn't exist so far, let's create it
-  if (comments == null) comments = {};
-  // get the entry
+  const comments = await db.get(`comments:${padId}`);
+  if (comments == null || comments[commentId] == null) return 'no_such_comment';
   if (comments[commentId].author !== authorId) {
     return 'unauth';
   }
@@ -183,6 +181,7 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
 
   // get the entry
   const comments = await db.get(prefix + padId);
+  if (comments == null || comments[commentId] == null) return 'no_such_comment';
   if (comments[commentId].author !== authorId) {
     return 'unauth';
   }
