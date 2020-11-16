@@ -34,7 +34,7 @@ describe('ep_comments_page - Comment Delete', function(){
     it('should not delete comment', async function () {
       var outer$ = helper.padOuter$;
       await new Promise((resolve) => setTimeout(resolve, 500));
-      helper.newPad({}, helperFunctions.padId);
+      await new Promise((resolve) => helper.newPad(resolve, helperFunctions.padId));
       await helper.waitForPromise(() => {
         outer$ = helper.padOuter$;
         return !!outer$ && outer$('.comment-delete').length;
