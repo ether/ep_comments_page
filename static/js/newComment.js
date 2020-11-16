@@ -78,10 +78,13 @@ var insertNewCommentPopupIfDontExist = function(comment, callback) {
 var showNewCommentPopup = function(position) {
   // position below comment icon
   position = position || [];
-  var left = position[0] || $('.toolbar .addComment').offset().left;
+  var left = position[0];
+  if ($('.toolbar .addComment').length) {
+    left = $('.toolbar .addComment').offset().left
+  }
   var top = position[1];
   $('#newComment').css('left', left);
-  if (top) {
+  if (left === position[0]) {
     $('#newComment').css('top', top);
   }
   // Reset form to make sure it is all clear

@@ -841,11 +841,10 @@ var cloneLine = function (line) {
 
   var lineElem = $(line.lineNode);
   var lineClone = lineElem.clone();
-  var innerdocbodyMargin = $(lineElem).parent().css("margin-left") || 0;
+  var innerdocbodyMargin = $(padInner).offset().left + parseInt(padInner.css('padding-left') + lineElem.offset().left) || 0;
   padInner.contents().find('body').append(lineClone);
   lineClone.css({position: 'absolute'});
   lineClone.css(lineElem.offset());
-  lineClone.css({color:'red'});
   lineClone.css({left: innerdocbodyMargin});
   lineClone.width(lineElem.width());
 
@@ -867,10 +866,6 @@ var isHeading = function (index) {
 function getXYOffsetOfRep(el, rep){
   var selStart = rep.selStart;
   var selEnd = rep.selEnd;
-  var viewPosition = 'bottom';
-  var clone;
-  var startIndex = 0;
-  var endIndex = 0;
 
   if (selStart[0] > selEnd [0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) { //make sure end is after start
     var startPos = _.clone(selStart);
@@ -878,45 +873,24 @@ function getXYOffsetOfRep(el, rep){
     selStart = startPos;
   }
 
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var startIndex = 0;
+  var endIndex = selEnd[1];
+  var lineIndex = selEnd[0];
+  if (selStart[0] === selEnd[0]) {
+    startIndex = selStart[1];
+  }
+
+  var padInner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
 
   // Get the target Line
   var startLine = rep.lines.atIndex(selStart[0]);
   var endLine = rep.lines.atIndex(selEnd[0]);
-  var leftOffset = $(padInner)[0].offsetLeft + $('iframe[name="ace_outer"]')[0].offsetLeft + parseInt(padInner.css('padding-left'));
-  if($(padInner)[0]){
-    leftOffset = leftOffset +3; // it appears on apple devices this might not be set properly?
-  }
-  // Add support for page view margins
-  var divMargin = $(startLine.lineNode).css("margin-left");
-  var innerdocbodyMargin = parseInt($(startLine.lineNode).parent().css("margin-left")) || 0;
-  var lineText = [];
-  var lineIndex = 0;
-
-  if (viewPosition === 'top') {
-    startIndex = selStart[1];
-    lineIndex = selStart[0];
-    lineText = Security.escapeHTML($(startLine.lineNode).text()).split('');
-    endIndex = lineText.length-1;
-    clone = cloneLine(startLine);
-    if (selStart[0] === selEnd[0]) {
-      endIndex = selEnd[1];
-    }
-  } else {
-    endIndex = selEnd[1];
-    lineIndex = selEnd[0];
-    lineText = Security.escapeHTML($(endLine.lineNode).text()).split('');
-    clone = cloneLine(endLine);
-    if (selStart[0] === selEnd[0]) {
-      startIndex = selStart[1];
-    }
-  }
-
+  var clone = cloneLine(endLine);
+  var lineText = Security.escapeHTML($(endLine.lineNode).text()).split('');
   lineText.splice(endIndex, 0, '</span>');
   lineText.splice(startIndex, 0, '<span id="selectWorker">');
   lineText = lineText.join('');
-  var toolbarMargin = parseInt(el.children().css('margin-left'));
+
   var heading = isHeading(lineIndex);
   if (heading) {
     lineText = '<' + heading + '>' + lineText + '</' + heading + '>';
@@ -925,44 +899,18 @@ function getXYOffsetOfRep(el, rep){
 
   // Is the line visible yet?
   if ( $(startLine.lineNode).length !== 0 ) {
-
     var worker =  $(clone).find('#selectWorker');
     var top = worker.offset().top + padInner.offset().top + parseInt(padInner.css('padding-top')); // A standard generic offset'
-    var left = (worker.offset().left || 0) + leftOffset + toolbarMargin + $(worker).width()/2 - el.width()/2;
-
+    var left = worker.offset().left;
     //adjust position
-    if (viewPosition === 'top') {
-      top = top - el[0].offsetHeight;
-      if(top <= 0 ) {  // If the tooltip wont be visible to the user because it's too high up
-        top = top + worker[0].offsetHeight;
-        if(top < 0){ top = 0; } // handle case where caret is in 0,0
-      }
-    } else if (viewPosition === 'bottom') {
-      top = top + worker[0].offsetHeight;
-    } else if (viewPosition === 'right') {
-      left = worker.offset().left + worker[0].offsetWidth + leftOffset + toolbarMargin;
-      top = top +(worker[0].offsetHeight/2);
-    } else if (viewPosition === 'left') {
-      left = 0;
-      if (divMargin) {
-        divMargin = parseInt(divMargin);
-        if ((divMargin + innerdocbodyMargin) > 0) {
-          left = left + divMargin;
-        }
-      }
-      left = left - worker.width();
-      top  = top +(worker[0].offsetHeight/2);
-    }
+    top = top + worker[0].offsetHeight;
 
     if (left < 0) {
       left = 0;
     }
-    if (left > padInner.width() - el[0].offsetWidth) {
-      left = padInner.width() - el[0].offsetWidth;
-    }
-
     // Remove the clone element
     $(clone).remove();
+
     return [left, top];
   }
 }
