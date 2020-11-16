@@ -2,8 +2,11 @@
 
 var _ = require('ep_etherpad-lite/static/js/underscore');
 var db = require('ep_etherpad-lite/node/db/DB');
+const log4js = require('ep_etherpad-lite/node_modules/log4js');
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 var shared = require('./static/js/shared');
+
+const logger = log4js.getLogger('ep_comments_page');
 
 exports.getComments = async (padId) => {
   // Not sure if we will encouter race conditions here..  Be careful.
@@ -16,8 +19,13 @@ exports.getComments = async (padId) => {
 
 exports.deleteComment = async (padId, commentId, authorId) => {
   const comments = await db.get(`comments:${padId}`);
-  if (comments == null || comments[commentId] == null) return 'no_such_comment';
+  if (comments == null || comments[commentId] == null) {
+    logger.debug(`ignoring attempt to delete non-existent comment ${commentId}`);
+    return 'no_such_comment';
+  }
   if (comments[commentId].author !== authorId) {
+    logger.debug(`author ${authorId} attempted to delete comment ${commentId} ` +
+                 `belonging to author ${comments[commentId].author}`);
     return 'unauth';
   }
   delete comments[commentId];
@@ -169,7 +177,10 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 };
 
 exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
-  if (commentText.length <= 0) return 'comment_cannot_be_empty';
+  if (commentText.length <= 0) {
+    logger.debug(`ignoring attempt to change comment ${commentId} to the empty string`);
+    return 'comment_cannot_be_empty';
+  }
 
   // Given a comment we update the comment text
 
@@ -181,8 +192,13 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
 
   // get the entry
   const comments = await db.get(prefix + padId);
-  if (comments == null || comments[commentId] == null) return 'no_such_comment';
+  if (comments == null || comments[commentId] == null) {
+    logger.debug(`ignoring attempt to edit non-existent comment ${commentId}`);
+    return 'no_such_comment';
+  }
   if (comments[commentId].author !== authorId) {
+    logger.debug(`author ${authorId} attempted to edit comment ${commentId} ` +
+                 `belonging to author ${comments[commentId].author}`);
     return 'unauth';
   }
   // update the comment text
