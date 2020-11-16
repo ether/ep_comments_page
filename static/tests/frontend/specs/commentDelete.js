@@ -31,26 +31,21 @@ describe('ep_comments_page - Comment Delete', function(){
   });
 
   context('when user presses the delete button on other users comment', function(){
-    it("should not delete comment", function(done){
+    it('should not delete comment', async function () {
       var outer$ = helper.padOuter$;
-      setTimeout(function () {
-        helper.newPad({}, helperFunctions.padId);
-        helper.waitFor(function () {
-          outer$ = helper.padOuter$;
-          return !!outer$ && outer$('.comment-delete').length;
-        }).done(function () {
-            outer$('.comment-delete').click();
-            helper.waitFor(function () {
-              var chrome$ = helper.padChrome$;
-
-              return chrome$('#gritter-container').find('.error').length > 0;
-            }).done(function () {
-              var inner$ = helper.padInner$;
-              if(inner$('.comment').length === 0) throw new Error("Error deleting comment");
-              done();
-            });
-        });
-      }, 500);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      helper.newPad({}, helperFunctions.padId);
+      await helper.waitForPromise(() => {
+        outer$ = helper.padOuter$;
+        return !!outer$ && outer$('.comment-delete').length;
+      });
+      outer$('.comment-delete').click();
+      await helper.waitForPromise(() => {
+        const chrome$ = helper.padChrome$;
+        return chrome$('#gritter-container').find('.error').length > 0;
+      });
+      const inner$ = helper.padInner$;
+      if (inner$('.comment').length === 0) throw new Error('Error deleting comment');
     });
   });
 });
