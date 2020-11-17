@@ -386,35 +386,31 @@ EpComments.prototype.findCommentText = function ($commentBox) {
                           '.full-display-content .comment-title-wrapper .comment-text');
 };
 // This function is useful to collect new comments on the collaborators
-EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
-  window.setTimeout(() => {
-    this.collectComments();
+EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = async function () {
+  await new Promise((resolve) => window.setTimeout(resolve, 300));
+  this.collectComments();
 
-    const countComments = Object.keys(this.comments).length;
-    const padOuter = $('iframe[name="ace_outer"]').contents();
-    this.padOuter = padOuter;
-    this.padInner = padOuter.find('iframe[name="ace_inner"]');
-    const padComment = this.padInner.contents().find('.comment');
-    if (countComments > padComment.length) {
-      window.setTimeout(() => {
-        this.collectComments();
-        const countComments = Object.keys(this.comments).length;
-        const padComment = this.padInner.contents().find('.comment');
-        if (countComments > padComment.length) {
-          window.setTimeout(() => {
-            this.collectComments();
-            const countComments = Object.keys(this.comments).length;
-            const padComment = this.padInner.contents().find('.comment');
-            if (countComments > padComment.length) {
-              window.setTimeout(() => {
-                this.collectComments();
-              }, 9000);
-            }
-          }, 3000);
-        }
-      }, 1000);
-    }
-  }, 300);
+  let countComments = Object.keys(this.comments).length;
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  this.padOuter = padOuter;
+  this.padInner = padOuter.find('iframe[name="ace_inner"]');
+  let padComment = this.padInner.contents().find('.comment');
+  if (countComments <= padComment.length) return;
+
+  await new Promise((resolve) => window.setTimeout(resolve, 1000));
+  this.collectComments();
+  countComments = Object.keys(this.comments).length;
+  padComment = this.padInner.contents().find('.comment');
+  if (countComments <= padComment.length) return;
+
+  await new Promise((resolve) => window.setTimeout(resolve, 3000));
+  this.collectComments();
+  countComments = Object.keys(this.comments).length;
+  padComment = this.padInner.contents().find('.comment');
+  if (countComments <= padComment.length) return;
+
+  await new Promise((resolve) => window.setTimeout(resolve, 9000));
+  this.collectComments();
 };
 
 // Insert comments container on element use for linenumbers
