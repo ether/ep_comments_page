@@ -387,28 +387,27 @@ EpComments.prototype.findCommentText = function ($commentBox) {
 };
 // This function is useful to collect new comments on the collaborators
 EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = function () {
-  const self = this;
-  window.setTimeout(function () {
-    self.collectComments();
+  window.setTimeout(() => {
+    this.collectComments();
 
-    const countComments = Object.keys(self.comments).length;
+    const countComments = Object.keys(this.comments).length;
     const padOuter = $('iframe[name="ace_outer"]').contents();
     this.padOuter = padOuter;
     this.padInner = padOuter.find('iframe[name="ace_inner"]');
     const padComment = this.padInner.contents().find('.comment');
     if (countComments > padComment.length) {
-      window.setTimeout(function () {
-        self.collectComments();
-        const countComments = Object.keys(self.comments).length;
+      window.setTimeout(() => {
+        this.collectComments();
+        const countComments = Object.keys(this.comments).length;
         const padComment = this.padInner.contents().find('.comment');
         if (countComments > padComment.length) {
-          window.setTimeout(function () {
-            self.collectComments();
-            const countComments = Object.keys(self.comments).length;
+          window.setTimeout(() => {
+            this.collectComments();
+            const countComments = Object.keys(this.comments).length;
             const padComment = this.padInner.contents().find('.comment');
             if (countComments > padComment.length) {
               window.setTimeout(() => {
-                self.collectComments();
+                this.collectComments();
               }, 9000);
             }
           }, 3000);
