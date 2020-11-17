@@ -7,7 +7,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
     this.timeout(60000);
   });
 
-  it('Fills suggestion Change From field when adding a comment with suggestion', function (done) {
+  it('Fills suggestion Change From field when adding a comment with suggestion', async function () {
     const chrome$ = helper.padChrome$;
 
     // As in the function openCommentFormWithSuggestion we send all the text and call 'selectall',
@@ -16,17 +16,16 @@ describe('ep_comments_page - Comment Suggestion', function () {
     // text without line attribute, in this case a <span>, to avoid select a '*'
     const targetText = '<span>A</span><ul><li> text with</li><li> line attributes</li></ul>';
 
-    openCommentFormWithSuggestion(targetText);
+    await openCommentFormWithSuggestion(targetText);
     const $suggestionFrom = chrome$('.from-value');
     expect($suggestionFrom.text()).to.be('A\n text with\n line attributes');
-    done();
   });
 
   it('Cancel suggestion and try again fills suggestion Change From field', async function () {
     const outer$ = helper.padOuter$;
     const chrome$ = helper.padChrome$;
 
-    openCommentFormWithSuggestion('This content will receive a comment');
+    await openCommentFormWithSuggestion('This content will receive a comment');
 
     // cancel
     const $cancelButton = chrome$('#comment-reset');
@@ -34,7 +33,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
 
     // wait for comment form to close
     await helper.waitForPromise(() => outer$('#newComments.active').length === 0);
-    openCommentFormWithSuggestion('New target for comment');
+    await openCommentFormWithSuggestion('New target for comment');
 
     const $suggestionFrom = chrome$('.from-value');
     expect($suggestionFrom.text()).to.be('New target for comment');
@@ -45,7 +44,7 @@ describe('ep_comments_page - Comment Suggestion', function () {
     const inner$ = helper.padInner$;
     const chrome$ = helper.padChrome$;
     const suggestedText = 'A new suggested text';
-    openCommentFormWithSuggestion('This content will receive a comment');
+    await openCommentFormWithSuggestion('This content will receive a comment');
 
     await helper.waitForPromise(() => chrome$('#newComment.popup-show').is(':visible'));
     chrome$('#newComment').find('textarea.comment-content').val('A new comment text');
