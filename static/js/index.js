@@ -120,43 +120,45 @@ ep_comments.prototype.init = function(){
 
   // Listen for events to delete a comment
   // All this does is remove the comment attr on the selection
-  this.container.parent().on("click", ".comment-delete", function(){
+  this.container.parent().on('click', '.comment-delete', async function () {
     var commentId = $(this).closest('.comment-container')[0].id;
-    self.socket.emit('deleteComment', {padId: self.padId, commentId: commentId, authorId: clientVars.userId}, function (err){
-      if (!err) {
-        self.deleteComment(commentId);
-        var padOuter = $('iframe[name="ace_outer"]').contents();
-        var padInner = padOuter.find('iframe[name="ace_inner"]');
-        var selector = "."+commentId;
-        var ace = self.ace;
+    try {
+      await new Promise((resolve, reject) => {
+        self.socket.emit('deleteComment', {
+          padId: self.padId,
+          commentId,
+          authorId: clientVars.userId,
+        }, (errMsg) => errMsg ? reject(new Error(errMsg)) : resolve());
+      });
+    } catch (err) {
+      if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
+      $.gritter.add({
+        title: html10n.translations['ep_comments_page.error'] || 'Error',
+        text: html10n.translations['ep_comments_page.error.delete_unauth'] ||
+          'You cannot delete other users comments!',
+        class_name: 'error',
+      });
+      return;
+    }
+    self.deleteComment(commentId);
+    const padOuter = $('iframe[name="ace_outer"]').contents();
+    const padInner = padOuter.find('iframe[name="ace_inner"]');
+    const selector = `.${commentId}`;
+    const ace = self.ace;
 
-        ace.callWithAce(function(aceTop){
-          var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
-          // rep is an array of reps..  I will need to iterate over each to do something meaningful..
-          $.each(repArr, function(index, rep){
-            // I don't think we need this nested call
-            ace.callWithAce(function (ace){
-              ace.ace_performSelectionChange(rep[0],rep[1],true);
-              ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
-              // Note that this is the correct way of doing it, instead of there being
-              // a commentId we now flag it as "comment-deleted"
-            });
-          });
-        },'deleteCommentedSelection', true);
-      }
-
-      if (err === 'unauth') {
-        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.delete_unauth"] || "You cannot delete other users comments!",  class_name: "error"})
-      } else {
-        $.gritter.add({
-          title: "Error",
-          text: err,
-          sticky: true,
-          class_name: "error"
-        })
-      }
-    });
-
+    ace.callWithAce((aceTop) => {
+      const repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+      // rep is an array of reps.. I will need to iterate over each to do something meaningful..
+      $.each(repArr, (index, rep) => {
+        // I don't think we need this nested call
+        ace.callWithAce((ace) => {
+          ace.ace_performSelectionChange(rep[0], rep[1], true);
+          ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
+          // Note that this is the correct way of doing it, instead of there being
+          // a commentId we now flag it as "comment-deleted"
+        });
+      });
+    }, 'deleteCommentedSelection', true);
   });
 
   // Listen for events to edit a comment
@@ -181,7 +183,7 @@ ep_comments.prototype.init = function(){
   });
 
   // submit the edition on the text and update the comment text
-  this.container.parent().on("click", ".comment-edit-submit", function(e){
+  this.container.parent().on('click', '.comment-edit-submit', async function (e) {
     e.preventDefault();
     e.stopPropagation();
     var $commentBox = $(this).closest('.comment-container');
@@ -194,29 +196,28 @@ ep_comments.prototype.init = function(){
     data.commentText = commentText;
     data.authorId = clientVars.userId;
 
-    self.socket.emit('updateCommentText', data, function (err){
-      if(!err) {
-        $commentForm.remove();
-        $commentBox.removeClass('editing');
-        self.updateCommentBoxText(commentId, commentText);
+    try {
+      await new Promise((resolve, reject) => {
+        self.socket.emit('updateCommentText', data,
+          (errMsg) => errMsg ? reject(new Error(errMsg)) : resolve());
+      });
+    } catch (err) {
+      if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
+      $.gritter.add({
+        title: html10n.translations['ep_comments_page.error'] || 'Error',
+        text: html10n.translations['ep_comments_page.error.edit_unauth'] ||
+          'You cannot edit other users comments!',
+        class_name: 'error',
+      });
+      return;
+    }
+    $commentForm.remove();
+    $commentBox.removeClass('editing');
+    self.updateCommentBoxText(commentId, commentText);
 
-        // although the comment or reply was saved on the data base successfully, it needs
-        // to update the comment or comment reply variable with the new text saved
-        self.setCommentOrReplyNewText(commentId, commentText);
-      }
-
-      if (err === 'unauth') {
-        $.gritter.add({title: html10n.translations["ep_comments_page.error"] || "Error", text: html10n.translations["ep_comments_page.error.edit_unauth"] || "You cannot edit other users comments!",  class_name: "error"})
-      } else {
-        $.gritter.add({
-          title: "Error",
-          text: err,
-          sticky: true,
-          class_name: "error"
-        })
-      }
-
-    });
+    // although the comment or reply was saved on the data base successfully, it needs
+    // to update the comment or comment reply variable with the new text saved
+    self.setCommentOrReplyNewText(commentId, commentText);
   });
 
   // hide the edit form and make the comment author and text visible again

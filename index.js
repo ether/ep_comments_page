@@ -67,14 +67,14 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     socket.on('deleteComment', async (data, respond) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
-      // delete the comment on the database
-      const failed = await commentManager.deleteComment(padId, data.commentId, data.authorId);
-      // Broadcast to all other users that this comment was deleted
-      if (!failed) {
+      try {
+        const {padId} = await readOnlyManager.getIds(data.padId);
+        await commentManager.deleteComment(padId, data.commentId, data.authorId);
         socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+        respond('');
+      } catch (err) {
+        respond(err.message || err.toString());
       }
-      respond(failed);
     });
 
     socket.on('revertChange', async (data, respond) => {
@@ -108,15 +108,15 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     socket.on('updateCommentText', async (data, respond) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
-      // Broadcast to all other users that the comment text was changed.
-      // Note that commentId here can either be the commentId or replyId..
-      var commentId = data.commentId;
-      var commentText = data.commentText;
-      var authorId = data.authorId;
-      const failed = await commentManager.changeCommentText(padId, commentId, commentText, authorId);
-      if (!failed) socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
-      respond(failed);
+      try {
+        const {commentId, commentText, authorId} = data;
+        const {padId} = await readOnlyManager.getIds(data.padId);
+        await commentManager.changeCommentText(padId, commentId, commentText, authorId);
+        socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+        respond('');
+      } catch (err) {
+        respond(err.message || err.toString());
+      }
     });
 
     socket.on('addCommentReply', async (data, respond) => {
