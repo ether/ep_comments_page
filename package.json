@@ -25,11 +25,31 @@
     "formidable": "*"
   },
   "devDependencies": {
+    "eslint": "^7.13.0",
+    "eslint-config-etherpad": "^1.0.8",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-arrow": "^1.2.2",
+    "eslint-plugin-promise": "^4.2.1",
     "request": "*",
     "socket.io-client": "*"
   },
+  "eslintConfig": {
+    "root": true,
+    "extends": "etherpad/plugin",
+    "ignorePatterns": [
+      "/static/js/jquery.tmpl.min.js",
+      "/static/js/moment-with-locales.min.js"
+    ]
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "ep_etherpad-lite": ">=1.8.3"
+  },
   "engines": {
-    "node": "*"
+    "node": ">=10.13.0"
   },
   "repository": {
     "type": "git",

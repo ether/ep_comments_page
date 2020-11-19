@@ -1,18 +1,16 @@
-/* global exports, require */
+'use strict';
 
-var eejs = require('ep_etherpad-lite/node/eejs/');
-var settings = require('ep_etherpad-lite/node/utils/Settings');
-var formidable = require('ep_etherpad-lite/node_modules/formidable');
-var commentManager = require('./commentManager');
-var apiUtils = require('./apiUtils');
-var _ = require('ep_etherpad-lite/static/js/underscore');
+const eejs = require('ep_etherpad-lite/node/eejs/');
+const settings = require('ep_etherpad-lite/node/utils/Settings');
+const formidable = require('ep_etherpad-lite/node_modules/formidable');
+const commentManager = require('./commentManager');
+const apiUtils = require('./apiUtils');
+const _ = require('ep_etherpad-lite/static/js/underscore');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
 
-exports.exportEtherpadAdditionalContent = function(hook_name, context, callback){
-  return callback(["comments"]);
-};
+exports.exportEtherpadAdditionalContent = (hookName, context, callback) => callback(['comments']);
 
 exports.padRemove = async (hookName, context) => {
   await Promise.all([
@@ -28,7 +26,7 @@ exports.padCopy = async (hookName, context) => {
   ]);
 };
 
-exports.handleMessageSecurity = function(hook_name, context, callback){
+exports.handleMessageSecurity = (hookName, context, callback) => {
   const {message: {data: {apool} = {}} = {}} = context;
   if (apool && apool[0] && apool[0][0] === 'comment') {
     // Comment change, allow it to override readonly security model!!
@@ -37,10 +35,9 @@ exports.handleMessageSecurity = function(hook_name, context, callback){
   return callback();
 };
 
-exports.socketio = function (hook_name, args, cb){
+exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
   io.on('connection', (socket) => {
-
     // Join the rooms
     socket.on('getComments', async (data, respond) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
@@ -58,7 +55,7 @@ exports.socketio = function (hook_name, args, cb){
     // On add events
     socket.on('addComment', async (data, respond) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
-      var content = data.comment;
+      const content = data.comment;
       const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
@@ -130,62 +127,64 @@ exports.socketio = function (hook_name, args, cb){
   return cb();
 };
 
-exports.eejsBlock_dd_insert = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/menuButtons.ejs");
+exports.eejsBlock_dd_insert = (hookName, args, cb) => {
+  args.content += eejs.require('ep_comments_page/templates/menuButtons.ejs');
   return cb();
 };
 
-exports.eejsBlock_mySettings = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/settings.ejs");
+exports.eejsBlock_mySettings = (hookName, args, cb) => {
+  args.content += eejs.require('ep_comments_page/templates/settings.ejs');
   return cb();
 };
 
-exports.padInitToolbar = function (hookName, args) {
-  var toolbar = args.toolbar;
+exports.padInitToolbar = (hookName, args) => {
+  const toolbar = args.toolbar;
 
-  var button = toolbar.button({
-      command: 'addComment',
-      localizationId: 'ep_comments_page.add_comment.title',
-      class: 'buttonicon buttonicon-comment-medical'
+  const button = toolbar.button({
+    command: 'addComment',
+    localizationId: 'ep_comments_page.add_comment.title',
+    class: 'buttonicon buttonicon-comment-medical',
   });
 
   toolbar.registerButton('addComment', button);
 };
 
-exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
-  //check if custom button is used
-  if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1 ) {
+exports.eejsBlock_editbarMenuLeft = (hookName, args, cb) => {
+  // check if custom button is used
+  if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1) {
     return cb();
   }
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentBarButtons.ejs");
+  args.content += eejs.require('ep_comments_page/templates/commentBarButtons.ejs');
   return cb();
 };
 
-exports.eejsBlock_scripts = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/comments.html");
-  args.content = args.content + eejs.require("ep_comments_page/templates/commentIcons.html");
+exports.eejsBlock_scripts = (hookName, args, cb) => {
+  args.content += eejs.require('ep_comments_page/templates/comments.html');
+  args.content += eejs.require('ep_comments_page/templates/commentIcons.html');
   return cb();
 };
 
-exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_comments_page/templates/styles.html");
+exports.eejsBlock_styles = (hookName, args, cb) => {
+  args.content += eejs.require('ep_comments_page/templates/styles.html');
   return cb();
 };
 
-exports.clientVars = function (hook, context, cb) {
-  var displayCommentAsIcon = settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
-  var highlightSelectedText = settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+exports.clientVars = (hook, context, cb) => {
+  const displayCommentAsIcon =
+    settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
+  const highlightSelectedText =
+    settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
   return cb({
-    "displayCommentAsIcon": displayCommentAsIcon,
-    "highlightSelectedText": highlightSelectedText,
+    displayCommentAsIcon,
+    highlightSelectedText,
   });
 };
 
-exports.expressCreateServer = function (hook_name, args, callback) {
+exports.expressCreateServer = (hookName, args, callback) => {
   args.app.get('/p/:pad/:rev?/comments', async (req, res) => {
-    var fields = req.query;
+    const fields = req.query;
     // check the api key
-    if(!apiUtils.validateApiKey(fields, res)) return;
+    if (!apiUtils.validateApiKey(fields, res)) return;
 
     // sanitize pad id before continuing
     const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
@@ -203,10 +202,10 @@ exports.expressCreateServer = function (hook_name, args, callback) {
   });
 
   args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
-    const [fields, files] = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+    const fields = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields) => {
         if (err != null) return reject(err);
-        resolve([fields, files]);
+        resolve(fields);
       });
     });
 
@@ -224,7 +223,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     try {
       data = JSON.parse(fields.data);
     } catch (err) {
-      res.json({code: 1, message: "data must be a JSON", data: null});
+      res.json({code: 1, message: 'data must be a JSON', data: null});
       return;
     }
 
@@ -233,23 +232,23 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       [commentIds, comments] = await commentManager.bulkAddComments(padIdReceived, data);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
-      res.json({code: 2, message: "internal error", data: null});
+      res.json({code: 2, message: 'internal error', data: null});
       return;
     }
     if (commentIds == null) return;
     for (let i = 0; i < commentIds.length; i++) {
       io.to(padIdReceived).emit('pushAddComment', commentIds[i], comments[i]);
     }
-    res.json({code: 0, commentIds: commentIds});
+    res.json({code: 0, commentIds});
   });
 
   args.app.get('/p/:pad/:rev?/commentReplies', async (req, res) => {
-    //it's the same thing as the formidable's fields
-    var fields = req.query;
+    // it's the same thing as the formidable's fields
+    const fields = req.query;
     // check the api key
-    if(!apiUtils.validateApiKey(fields, res)) return;
+    if (!apiUtils.validateApiKey(fields, res)) return;
 
-    //sanitize pad id before continuing
+    // sanitize pad id before continuing
     const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
     // call the route with the pad id sanitized
@@ -258,18 +257,18 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       data = await commentManager.getCommentReplies(padIdReceived);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
-      res.json({code: 2, message: "internal error", data:null});
+      res.json({code: 2, message: 'internal error', data: null});
       return;
     }
     if (data == null) return;
-    res.json({code: 0, data: data});
+    res.json({code: 0, data});
   });
 
   args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
-    const [fields, files] = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields, files) => {
+    const fields = await new Promise((resolve, reject) => {
+      (new formidable.IncomingForm()).parse(req, (err, fields) => {
         if (err != null) return reject(err);
-        resolve([fields, files]);
+        resolve(fields);
       });
     });
 
@@ -285,9 +284,9 @@ exports.expressCreateServer = function (hook_name, args, callback) {
     // create data to hold comment reply information:
     let data;
     try {
-        data = JSON.parse(fields.data);
+      data = JSON.parse(fields.data);
     } catch (err) {
-      res.json({code: 1, message: "data must be a JSON", data: null});
+      res.json({code: 1, message: 'data must be a JSON', data: null});
       return;
     }
 
@@ -296,7 +295,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       [replyIds, replies] = await commentManager.bulkAddCommentReplies(padIdReceived, data);
     } catch (err) {
       console.error(err.stack ? err.stack : err.toString());
-      res.json({code: 2, message: "internal error", data: null});
+      res.json({code: 2, message: 'internal error', data: null});
       return;
     }
     if (replyIds == null) return;
@@ -304,7 +303,7 @@ exports.expressCreateServer = function (hook_name, args, callback) {
       replies[i].replyId = replyIds[i];
       io.to(padIdReceived).emit('pushAddCommentReply', replyIds[i], replies[i]);
     }
-    res.json({code: 0, replyIds: replyIds});
+    res.json({code: 0, replyIds});
   });
   return callback();
-}
+};

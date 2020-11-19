@@ -1,10 +1,10 @@
-/* global exports, require */
+'use strict';
 
-var _ = require('ep_etherpad-lite/static/js/underscore');
-var db = require('ep_etherpad-lite/node/db/DB');
+const _ = require('ep_etherpad-lite/static/js/underscore');
+const db = require('ep_etherpad-lite/node/db/DB');
 const log4js = require('ep_etherpad-lite/node_modules/log4js');
-var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-var shared = require('./static/js/shared');
+const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const shared = require('./static/js/shared');
 
 const logger = log4js.getLogger('ep_comments_page');
 
@@ -12,7 +12,7 @@ exports.getComments = async (padId) => {
   // Not sure if we will encouter race conditions here..  Be careful.
 
   // get the globalComments
-  let comments = await db.get('comments:' + padId);
+  let comments = await db.get(`comments:${padId}`);
   if (comments == null) comments = {};
   return {comments};
 };
@@ -29,11 +29,11 @@ exports.deleteComment = async (padId, commentId, authorId) => {
     throw new Error('unauth');
   }
   delete comments[commentId];
-  await db.set('comments:' + padId, comments);
+  await db.set(`comments:${padId}`, comments);
 };
 
 exports.deleteComments = async (padId) => {
-  await db.remove('comments:' + padId);
+  await db.remove(`comments:${padId}`);
 };
 
 exports.addComment = async (padId, data) => {
@@ -43,7 +43,7 @@ exports.addComment = async (padId, data) => {
 
 exports.bulkAddComments = async (padId, data) => {
   // get the entry
-  let comments = await db.get('comments:' + padId);
+  let comments = await db.get(`comments:${padId}`);
 
   // the entry doesn't exist so far, let's create it
   if (comments == null) comments = {};
@@ -69,31 +69,31 @@ exports.bulkAddComments = async (padId, data) => {
   });
 
   // save the new element back
-  await db.set('comments:' + padId, comments);
+  await db.set(`comments:${padId}`, comments);
 
   return [commentIds, newComments];
 };
 
 exports.copyComments = async (originalPadId, newPadID) => {
   // get the comments of original pad
-  const originalComments = await db.get('comments:' + originalPadId);
+  const originalComments = await db.get(`comments:${originalPadId}`);
   // make sure we have different copies of the comment between pads
   const copiedComments = _.mapObject(originalComments, (thisComment) => _.clone(thisComment));
 
   // save the comments on new pad
-  await db.set('comments:' + newPadID, copiedComments);
+  await db.set(`comments:${newPadID}`, copiedComments);
 };
 
 exports.getCommentReplies = async (padId) => {
   // get the globalComments replies
-  let replies = await db.get('comment-replies:' + padId);
+  let replies = await db.get(`comment-replies:${padId}`);
   // comment does not exist
   if (replies == null) replies = {};
   return {replies};
 };
 
 exports.deleteCommentReplies = async (padId) => {
-  await db.remove('comment-replies:' + padId);
+  await db.remove(`comment-replies:${padId}`);
 };
 
 exports.addCommentReply = async (padId, data) => {
@@ -103,14 +103,14 @@ exports.addCommentReply = async (padId, data) => {
 
 exports.bulkAddCommentReplies = async (padId, data) => {
   // get the entry
-  let replies = await db.get('comment-replies:' + padId);
+  let replies = await db.get(`comment-replies:${padId}`);
   // the entry doesn't exist so far, let's create it
   if (replies == null) replies = {};
 
   const newReplies = [];
   const replyIds = _.map(data, (replyData) => {
     // create the new reply id
-    const replyId = "c-reply-" + randomString(16);
+    const replyId = `c-reply-${randomString(16)}`;
 
     const metadata = replyData.comment || {};
 
@@ -121,7 +121,7 @@ exports.bulkAddCommentReplies = async (padId, data) => {
       changeFrom: replyData.changeFrom || null,
       author: metadata.author || 'empty',
       name: metadata.name || replyData.name,
-      timestamp: parseInt(replyData.timestamp) || new Date().getTime()
+      timestamp: parseInt(replyData.timestamp) || new Date().getTime(),
     };
 
     // add the entry for this pad
@@ -132,28 +132,28 @@ exports.bulkAddCommentReplies = async (padId, data) => {
   });
 
   // save the new element back
-  await db.set('comment-replies:' + padId, replies);
+  await db.set(`comment-replies:${padId}`, replies);
 
   return [replyIds, newReplies];
 };
 
 exports.copyCommentReplies = async (originalPadId, newPadID) => {
   // get the replies of original pad
-  const originalReplies = await db.get('comment-replies:' + originalPadId);
+  const originalReplies = await db.get(`comment-replies:${originalPadId}`);
   // make sure we have different copies of the reply between pads
   const copiedReplies = _.mapObject(originalReplies, (thisReply) => _.clone(thisReply));
 
   // save the comment replies on new pad
-  await db.set('comment-replies:' + newPadID, copiedReplies);
+  await db.set(`comment-replies:${newPadID}`, copiedReplies);
 };
 
 exports.changeAcceptedState = async (padId, commentId, state) => {
   // Given a comment we update that comment to say the change was accepted or reverted
 
   // If we're dealing with comment replies we need to a different query
-  var prefix = "comments:";
-  if(commentId.substring(0,7) === "c-reply"){
-    prefix = "comment-replies:";
+  let prefix = 'comments:';
+  if (commentId.substring(0, 7) === 'c-reply') {
+    prefix = 'comment-replies:';
   }
 
   // get the entry
@@ -172,7 +172,7 @@ exports.changeAcceptedState = async (padId, commentId, state) => {
 
   comments[commentId] = comment;
 
-  //save the new element back
+  // save the new element back
   await db.set(prefix + padId, comments);
 };
 
@@ -185,8 +185,8 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
   // Given a comment we update the comment text
 
   // If we're dealing with comment replies we need to a different query
-  var prefix = 'comments:';
-  if (commentId.substring(0,7) === 'c-reply') {
+  let prefix = 'comments:';
+  if (commentId.substring(0, 7) === 'c-reply') {
     prefix = 'comment-replies:';
   }
 

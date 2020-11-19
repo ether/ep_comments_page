@@ -1,6 +1,8 @@
+'use strict';
+
 /* ***** Public methods: ***** */
 
-var localize = function(element) {
+const localize = (element) => {
   html10n.translateElement(html10n.translations, element.get(0));
 };
 

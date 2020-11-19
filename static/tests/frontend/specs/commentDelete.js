@@ -1,38 +1,34 @@
-describe('ep_comments_page - Comment Delete', function(){
-  var helperFunctions;
-  var textOfComment = 'original comment';
-  var textOfReply = 'original reply';
-  var FIRST_LINE = 0;
+'use strict';
+
+describe('ep_comments_page - Comment Delete', function () {
+  let helperFunctions;
+  const textOfComment = 'original comment';
+  const textOfReply = 'original reply';
+  const FIRST_LINE = 0;
 
   // create pad with a comment and a reply
   beforeEach(function (done) {
-    helper.waitFor(function(){
-      return (ep_comments_page_test_helper !== 'undefined')
-    });
-    helperFunctions = ep_comments_page_test_helper.commentDelete;
-    helperFunctions.createPad(this, function(){
+    helperFunctions = commentDelete;
+    helperFunctions.createPad(this, () => {
       helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
     });
   });
 
-  context('when user presses the delete button on a comment', function(){
-    it("should delete comment", function(done){
-      var outer$ = helper.padOuter$;
-      var inner$ = helper.padInner$;
+  context('when user presses the delete button on a comment', function () {
+    it('should delete comment', function (done) {
+      const outer$ = helper.padOuter$;
+      const inner$ = helper.padInner$;
       outer$('.comment-delete').click();
-      helper.waitFor(function(){
-        return inner$('.comment').length === 0;
-      }).done(function () {
-        if(inner$('.comment').length !== 0) throw new Error("Error deleting comment");
+      helper.waitFor(() => inner$('.comment').length === 0).done(() => {
+        if (inner$('.comment').length !== 0) throw new Error('Error deleting comment');
         done();
       });
     });
-
   });
 
-  context('when user presses the delete button on other users comment', function(){
+  context('when user presses the delete button on other users comment', function () {
     it('should not delete comment', async function () {
-      var outer$ = helper.padOuter$;
+      let outer$ = helper.padOuter$;
       await new Promise((resolve) => setTimeout(resolve, 500));
       await new Promise((resolve) => helper.newPad(resolve, helperFunctions.padId));
       await helper.waitForPromise(() => {
@@ -50,165 +46,161 @@ describe('ep_comments_page - Comment Delete', function(){
   });
 });
 
-var ep_comments_page_test_helper = ep_comments_page_test_helper || {};
-ep_comments_page_test_helper.commentDelete = {
+const commentDelete = {
   padId: undefined,
-  createPad: function(test, cb) {
-    var self = this;
-    this.padId = helper.newPad(function(){
-      self.enlargeScreen(function(){
-        self.createOrResetPadText(function(){
+  createPad(test, cb) {
+    const self = this;
+    this.padId = helper.newPad(() => {
+      self.enlargeScreen(() => {
+        self.createOrResetPadText(() => {
           cb();
         });
       });
     });
     test.timeout(60000);
   },
-  createOrResetPadText: function(cb) {
-    this.cleanPad(function(){
-      var inner$ = helper.padInner$;
+  createOrResetPadText(cb) {
+    this.cleanPad(() => {
+      const inner$ = helper.padInner$;
       inner$('div').first().sendkeys('something\n anything');
-      helper.waitFor(function(){
-        var inner$ = helper.padInner$;
-        var lineLength = inner$('div').length;
+      helper.waitFor(() => {
+        const inner$ = helper.padInner$;
+        const lineLength = inner$('div').length;
 
         return lineLength > 1;
       }).done(cb);
     });
   },
-  reloadPad: function(test, cb){
+  reloadPad(test, cb) {
     test.timeout(20000);
-    var self = this;
-    var padId = this.padId;
+    const self = this;
+    const padId = this.padId;
     // we do nothing for a second while we wait for content to be collected before reloading
     // this may be hacky, but we need time for CC to run so... :?
-    setTimeout(function() {
-      helper.newPad(function(){
+    setTimeout(() => {
+      helper.newPad(() => {
         self.enlargeScreen(cb);
       }, padId);
     }, 1000);
   },
-  cleanPad: function(callback) {
-    var inner$ = helper.padInner$;
-    var $padContent = inner$("#innerdocbody");
-    $padContent.html(" ");
+  cleanPad(callback) {
+    const inner$ = helper.padInner$;
+    const $padContent = inner$('#innerdocbody');
+    $padContent.html(' ');
 
     // wait for Etherpad to re-create first line
-    helper.waitFor(function(){
-      var lineNumber = inner$("div").length;
+    helper.waitFor(() => {
+      const lineNumber = inner$('div').length;
       return lineNumber === 1;
     }, 20000).done(callback);
   },
-  enlargeScreen: function(callback) {
-    $('#iframe-container iframe').css("max-width", "3000px");
+  enlargeScreen(callback) {
+    $('#iframe-container iframe').css('max-width', '3000px');
     callback();
   },
-  addComentAndReplyToLine: function(line, textOfComment, textOfReply, callback) {
-    var self = this;
-    this.addCommentToLine(line, textOfComment, function(){
+  addComentAndReplyToLine(line, textOfComment, textOfReply, callback) {
+    const self = this;
+    this.addCommentToLine(line, textOfComment, () => {
       self.addCommentReplyToLine(line, textOfReply, callback);
     });
   },
-  addCommentToLine: function(line, textOfComment, callback) {
-    var outer$ = helper.padOuter$;
-    var chrome$ = helper.padChrome$;
-    var $line = this.getLine(line);
+  addCommentToLine(line, textOfComment, callback) {
+    const chrome$ = helper.padChrome$;
+    const $line = this.getLine(line);
     $line.sendkeys('{selectall}'); // needs to select content to add comment to
-    var $commentButton = chrome$(".addComment");
+    const $commentButton = chrome$('.addComment');
     $commentButton.click();
 
     // fill the comment form and submit it
-    var $commentField = chrome$("textarea.comment-content");
+    const $commentField = chrome$('textarea.comment-content');
     $commentField.val(textOfComment);
-    var $submittButton = chrome$(".comment-buttons input[type=submit]");
+    const $submittButton = chrome$('.comment-buttons input[type=submit]');
     $submittButton.click();
 
     // wait until comment is created and comment id is set
     this.createdCommentOnLine(line, callback);
   },
-  addCommentReplyToLine: function(line, textOfReply, callback) {
-    var outer$ = helper.padOuter$;
-    var commentId = this.getCommentIdOfLine(line);
-    var existingReplies = outer$(".sidebar-comment-reply").length;
+  addCommentReplyToLine(line, textOfReply, callback) {
+    const outer$ = helper.padOuter$;
+    const commentId = this.getCommentIdOfLine(line);
+    const existingReplies = outer$('.sidebar-comment-reply').length;
 
     // if comment icons are enabled, make sure we display the comment box:
     if (this.commentIconsEnabled()) {
       // click on the icon
-      var $commentIcon = outer$("#commentIcons #icon-"+commentId).first();
+      const $commentIcon = outer$(`#commentIcons #icon-${commentId}`).first();
       $commentIcon.click();
     }
 
     // fill reply field
-    var $replyField = outer$(".comment-content");
+    const $replyField = outer$('.comment-content');
     $replyField.val(textOfReply);
 
     // submit reply
-    var $submitReplyButton = outer$("form.new-comment input[type='submit']").first();
+    const $submitReplyButton = outer$("form.new-comment input[type='submit']").first();
     $submitReplyButton.click();
 
     // wait for the reply to be saved
-    helper.waitFor(function() {
-      var hasSavedReply = outer$(".sidebar-comment-reply").length === existingReplies + 1;
+    helper.waitFor(() => {
+      const hasSavedReply = outer$('.sidebar-comment-reply').length === existingReplies + 1;
       return hasSavedReply;
     }).done(callback);
   },
-  getLine: function(lineNum) {
-    var inner$ = helper.padInner$;
-    var $line = inner$('div').slice(lineNum, lineNum + 1);
+  getLine(lineNum) {
+    const inner$ = helper.padInner$;
+    const $line = inner$('div').slice(lineNum, lineNum + 1);
     return $line;
   },
-  createdCommentOnLine: function(line, cb) {
-    var self = this;
-    helper.waitFor(function() {
-      return self.getCommentIdOfLine(line) !== null;
-    }).done(cb);
+  createdCommentOnLine(line, cb) {
+    const self = this;
+    helper.waitFor(() => self.getCommentIdOfLine(line) != null).done(cb);
   },
-  getCommentIdOfLine: function(line) {
-    var $line = this.getLine(line);
-    var comment = $line.find(".comment");
-    var cls = comment.attr('class');
-    var classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-    var commentId = (classCommentId) ? classCommentId[1] : null;
+  getCommentIdOfLine(line) {
+    const $line = this.getLine(line);
+    const comment = $line.find('.comment');
+    const cls = comment.attr('class');
+    const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
+    const commentId = (classCommentId) ? classCommentId[1] : null;
 
     return commentId;
   },
-  commentIconsEnabled: function() {
-    return helper.padOuter$("#commentIcons").length > 0;
+  commentIconsEnabled() {
+    return helper.padOuter$('#commentIcons').length > 0;
   },
-  clickEditCommentButton: function () {
-    var outer$ = helper.padOuter$;
-    var $editButton = outer$(".comment-edit").first();
+  clickEditCommentButton() {
+    const outer$ = helper.padOuter$;
+    const $editButton = outer$('.comment-edit').first();
     $editButton.click();
   },
-  clickEditCommentReplyButton: function () {
-    var outer$ = helper.padOuter$;
-    var $editButton = outer$(".comment-edit").last();
+  clickEditCommentReplyButton() {
+    const outer$ = helper.padOuter$;
+    const $editButton = outer$('.comment-edit').last();
     $editButton.click();
   },
-  getEditForm: function () {
-    var outer$ = helper.padOuter$;
-    return outer$(".comment-edit-form");
+  getEditForm() {
+    const outer$ = helper.padOuter$;
+    return outer$('.comment-edit-form');
   },
-  checkIfOneFormEditWasAdded: function () {
+  checkIfOneFormEditWasAdded() {
     expect(this.getEditForm().length).to.be(1);
   },
-  checkIfOneFormEditWasRemoved: function () {
+  checkIfOneFormEditWasRemoved() {
     expect(this.getEditForm().length).to.be(0);
   },
-  checkIfCommentFieldIsHidden: function (fieldClass) {
-    var outer$ = helper.padOuter$;
-    var $field = outer$('.' + fieldClass).first();
+  checkIfCommentFieldIsHidden(fieldClass) {
+    const outer$ = helper.padOuter$;
+    const $field = outer$(`.${fieldClass}`).first();
     expect($field.is(':visible')).to.be(false);
   },
-  pressCancel: function () {
-    var $cancelButton =  this.getEditForm().find('.comment-edit-cancel');
+  pressCancel() {
+    const $cancelButton = this.getEditForm().find('.comment-edit-cancel');
     $cancelButton.click();
   },
-  pressSave: function () {
-    var $saveButton =  this.getEditForm().find('.comment-edit-submit');
+  pressSave() {
+    const $saveButton = this.getEditForm().find('.comment-edit-submit');
     $saveButton.click();
   },
-  writeCommentText: function (commentText) {
+  writeCommentText(commentText) {
     this.getEditForm().find('.comment-edit-text').text(commentText);
   },
 };
