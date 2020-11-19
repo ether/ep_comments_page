@@ -3,16 +3,16 @@
 const $ = require('ep_etherpad-lite/node_modules/cheerio');
 const commentManager = require('./commentManager');
 
-// Add the props to be supported in export
-exports.exportHtmlAdditionalTagsWithData =
-  async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
-
 // Iterate over pad attributes to find only the comment ones
 const findAllCommentUsedOn = (pad) => {
   const commentsUsed = [];
   pad.pool.eachAttrib((key, value) => { if (key === 'comment') commentsUsed.push(value); });
   return commentsUsed;
 };
+
+// Add the props to be supported in export
+exports.exportHtmlAdditionalTagsWithData =
+  async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
 
 exports.getLineHTMLForExport = async (hookName, context) => {
   // I'm not sure how optimal this is - it will do a database lookup for each line..
