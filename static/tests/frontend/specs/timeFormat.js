@@ -3,6 +3,13 @@
 let moment;
 
 describe('ep_comments_page - Time Formatting', function () {
+  let originalLanguage = null;
+
+  after(async function () {
+    // Restore the language to avoid breaking other tests.
+    if (originalLanguage != null) await changeLanguageTo(originalLanguage);
+  });
+
   for (const [lang, description] of
     Object.entries({en: 'English', af: 'a language not localized yet'})) {
     describe(`in ${description}`, function () {
@@ -10,11 +17,6 @@ describe('ep_comments_page - Time Formatting', function () {
         this.timeout(60000);
         await loadMoment();
         await changeLanguageTo(lang);
-      });
-
-      // ensure we go back to English to avoid breaking other tests:
-      after(async function () {
-        await changeLanguageTo('en');
       });
 
       it('returns "12 seconds ago" when time is 12 seconds in the past', async function () {
@@ -254,6 +256,7 @@ describe('ep_comments_page - Time Formatting', function () {
   };
 
   const changeLanguageTo = async (lang) => {
+    if (originalLanguage == null) originalLanguage = helper.padChrome$.window.html10n.getLanguage();
     helper.padChrome$('#languagemenu').val(lang).trigger('change');
     await helper.waitForPromise(() => moment.locale() === lang);
   };
