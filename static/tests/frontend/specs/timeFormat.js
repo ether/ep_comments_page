@@ -250,10 +250,7 @@ describe('ep_comments_page - Time Formatting', function () {
   const loadMoment = async () => {
     await new Promise((resolve) => helper.newPad(resolve));
     const chrome$ = helper.padChrome$;
-    const code = await chrome$.getScript(
-        '/static/plugins/ep_comments_page/static/js/moment-with-locales.min.js');
-    chrome$.window.eval(code);
-    moment = chrome$.window.moment;
+    moment = chrome$.window.require('ep_comments_page/static/js/moment-with-locales.min');
     moment.relativeTimeThreshold('ss', 0);
   };
 
@@ -279,5 +276,6 @@ describe('ep_comments_page - Time Formatting', function () {
 
     await helper.waitForPromise(
         () => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang]);
+    await helper.waitForPromise(() => moment.locale() === lang);
   };
 });
