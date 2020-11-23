@@ -978,6 +978,9 @@ EpComments.prototype.saveComment = function (data, rep) {
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
+      // we should get rep again because the document might have changed..
+      // details at https://github.com/ether/ep_comments/issues/133
+      rep = ace.ace_getRep();
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
     }, 'insertComment', true);
