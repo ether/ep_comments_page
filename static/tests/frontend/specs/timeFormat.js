@@ -128,7 +128,6 @@ describe('ep_comments_page - Time Formatting', function () {
       this.timeout(60000);
       await loadMoment();
       await changeLanguageTo('pt-br');
-      moment.locale('pt-br');
     });
 
     it('returns "há 12 segundos" when time is 12 seconds in the past', async function () {
@@ -255,27 +254,7 @@ describe('ep_comments_page - Time Formatting', function () {
   };
 
   const changeLanguageTo = async (lang) => {
-    const boldTitles = {
-      'en': 'Bold (Ctrl+B)',
-      'pt-br': 'Negrito (Ctrl-B)',
-      'af': 'Vet (Ctrl-B)',
-    };
-    const chrome$ = helper.padChrome$;
-
-    // click on the settings button to make settings visible
-    const $settingsButton = chrome$('.buttonicon-settings');
-    $settingsButton.click();
-
-    // select the language
-    const $language = chrome$('#languagemenu');
-    $language.val(lang);
-    $language.change();
-
-    // hide settings again
-    $settingsButton.click();
-
-    await helper.waitForPromise(
-        () => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang]);
+    helper.padChrome$('#languagemenu').val(lang).trigger('change');
     await helper.waitForPromise(() => moment.locale() === lang);
   };
 });
