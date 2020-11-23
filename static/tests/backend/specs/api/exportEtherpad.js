@@ -4,8 +4,8 @@
  * Import and Export tests for comments in .etherpad format
  */
 
-const supertest = require('ep_etherpad-lite/node_modules/supertest');
-const superagent = require('ep_etherpad-lite/node_modules/superagent');
+const supertest = require('supertest');
+const superagent = require('superagent');
 const fs = require('fs');
 
 // test doc

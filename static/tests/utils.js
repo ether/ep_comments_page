@@ -3,8 +3,8 @@
 const appUrl = 'http://localhost:9001';
 const apiVersion = 1;
 
-const supertest = require('ep_etherpad-lite/node_modules/supertest');
-const request = require('ep_etherpad-lite/node_modules/request');
+const supertest = require('supertest');
+const request = require('request');
 const api = supertest(appUrl);
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 

@@ -31,8 +31,10 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.2",
     "eslint-plugin-promise": "^4.2.1",
-    "request": "*",
-    "socket.io-client": "*"
+    "request": "^2.88.2",
+    "socket.io-client": "^2.3.0",
+    "superagent": "^3.8.3",
+    "supertest": "^4.0.2"
   },
   "eslintConfig": {
     "root": true,
