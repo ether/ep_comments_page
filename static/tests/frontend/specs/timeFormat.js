@@ -16,10 +16,17 @@ describe('ep_comments_page - Time Formatting', function () {
     if (originalLanguage != null) await changeLanguageTo(originalLanguage);
   });
 
-  for (const [lang, description] of
-    Object.entries({en: 'English', af: 'a language not localized yet'})) {
+  for (const [lang, description] of Object.entries({
+    en: 'English',
+    // See https://translatewiki.net/wiki/FAQ#Special_private_language_codes_qqq,_qqx.
+    qqq: 'a language that moment.js does not support',
+  })) {
     describe(`in ${description}`, function () {
       before(async function () {
+        // First switch to a supported language that is not 'en' so that we know when the language
+        // change has taken effect. (This is important because using an unsupported language will
+        // cause moment.js to fall back to 'en'.)
+        await changeLanguageTo('pt-br');
         await changeLanguageTo(lang);
       });
 
@@ -252,7 +259,8 @@ describe('ep_comments_page - Time Formatting', function () {
 
   const changeLanguageTo = async (lang) => {
     if (originalLanguage == null) originalLanguage = helper.padChrome$.window.html10n.getLanguage();
+    expect(helper.padChrome$(`#languagemenu [value=${lang}]`).length).to.be(1);
     helper.padChrome$('#languagemenu').val(lang).trigger('change');
-    await helper.waitForPromise(() => moment.locale() === lang);
+    await helper.waitForPromise(() => moment.locale() === (lang === 'qqq' ? 'en' : lang));
   };
 });
