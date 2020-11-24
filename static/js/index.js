@@ -93,7 +93,8 @@ EpComments.prototype.init = function () {
   // When language is changed, we need to reload the comments to make sure
   // all templates are localized
   html10n.bind('localized', () => {
-    moment.locale(html10n.getLanguage());
+    // Fall back to 'en' if moment.js doesn't support the language.
+    moment.locale([html10n.getLanguage(), 'en']);
     this.localizeExistingComments();
   });
 
