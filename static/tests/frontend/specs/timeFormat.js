@@ -1,9 +1,15 @@
 'use strict';
 
-let moment;
-
 describe('ep_comments_page - Time Formatting', function () {
+  let moment;
   let originalLanguage = null;
+
+  before(async function () {
+    this.timeout(60000);
+    await new Promise((resolve) => helper.newPad(resolve));
+    moment = helper.padChrome$.window.require('ep_comments_page/static/js/moment-with-locales.min');
+    moment.relativeTimeThreshold('ss', 0);
+  });
 
   after(async function () {
     // Restore the language to avoid breaking other tests.
@@ -14,8 +20,6 @@ describe('ep_comments_page - Time Formatting', function () {
     Object.entries({en: 'English', af: 'a language not localized yet'})) {
     describe(`in ${description}`, function () {
       before(async function () {
-        this.timeout(60000);
-        await loadMoment();
         await changeLanguageTo(lang);
       });
 
@@ -127,8 +131,6 @@ describe('ep_comments_page - Time Formatting', function () {
 
   describe('in Portuguese', function () {
     before(async function () {
-      this.timeout(60000);
-      await loadMoment();
       await changeLanguageTo('pt-br');
     });
 
@@ -247,13 +249,6 @@ describe('ep_comments_page - Time Formatting', function () {
   const weeks = (count) => 7 * days(count);
   const months = (count) => 4 * weeks(count);
   const years = (count) => 12 * months(count);
-
-  const loadMoment = async () => {
-    await new Promise((resolve) => helper.newPad(resolve));
-    const chrome$ = helper.padChrome$;
-    moment = chrome$.window.require('ep_comments_page/static/js/moment-with-locales.min');
-    moment.relativeTimeThreshold('ss', 0);
-  };
 
   const changeLanguageTo = async (lang) => {
     if (originalLanguage == null) originalLanguage = helper.padChrome$.window.html10n.getLanguage();
