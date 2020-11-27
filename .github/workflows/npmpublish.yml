@@ -68,3 +68,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - run: git push --follow-tags
+
+##ETHERPAD_NPM_V=1
+## NPM configuration automatically created using bin/plugins/updateAllPluginsScript.sh
