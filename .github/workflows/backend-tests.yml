@@ -38,7 +38,7 @@ jobs:
     - name: Install plugin dependencies
       run: |
         cd node_modules/ep_comments_page #${{github.event.repository.name}}
-        npm i
+        npm ci
 
     # configures some settings and runs npm run test
     - name: Run the backend tests
