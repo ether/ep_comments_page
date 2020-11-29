@@ -33,11 +33,11 @@ jobs:
     - name: Checkout plugin repository
       uses: actions/checkout@v2
       with:
-        path: ./node_modules/${{github.event.repository.name}}
+        path: ./node_modules/ep_comments_page #${{github.event.repository.name}}
 
     - name: Install plugin dependencies
       run: |
-        cd node_modules/${{github.event.repository.name}}
+        cd node_modules/ep_comments_page #${{github.event.repository.name}}
         npm i
 
     # configures some settings and runs npm run test
