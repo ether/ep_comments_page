@@ -1,3 +1,6 @@
+# You need to change lines 38 and 46 in case the plugin's name on npmjs.com is different
+# from the repository name
+
 name: "Backend tests"
 
 # any branch is useful for testing before a PR is submitted
@@ -33,13 +36,16 @@ jobs:
     - name: Checkout plugin repository
       uses: actions/checkout@v2
       with:
-        path: ./node_modules/ep_comments_page #${{github.event.repository.name}}
+        path: ./node_modules/${{github.event.repository.name}}
 
     - name: Install plugin dependencies
       run: |
-        cd node_modules/ep_comments_page #${{github.event.repository.name}}
-        npm i
+        cd node_modules/${{github.event.repository.name}}
+        npm ci
 
     # configures some settings and runs npm run test
     - name: Run the backend tests
       run: tests/frontend/travis/runnerBackend.sh
+
+##ETHERPAD_NPM_V=1
+## NPM configuration automatically created using bin/plugins/updateAllPluginsScript.sh
