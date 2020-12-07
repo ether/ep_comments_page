@@ -137,7 +137,7 @@ exports.eejsBlock_mySettings = (hookName, args, cb) => {
   return cb();
 };
 
-exports.padInitToolbar = (hookName, args) => {
+exports.padInitToolbar = (hookName, args, cb) => {
   const toolbar = args.toolbar;
 
   const button = toolbar.button({
@@ -147,6 +147,8 @@ exports.padInitToolbar = (hookName, args) => {
   });
 
   toolbar.registerButton('addComment', button);
+
+  return cb();
 };
 
 exports.eejsBlock_editbarMenuLeft = (hookName, args, cb) => {
