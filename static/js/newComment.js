@@ -74,12 +74,12 @@ const insertNewCommentPopupIfDontExist = function (comment, callback) {
   return newCommentPopup;
 };
 
-const showNewCommentPopup = function(position) {
+const showNewCommentPopup = (position) => {
   // position below comment icon
   position = position || [];
   let left = position[0];
   if ($('.toolbar .addComment').length) {
-    left = $('.toolbar .addComment').offset().left
+    left = $('.toolbar .addComment').offset().left;
   }
   const top = position[1];
   $('#newComment').css('left', left);

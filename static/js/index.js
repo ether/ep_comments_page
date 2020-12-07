@@ -27,6 +27,12 @@ const cssFiles = [
 
 const UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
+const parseMultiline = (text) => {
+  if (!text) return text;
+  text = JSON.stringify(text);
+  return text.substr(1, (text.length - 2));
+};
+
 /* ********************************************************************
  *                         ep_comments Plugin                         *
  ******************************************************************** */
@@ -790,13 +796,15 @@ EpComments.prototype.deleteComment = function (commentId) {
   $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
-const cloneLine = function (line) {
+const cloneLine = (line) => {
   const padOuter = $('iframe[name="ace_outer"]').contents();
   const padInner = padOuter.find('iframe[name="ace_inner"]');
 
   const lineElem = $(line.lineNode);
   const lineClone = lineElem.clone();
-  const innerdocbodyMargin = $(padInner).offset().left + parseInt(padInner.css('padding-left') + lineElem.offset().left) || 0;
+  const innerOffset = $(padInner).offset().left;
+  const innerPadding = parseInt(padInner.css('padding-left') + lineElem.offset().left);
+  const innerdocbodyMargin = innerOffset + innerPadding || 0;
   padInner.contents().find('body').append(lineClone);
   lineClone.css({position: 'absolute'});
   lineClone.css(lineElem.offset());
@@ -808,7 +816,7 @@ const cloneLine = function (line) {
 
 let isHeading = function (index) {
   const attribs = this.documentAttributeManager.getAttributesOnLine(index);
-  for (let i=0; i<attribs.length; i++) {
+  for (let i = 0; i < attribs.length; i++) {
     if (attribs[i][0] === 'heading') {
       const value = attribs[i][1];
       i = attribs.length;
@@ -816,13 +824,13 @@ let isHeading = function (index) {
     }
   }
   return false;
-}
+};
 
-function getXYOffsetOfRep(el, rep){
-  const selStart = rep.selStart;
-  const selEnd = rep.selEnd;
-
-  if (selStart[0] > selEnd [0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) { //make sure end is after start
+const getXYOffsetOfRep = (rep) => {
+  let selStart = rep.selStart;
+  let selEnd = rep.selEnd;
+  // make sure end is after start
+  if (selStart[0] > selEnd[0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) {
     selEnd = selStart;
     selStart = _.clone(selStart);
   }
@@ -847,17 +855,18 @@ function getXYOffsetOfRep(el, rep){
 
   const heading = isHeading(lineIndex);
   if (heading) {
-    lineText = '<' + heading + '>' + lineText + '</' + heading + '>';
+    lineText = `<${heading}>${lineText}</${heading}>`;
   }
   $(clone).html(lineText);
 
   // Is the line visible yet?
-  if ( $(startLine.lineNode).length !== 0 ) {
-    const worker =  $(clone).find('#selectWorker');
-    let top = worker.offset().top + padInner.offset().top + parseInt(padInner.css('padding-top')); // A standard generic offset'
+  if ($(startLine.lineNode).length !== 0) {
+    const worker = $(clone).find('#selectWorker');
+    // A standard generic offset'
+    let top = worker.offset().top + padInner.offset().top + parseInt(padInner.css('padding-top'));
     let left = worker.offset().left;
-    //adjust position
-    top = top + worker[0].offsetHeight;
+    // adjust position
+    top += worker[0].offsetHeight;
 
     if (left < 0) {
       left = 0;
@@ -866,12 +875,6 @@ function getXYOffsetOfRep(el, rep){
     $(clone).remove();
     return [left, top];
   }
-}
-
-function parseMultiline (text) {
-  if (!text) return text;
-  text = JSON.stringify(text);
-  return text.substr(1, (text.length - 2));
 };
 
 EpComments.prototype.displayNewCommentForm = function () {
@@ -903,8 +906,8 @@ EpComments.prototype.displayNewCommentForm = function () {
   $('#newComment').find('.from-value').text(selectedText);
 
   // Display form
-  setTimeout(function() {
-    const position = getXYOffsetOfRep($('#newComment') ,rep);
+  setTimeout(() => {
+    const position = getXYOffsetOfRep(rep);
     newComment.showNewCommentPopup(position);
   });
 
@@ -1401,7 +1404,7 @@ const getRepFromSelector = function (selector, container) {
 };
 
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
-exports.aceInitialized = function(hookName, context, cb) {
+exports.aceInitialized = (hookName, context, cb) => {
   const editorInfo = context.editorInfo;
   isHeading = _(isHeading).bind(context);
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
