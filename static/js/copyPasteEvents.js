@@ -254,7 +254,7 @@ const htmlDecode = (input) => {
 // P.S: It's not possible to have two or more comments when there is only text selected, because for
 // each comment created it's generated a <span> and to copy only the text it MUST NOT HAVE any tag
 // on the selection
-exports.getCommentIdOnFirstPositionSelected = () => {
+exports.getCommentIdOnFirstPositionSelected = function () {
   const attributeManager = this.documentAttributeManager;
   const rep = this.rep;
   const commentId = _.object(
@@ -262,7 +262,7 @@ exports.getCommentIdOnFirstPositionSelected = () => {
   return commentId;
 };
 
-exports.hasCommentOnSelection = () => {
+exports.hasCommentOnSelection = function () {
   let hasComment;
   const attributeManager = this.documentAttributeManager;
   const rep = this.rep;
