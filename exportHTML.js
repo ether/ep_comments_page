@@ -2,6 +2,7 @@
 
 const $ = require('ep_etherpad-lite/node_modules/cheerio');
 const commentManager = require('./commentManager');
+const settings = require('ep_etherpad-lite/node/utils/Settings');
 
 // Iterate over pad attributes to find only the comment ones
 const findAllCommentUsedOn = (pad) => {
@@ -15,6 +16,7 @@ exports.exportHtmlAdditionalTagsWithData =
   async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
 
 exports.getLineHTMLForExport = async (hookName, context) => {
+  if (settings.ep_comments_page && settings.ep_comments_page.exportHtml === false) return;
   // I'm not sure how optimal this is - it will do a database lookup for each line..
   const {comments} = await commentManager.getComments(context.padId);
   // Load the HTML into a throwaway div instead of calling $.load() to avoid
@@ -38,6 +40,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
 };
 
 exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
+  if (settings.ep_comments_page && settings.ep_comments_page.exportHtml === false) return;
   const {comments} = await commentManager.getComments(padId);
   if (!comments) return;
   const div = $('<div>').attr('id', 'comments');
