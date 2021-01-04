@@ -8,6 +8,7 @@ const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const common = require(m('common'));
+const db = require('ep_etherpad-lite/node/db/DB');
 let agent;
 
 describe('export comments to HTML', function () {
@@ -25,19 +26,18 @@ describe('export comments to HTML', function () {
 
   context('when pad text has one comment', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(textWithComment('c-1234'));
-      };
+      html = () => buildHTML(textWithComment('c-1234'));
     });
 
-    it('returns ok', function (done) {
+    it('returns ok', async function () {
       agent.get(getHTMLEndPointFor(padID))
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns HTML with comment class', function (done) {
+    it('returns HTML with comment class', async function () {
+      await insertCommentToDB(padID, 'c-1234');
       agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
@@ -48,18 +48,17 @@ describe('export comments to HTML', function () {
               throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
   context('when pad text has two comments in a single line', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(textWithComment('c-1234') + textWithComment('c-82a3'));
-      };
+      html = () => buildHTML(textWithComment('c-1234') + textWithComment('c-82a3'));
     });
 
-    it('returns HTML with two comments spans', function (done) {
+    it('returns HTML with two comments spans', async function () {
+      await insertCommentToDB(padID, 'c-1234');
+      await insertCommentToDB(padID, 'c-82a3');
       agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const firstComment = regexWithComment('c-1234');
@@ -73,16 +72,13 @@ describe('export comments to HTML', function () {
               throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
   context('when pad text has no comments', function () {
     before(async function () {
-      html = function () {
-        return buildHTML('empty pad');
-      };
+      html = () => buildHTML('empty pad');
     });
 
     it('returns HTML with no comment', function (done) {
@@ -104,10 +100,8 @@ describe('export comments to HTML', function () {
 
   context('when pad text has comment inside strong', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(
-            `<strong>${textWithComment('c-2342', 'this is a comment and bold')}</strong>`);
-      };
+      html = () => buildHTML(
+          `<strong>${textWithComment('c-2342', 'this is a comment and bold')}</strong>`);
     });
 
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
@@ -137,9 +131,7 @@ describe('export comments to HTML', function () {
 
   context('when pad text has comment in strong', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(textWithComment('c-2342', '<strong>this is a comment and bold</strong>'));
-      };
+      html = () => buildHTML(textWithComment('c-2342', `<strong>this is a comment and bold</strong>`)); // eslint-disable-line
     });
 
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
@@ -159,12 +151,11 @@ describe('export comments to HTML', function () {
 
   context('when pad text has part with comment and part without it', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(`no comment here ${textWithComment('c-2342')}`);
-      };
+      html = () => buildHTML(`no comment here ${textWithComment('c-2342')}`);
     });
 
-    it('returns HTML with part with comment and part without it', function (done) {
+    it('returns HTML with part with comment and part without it', async function () {
+      await insertCommentToDB(padID, 'c-2342');
       agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = `no comment here ${regexWithComment('c-2342')}`;
@@ -175,28 +166,25 @@ describe('export comments to HTML', function () {
               throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
 
   context('Don\'t export when settings.exportHtml = false, pad text has one comment', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(textWithComment('c-1234'));
-      };
+      html = () => buildHTML(textWithComment('c-1234'));
     });
 
-    it('returns ok', function (done) {
+    it('returns ok', async function () {
       settings.ep_comments_page = {exportHTML: false};
       agent.get(getHTMLEndPointFor(padID))
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns HTML without comment class', function (done) {
+    it('returns HTML without comment class', async function () {
       settings.ep_comments_page = {exportHtml: false};
       agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
@@ -208,28 +196,26 @@ describe('export comments to HTML', function () {
               throw new Error(`Comment exported. Regex used: ${expectedRegex}, ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
   context('Export when settings.exportHtml = true, pad text has one comment', function () {
     before(async function () {
-      html = function () {
-        return buildHTML(textWithComment('c-1234'));
-      };
+      html = () => buildHTML(textWithComment('c-1234'));
     });
 
-    it('returns ok', function (done) {
+    it('returns ok', async function () {
       settings.ep_comments_page = {exportHTML: true};
       agent.get(getHTMLEndPointFor(padID))
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns HTML with comment class', function (done) {
+    it('returns HTML with comment class', async function () {
       settings.ep_comments_page = {exportHtml: true};
+      await insertCommentToDB(padID, 'c-1234');
       agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
@@ -240,15 +226,14 @@ describe('export comments to HTML', function () {
               throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 });
 
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
-const createPad = function (padID, callback) {
+const createPad = (padID, callback) => {
   agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to create new Pad'));
@@ -257,7 +242,7 @@ const createPad = function (padID, callback) {
       });
 };
 
-const setHTML = function (padID, html, callback) {
+const setHTML = (padID, html, callback) => {
   agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to set pad HTML'));
@@ -266,23 +251,30 @@ const setHTML = function (padID, html, callback) {
       });
 };
 
-const getHTMLEndPointFor = function (padID, callback) {
-  return `/api/${apiVersion}/getHTML?apikey=${apiKey}&padID=${padID}`;
-};
+const getHTMLEndPointFor = (padID, callback) => `/api/${apiVersion}/getHTML?apikey=${apiKey}&padID=${padID}`; // eslint-disable-line
 
 
-const buildHTML = function (body) {
-  return `<html><body>${body}</body></html>`;
-};
+const buildHTML = (body) => `<html><body>${body}</body></html>`;
 
-const textWithComment = function (commentId, text) {
+const textWithComment = (commentId, text) => {
   if (!text) text = `this is ${commentId}`;
 
   return `<span class='comment ${commentId}'>${text}`;
 };
 
-const regexWithComment = function (commentID, text) {
+const regexWithComment = (commentID, text) => {
   if (!text) text = `this is ${commentID}`;
 
   return `<span .*class=['|"].*comment ${commentID}.*['|"].*>${text}`;
+};
+
+const insertCommentToDB = async (padID, commentId) => {
+  const text = `this is ${commentId}`;
+  let comments = await db.get(`comments:${padID}`);
+  if (!comments) {
+    comments = {};
+  }
+  comments[commentId] = {text};
+
+  return db.set(`comments:${padID}`, comments);
 };
