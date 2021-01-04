@@ -1,18 +1,20 @@
 'use strict';
 
+function m(mod) { return `${__dirname}/../../../../../../../tests/backend/${mod}`; }
 const utils = require('../../../utils');
 const apiKey = utils.apiKey;
 const codeToBe0 = utils.codeToBe0;
-const api = utils.api;
 const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-
+const settings = require('ep_etherpad-lite/node/utils/Settings');
+const common = require(m('common'));
+let agent;
 
 describe('export comments to HTML', function () {
   let padID;
   let html;
-
   // create a new pad before each test run
+  before(async function () { agent = await common.init(); });
   beforeEach(function (done) {
     padID = randomString(5);
 
@@ -29,14 +31,14 @@ describe('export comments to HTML', function () {
     });
 
     it('returns ok', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
           .expect(200, done);
     });
 
     it('returns HTML with comment class', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
             const expectedComments = new RegExp(expectedRegex);
@@ -58,7 +60,7 @@ describe('export comments to HTML', function () {
     });
 
     it('returns HTML with two comments spans', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const firstComment = regexWithComment('c-1234');
             const secondComment = regexWithComment('c-82a3');
@@ -84,7 +86,7 @@ describe('export comments to HTML', function () {
     });
 
     it('returns HTML with no comment', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = '.*empty pad.*';
             const noComment = new RegExp(expectedRegex);
@@ -111,7 +113,7 @@ describe('export comments to HTML', function () {
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
     // comment)
     xit('returns HTML with strong and comment, in any order', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const strongInsideCommentRegex =
                 regexWithComment('c-2342', '<strong>this is a comment and bold</strong>');
@@ -143,7 +145,7 @@ describe('export comments to HTML', function () {
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
     // comment)
     it('returns HTML with strong and comment, in any order', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const html = res.body.data.html;
             const foundComment = (html.indexOf('<strong>') !== -1);
@@ -163,9 +165,74 @@ describe('export comments to HTML', function () {
     });
 
     it('returns HTML with part with comment and part without it', function (done) {
-      api.get(getHTMLEndPointFor(padID))
+      agent.get(getHTMLEndPointFor(padID))
           .expect((res) => {
             const expectedRegex = `no comment here ${regexWithComment('c-2342')}`;
+            const expectedComments = new RegExp(expectedRegex);
+            const html = res.body.data.html;
+            const foundComment = html.match(expectedComments);
+            if (!foundComment) {
+              throw new Error(`Comment not exported. Regex used: ${expectedRegex}, ` +
+                              `html exported: ${html}`);
+            }
+          })
+          .end(done);
+    });
+  });
+
+
+  context('Don\'t export when settings.exportHtml = false, pad text has one comment', function () {
+    before(async function () {
+      html = function () {
+        return buildHTML(textWithComment('c-1234'));
+      };
+    });
+
+    it('returns ok', function (done) {
+      settings.ep_comments_page = {exportHTML: false};
+      agent.get(getHTMLEndPointFor(padID))
+          .expect(codeToBe0)
+          .expect('Content-Type', /json/)
+          .expect(200, done);
+    });
+
+    it('returns HTML without comment class', function (done) {
+      settings.ep_comments_page = {exportHtml: false};
+      agent.get(getHTMLEndPointFor(padID))
+          .expect((res) => {
+            const expectedRegex = regexWithComment('c-1234');
+            const expectedComments = new RegExp(expectedRegex);
+            const html = res.body.data.html;
+            const foundComment = html.match(expectedComments);
+            if (foundComment) {
+              throw new Error(`Comment exported. Regex used: ${expectedRegex}, ` +
+                              `html exported: ${html}`);
+            }
+          })
+          .end(done);
+    });
+  });
+
+  context('Export when settings.exportHtml = true, pad text has one comment', function () {
+    before(async function () {
+      html = function () {
+        return buildHTML(textWithComment('c-1234'));
+      };
+    });
+
+    it('returns ok', function (done) {
+      settings.ep_comments_page = {exportHTML: true};
+      agent.get(getHTMLEndPointFor(padID))
+          .expect(codeToBe0)
+          .expect('Content-Type', /json/)
+          .expect(200, done);
+    });
+
+    it('returns HTML with comment class', function (done) {
+      settings.ep_comments_page = {exportHtml: true};
+      agent.get(getHTMLEndPointFor(padID))
+          .expect((res) => {
+            const expectedRegex = regexWithComment('c-1234');
             const expectedComments = new RegExp(expectedRegex);
             const html = res.body.data.html;
             const foundComment = html.match(expectedComments);
@@ -182,7 +249,7 @@ describe('export comments to HTML', function () {
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
 const createPad = function (padID, callback) {
-  api.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
+  agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to create new Pad'));
 
@@ -191,7 +258,7 @@ const createPad = function (padID, callback) {
 };
 
 const setHTML = function (padID, html, callback) {
-  api.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
+  agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to set pad HTML'));
 
