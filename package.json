@@ -25,12 +25,14 @@
     "formidable": "*"
   },
   "devDependencies": {
-    "eslint": "^7.14.0",
-    "eslint-config-etherpad": "^1.0.10",
+    "eslint": "^7.17.0",
+    "eslint-config-etherpad": "^1.0.21",
+    "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.2",
     "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0",
     "request": "^2.88.2",
     "socket.io-client": "^2.3.0",
     "superagent": "^3.8.3",

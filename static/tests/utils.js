@@ -78,7 +78,7 @@ const createComment = function (pad, commentData, done) {
           commentId = json.commentIds[0];
           done(null, commentId);
         }
-      },
+      }
   );
 };
 
@@ -108,7 +108,7 @@ const createCommentReply = function (pad, comment, replyData, done) {
           replyId = json.replyIds[0];
           done(null, replyId);
         }
-      },
+      }
   );
 };
 
