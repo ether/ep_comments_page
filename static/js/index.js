@@ -20,7 +20,7 @@ const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
-const { pad } = require('ep_etherpad-lite/static/js/pad');
+const {pad} = require('ep_etherpad-lite/static/js/pad');
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -1057,7 +1057,6 @@ EpComments.prototype.lineHasMarker = function (line) {
 // Save comment
 EpComments.prototype.saveComment = function (data, rep) {
   this.socket.emit('addComment', data, (commentId, comment) => { 
-    // console.log(comment);
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
@@ -1244,8 +1243,6 @@ const hooks = {
   // Init pad comments
   postAceInit: (hookName, context, cb) => {
     if (!pad.plugins) pad.plugins = {};
-    console.log("postaceinit: ");
-    console.log(context);
     const Comments = new EpComments(context);
     pad.plugins.ep_comments_page = Comments;
 
@@ -1300,95 +1297,78 @@ const hooks = {
       }
       
       
-      if (!context.callstack.docTextChanged) {
-        return cb();
-      }
-      var ace = context.editorInfo.editor;
-      var padlines = ace.exportText().split('\n');  
-      var i = 0;
-      var result = [];
-      
-      
-      if(padlines){
-        
-      for (i = 0; i < padlines.length; i += 1) {
+    if (!context.callstack.docTextChanged) {
+      return cb();
+    }
+    let ace = context.editorInfo.editor;
+    let padlines = ace.exportText().split('\n');  
+    let i = 0;
+    let result = [];
+
+    if(padlines){
+      for (i = 0; i < padlines.length; i += 1){
         if (padlines[i]) {
-          
-          
           axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=>{
-            
             result[res.data.line] = (res.data.output);
-            
             if(result){
-            for(var j=0;j<result.length;j++){
-              if(!padlines[j]) continue;
-              var complete_string = "";
-              for(var k=0;k<result[j].length;k++){
-                complete_string+=result[j][k] + " ";
-              }
-              var expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
-              var current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
-              var sum=0;
-              if(current && expected){
-                for(var k=0;k<expected.length && k<current.length;k++){
-                  var start = [],end=[];
+              for(let j=0;j<result.length;j++){
+                if(!padlines[j]) continue;
+                let complete_string = "";
+                for(let k=0;k<result[j].length;k++){
+                  complete_string+=result[j][k] + " ";
+                }
+                let expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+                let current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+                let sum=0;
+                if(current && expected){
+                  for(let k=0;k<expected.length && k<current.length;k++){
+                    let start = [],end=[];
                     start[0] = j;
                     start[1] = sum;
                     end[0] = j;
                     end[1] = sum+current[k].length;
-                  
-                  if(expected[k]!=current[k]){
-                    const data = {};
+                    
+                    if(expected[k]!=current[k]){
+                      const data = {};
 
-                    // // Insert comment data
-                    data.padId = clientVars.padId;
-                    data.comment = {};
-                    data.comment.author = context.documentAttributeManager.author;
-                    data.comment.name = "";
-                    data.comment.timestamp = new Date().getTime();
+                      // // Insert comment data
+                      data.padId = clientVars.padId;
+                      data.comment = {};
+                      data.comment.author = context.documentAttributeManager.author;
+                      data.comment.name = "";
+                      data.comment.timestamp = new Date().getTime();
 
-                    // // If client is anonymous
-                    if (data.comment.name === undefined) {
-                      data.comment.name = clientVars.userAgent;
+                      // // If client is anonymous
+                      if (data.comment.name === undefined) {
+                        data.comment.name = clientVars.userAgent;
+                      }
+                      data.changeFrom = current[k];
+                      data.comment.changeFrom = current[k];
+                      data.comment.changeTo = expected[k];
+                      data.comment.text = "";
+                      data.commentId = "";
+                      let rep = {};
+                      rep.selStart = start;
+                      rep.selEnd = end;
+                      pad.plugins.ep_comments_page.saveComment(data,rep);
+                      console.log("current line : (" + (j) + ","+ sum  +") current word : " + current[k]);
+                      console.log("current line : (" + (j) +","+ (sum+current[k].length)  +") corrected word : " + expected[k]);
                     }
-                    data.changeFrom = current[k];
-                    data.comment.changeFrom = current[k];
-                    data.comment.changeTo = expected[k];
-                    data.comment.text = "";
-                    data.commentId = "";
-                    var rep = {};
-                    rep.selStart = start;
-                    rep.selEnd = end;
-                    
-                    pad.plugins.ep_comments_page.saveComment(data,rep);
-                    
-                    
-                    
-                    console.log("current line : (" + (j) + ","+ sum  +") current word : " + current[k]);
-                    console.log("current line : (" + (j) +","+ (sum+current[k].length)  +") corrected word : " + expected[k]);
-                    
-                    
+                    sum+=current[k].length + 1;
                   }
-                  sum+=current[k].length + 1;
                 }
               }
-            }
             }
           })
           .catch(err=>{
             console.log(err.response);
           })
         }
-      }
-      
+      } 
     }
-
     return cb();
   },
-
 // ---------------------------MAJOR CHANGES END-----------------------------------------------
-
-
   // Insert comments classes
   aceAttribsToClasses: (hookName, context, cb) => {
     if (context.key === 'comment' && context.value !== 'comment-deleted') {
