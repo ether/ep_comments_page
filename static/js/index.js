@@ -1299,40 +1299,40 @@ const hooks = {
       return cb();
     }
     const ace = context.editorInfo.editor;
-    const padlines = ace.exportText().split('\n');  
+    const padlines = ace.exportText().split('\n');
     let i = 0;
     const result = [];
-    if (padlines){
-      for (i = 0; i < padlines.length; i += 1){
+    if (padlines) {
+      for (i = 0; i < padlines.length; i += 1) {
         if (padlines[i]) {
-          axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=> {
+          axios.get('http://localhost:5000/', { params :{ line: i , query : padlines[i] } } ).then(res=> {
             result[res.data.line] = (res.data.output);
-            if (result){
-              for (let j = 0; j < result.length; j++){
+            if (result) {
+              for (let j = 0; j < result.length; j++) {
                 if (!padlines[j]) continue;
-                let complete_string = "";
-                for (let k = 0; k < result[j].length; k++){
-                  complete_string+=result[j][k] + " ";
+                let complete_string = '';
+                for (let k = 0; k < result[j].length; k++) {
+                  complete_string += result[j][k] + " ";
                 }
                 const expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
                 const current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
-                let sum=0;
-                if (current && expected){
-                  for (let k = 0; k < expected.length && k < current.length; k++){
+                let sum = 0;
+                if (current && expected) {
+                  for (let k = 0; k < expected.length && k < current.length; k++) {
                     const start = [],end = [];
                     start[0] = j;
                     start[1] = sum;
                     end[0] = j;
-                    end[1] = sum+current[k].length;
+                    end[1] = sum + current[k].length;
                     
-                    if (expected[k]!=current[k]){
+                    if (expected[k] !== current[k]) {
                       const data = {};
 
                       // // Insert comment data
                       data.padId = clientVars.padId;
                       data.comment = {};
                       data.comment.author = context.documentAttributeManager.author;
-                      data.comment.name = "";
+                      data.comment.name = '';
                       data.comment.timestamp = new Date().getTime();
 
                       // // If client is anonymous
@@ -1342,22 +1342,22 @@ const hooks = {
                       data.changeFrom = current[k];
                       data.comment.changeFrom = current[k];
                       data.comment.changeTo = expected[k];
-                      data.comment.text = "";
-                      data.commentId = "";
+                      data.comment.text = '';
+                      data.commentId = '';
                       const rep = {};
                       rep.selStart = start;
                       rep.selEnd = end;
                       pad.plugins.ep_comments_page.saveComment(data,rep);
-                      console.log("current line : (" + (j) + ","+ sum  +") current word : " + current[k]);
-                      console.log("current line : (" + (j) +","+ (sum+current[k].length)  +") corrected word : " + expected[k]);
+                      console.log("current line : (" + (j) + "," + sum  + ") current word : " + current[k]);
+                      console.log("current line : (" + (j) + "," + (sum+current[k].length)  + ") corrected word : " + expected[k]);
                     }
-                    sum+=current[k].length + 1;
+                    sum += current[k].length + 1;
                   }
                 }
               }
             }
           })
-          .catch(err=> {
+          .catch(err => {
             console.log(err.response);
           })
         }
