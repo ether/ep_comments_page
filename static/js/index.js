@@ -7,6 +7,7 @@
 
 
 const _ = require('ep_etherpad-lite/static/js/underscore');
+const axios = require('./node_modules/axios/index');
 const browser = require('ep_etherpad-lite/static/js/browser');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');
@@ -19,6 +20,7 @@ const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
+const { pad } = require('ep_etherpad-lite/static/js/pad');
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -993,7 +995,7 @@ EpComments.prototype.createNewCommentFormIfDontExist = function (rep) {
       data.comment.changeTo = comment.changeTo;
     }
     data.comment.text = comment.text;
-
+    console.log(rep);
     this.saveComment(data, rep);
   });
 };
@@ -1054,13 +1056,16 @@ EpComments.prototype.lineHasMarker = function (line) {
 
 // Save comment
 EpComments.prototype.saveComment = function (data, rep) {
-  this.socket.emit('addComment', data, (commentId, comment) => {
+  this.socket.emit('addComment', data, (commentId, comment) => { 
+    // console.log(comment);
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
       // we should get rep again because the document might have changed..
       // details at https://github.com/ether/ep_comments/issues/133
-      rep = ace.ace_getRep();
+      // rep = ace.ace_getRep();
+      // console.log("came here");
+      // console.log(rep);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('comment', commentId);
     }, 'insertComment', true);
@@ -1233,12 +1238,14 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 /* ********************************************************************
  *                           Etherpad Hooks                           *
  ******************************************************************** */
-
+// ---------------------------MAJOR CHANGES START-----------------------------------------------
 const hooks = {
 
   // Init pad comments
   postAceInit: (hookName, context, cb) => {
     if (!pad.plugins) pad.plugins = {};
+    console.log("postaceinit: ");
+    console.log(context);
     const Comments = new EpComments(context);
     pad.plugins.ep_comments_page = Comments;
 
@@ -1256,7 +1263,7 @@ const hooks = {
 
   postToolbarInit: (hookName, args, cb) => {
     const editbar = args.toolbar;
-
+    // console.log(parent);
     editbar.registerCommand('addComment', () => {
       pad.plugins.ep_comments_page.displayNewCommentForm();
     });
@@ -1278,7 +1285,6 @@ const hooks = {
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.setYofComments();
     }
-
     // some times on init ep_comments_page is not yet on the plugin list
     if (pad.plugins.ep_comments_page) {
       const commentWasPasted = pad.plugins.ep_comments_page.shouldCollectComment;
@@ -1291,9 +1297,97 @@ const hooks = {
           pad.plugins.ep_comments_page.shouldCollectComment = false;
         });
       }
+      }
+      
+      
+      if (!context.callstack.docTextChanged) {
+        return cb();
+      }
+      var ace = context.editorInfo.editor;
+      var padlines = ace.exportText().split('\n');  
+      var i = 0;
+      var result = [];
+      
+      
+      if(padlines){
+        
+      for (i = 0; i < padlines.length; i += 1) {
+        if (padlines[i]) {
+          
+          
+          axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=>{
+            
+            result[res.data.line] = (res.data.output);
+            
+            if(result){
+            for(var j=0;j<result.length;j++){
+              if(!padlines[j]) continue;
+              var complete_string = "";
+              for(var k=0;k<result[j].length;k++){
+                complete_string+=result[j][k] + " ";
+              }
+              var expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+              var current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+              var sum=0;
+              if(current && expected){
+                for(var k=0;k<expected.length && k<current.length;k++){
+                  var start = [],end=[];
+                    start[0] = j;
+                    start[1] = sum;
+                    end[0] = j;
+                    end[1] = sum+current[k].length;
+                  
+                  if(expected[k]!=current[k]){
+                    const data = {};
+
+                    // // Insert comment data
+                    data.padId = clientVars.padId;
+                    data.comment = {};
+                    data.comment.author = context.documentAttributeManager.author;
+                    data.comment.name = "";
+                    data.comment.timestamp = new Date().getTime();
+
+                    // // If client is anonymous
+                    if (data.comment.name === undefined) {
+                      data.comment.name = clientVars.userAgent;
+                    }
+                    data.changeFrom = current[k];
+                    data.comment.changeFrom = current[k];
+                    data.comment.changeTo = expected[k];
+                    data.comment.text = "";
+                    data.commentId = "";
+                    var rep = {};
+                    rep.selStart = start;
+                    rep.selEnd = end;
+                    
+                    pad.plugins.ep_comments_page.saveComment(data,rep);
+                    
+                    
+                    
+                    console.log("current line : (" + (j) + ","+ sum  +") current word : " + current[k]);
+                    console.log("current line : (" + (j) +","+ (sum+current[k].length)  +") corrected word : " + expected[k]);
+                    
+                    
+                  }
+                  sum+=current[k].length + 1;
+                }
+              }
+            }
+            }
+          })
+          .catch(err=>{
+            console.log(err.response);
+          })
+        }
+      }
+      
     }
+
     return cb();
   },
+
+// ---------------------------MAJOR CHANGES END-----------------------------------------------
+
 
   // Insert comments classes
   aceAttribsToClasses: (hookName, context, cb) => {
