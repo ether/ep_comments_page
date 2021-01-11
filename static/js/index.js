@@ -1303,16 +1303,16 @@ const hooks = {
     let i = 0;
     const result = [];
     if (padlines) {
-      for (i = 0; i < padlines.length; i += 1) {
+      for (i = 0; i < padlines.length; i++) {
         if (padlines[i]) {
-          axios.get('http://localhost:5000/', { params :{ line: i , query : padlines[i] } } ).then(res=> {
+          axios.get('http://localhost:5000/', { params:{ line: i, query : padlines[i] } } ).then((res) => {
             result[res.data.line] = (res.data.output);
             if (result) {
               for (let j = 0; j < result.length; j++) {
                 if (!padlines[j]) continue;
                 let complete_string = '';
                 for (let k = 0; k < result[j].length; k++) {
-                  complete_string += result[j][k] + " ";
+                  complete_string += result[j][k] + ' ';
                 }
                 const expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
                 const current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
@@ -1347,9 +1347,7 @@ const hooks = {
                       const rep = {};
                       rep.selStart = start;
                       rep.selEnd = end;
-                      pad.plugins.ep_comments_page.saveComment(data,rep);
-                      console.log("current line : (" + (j) + "," + sum  + ") current word : " + current[k]);
-                      console.log("current line : (" + (j) + "," + (sum+current[k].length)  + ") corrected word : " + expected[k]);
+                      pad.plugins.ep_comments_page.saveComment(data, rep);
                     }
                     sum += current[k].length + 1;
                   }
@@ -1360,9 +1358,9 @@ const hooks = {
           .catch(err => {
             console.log(err.response);
           })
-        }
-      } 
-    }
+        };
+      }; 
+    };
     return cb();
   },
 // ---------------------------MAJOR CHANGES END-----------------------------------------------
@@ -1479,7 +1477,7 @@ exports.aceInitialized = (hookName, context, cb) => {
   const editorInfo = context.editorInfo;
   isHeading = _(isHeading).bind(context);
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
-  editorInfo.ace_getCommentIdOnFirstPositionSelected =
+  editorInfo.ace_getCommentIdOnFirstPositionSelected = 
     _(getCommentIdOnFirstPositionSelected).bind(context);
   editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
   return cb();
