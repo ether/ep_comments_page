@@ -1305,7 +1305,7 @@ const hooks = {
     if (padlines) {
       for (i = 0; i < padlines.length; i++) {
         if (padlines[i]) {
-          axios.get('http://localhost:5000/', { params:{ line: i, query : padlines[i] } } ).then((res) => {
+          axios.get('http://localhost:5000/', { params:{ line: i, query: padlines[i]}}).then((res) => {
             result[res.data.line] = (res.data.output);
             if (result) {
               for (let j = 0; j < result.length; j++) {
