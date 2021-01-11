@@ -20,7 +20,7 @@ const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
-const {pad} = require('ep_etherpad-lite/static/js/pad');
+// const {pad} = require('ep_etherpad-lite/static/js/pad');
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -29,7 +29,7 @@ const cssFiles = [
 
 const UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
-const parseMultiline = (text) => {
+const parseMultiline = (text)=> {
   if (!text) return text;
   text = JSON.stringify(text);
   return text.substr(1, (text.length - 2));
@@ -76,14 +76,14 @@ EpComments.prototype.init = function () {
   commentIcons.insertContainer();
 
   // Get all comments
-  this.getComments((comments) => {
+  this.getComments((comments)=> {
     if (!$.isEmptyObject(comments)) {
       this.setComments(comments);
       this.collectComments();
     }
   });
 
-  this.getCommentReplies((replies) => {
+  this.getCommentReplies((replies)=> {
     if (!$.isEmptyObject(replies)) {
       this.commentReplies = replies;
       this.collectCommentReplies();
@@ -93,30 +93,30 @@ EpComments.prototype.init = function () {
   });
 
   // Init add push event
-  this.pushComment('add', (commentId, comment) => {
+  this.pushComment('add', (commentId, comment)=> {
     this.setComment(commentId, comment);
     this.collectCommentsAfterSomeIntervalsOfTime();
   });
 
   // When language is changed, we need to reload the comments to make sure
   // all templates are localized
-  html10n.bind('localized', () => {
+  html10n.bind('localized', ()=> {
     // Fall back to 'en' if moment.js doesn't support the language.
     moment.locale([html10n.getLanguage(), 'en']);
     this.localizeExistingComments();
   });
 
   // Recalculate position when editor is resized
-  $('#settings input, #skin-variant-full-width').on('change', (e) => {
+  $('#settings input, #skin-variant-full-width').on('change', (e)=> {
     this.setYofComments();
   });
-  this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e) => {
+  this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e)=> {
     this.setYofComments();
   });
-  $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
+  $(window).resize(_.debounce(()=> { this.setYofComments(); }, 100));
 
   // On click comment icon toolbar
-  $('.addComment').on('click', (e) => {
+  $('.addComment').on('click', (e)=> {
     e.preventDefault(); // stops focus from being lost
     this.displayNewCommentForm();
   });
@@ -129,7 +129,7 @@ EpComments.prototype.init = function () {
   this.container.parent().on('click', '.comment-delete', async function () {
     const commentId = $(this).closest('.comment-container')[0].id;
     try {
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject)=> {
         self.socket.emit('deleteComment', {
           padId: self.padId,
           commentId,
@@ -152,12 +152,12 @@ EpComments.prototype.init = function () {
     const selector = `.${commentId}`;
     const ace = self.ace;
 
-    ace.callWithAce((aceTop) => {
+    ace.callWithAce((aceTop)=> {
       const repArr = aceTop.ace_getRepFromSelector(selector, padInner);
       // rep is an array of reps.. I will need to iterate over each to do something meaningful..
-      $.each(repArr, (index, rep) => {
+      $.each(repArr, (index, rep)=> {
         // I don't think we need this nested call
-        ace.callWithAce((ace) => {
+        ace.callWithAce((ace)=> {
           ace.ace_performSelectionChange(rep[0], rep[1], true);
           ace.ace_setAttributeOnSelection('comment', 'comment-deleted');
           // Note that this is the correct way of doing it, instead of there being
@@ -203,7 +203,7 @@ EpComments.prototype.init = function () {
     data.authorId = clientVars.userId;
 
     try {
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject)=> {
         self.socket.emit('updateCommentText', data,
             (errMsg) => errMsg ? reject(new Error(errMsg)) : resolve());
       });
@@ -283,11 +283,11 @@ EpComments.prototype.init = function () {
 
     if (isRevert) {
       // Tell all users this change was reverted
-      self.socket.emit('revertChange', data, () => {});
+      self.socket.emit('revertChange', data, ()=> {});
       self.showChangeAsReverted(data.commentId);
     } else {
       // Tell all users this change was accepted
-      self.socket.emit('acceptChange', data, () => {});
+      self.socket.emit('acceptChange', data, ()=> {});
       // Update our own comments container with the accepted change
       self.showChangeAsAccepted(data.commentId);
     }
@@ -316,8 +316,8 @@ EpComments.prototype.init = function () {
     data.reply = $(this).find('.comment-content').val();
     data.changeTo = $(this).find('.to-value').val() || null;
     data.changeFrom = $(this).find('.from-value').text() || null;
-    self.socket.emit('addCommentReply', data, () => {
-      self.getCommentReplies((replies) => {
+    self.socket.emit('addCommentReply', data, ()=> {
+      self.getCommentReplies((replies)=> {
         self.commentReplies = replies;
         self.collectCommentReplies();
 
@@ -351,7 +351,7 @@ EpComments.prototype.init = function () {
     $('#options-comments').attr('checked', 'checked');
   }
 
-  $('#options-comments').on('change', () => {
+  $('#options-comments').on('change', ()=> {
     const checked = $('#options-comments').is(':checked');
     padcookie.setPref('comments', checked);
     this.padOuter.find('#comments, #commentIcons').toggleClass('active', checked);
@@ -372,16 +372,16 @@ EpComments.prototype.init = function () {
   // The same does not occur when the user selects more than the span, for example:
   // text<comment class='comment'><span>to be copied</span></comment>
   if (browser.chrome || browser.firefox) {
-    this.padInner.contents().on('copy', (e) => {
+    this.padInner.contents().on('copy', (e)=> {
       events.addTextOnClipboard(
           e, this.ace, this.padInner, false, this.comments, this.commentReplies);
     });
 
-    this.padInner.contents().on('cut', (e) => {
+    this.padInner.contents().on('cut', (e)=> {
       events.addTextOnClipboard(e, this.ace, this.padInner, true);
     });
 
-    this.padInner.contents().on('paste', (e) => {
+    this.padInner.contents().on('paste', (e)=> {
       events.saveCommentsAndReplies(e);
     });
   }
@@ -472,13 +472,13 @@ EpComments.prototype.collectComments = function (callback) {
 
   // HOVER SIDEBAR COMMENT
   let hideCommentTimer;
-  this.container.on('mouseover', '.sidebar-comment', (e) => {
+  this.container.on('mouseover', '.sidebar-comment', (e)=> {
     // highlight comment
     clearTimeout(hideCommentTimer);
     commentBoxes.highlightComment(e.currentTarget.id, e);
-  }).on('mouseout', '.sidebar-comment', (e) => {
+  }).on('mouseout', '.sidebar-comment', (e)=> {
     // do not hide directly the comment, because sometime the mouse get out accidently
-    hideCommentTimer = setTimeout(() => {
+    hideCommentTimer = setTimeout(()=> {
       commentBoxes.hideComment(e.currentTarget.id);
     }, 1000);
   });
@@ -499,11 +499,11 @@ EpComments.prototype.collectComments = function (callback) {
     commentBoxes.highlightComment(commentId, e, $(this));
   });
 
-  this.padInner.contents().on('mouseleave', '.comment', (e) => {
+  this.padInner.contents().on('mouseleave', '.comment', (e)=> {
     const commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
     // only closes comment if it was not opened by a click on the icon
     if (!commentOpenedByClickOnIcon && container.is(':visible')) {
-      hideCommentTimer = setTimeout(() => {
+      hideCommentTimer = setTimeout(()=> {
         self.closeOpenedComment(e);
       }, 1000);
     }
@@ -517,13 +517,13 @@ EpComments.prototype.collectComments = function (callback) {
 
 EpComments.prototype.addListenersToCloseOpenedComment = function () {
   // we need to add listeners to the different iframes of the page
-  $(document).on('touchstart click', (e) => {
+  $(document).on('touchstart click', (e)=> {
     this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  this.padOuter.find('html').on('touchstart click', (e) => {
+  this.padOuter.find('html').on('touchstart click', (e)=> {
     this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
-  this.padInner.contents().find('html').on('touchstart click', (e) => {
+  this.padInner.contents().find('html').on('touchstart click', (e)=> {
     this.closeOpenedCommentIfNotOnSelectedElements(e);
   });
 };
@@ -545,7 +545,7 @@ EpComments.prototype.closeOpenedCommentIfNotOnSelectedElements = function (e) {
 
 // Collect Comments and link text content to the comments div
 EpComments.prototype.collectCommentReplies = function (callback) {
-  $.each(this.commentReplies, (replyId, reply) => {
+  $.each(this.commentReplies, (replyId, reply)=> {
     const commentId = reply.commentId;
     if (commentId) {
       // tell comment icon that this comment has 1+ replies
@@ -652,7 +652,7 @@ EpComments.prototype.setYofComments = function () {
   });
 
   // re-display comments that were visible before
-  _.each(commentsToBeShown, (commentEle) => {
+  _.each(commentsToBeShown, (commentEle)=> {
     commentEle.show();
   });
 };
@@ -668,7 +668,7 @@ EpComments.prototype.getFirstOcurrenceOfCommentIds = function () {
 
 EpComments.prototype.getUniqueCommentsId = function (padInner) {
   const inlineComments = padInner.find('.comment');
-  const commentsId = _.map(inlineComments, (inlineComment) => {
+  const commentsId = _.map(inlineComments, (inlineComment)=> {
     const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
     // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
     if (commentId && commentId[1]) return commentId[1];
@@ -704,7 +704,7 @@ EpComments.prototype.localizeExistingComments = function () {
   const padComments = this.padInner.contents().find('.comment');
   const comments = this.comments;
 
-  padComments.each((key, it) => {
+  padComments.each((key, it)=> {
     const $this = $(it);
     const cls = $this.attr('class');
     const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
@@ -762,7 +762,7 @@ EpComments.prototype.setCommentOrReplyNewText = function (commentOrReplyId, text
 EpComments.prototype.getComments = function (callback) {
   const req = {padId: this.padId};
 
-  this.socket.emit('getComments', req, (res) => {
+  this.socket.emit('getComments', req, (res)=> {
     callback(res.comments);
   });
 };
@@ -770,7 +770,7 @@ EpComments.prototype.getComments = function (callback) {
 // Get all comment replies
 EpComments.prototype.getCommentReplies = function (callback) {
   const req = {padId: this.padId};
-  this.socket.emit('getCommentReplies', req, (res) => {
+  this.socket.emit('getCommentReplies', req, (res)=> {
     callback(res.replies);
   });
 };
@@ -798,7 +798,7 @@ EpComments.prototype.deleteComment = function (commentId) {
   $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
-const cloneLine = (line) => {
+const cloneLine = (line)=> {
   const padOuter = $('iframe[name="ace_outer"]').contents();
   const padInner = padOuter.find('iframe[name="ace_inner"]');
 
@@ -828,7 +828,7 @@ let isHeading = function (index) {
   return false;
 };
 
-const getXYOffsetOfRep = (rep) => {
+const getXYOffsetOfRep = (rep)=> {
   let selStart = rep.selStart;
   let selEnd = rep.selEnd;
   // make sure end is after start
@@ -883,7 +883,7 @@ EpComments.prototype.displayNewCommentForm = function () {
   const rep = {};
   const ace = this.ace;
 
-  ace.callWithAce((ace) => {
+  ace.callWithAce((ace)=> {
     const saveRep = ace.ace_getRep();
 
     rep.lines = saveRep.lines;
@@ -908,7 +908,7 @@ EpComments.prototype.displayNewCommentForm = function () {
   $('#newComment').find('.from-value').text(selectedText);
 
   // Display form
-  setTimeout(() => {
+  setTimeout(()=> {
     const position = getXYOffsetOfRep(rep);
     newComment.showNewCommentPopup(position);
   });
@@ -963,7 +963,7 @@ EpComments.prototype.getIntValueOfCSSProperty = function ($element, property) {
 EpComments.prototype.getFirstElementSelected = function () {
   let element;
 
-  this.ace.callWithAce((ace) => {
+  this.ace.callWithAce((ace)=> {
     const rep = ace.ace_getRep();
     const line = rep.lines.atIndex(rep.selStart[0]);
     const key = `#${line.key}`;
@@ -989,7 +989,7 @@ EpComments.prototype.createNewCommentFormIfDontExist = function (rep) {
 
   // If a new comment box doesn't already exist, create one
   data.changeFrom = parseMultiline(this.getSelectedText(rep));
-  newComment.insertNewCommentPopupIfDontExist(data, (comment, index) => {
+  newComment.insertNewCommentPopupIfDontExist(data, (comment, index)=> {
     if (comment.changeTo) {
       data.comment.changeFrom = comment.changeFrom;
       data.comment.changeTo = comment.changeTo;
@@ -1056,10 +1056,10 @@ EpComments.prototype.lineHasMarker = function (line) {
 
 // Save comment
 EpComments.prototype.saveComment = function (data, rep) {
-  this.socket.emit('addComment', data, (commentId, comment) => { 
+  this.socket.emit('addComment', data, (commentId, comment)=> { 
     comment.commentId = commentId;
 
-    this.ace.callWithAce((ace) => {
+    this.ace.callWithAce((ace)=> {
       // we should get rep again because the document might have changed..
       // details at https://github.com/ether/ep_comments/issues/133
       // rep = ace.ace_getRep();
@@ -1078,7 +1078,7 @@ EpComments.prototype.saveComment = function (data, rep) {
 //                c-newCommentId124: data:{...}}
 EpComments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
   const data = this.buildComments(commentData);
-  this.socket.emit('bulkAddComment', padId, data, (comments) => {
+  this.socket.emit('bulkAddComment', padId, data, (comments)=> {
     this.setComments(comments);
     this.shouldCollectComment = true;
   });
@@ -1111,8 +1111,8 @@ EpComments.prototype.getMapfakeComments = function () {
 // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
 EpComments.prototype.saveCommentReplies = function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
-  this.socket.emit('bulkAddCommentReplies', padId, data, (replies) => {
-    _.each(replies, (reply) => {
+  this.socket.emit('bulkAddCommentReplies', padId, data, (replies)=> {
+    _.each(replies, (reply)=> {
       this.setCommentReply(reply);
     });
     this.shouldCollectComment = true; // force collect the comment replies saved
@@ -1142,14 +1142,14 @@ EpComments.prototype.buildCommentReply = function (replyData) {
 // Listen for comment
 EpComments.prototype.commentListen = function () {
   const socket = this.socket;
-  socket.on('pushAddCommentInBulk', () => {
-    this.getComments((allComments) => {
+  socket.on('pushAddCommentInBulk', ()=> {
+    this.getComments((allComments)=> {
       if (!$.isEmptyObject(allComments)) {
         // we get the comments in this format {c-123:{author:...}, c-124:{author:...}}
         // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
         // in this.comments
         const commentsProcessed = {};
-        _.map(allComments, (comment, commentId) => {
+        _.map(allComments, (comment, commentId)=> {
           commentsProcessed[commentId] = {};
           commentsProcessed[commentId].data = comment;
         });
@@ -1162,8 +1162,8 @@ EpComments.prototype.commentListen = function () {
 
 // Listen for comment replies
 EpComments.prototype.commentRepliesListen = function () {
-  this.socket.on('pushAddCommentReply', (replyId, reply) => {
-    this.getCommentReplies((replies) => {
+  this.socket.on('pushAddCommentReply', (replyId, reply)=> {
+    this.getCommentReplies((replies)=> {
       if (!$.isEmptyObject(replies)) {
         this.commentReplies = replies;
         this.collectCommentReplies();
@@ -1189,7 +1189,7 @@ EpComments.prototype.showChangeAsAccepted = function (commentId) {
       .each(function () {
         $(this).removeClass('change-accepted');
         const data = {commentId: $(this).attr('data-commentid'), padId: self.padId};
-        self.socket.emit('revertChange', data, () => {});
+        self.socket.emit('revertChange', data, ()=> {});
       });
 
   // this comment get accepted
@@ -1206,29 +1206,29 @@ EpComments.prototype.showChangeAsReverted = function (commentId) {
 EpComments.prototype.pushComment = function (eventType, callback) {
   const socket = this.socket;
 
-  socket.on('textCommentUpdated', (commentId, commentText) => {
+  socket.on('textCommentUpdated', (commentId, commentText)=> {
     this.updateCommentBoxText(commentId, commentText);
   });
 
-  socket.on('commentDeleted', (commentId) => {
+  socket.on('commentDeleted', (commentId)=> {
     this.deleteComment(commentId);
   });
 
-  socket.on('changeAccepted', (commentId) => {
+  socket.on('changeAccepted', (commentId)=> {
     this.showChangeAsAccepted(commentId);
   });
 
-  socket.on('changeReverted', (commentId) => {
+  socket.on('changeReverted', (commentId)=> {
     this.showChangeAsReverted(commentId);
   });
 
   // On collaborator add a comment in the current pad
   if (eventType === 'add') {
-    socket.on('pushAddComment', (commentId, comment) => {
+    socket.on('pushAddComment', (commentId, comment)=> {
       callback(commentId, comment);
     });
   } else if (eventType === 'addCommentReply') {
-    socket.on('pushAddCommentReply', (replyId, reply) => {
+    socket.on('pushAddCommentReply', (replyId, reply)=> {
       callback(replyId, reply);
     });
   }
@@ -1241,7 +1241,7 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 const hooks = {
 
   // Init pad comments
-  postAceInit: (hookName, context, cb) => {
+  postAceInit: (hookName, context, cb)=> {
     if (!pad.plugins) pad.plugins = {};
     const Comments = new EpComments(context);
     pad.plugins.ep_comments_page = Comments;
@@ -1258,16 +1258,16 @@ const hooks = {
     return cb();
   },
 
-  postToolbarInit: (hookName, args, cb) => {
+  postToolbarInit: (hookName, args, cb)=> {
     const editbar = args.toolbar;
     // console.log(parent);
-    editbar.registerCommand('addComment', () => {
+    editbar.registerCommand('addComment', ()=> {
       pad.plugins.ep_comments_page.displayNewCommentForm();
     });
     return cb();
   },
 
-  aceEditEvent: (hookName, context, cb) => {
+  aceEditEvent: (hookName, context, cb)=> {
     if (!pad.plugins) pad.plugins = {};
     // first check if some text is being marked/unmarked to add comment to it
     const eventType = context.callstack.editEvent.eventType;
@@ -1289,7 +1289,7 @@ const hooks = {
       // we have to wait the DOM update from a fakeComment 'fakecomment-123' to a comment class
       // 'c-123'
       if (commentWasPasted && domClean) {
-        pad.plugins.ep_comments_page.collectComments(() => {
+        pad.plugins.ep_comments_page.collectComments(()=> {
           pad.plugins.ep_comments_page.collectCommentReplies();
           pad.plugins.ep_comments_page.shouldCollectComment = false;
         });
@@ -1305,30 +1305,30 @@ const hooks = {
     let i = 0;
     let result = [];
 
-    if(padlines){
+    if (padlines){
       for (i = 0; i < padlines.length; i += 1){
         if (padlines[i]) {
-          axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=>{
+          axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=> {
             result[res.data.line] = (res.data.output);
-            if(result){
-              for(let j=0;j<result.length;j++){
-                if(!padlines[j]) continue;
+            if (result){
+              for(let j = 0;j < result.length;j++){
+                if (!padlines[j]) continue;
                 let complete_string = "";
-                for(let k=0;k<result[j].length;k++){
+                for(let k = 0;k < result[j].length;k++){
                   complete_string+=result[j][k] + " ";
                 }
                 let expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
                 let current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
                 let sum=0;
-                if(current && expected){
-                  for(let k=0;k<expected.length && k<current.length;k++){
+                if (current && expected){
+                  for(let k = 0;k < expected.length && k < current.length;k++){
                     let start = [],end=[];
                     start[0] = j;
                     start[1] = sum;
                     end[0] = j;
                     end[1] = sum+current[k].length;
                     
-                    if(expected[k]!=current[k]){
+                    if (expected[k]!=current[k]){
                       const data = {};
 
                       // // Insert comment data
@@ -1360,7 +1360,7 @@ const hooks = {
               }
             }
           })
-          .catch(err=>{
+          .catch(err=> {
             console.log(err.response);
           })
         }
@@ -1370,7 +1370,7 @@ const hooks = {
   },
 // ---------------------------MAJOR CHANGES END-----------------------------------------------
   // Insert comments classes
-  aceAttribsToClasses: (hookName, context, cb) => {
+  aceAttribsToClasses: (hookName, context, cb)=> {
     if (context.key === 'comment' && context.value !== 'comment-deleted') {
       return cb(['comment', context.value]);
     }
@@ -1417,7 +1417,7 @@ const getRepFromSelector = function (selector, container) {
   // this comment and remove it.  This is because content can be pasted
   // Mid comment which would mean a remove selection could have unexpected consequences
 
-  $.each(elements, (index, span) => {
+  $.each(elements, (index, span)=> {
     // create a rep array container we can push to..
     const rep = [[], []];
 
@@ -1461,7 +1461,7 @@ const getRepFromSelector = function (selector, container) {
     // Get each line Attribute on this line..
     let hasLineAttribute = false;
     const attrArr = attributeManager.getAttributesOnLine(lineNumber);
-    $.each(attrArr, (attrK, value) => {
+    $.each(attrArr, (attrK, value)=> {
       if (value[0] === 'lmkr') hasLineAttribute = true;
     });
     if (hasLineAttribute) leftOffset++;
@@ -1478,7 +1478,7 @@ const getRepFromSelector = function (selector, container) {
 };
 
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
-exports.aceInitialized = (hookName, context, cb) => {
+exports.aceInitialized = (hookName, context, cb)=> {
   const editorInfo = context.editorInfo;
   isHeading = _(isHeading).bind(context);
   editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
