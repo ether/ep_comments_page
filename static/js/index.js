@@ -1056,7 +1056,7 @@ EpComments.prototype.lineHasMarker = function (line) {
 
 // Save comment
 EpComments.prototype.saveComment = function (data, rep) {
-  this.socket.emit('addComment', data, (commentId, comment) => { 
+  this.socket.emit('addComment', data, (commentId, comment) => {
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
@@ -1294,35 +1294,32 @@ const hooks = {
           pad.plugins.ep_comments_page.shouldCollectComment = false;
         });
       }
-      }
-      
-      
+    }
     if (!context.callstack.docTextChanged) {
       return cb();
     }
-    let ace = context.editorInfo.editor;
-    let padlines = ace.exportText().split('\n');  
+    const ace = context.editorInfo.editor;
+    const padlines = ace.exportText().split('\n');  
     let i = 0;
-    let result = [];
-
+    const result = [];
     if (padlines){
       for (i = 0; i < padlines.length; i += 1){
         if (padlines[i]) {
           axios.get('http://localhost:5000/',{params:{line: i,query:padlines[i]}}).then(res=> {
             result[res.data.line] = (res.data.output);
             if (result){
-              for(let j = 0; j < result.length; j++){
+              for (let j = 0; j < result.length; j++){
                 if (!padlines[j]) continue;
                 let complete_string = "";
-                for(let k = 0; k < result[j].length; k++){
+                for (let k = 0; k < result[j].length; k++){
                   complete_string+=result[j][k] + " ";
                 }
-                let expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
-                let current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+                const expected = complete_string.split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
+                const current = padlines[j].split(/[ .:;?!~,`"&|()<>{}\[\]\r\n/\\]+/);
                 let sum=0;
                 if (current && expected){
-                  for(let k = 0; k < expected.length && k < current.length; k++){
-                    let start = [],end=[];
+                  for (let k = 0; k < expected.length && k < current.length; k++){
+                    const start = [],end = [];
                     start[0] = j;
                     start[1] = sum;
                     end[0] = j;
@@ -1347,7 +1344,7 @@ const hooks = {
                       data.comment.changeTo = expected[k];
                       data.comment.text = "";
                       data.commentId = "";
-                      let rep = {};
+                      const rep = {};
                       rep.selStart = start;
                       rep.selEnd = end;
                       pad.plugins.ep_comments_page.saveComment(data,rep);
