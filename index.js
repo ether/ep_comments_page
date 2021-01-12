@@ -12,11 +12,9 @@ let io;
 
 exports.exportEtherpadAdditionalContent = (hookName, context, callback) => callback(['comments']);
 
-exports.padRemove = async (hookName, context) => {
-  await Promise.all([
-    commentManager.deleteCommentReplies(context.padID),
-    commentManager.deleteComments(context.padID),
-  ]);
+exports.padRemove = (hookName, context) => {
+  commentManager.deleteCommentReplies(context.padID);
+  commentManager.deleteComments(context.padID);
 };
 
 exports.padCopy = async (hookName, context) => {
