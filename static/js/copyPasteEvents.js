@@ -111,7 +111,8 @@ const getCommentIds = (html) => {
       commentIds.push(commentId);
     }
   });
-  const uniqueCommentIds = _.uniq(commentIds);
+  const onlyUnique = (value, index, self) => self.indexOf(value) === index;
+  const uniqueCommentIds = commentIds.filter(onlyUnique);
   return uniqueCommentIds;
 };
 

@@ -399,12 +399,14 @@ const copyAndPaste = {
   getCommentDataValues(event) {
     const commentData = event.originalEvent.clipboardData.getData('text/objectComment');
     const commentDataJSON = JSON.parse(commentData);
+    /* eslint-disable-next-line you-dont-need-lodash-underscore/values */
     const commentDataValues = _.values(commentDataJSON)[0].data;
     return commentDataValues;
   },
   getCommentReplyDataValues(event) {
     const commentReplyData = event.originalEvent.clipboardData.getData('text/objectReply');
     const commentReplyDataJSON = JSON.parse(commentReplyData);
+    /* eslint-disable-next-line you-dont-need-lodash-underscore/values */
     const commentReplyDataValues = _.values(commentReplyDataJSON)[0];
     return commentReplyDataValues;
   },
@@ -441,7 +443,7 @@ const copyAndPaste = {
   },
   testIfHasAllFieldsNecessaryToCreateACommementReply(event) {
     const commentReplyDataValues = this.getCommentReplyDataValues(event);
-    const keys = _.keys(commentReplyDataValues);
+    const keys = Object.keys(commentReplyDataValues);
     const keysRequired = [
       'commentId',
       'text',
@@ -457,7 +459,7 @@ const copyAndPaste = {
   },
   testIfHasAllFieldsNecessaryToCreateAComment(event) {
     const commentDataValues = this.getCommentDataValues(event);
-    const keys = _.keys(commentDataValues);
+    const keys = Object.keys(commentDataValues);
     const keysRequired = [
       'author',
       'name',

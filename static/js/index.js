@@ -671,7 +671,8 @@ EpComments.prototype.getUniqueCommentsId = function (padInner) {
     // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
     if (commentId && commentId[1]) return commentId[1];
   });
-  return _.uniq(commentsId);
+  const onlyUnique = (value, index, self) => self.indexOf(value) === index;
+  return commentsId.filter(onlyUnique);
 };
 
 // Indicates if all comments are on the correct Y position, and don't need to
@@ -1406,10 +1407,10 @@ const getRepFromSelector = function (selector, container) {
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
 exports.aceInitialized = (hookName, context, cb) => {
   const editorInfo = context.editorInfo;
-  isHeading = _(isHeading).bind(context);
-  editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
+  isHeading = isHeading.bind(context);
+  editorInfo.ace_getRepFromSelector = getRepFromSelector.bind(context);
   editorInfo.ace_getCommentIdOnFirstPositionSelected =
-    _(getCommentIdOnFirstPositionSelected).bind(context);
-  editorInfo.ace_hasCommentOnSelection = _(hasCommentOnSelection).bind(context);
+    getCommentIdOnFirstPositionSelected.bind(context);
+  editorInfo.ace_hasCommentOnSelection = hasCommentOnSelection.bind(context);
   return cb();
 };
