@@ -131,7 +131,9 @@ describe('export comments to HTML', function () {
 
   context('when pad text has comment in strong', function () {
     before(async function () {
-      html = () => buildHTML(textWithComment('c-2342', `<strong>this is a comment and bold</strong>`)); // eslint-disable-line
+      html = () => buildHTML(
+          textWithComment('c-2342', '<strong>this is a comment and bold</strong>')
+      );
     });
 
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
@@ -251,8 +253,8 @@ const setHTML = (padID, html, callback) => {
       });
 };
 
-const getHTMLEndPointFor = (padID, callback) => `/api/${apiVersion}/getHTML?apikey=${apiKey}&padID=${padID}`; // eslint-disable-line
-
+const getHTMLEndPointFor = (padID, callback) => `/api/${apiVersion}/getHTML?
+    apikey=${apiKey}&padID=${padID}`;
 
 const buildHTML = (body) => `<html><body>${body}</body></html>`;
 
