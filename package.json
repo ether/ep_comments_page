@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "cheerio": "^0.22.0",
-    "formidable": "*"
+    "formidable": "^1.2.2"
   },
   "devDependencies": {
     "eslint": "^7.17.0",
