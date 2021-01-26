@@ -2,7 +2,7 @@
 
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
-const formidable = require('ep_etherpad-lite/node_modules/formidable');
+const formidable = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const _ = require('ep_etherpad-lite/static/js/underscore');
