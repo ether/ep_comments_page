@@ -1,6 +1,6 @@
 'use strict';
 
-const $ = require('ep_etherpad-lite/node_modules/cheerio');
+const $ = require('cheerio');
 const commentManager = require('./commentManager');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 
