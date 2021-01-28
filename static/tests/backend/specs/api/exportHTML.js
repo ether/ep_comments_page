@@ -1,13 +1,12 @@
 'use strict';
 
-function m(mod) { return `${__dirname}/../../../../../../../tests/backend/${mod}`; }
 const utils = require('../../../utils');
 const apiKey = utils.apiKey;
 const codeToBe0 = utils.codeToBe0;
 const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const settings = require('ep_etherpad-lite/node/utils/Settings');
-const common = require(m('common'));
+const common = require('ep_etherpad-lite/tests/backend/common');
 const db = require('ep_etherpad-lite/node/db/DB');
 let agent;
 
