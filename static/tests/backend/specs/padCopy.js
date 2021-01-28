@@ -1,6 +1,6 @@
 'use strict';
 
-const supertest = require('../../../../node_modules/supertest');
+const supertest = require('supertest');
 const utils = require('../../utils');
 const createPad = utils.createPad;
 const createComment = utils.createComment;
