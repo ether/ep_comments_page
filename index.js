@@ -18,8 +18,10 @@ exports.padRemove = (hookName, context) => {
 };
 
 exports.padCopy = async (hookName, context) => {
-  commentManager.copyComments(context.originalPad.id, context.destinationID);
-  commentManager.copyCommentReplies(context.originalPad.id, context.destinationID);
+  await Promise.all([
+    commentManager.copyComments(context.originalPad.id, context.destinationID),
+    commentManager.copyCommentReplies(context.originalPad.id, context.destinationID),
+  ]);
 };
 
 exports.handleMessageSecurity = (hookName, context, callback) => {
