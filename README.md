@@ -1,3 +1,5 @@
+![Publish Status](https://github.com/ether/ep_comments_page/workflows/Node.js%20Package/badge.svg) ![Backend Tests Status](https://github.com/ether/ep_comments_page/workflows/Backend%20tests/badge.svg)
+
 # Comments and annotations for Etherpad
 
 ![Screen shot](https://user-images.githubusercontent.com/220864/98013526-617ff900-1df2-11eb-88b6-cf259372f6ca.PNG)
