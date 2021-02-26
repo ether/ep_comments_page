@@ -49,9 +49,12 @@ const EpComments = function (context) {
   const loc = document.location;
   const port = loc.port === '' ? (loc.protocol === 'https:' ? 443 : 80) : loc.port;
   const url = `${loc.protocol}//${loc.hostname}:${port}/comment`;
-  this.socket = io.connect(url);
-
+  
   this.padId = clientVars.padId;
+  this.socket = io.connect(url, {
+    query: `padId=${padId}`,   
+  });
+
   this.comments = [];
   this.commentReplies = {};
   this.mapFakeComments = [];
