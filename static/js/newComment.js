@@ -47,7 +47,7 @@ const localizenewCommentPopup = () => {
 };
 
 // Insert new Comment Form
-const insertNewCommentPopupIfDontExist = function (comment, callback) {
+const insertNewCommentPopupIfDontExist = (comment, callback) => {
   $('#newComment').remove();
 
   comment.commentId = '';

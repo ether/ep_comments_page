@@ -52,7 +52,7 @@ const EpComments = function (context) {
 
   this.padId = clientVars.padId;
   this.socket = io.connect(url, {
-    query: `padId=${this.padId}`,   
+    query: `padId=${this.padId}`,
   });
 
   this.comments = [];
