@@ -1267,7 +1267,7 @@ const hooks = {
     return cb();
   },
 
-  aceEditEvent: (hookName, context, cb) => {
+  aceEditEvent: (hookName, context) => {
     if (!pad.plugins) pad.plugins = {};
     // first check if some text is being marked/unmarked to add comment to it
     const eventType = context.callstack.editEvent.eventType;
@@ -1311,7 +1311,7 @@ const hooks = {
     return cb();
   },
 
-  aceEditorCSS: (hookName, context, cb) => cb(cssFiles),
+  aceEditorCSS: (hookName, context) => cssFiles,
 };
 
 exports.aceEditorCSS = hooks.aceEditorCSS;
