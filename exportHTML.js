@@ -17,8 +17,10 @@ exports.exportHtmlAdditionalTagsWithData =
 
 exports.getLineHTMLForExport = async (hookName, context) => {
   if (settings.ep_comments_page && settings.ep_comments_page.exportHtml === false) return;
+
   // I'm not sure how optimal this is - it will do a database lookup for each line..
   const {comments} = await commentManager.getComments(context.padId);
+  let hasPlugin = false;
   // Load the HTML into a throwaway div instead of calling $.load() to avoid
   // https://github.com/cheeriojs/cheerio/issues/1031
   const content = $('<div>').html(context.lineContent);
@@ -28,6 +30,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
     const commentId = span.data('comment');
     if (!commentId) return; // not a comment.  please optimize me in selector
     if (!comments[commentId]) return; // if this comment has been deleted..
+    hasPlugin = true;
     span.append(
         $('<sup>').append(
             $('<a>').attr('href', `#${commentId}`).text('*')));
@@ -36,7 +39,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
       span.removeAttr('data-comment').addClass('comment').addClass(commentId);
     }
   });
-  context.lineContent = content.html();
+  if (hasPlugin) context.lineContent = content.html();
 };
 
 exports.exportHTMLAdditionalContent = async (hookName, {padId}) => {
