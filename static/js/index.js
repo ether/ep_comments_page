@@ -1277,7 +1277,7 @@ const hooks = {
       pad.plugins.ep_comments_page.preCommentMarker.handleMarkText(context);
     }
 
-    if (['setup', 'setBaseText', 'importText'].includes(eventType)) return cb();
+    if (['setup', 'setBaseText', 'importText'].includes(eventType)) return;
 
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.setYofComments();
@@ -1296,7 +1296,7 @@ const hooks = {
         });
       }
     }
-    return cb();
+    return;
   },
 
   // Insert comments classes
