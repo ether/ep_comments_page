@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('ep_etherpad-lite/static/js/underscore');
+const _ = require('underscore');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const shared = require('./shared');
 

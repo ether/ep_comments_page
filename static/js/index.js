@@ -6,7 +6,7 @@
 */
 
 
-const _ = require('ep_etherpad-lite/static/js/underscore');
+const _ = require('underscore');
 const browser = require('ep_etherpad-lite/static/js/browser');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');

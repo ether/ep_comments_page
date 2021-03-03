@@ -5,7 +5,7 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 const formidable = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
-const _ = require('ep_etherpad-lite/static/js/underscore');
+const _ = require('underscore');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
