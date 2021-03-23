@@ -5,6 +5,7 @@
   "ep_comments_page.add_comment" : "Kommentar zur Auswahl hinzufügen",
   "ep_comments_page.add_comment.hint" : "Bitte wählen Sie zuerst den zu kommentierenden Text aus",
   "ep_comments_page.delete_comment.title" : "Diesen Kommentar löschen",
+  "ep_comments_page.edit_comment.title" : "Edit this comment",
   "ep_comments_page.show_comments" : "Kommentare anzeigen",
   "ep_comments_page.comments_template.suggested_change" : "Vorgeschlagene Änderung",
   "ep_comments_page.comments_template.from" : "von",
@@ -17,5 +18,9 @@
   "ep_comments_page.comments_template.comment.value" : "Kommentar",
   "ep_comments_page.comments_template.cancel.value" : "Abbrechen",
   "ep_comments_page.comments_template.reply.value": "Antworten",
-  "ep_comments_page.comments_template.reply.placeholder": "Antworten"
+  "ep_comments_page.comments_template.reply.placeholder": "Antworten",
+  "ep_comments_page.comments_template.edit_comment.save" : "save",
+  "ep_comments_page.comments_template.edit_comment.cancel" :"cancel",
+  "ep_comments_page.error.edit_unauth": "You cannot edit other users comments!",
+  "ep_comments_page.error.delete_unauth": "You cannot delete other users comments!"
 }

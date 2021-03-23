@@ -5,6 +5,7 @@
   "ep_comments_page.add_comment" : "Annoter la sélection",
   "ep_comments_page.add_comment.hint" : "Vous devez d'abord sélectionner un texte à annoter",
   "ep_comments_page.delete_comment.title" : "Supprimer cette annotation",
+  "ep_comments_page.edit_comment.title" : "Modifier ce commentaire",
   "ep_comments_page.show_comments" : "Afficher les annotations",
   "ep_comments_page.comments_template.suggested_change" : "Modification proposée",
   "ep_comments_page.comments_template.from" : "Remplacer",
@@ -17,5 +18,9 @@
   "ep_comments_page.comments_template.comment.value" : "Annotation",
   "ep_comments_page.comments_template.cancel.value" : "Annuler",
   "ep_comments_page.comments_template.reply.value":"Répondre",
-  "ep_comments_page.comments_template.reply.placeholder":"Répondre"
+  "ep_comments_page.comments_template.reply.placeholder":"Répondre",
+  "ep_comments_page.comments_template.edit_comment.save" : "Enregistrer",
+  "ep_comments_page.comments_template.edit_comment.cancel" :"Annuler",
+  "ep_comments_page.error.edit_unauth": "Vous ne pouvez pas modifier les commentaires des autres utilisatrices et utilisateurs !",
+  "ep_comments_page.error.delete_unauth": "Vous ne pouvez pas supprimer les commentaires des autres utilisatrices et utilisateurs !"
 }

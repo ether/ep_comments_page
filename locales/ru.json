@@ -20,5 +20,7 @@
   "ep_comments_page.comments_template.reply.value" : "Ответить",
   "ep_comments_page.comments_template.reply.placeholder" : "Ответить",
   "ep_comments_page.comments_template.edit_comment.save" : "сохранить",
-  "ep_comments_page.comments_template.edit_comment.cancel" :"отменить"
+  "ep_comments_page.comments_template.edit_comment.cancel" :"отменить",
+  "ep_comments_page.error.edit_unauth": "You cannot edit other users comments!",
+  "ep_comments_page.error.delete_unauth": "You cannot delete other users comments!"
 }
