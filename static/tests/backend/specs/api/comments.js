@@ -238,7 +238,7 @@ describe('create comment API broadcast', function () {
       const req = {padId: padID};
       // needs to get comments to be able to join the pad room, where the messages will be broadcast
       // to:
-      socket.emit('getComments', req, (res) => {
+      socket.emit('getComments', req, (errj, res) => {
         socket.on('pushAddComment', (data) => {
           ++timesMessageWasReceived;
         });

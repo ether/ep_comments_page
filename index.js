@@ -38,91 +38,88 @@ exports.handleMessageSecurity = (hookName, context, callback) => {
 exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
   io.on('connection', (socket) => {
+    const handler = (fn) => (...args) => {
+      const respond = args.pop();
+      (async () => await fn(...args))().then(
+          (val) => respond(null, val),
+          (err) => respond({name: err.name, message: err.message}));
+    };
+
     // Join the rooms
-    socket.on('getComments', async (data, respond) => {
+    socket.on('getComments', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       // Put read-only and read-write users in the same socket.io "room" so that they can see each
       // other's updates.
       socket.join(padId);
-      respond(await commentManager.getComments(padId));
-    });
+      return await commentManager.getComments(padId);
+    }));
 
-    socket.on('getCommentReplies', async (data, respond) => {
+    socket.on('getCommentReplies', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
-      respond(await commentManager.getCommentReplies(padId));
-    });
+      return await commentManager.getCommentReplies(padId);
+    }));
 
     // On add events
-    socket.on('addComment', async (data, respond) => {
+    socket.on('addComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       const content = data.comment;
       const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
-        respond(commentId, comment);
+        return [commentId, comment];
       }
-    });
+    }));
 
-    socket.on('deleteComment', async (data, respond) => {
-      try {
-        const {padId} = await readOnlyManager.getIds(data.padId);
-        await commentManager.deleteComment(padId, data.commentId, data.authorId);
-        socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
-        respond('');
-      } catch (err) {
-        respond(err.message || err.toString());
-      }
-    });
+    socket.on('deleteComment', handler(async (data) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      await commentManager.deleteComment(padId, data.commentId, data.authorId);
+      socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
+    }));
 
-    socket.on('revertChange', async (data, respond) => {
+    socket.on('revertChange', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       await commentManager.changeAcceptedState(padId, data.commentId, false);
       socket.broadcast.to(padId).emit('changeReverted', data.commentId);
-    });
+    }));
 
-    socket.on('acceptChange', async (data, respond) => {
+    socket.on('acceptChange', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       await commentManager.changeAcceptedState(padId, data.commentId, true);
       socket.broadcast.to(padId).emit('changeAccepted', data.commentId);
-    });
+    }));
 
-    socket.on('bulkAddComment', async (padId, data, respond) => {
+    socket.on('bulkAddComment', handler(async (padId, data) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-      respond(_.object(commentIds, comments)); // {c-123:data, c-124:data}
-    });
+      return _.object(commentIds, comments); // {c-123:data, c-124:data}
+    }));
 
-    socket.on('bulkAddCommentReplies', async (padId, data, respond) => {
+    socket.on('bulkAddCommentReplies', handler(async (padId, data) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-      respond(_.zip(repliesId, replies));
-    });
+      return _.zip(repliesId, replies);
+    }));
 
-    socket.on('updateCommentText', async (data, respond) => {
-      try {
-        const {commentId, commentText, authorId} = data;
-        const {padId} = await readOnlyManager.getIds(data.padId);
-        await commentManager.changeCommentText(padId, commentId, commentText, authorId);
-        socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
-        respond('');
-      } catch (err) {
-        respond(err.message || err.toString());
-      }
-    });
+    socket.on('updateCommentText', handler(async (data) => {
+      const {commentId, commentText, authorId} = data;
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      await commentManager.changeCommentText(padId, commentId, commentText, authorId);
+      socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
+    }));
 
-    socket.on('addCommentReply', async (data, respond) => {
+    socket.on('addCommentReply', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       const [replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
       socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
-      respond(replyId, reply);
-    });
+      return [replyId, reply];
+    }));
   });
   return cb();
 };

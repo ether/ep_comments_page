@@ -130,12 +130,10 @@ EpComments.prototype.init = function () {
   this.container.parent().on('click', '.comment-delete', async function () {
     const commentId = $(this).closest('.comment-container')[0].id;
     try {
-      await new Promise((resolve, reject) => {
-        self.socket.emit('deleteComment', {
-          padId: self.padId,
-          commentId,
-          authorId: clientVars.userId,
-        }, (errMsg) => errMsg ? reject(new Error(errMsg)) : resolve());
+      await self._send('deleteComment', {
+        padId: self.padId,
+        commentId,
+        authorId: clientVars.userId,
       });
     } catch (err) {
       if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
@@ -204,10 +202,7 @@ EpComments.prototype.init = function () {
     data.authorId = clientVars.userId;
 
     try {
-      await new Promise((resolve, reject) => {
-        self.socket.emit('updateCommentText', data,
-            (errMsg) => errMsg ? reject(new Error(errMsg)) : resolve());
-      });
+      await self._send('updateCommentText', data);
     } catch (err) {
       if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
       $.gritter.add({
@@ -284,11 +279,11 @@ EpComments.prototype.init = function () {
 
     if (isRevert) {
       // Tell all users this change was reverted
-      self.socket.emit('revertChange', data, () => {});
+      self._send('revertChange', data);
       self.showChangeAsReverted(data.commentId);
     } else {
       // Tell all users this change was accepted
-      self.socket.emit('acceptChange', data, () => {});
+      self._send('acceptChange', data);
       // Update our own comments container with the accepted change
       self.showChangeAsAccepted(data.commentId);
     }
@@ -317,7 +312,7 @@ EpComments.prototype.init = function () {
     data.reply = $(this).find('.comment-content').val();
     data.changeTo = $(this).find('.to-value').val() || null;
     data.changeFrom = $(this).find('.from-value').text() || null;
-    self.socket.emit('addCommentReply', data, () => {
+    self._send('addCommentReply', data).then(() => {
       self.getCommentReplies((replies) => {
         self.commentReplies = replies;
         self.collectCommentReplies();
@@ -760,21 +755,23 @@ EpComments.prototype.setCommentOrReplyNewText = function (commentOrReplyId, text
   }
 };
 
+EpComments.prototype._send = async function (type, ...args) {
+  return await new Promise((resolve, reject) => {
+    this.socket.emit(type, ...args, (errj, val) => {
+      if (errj != null) return reject(Object.assign(new Error(errj.message), {name: errj.name}));
+      resolve(val);
+    });
+  });
+};
+
 // Get all comments
 EpComments.prototype.getComments = function (callback) {
-  const req = {padId: this.padId};
-
-  this.socket.emit('getComments', req, (res) => {
-    callback(res.comments);
-  });
+  this._send('getComments', {padId: this.padId}).then((res) => callback(res.comments));
 };
 
 // Get all comment replies
 EpComments.prototype.getCommentReplies = function (callback) {
-  const req = {padId: this.padId};
-  this.socket.emit('getCommentReplies', req, (res) => {
-    callback(res.replies);
-  });
+  this._send('getCommentReplies', {padId: this.padId}).then((res) => callback(res.replies));
 };
 
 EpComments.prototype.getCommentData = function () {
@@ -1058,7 +1055,9 @@ EpComments.prototype.lineHasMarker = function (line) {
 
 // Save comment
 EpComments.prototype.saveComment = function (data, rep) {
-  this.socket.emit('addComment', data, (commentId, comment) => {
+  this._send('addComment', data).then((res) => {
+    if (res == null) return;
+    const [commentId, comment] = res;
     comment.commentId = commentId;
 
     this.ace.callWithAce((ace) => {
@@ -1078,7 +1077,7 @@ EpComments.prototype.saveComment = function (data, rep) {
 //                c-newCommentId124: data:{...}}
 EpComments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
   const data = this.buildComments(commentData);
-  this.socket.emit('bulkAddComment', padId, data, (comments) => {
+  this._send('bulkAddComment', padId, data).then((comments) => {
     this.setComments(comments);
     this.shouldCollectComment = true;
   });
@@ -1111,7 +1110,7 @@ EpComments.prototype.getMapfakeComments = function () {
 // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
 EpComments.prototype.saveCommentReplies = function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
-  this.socket.emit('bulkAddCommentReplies', padId, data, (replies) => {
+  this._send('bulkAddCommentReplies', padId, data).then((replies) => {
     _.each(replies, (reply) => {
       this.setCommentReply(reply);
     });
@@ -1189,7 +1188,7 @@ EpComments.prototype.showChangeAsAccepted = function (commentId) {
       .each(function () {
         $(this).removeClass('change-accepted');
         const data = {commentId: $(this).attr('data-commentid'), padId: self.padId};
-        self.socket.emit('revertChange', data, () => {});
+        self._send('revertChange', data);
       });
 
   // this comment get accepted
