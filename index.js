@@ -200,7 +200,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
       return;
     }
     if (data == null) return;
-    res.json({code: 0, data});
+    res.json({code: 0, message: 'ok', data});
   });
 
   args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
@@ -241,7 +241,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
     for (let i = 0; i < commentIds.length; i++) {
       io.to(padIdReceived).emit('pushAddComment', commentIds[i], comments[i]);
     }
-    res.json({code: 0, commentIds});
+    res.json({code: 0, message: 'ok', commentIds});
   });
 
   args.app.get('/p/:pad/:rev?/commentReplies', async (req, res) => {
@@ -263,7 +263,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
       return;
     }
     if (data == null) return;
-    res.json({code: 0, data});
+    res.json({code: 0, message: 'ok', data});
   });
 
   args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
@@ -305,7 +305,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
       replies[i].replyId = replyIds[i];
       io.to(padIdReceived).emit('pushAddCommentReply', replyIds[i], replies[i]);
     }
-    res.json({code: 0, replyIds});
+    res.json({code: 0, message: 'ok', replyIds});
   });
   return callback();
 };
