@@ -1,6 +1,6 @@
 'use strict';
 
-const supertest = require('supertest');
+const common = require('ep_etherpad-lite/tests/backend/common');
 const io = require('socket.io-client');
 const utils = require('../../../utils');
 const createPad = utils.createPad;
@@ -8,15 +8,20 @@ const readOnlyId = utils.readOnlyId;
 const createComment = utils.createComment;
 const createCommentReply = utils.createCommentReply;
 const commentRepliesEndPointFor = utils.commentRepliesEndPointFor;
-const apiKey = utils.apiKey;
-const appUrl = utils.appUrl;
 const codeToBe0 = utils.codeToBe0;
 const codeToBe1 = utils.codeToBe1;
 const codeToBe4 = utils.codeToBe4;
-const api = supertest(appUrl);
 
+let api;
+let appUrl;
+const apiKey = common.apiKey;
 
 describe(__filename, function () {
+  before(async function () {
+    api = await common.init();
+    appUrl = common.baseUrl;
+  });
+
   describe('get comments replies', function () {
     let padID;
     // create a new pad before each test run

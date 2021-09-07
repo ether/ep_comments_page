@@ -1,13 +1,10 @@
 'use strict';
 
-const appUrl = 'http://localhost:9001';
-const apiVersion = 1;
-
-const supertest = require('supertest');
-const api = supertest(appUrl);
+const common = require('ep_etherpad-lite/tests/backend/common');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-const apiKey = require('ep_etherpad-lite/node/handler/APIHandler.js').exportedForTestingOnly.apiKey;
+const apiKey = common.apiKey;
+const apiVersion = 1;
 
 // Functions to validate API responses:
 const codeToBe = function (expectedCode, res) {
@@ -32,21 +29,24 @@ const commentRepliesEndPointFor = function (pad) {
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
 const createPad = function (done) {
-  const pad = randomString(5);
-
-  api.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${pad}`)
-      .end((err, res) => {
-        if (err || (res.body.code !== 0)) return done(new Error('Unable to create new Pad'));
-        done(null, pad);
-      });
+  common.init().then((agent) => {
+    const pad = randomString(5);
+    agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${pad}`)
+        .end((err, res) => {
+          if (err || (res.body.code !== 0)) return done(new Error('Unable to create new Pad'));
+          done(null, pad);
+        });
+  });
 };
 
 const readOnlyId = function (padID, done) {
-  api.get(`/api/${apiVersion}/getReadOnlyID?apikey=${apiKey}&padID=${padID}`)
-      .end((err, res) => {
-        if (err || (res.body.code !== 0)) return done(new Error('Unable to get read only id'));
-        done(null, res.body.data.readOnlyID);
-      });
+  common.init().then((agent) => {
+    agent.get(`/api/${apiVersion}/getReadOnlyID?apikey=${apiKey}&padID=${padID}`)
+        .end((err, res) => {
+          if (err || (res.body.code !== 0)) return done(new Error('Unable to get read only id'));
+          done(null, res.body.data.readOnlyID);
+        });
+  });
 };
 
 // Creates a comment and calls the callback when finished.
@@ -54,18 +54,20 @@ const createComment = function (pad, commentData, done) {
   commentData = commentData || {};
   commentData.name = commentData.name || 'John Doe';
   commentData.text = commentData.text || 'This is a comment';
-  api.post(commentsEndPointFor(pad))
-      .send({
-        apikey: apiKey,
-        data: JSON.stringify([commentData]),
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .expect(codeToBe0)
-      .end((err, res) => {
-        if (err) return done(err);
-        done(null, res.body.commentIds[0]);
-      });
+  common.init().then((agent) => {
+    agent.post(commentsEndPointFor(pad))
+        .send({
+          apikey: apiKey,
+          data: JSON.stringify([commentData]),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .expect(codeToBe0)
+        .end((err, res) => {
+          if (err) return done(err);
+          done(null, res.body.commentIds[0]);
+        });
+  });
 };
 
 // Creates a comment reply and calls the callback when finished.
@@ -74,25 +76,24 @@ const createCommentReply = function (pad, comment, replyData, done) {
   replyData.commentId = comment;
   replyData.name = replyData.name || 'John Doe';
   replyData.text = replyData.text || 'This is a reply';
-  api.post(commentRepliesEndPointFor(pad))
-      .send({
-        apikey: apiKey,
-        data: JSON.stringify([replyData]),
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .expect(codeToBe0)
-      .end((err, res) => {
-        if (err) return done(err);
-        done(null, res.body.replyIds[0]);
-      });
+  common.init().then((agent) => {
+    agent.post(commentRepliesEndPointFor(pad))
+        .send({
+          apikey: apiKey,
+          data: JSON.stringify([replyData]),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .expect(codeToBe0)
+        .end((err, res) => {
+          if (err) return done(err);
+          done(null, res.body.replyIds[0]);
+        });
+  });
 };
 
 /* ********** Available functions/values: ********** */
 exports.apiVersion = apiVersion;
-exports.api = api;
-exports.appUrl = appUrl;
-exports.apiKey = apiKey;
 exports.createPad = createPad;
 exports.readOnlyId = readOnlyId;
 exports.createComment = createComment;

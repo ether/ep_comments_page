@@ -1,22 +1,23 @@
 'use strict';
 
 const utils = require('../../../utils');
-const apiKey = utils.apiKey;
 const codeToBe0 = utils.codeToBe0;
 const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const common = require('ep_etherpad-lite/tests/backend/common');
 const db = require('ep_etherpad-lite/node/db/DB');
+
 let agent;
+const apiKey = common.apiKey;
 
 xdescribe(__filename, function () {
   let padID;
   let html;
-  // create a new pad before each test run
-  // before(async function () {  });
+
+  before(async function () { agent = await common.init(); });
+
   beforeEach(async function (done) {
-    agent = await common.init();
     padID = randomString(5);
 
     createPad(padID, () => {
