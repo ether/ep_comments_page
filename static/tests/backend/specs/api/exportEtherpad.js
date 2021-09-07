@@ -4,6 +4,7 @@
  * Import and Export tests for comments in .etherpad format
  */
 
+const assert = require('assert').strict;
 const supertest = require('supertest');
 const superagent = require('superagent');
 const fs = require('fs');
@@ -30,7 +31,8 @@ describe(__filename, function () {
             contentType: 'application/etherpad',
           })
           .expect(200)
-          .expect(/FrameCall\('true', 'ok'\);/);
+          .expect('Content-Type', /json/)
+          .expect((res) => assert.equal(res.body.code, 0));
     });
 
     it('exports .etherpad and checks it includes comments', async function () {
