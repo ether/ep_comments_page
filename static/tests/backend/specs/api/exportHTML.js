@@ -253,7 +253,7 @@ const setHTML = (padID, html, done) => {
       });
 };
 
-const getHTMLEndPointFor = (padID, callback) => `/api/${apiVersion}/getHTML?
+const getHTMLEndPointFor = (padID) => `/api/${apiVersion}/getHTML?
     apikey=${apiKey}&padID=${padID}`;
 
 const buildHTML = (body) => `<html><body>${body}</body></html>`;
