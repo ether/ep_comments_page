@@ -198,7 +198,7 @@ describe(__filename, function () {
     it('returns code 0 when reply is successfully added', function (done) {
       api.post(commentRepliesEndPointFor(padID))
           .field('apikey', apiKey)
-          .field('data', repliesData(commentID))
+          .field('data', repliesData([replyData(commentID)]))
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
           .expect(200, done);
