@@ -36,7 +36,6 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0",
-    "request": "^2.88.2",
     "socket.io-client": "^2.3.0",
     "superagent": "^6.1.0",
     "supertest": "^6.1.6"

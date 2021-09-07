@@ -4,7 +4,6 @@ const appUrl = 'http://localhost:9001';
 const apiVersion = 1;
 
 const supertest = require('supertest');
-const request = require('request');
 const api = supertest(appUrl);
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
@@ -54,62 +53,41 @@ const readOnlyId = function (padID, callback) {
 
 // Creates a comment and calls the callback when finished.
 const createComment = function (pad, commentData, done) {
-  let commentId;
   commentData = commentData || {};
   commentData.name = commentData.name || 'John Doe';
   commentData.text = commentData.text || 'This is a comment';
-
-  const url = appUrl + commentsEndPointFor(pad);
-  request.post(url,
-      {form: {
+  api.post(commentsEndPointFor(pad))
+      .send({
         apikey: apiKey,
         data: JSON.stringify([commentData]),
-      }},
-      (error, res, body) => {
-        if (error) {
-          throw error;
-        } else if (res.statusCode !== 200) {
-          throw new Error(`Failed on calling API. Status code: ${res.statusCode}`);
-        } else {
-          const json = JSON.parse(body);
-          if (json.code !== 0) {
-            throw new Error(`Failed on calling API. Response was: ${res.body}`);
-          }
-          commentId = json.commentIds[0];
-          done(null, commentId);
-        }
-      }
-  );
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .expect(codeToBe0)
+      .end((err, res) => {
+        if (err) return done(err);
+        done(null, res.body.commentIds[0]);
+      });
 };
 
 // Creates a comment reply and calls the callback when finished.
 const createCommentReply = function (pad, comment, replyData, done) {
-  let replyId;
   replyData = replyData || {};
   replyData.commentId = comment;
   replyData.name = replyData.name || 'John Doe';
   replyData.text = replyData.text || 'This is a reply';
-  const url = appUrl + commentRepliesEndPointFor(pad);
-  request.post(url,
-      {form: {
+  api.post(commentRepliesEndPointFor(pad))
+      .send({
         apikey: apiKey,
         data: JSON.stringify([replyData]),
-      }},
-      (error, res, body) => {
-        if (error) {
-          throw error;
-        } else if (res.statusCode !== 200) {
-          throw new Error(`Failed on calling API. Status code: ${res.statusCode}`);
-        } else {
-          const json = JSON.parse(body);
-          if (json.code !== 0) {
-            throw new Error(`Failed on calling API. Response was: ${res.body}`);
-          }
-          replyId = json.replyIds[0];
-          done(null, replyId);
-        }
-      }
-  );
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .expect(codeToBe0)
+      .end((err, res) => {
+        if (err) return done(err);
+        done(null, res.body.replyIds[0]);
+      });
 };
 
 /* ********** Available functions/values: ********** */
