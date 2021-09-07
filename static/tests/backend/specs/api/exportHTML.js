@@ -113,6 +113,9 @@ describe(__filename, function () {
     // comment)
     xit('returns HTML with strong and comment, in any order', function (done) {
       agent.get(getHTMLEndPointFor(padID))
+          .expect(200)
+          .expect('Content-Type', /json/)
+          .expect(codeToBe0)
           .expect((res) => {
             const strongInsideCommentRegex =
                 regexWithComment('c-2342', '<strong>this is a comment and bold</strong>');
