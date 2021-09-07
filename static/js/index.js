@@ -65,7 +65,7 @@ const EpComments = function (context) {
 };
 
 // Init Etherpad plugin comment pads
-EpComments.prototype.init = function () {
+EpComments.prototype.init = async function () {
   const self = this;
   moment.locale(html10n.getLanguage());
 
@@ -76,22 +76,17 @@ EpComments.prototype.init = function () {
   // Init icons container
   commentIcons.insertContainer();
 
-  // Get all comments
-  this.getComments().then((comments) => {
-    if (!$.isEmptyObject(comments)) {
-      this.setComments(comments);
-      this.collectComments();
-    }
-  });
-
-  this.getCommentReplies().then((replies) => {
-    if (!$.isEmptyObject(replies)) {
-      this.commentReplies = replies;
-      this.collectCommentReplies();
-    }
-    this.commentRepliesListen();
-    this.commentListen();
-  });
+  const [comments, replies] = await Promise.all([this.getComments(), this.getCommentReplies()]);
+  if (!$.isEmptyObject(comments)) {
+    this.setComments(comments);
+    this.collectComments();
+  }
+  if (!$.isEmptyObject(replies)) {
+    this.commentReplies = replies;
+    this.collectCommentReplies();
+  }
+  this.commentRepliesListen();
+  this.commentListen();
 
   // Init add push event
   this.pushComment('add', (commentId, comment) => {
