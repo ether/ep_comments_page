@@ -236,19 +236,19 @@ xdescribe(__filename, function () {
 
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
-const createPad = (padID, callback) => {
+const createPad = (padID, done) => {
   agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
       .end((err, res) => {
-        if (err || (res.body.code !== 0)) callback(new Error('Unable to create new Pad'));
-        callback(null, padID);
+        if (err || (res.body.code !== 0)) return done(new Error('Unable to create new Pad'));
+        done(null, padID);
       });
 };
 
-const setHTML = (padID, html, callback) => {
+const setHTML = (padID, html, done) => {
   agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
       .end((err, res) => {
-        if (err || (res.body.code !== 0)) callback(new Error('Unable to set pad HTML'));
-        callback(null, padID);
+        if (err || (res.body.code !== 0)) return done(new Error('Unable to set pad HTML'));
+        done(null, padID);
       });
 };
 
