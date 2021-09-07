@@ -10,7 +10,7 @@ const common = require('ep_etherpad-lite/tests/backend/common');
 const db = require('ep_etherpad-lite/node/db/DB');
 let agent;
 
-xdescribe('export comments to HTML', function () {
+xdescribe(__filename, function () {
   let padID;
   let html;
   // create a new pad before each test run

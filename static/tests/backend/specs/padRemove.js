@@ -11,7 +11,7 @@ const appUrl = utils.appUrl;
 const apiKey = utils.apiKey;
 const api = supertest(appUrl);
 
-describe('padRemove hook', function () {
+describe(__filename, function () {
   let padID;
 
   beforeEach(function (done) {
