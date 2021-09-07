@@ -1,5 +1,6 @@
 'use strict';
 
+const absolutePaths = require('ep_etherpad-lite/node/utils/AbsolutePaths');
 const fs = require('fs');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
@@ -7,7 +8,7 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 // ensure we have an apiKey
 let apiKey = '';
 try {
-  apiKey = fs.readFileSync('./APIKEY.txt', 'utf8').trim();
+  apiKey = fs.readFileSync(absolutePaths.makeAbsolute('./APIKEY.txt'), 'utf8').trim();
 } catch (e) {
   console.warn('Could not find APIKEY');
 }
