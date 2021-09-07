@@ -240,8 +240,7 @@ const createPad = (padID, callback) => {
   agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to create new Pad'));
-
-        callback(padID);
+        callback(null, padID);
       });
 };
 
@@ -249,7 +248,6 @@ const setHTML = (padID, html, callback) => {
   agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
       .end((err, res) => {
         if (err || (res.body.code !== 0)) callback(new Error('Unable to set pad HTML'));
-
         callback(null, padID);
       });
 };
