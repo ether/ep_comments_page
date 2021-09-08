@@ -1,18 +1,20 @@
 'use strict';
 
-const supertest = require('supertest');
+const common = require('ep_etherpad-lite/tests/backend/common');
 const utils = require('../../utils');
 const createPad = utils.createPad;
 const createComment = utils.createComment;
 const createCommentReply = utils.createCommentReply;
 const commentsEndPointFor = utils.commentsEndPointFor;
 const commentRepliesEndPointFor = utils.commentRepliesEndPointFor;
-const appUrl = utils.appUrl;
-const apiKey = utils.apiKey;
-const api = supertest(appUrl);
 
-describe('padCopy hook', function () {
+let api;
+const apiKey = common.apiKey;
+
+describe(__filename, function () {
   let padID;
+
+  before(async function () { api = await common.init(); });
 
   beforeEach(function (done) {
     createPad((err, newPadID) => {

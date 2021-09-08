@@ -1,28 +1,32 @@
 'use strict';
 
 const utils = require('../../../utils');
-const apiKey = utils.apiKey;
 const codeToBe0 = utils.codeToBe0;
 const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const common = require('ep_etherpad-lite/tests/backend/common');
 const db = require('ep_etherpad-lite/node/db/DB');
-let agent;
 
-xdescribe('export comments to HTML', function () {
+let agent;
+const apiKey = common.apiKey;
+
+describe(__filename, function () {
   let padID;
   let html;
-  // create a new pad before each test run
-  // before(async function () {  });
-  beforeEach(async function (done) {
-    agent = await common.init();
-    padID = randomString(5);
 
-    createPad(padID, () => {
-      setHTML(padID, html(), done);
-    });
-    return;
+  before(async function () { agent = await common.init(); });
+
+  beforeEach(async function () {
+    padID = randomString(5);
+    await agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .expect(codeToBe0);
+    await agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html()}`)
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .expect(codeToBe0);
   });
 
   context('when pad text has one comment', function () {
@@ -109,6 +113,9 @@ xdescribe('export comments to HTML', function () {
     // comment)
     xit('returns HTML with strong and comment, in any order', function (done) {
       agent.get(getHTMLEndPointFor(padID))
+          .expect(200)
+          .expect('Content-Type', /json/)
+          .expect(codeToBe0)
           .expect((res) => {
             const strongInsideCommentRegex =
                 regexWithComment('c-2342', '<strong>this is a comment and bold</strong>');
@@ -234,28 +241,7 @@ xdescribe('export comments to HTML', function () {
   });
 });
 
-
-// Creates a pad and returns the pad id. Calls the callback when finished.
-const createPad = (padID, callback) => {
-  agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
-      .end((err, res) => {
-        if (err || (res.body.code !== 0)) callback(new Error('Unable to create new Pad'));
-
-        callback(padID);
-      });
-};
-
-const setHTML = (padID, html, callback) => {
-  agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html}`)
-      .end((err, res) => {
-        if (err || (res.body.code !== 0)) callback(new Error('Unable to set pad HTML'));
-
-        callback(null, padID);
-      });
-};
-
-const getHTMLEndPointFor = (padID, callback) => `/api/${apiVersion}/getHTML?
-    apikey=${apiKey}&padID=${padID}`;
+const getHTMLEndPointFor = (padID) => `/api/${apiVersion}/getHTML?apikey=${apiKey}&padID=${padID}`;
 
 const buildHTML = (body) => `<html><body>${body}</body></html>`;
 

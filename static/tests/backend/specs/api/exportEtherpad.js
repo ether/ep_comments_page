@@ -4,18 +4,21 @@
  * Import and Export tests for comments in .etherpad format
  */
 
-const supertest = require('supertest');
+const assert = require('assert').strict;
+const common = require('ep_etherpad-lite/tests/backend/common');
 const superagent = require('superagent');
 const fs = require('fs');
 
 // test doc
 const etherpadDoc = fs.readFileSync(`${__dirname}/test.etherpad`);
 const apiVersion = 1;
-const apiKey = require('ep_etherpad-lite/node/handler/APIHandler.js').exportedForTestingOnly.apiKey;
+const apiKey = common.apiKey;
 const testPadId = makeid();
-const api = supertest('http://localhost:9001');
+let api;
 
 describe(__filename, function () {
+  before(async function () { api = await common.init(); });
+
   describe('Imports and Exports', function () {
     it('creates a new Pad, imports content to it, checks that content', async function () {
       await api.get(`${endPoint('createPad')}&padID=${testPadId}`)
@@ -30,7 +33,8 @@ describe(__filename, function () {
             contentType: 'application/etherpad',
           })
           .expect(200)
-          .expect(/FrameCall\('true', 'ok'\);/);
+          .expect('Content-Type', /json/)
+          .expect((res) => assert.equal(res.body.code, 0));
     });
 
     it('exports .etherpad and checks it includes comments', async function () {
