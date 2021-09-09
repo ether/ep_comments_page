@@ -77,14 +77,14 @@ EpComments.prototype.init = function () {
   commentIcons.insertContainer();
 
   // Get all comments
-  this.getComments((comments) => {
+  this.getComments().then((comments) => {
     if (!$.isEmptyObject(comments)) {
       this.setComments(comments);
       this.collectComments();
     }
   });
 
-  this.getCommentReplies((replies) => {
+  this.getCommentReplies().then((replies) => {
     if (!$.isEmptyObject(replies)) {
       this.commentReplies = replies;
       this.collectCommentReplies();
@@ -304,7 +304,7 @@ EpComments.prototype.init = function () {
   });
 
   // When a reply get submitted
-  this.container.parent().on('submit', '.new-comment', function (e) {
+  this.container.parent().on('submit', '.new-comment', async function (e) {
     e.preventDefault();
 
     const data = self.getCommentData();
@@ -312,17 +312,13 @@ EpComments.prototype.init = function () {
     data.reply = $(this).find('.comment-content').val();
     data.changeTo = $(this).find('.to-value').val() || null;
     data.changeFrom = $(this).find('.from-value').text() || null;
-    self._send('addCommentReply', data).then(() => {
-      self.getCommentReplies((replies) => {
-        self.commentReplies = replies;
-        self.collectCommentReplies();
-
-        // Once the new reply is displayed, we clear the form
-        $('iframe[name="ace_outer"]').contents().find('.new-comment').removeClass('editing');
-      });
-    });
-
     $(this).trigger('reset_reply');
+    await self._send('addCommentReply', data);
+    const replies = await self.getCommentReplies();
+    self.commentReplies = replies;
+    self.collectCommentReplies();
+    // Once the new reply is displayed, we clear the form
+    $('iframe[name="ace_outer"]').contents().find('.new-comment').removeClass('editing');
   });
   this.container.parent().on('reset_reply', '.new-comment', function (e) {
     // Reset the form
@@ -765,13 +761,13 @@ EpComments.prototype._send = async function (type, ...args) {
 };
 
 // Get all comments
-EpComments.prototype.getComments = function (callback) {
-  this._send('getComments', {padId: this.padId}).then((res) => callback(res.comments));
+EpComments.prototype.getComments = async function () {
+  return (await this._send('getComments', {padId: this.padId})).comments;
 };
 
 // Get all comment replies
-EpComments.prototype.getCommentReplies = function (callback) {
-  this._send('getCommentReplies', {padId: this.padId}).then((res) => callback(res.replies));
+EpComments.prototype.getCommentReplies = async function () {
+  return (await this._send('getCommentReplies', {padId: this.padId})).replies;
 };
 
 EpComments.prototype.getCommentData = function () {
@@ -1054,33 +1050,31 @@ EpComments.prototype.lineHasMarker = function (line) {
 };
 
 // Save comment
-EpComments.prototype.saveComment = function (data, rep) {
-  this._send('addComment', data).then((res) => {
-    if (res == null) return;
-    const [commentId, comment] = res;
-    comment.commentId = commentId;
+EpComments.prototype.saveComment = async function (data, rep) {
+  const res = await this._send('addComment', data);
+  if (res == null) return;
+  const [commentId, comment] = res;
+  comment.commentId = commentId;
 
-    this.ace.callWithAce((ace) => {
-      // we should get rep again because the document might have changed..
-      // details at https://github.com/ether/ep_comments/issues/133
-      rep = ace.ace_getRep();
-      ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
-      ace.ace_setAttributeOnSelection('comment', commentId);
-    }, 'insertComment', true);
+  this.ace.callWithAce((ace) => {
+    // we should get rep again because the document might have changed..
+    // details at https://github.com/ether/ep_comments/issues/133
+    rep = ace.ace_getRep();
+    ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
+    ace.ace_setAttributeOnSelection('comment', commentId);
+  }, 'insertComment', true);
 
-    this.setComment(commentId, comment);
-    this.collectComments();
-  });
+  this.setComment(commentId, comment);
+  this.collectComments();
 };
 
 // commentData = {c-newCommentId123: data:{author:..., date:..., ...},
 //                c-newCommentId124: data:{...}}
-EpComments.prototype.saveCommentWithoutSelection = function (padId, commentData) {
+EpComments.prototype.saveCommentWithoutSelection = async function (padId, commentData) {
   const data = this.buildComments(commentData);
-  this._send('bulkAddComment', padId, data).then((comments) => {
-    this.setComments(comments);
-    this.shouldCollectComment = true;
-  });
+  const comments = await this._send('bulkAddComment', padId, data);
+  this.setComments(comments);
+  this.shouldCollectComment = true;
 };
 
 EpComments.prototype.buildComments = function (commentsData) {
@@ -1108,14 +1102,13 @@ EpComments.prototype.getMapfakeComments = function () {
 };
 
 // commentReplyData = {c-reply-123:{commentReplyData1}, c-reply-234:{commentReplyData1}, ...}
-EpComments.prototype.saveCommentReplies = function (padId, commentReplyData) {
+EpComments.prototype.saveCommentReplies = async function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
-  this._send('bulkAddCommentReplies', padId, data).then((replies) => {
-    _.each(replies, (reply) => {
-      this.setCommentReply(reply);
-    });
-    this.shouldCollectComment = true; // force collect the comment replies saved
+  const replies = await this._send('bulkAddCommentReplies', padId, data);
+  _.each(replies, (reply) => {
+    this.setCommentReply(reply);
   });
+  this.shouldCollectComment = true; // force collect the comment replies saved
 };
 
 EpComments.prototype.buildCommentReplies = function (repliesData) {
@@ -1141,33 +1134,31 @@ EpComments.prototype.buildCommentReply = function (replyData) {
 // Listen for comment
 EpComments.prototype.commentListen = function () {
   const socket = this.socket;
-  socket.on('pushAddCommentInBulk', () => {
-    this.getComments((allComments) => {
-      if (!$.isEmptyObject(allComments)) {
-        // we get the comments in this format {c-123:{author:...}, c-124:{author:...}}
-        // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
-        // in this.comments
-        const commentsProcessed = {};
-        _.map(allComments, (comment, commentId) => {
-          commentsProcessed[commentId] = {};
-          commentsProcessed[commentId].data = comment;
-        });
-        this.comments = commentsProcessed;
-        this.collectCommentsAfterSomeIntervalsOfTime(); // here we collect on the collaborators
-      }
-    });
+  socket.on('pushAddCommentInBulk', async () => {
+    const allComments = await this.getComments();
+    if (!$.isEmptyObject(allComments)) {
+      // we get the comments in this format {c-123:{author:...}, c-124:{author:...}}
+      // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
+      // in this.comments
+      const commentsProcessed = {};
+      _.map(allComments, (comment, commentId) => {
+        commentsProcessed[commentId] = {};
+        commentsProcessed[commentId].data = comment;
+      });
+      this.comments = commentsProcessed;
+      this.collectCommentsAfterSomeIntervalsOfTime(); // here we collect on the collaborators
+    }
   });
 };
 
 // Listen for comment replies
 EpComments.prototype.commentRepliesListen = function () {
-  this.socket.on('pushAddCommentReply', (replyId, reply) => {
-    this.getCommentReplies((replies) => {
-      if (!$.isEmptyObject(replies)) {
-        this.commentReplies = replies;
-        this.collectCommentReplies();
-      }
-    });
+  this.socket.on('pushAddCommentReply', async (replyId, reply) => {
+    const replies = await this.getCommentReplies();
+    if (!$.isEmptyObject(replies)) {
+      this.commentReplies = replies;
+      this.collectCommentReplies();
+    }
   });
 };
 
