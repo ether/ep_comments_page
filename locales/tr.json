@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erdemkose"
+		]
+	},
+	"ep_comments_page.comments": "Yorumlar",
+	"ep_comments_page.delete_comment.title": "Bu yorumu sil",
+	"ep_comments_page.edit_comment.title": "Bu yorumu düzenle",
+	"ep_comments_page.show_comments": "Yorumları göster",
+	"ep_comments_page.comments_template.reply.value": "Yanıtla",
+	"ep_comments_page.comments_template.reply.placeholder": "Yanıtla",
+	"ep_comments_page.error.delete_unauth": "Diğer kullanıcıların yorumlarını silemezsiniz!"
+}

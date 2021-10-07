@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardoaddad"
+		]
+	},
+	"ep_comments_page.comment": "Comentário",
+	"ep_comments_page.comments": "Comentários",
+	"ep_comments_page.show_comments": "Mostrar comentários",
+	"ep_comments_page.comments_template.from": "De",
+	"ep_comments_page.comments_template.to": "Para",
+	"ep_comments_page.comments_template.comment.value": "Comentário",
+	"ep_comments_page.comments_template.cancel.value": "Cancelar",
+	"ep_comments_page.comments_template.reply.value": "Responder",
+	"ep_comments_page.comments_template.reply.placeholder": "Responder",
+	"ep_comments_page.comments_template.edit_comment.save": "salvar",
+	"ep_comments_page.comments_template.edit_comment.cancel": "cancelar"
+}

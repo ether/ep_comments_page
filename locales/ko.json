@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ykhwong"
+		]
+	},
+	"ep_comments_page.comment": "의견",
+	"ep_comments_page.comments": "의견",
+	"ep_comments_page.delete_comment.title": "이 의견 삭제",
+	"ep_comments_page.edit_comment.title": "이 의견 편집하기",
+	"ep_comments_page.show_comments": "의견 표시",
+	"ep_comments_page.comments_template.revert_change.value": "변경사항 되돌리기",
+	"ep_comments_page.comments_template.include_suggestion": "제안된 변경사항 포함",
+	"ep_comments_page.comments_template.comment.value": "의견",
+	"ep_comments_page.comments_template.cancel.value": "취소",
+	"ep_comments_page.comments_template.reply.value": "답변",
+	"ep_comments_page.comments_template.reply.placeholder": "답변",
+	"ep_comments_page.comments_template.edit_comment.save": "저장",
+	"ep_comments_page.comments_template.edit_comment.cancel": "취소",
+	"ep_comments_page.error.edit_unauth": "다른 사용자의 의견을 편집할 수 없습니다!",
+	"ep_comments_page.error.delete_unauth": "다른 사용자의 의견을 삭제할 수 없습니다!"
+}

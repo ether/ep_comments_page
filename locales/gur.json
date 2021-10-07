@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adignyoke",
+			"Akoonaba"
+		]
+	},
+	"ep_comments_page.comment": "Fu yelisum",
+	"ep_comments_page.comments": "Lebesegɔ",
+	"ep_comments_page.delete_comment.title": "Yesi lebesegɔ wã basɛ",
+	"ep_comments_page.comments_template.from": "Ze'ele",
+	"ep_comments_page.comments_template.accept_change.value": "Sakɛ Teerɛ",
+	"ep_comments_page.comments_template.to": "Wɛ̃",
+	"ep_comments_page.comments_template.comment.value": "Lebese",
+	"ep_comments_page.comments_template.cancel.value": "Sanbasɛ",
+	"ep_comments_page.comments_template.reply.value": "Lerege",
+	"ep_comments_page.comments_template.reply.placeholder": "Lerege",
+	"ep_comments_page.comments_template.edit_comment.cancel": "Saabasɛ"
+}

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"MITO"
+		]
+	},
+	"ep_comments_page.comment": "Kommentoi",
+	"ep_comments_page.comments": "Kommentit",
+	"ep_comments_page.delete_comment.title": "Poista tämä kommentti",
+	"ep_comments_page.edit_comment.title": "Muokkaa tätä kommenttia",
+	"ep_comments_page.show_comments": "Näytä kommentit",
+	"ep_comments_page.comments_template.suggested_change": "Muutosehdotus",
+	"ep_comments_page.comments_template.from": "Lähettäjä",
+	"ep_comments_page.comments_template.accept_change.value": "Hyväksy muutos",
+	"ep_comments_page.comments_template.revert_change.value": "Peruuta muutos",
+	"ep_comments_page.comments_template.to": "Vastaanottaja",
+	"ep_comments_page.comments_template.comment.value": "Kommentoi",
+	"ep_comments_page.comments_template.cancel.value": "Peruuta",
+	"ep_comments_page.comments_template.reply.value": "Vastaa",
+	"ep_comments_page.comments_template.reply.placeholder": "Vastaa",
+	"ep_comments_page.comments_template.edit_comment.save": "tallenna",
+	"ep_comments_page.comments_template.edit_comment.cancel": "peruuta",
+	"ep_comments_page.error.edit_unauth": "Et voi muokata toisten käyttäjien kommentteja!",
+	"ep_comments_page.error.delete_unauth": "Et voi poistaa muiden käyttäjien kommentteja!"
+}
