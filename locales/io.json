@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joao Xavier"
+		]
+	},
+	"ep_comments_page.comment": "Komento",
+	"ep_comments_page.comments": "Komenti",
+	"ep_comments_page.add_comment": "Adjuntez nova komento en l'areo selektita",
+	"ep_comments_page.edit_comment.title": "Redaktar ca komento",
+	"ep_comments_page.comments_template.from": "De",
+	"ep_comments_page.comments_template.include_suggestion": "Inkluzez chanjo propozata",
+	"ep_comments_page.comments_template.reply.placeholder": "Respondo",
+	"ep_comments_page.comments_template.edit_comment.cancel": "desfacar"
+}

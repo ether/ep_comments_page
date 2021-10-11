@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Thas Tayapongsak"
+		]
+	},
+	"ep_comments_page.comment": "ความคิดเห็น",
+	"ep_comments_page.delete_comment.title": "ลบความเห็น",
+	"ep_comments_page.edit_comment.title": "แก้ไขความคิดเห็น",
+	"ep_comments_page.show_comments": "แสดงความเห็น",
+	"ep_comments_page.comments_template.from": "จาก",
+	"ep_comments_page.comments_template.accept_change.value": "ยอมรับการเปลี่ยนแปลง",
+	"ep_comments_page.comments_template.cancel.value": "ยกเลิก",
+	"ep_comments_page.comments_template.reply.placeholder": "ตอบกลับ",
+	"ep_comments_page.comments_template.edit_comment.save": "บันทึก",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ยกเลิก"
+}
