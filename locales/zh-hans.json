@@ -1,18 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
-			"TsuyaMarisa"
+			"TsuyaMarisa",
+			"列维劳德"
 		]
 	},
 	"ep_comments_page.comment": "评论",
 	"ep_comments_page.comments": "评论",
-	"ep_comments_page.add_comment.title": "添加新的评论",
+	"ep_comments_page.add_comment.title": "在选项中添加新评论",
 	"ep_comments_page.add_comment": "添加新的评论",
-	"ep_comments_page.add_comment.hint": "请先选择文本评论",
+	"ep_comments_page.add_comment.hint": "请先选择文本用以评论",
 	"ep_comments_page.delete_comment.title": "删除此评论",
 	"ep_comments_page.edit_comment.title": "编辑此注释",
 	"ep_comments_page.show_comments": "显示评论",
-	"ep_comments_page.comments_template.suggested_change": "建议的变化",
+	"ep_comments_page.comments_template.suggested_change": "建议更改",
 	"ep_comments_page.comments_template.from": "来自",
 	"ep_comments_page.comments_template.accept_change.value": "接受更改",
 	"ep_comments_page.comments_template.revert_change.value": "最近更改",
