@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ajeje Brazorf"
+		]
+	},
+	"ep_comments_page.comments_template.cancel.value": "{{Identical|Cancel}}",
+	"ep_comments_page.comments_template.edit_comment.cancel": "{{Identical|Cancel}}"
+}
