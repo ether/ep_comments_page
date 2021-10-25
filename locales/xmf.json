@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Narazeni"
+		]
+	},
+	"ep_comments_page.delete_comment.title": "ათე კომენტარიშ ლასუა",
+	"ep_comments_page.show_comments": "კომენტარეფიშ ძირაფა",
+	"ep_comments_page.comments_template.accept_change.value": "თირუაშ მეღება",
+	"ep_comments_page.comments_template.comment.value": "კომენტარი",
+	"ep_comments_page.comments_template.cancel.value": "გოუქვაფა",
+	"ep_comments_page.comments_template.reply.value": "გამაშ მეჭარუა",
+	"ep_comments_page.comments_template.edit_comment.save": "ჩუალა",
+	"ep_comments_page.comments_template.edit_comment.cancel": "გოუქვაფა",
+	"ep_comments_page.error.edit_unauth": "თქვა ვეშეილებჷნა შხვა მახვარებუეფიშ კომენტარეფიშ რედაქტირაფა!",
+	"ep_comments_page.error.delete_unauth": "თქვა ვეშეილებჷნა შხვა მახვარებუეფიშ კომენტარეფიშ ლასუა!"
+}

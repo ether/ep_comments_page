@@ -1,18 +1,31 @@
 {
 	"@metadata": {
 		"authors": [
-			"Eduardoaddad"
+			"Eduardoaddad",
+			"Svjatysberega"
 		]
 	},
 	"ep_comments_page.comment": "Comentário",
 	"ep_comments_page.comments": "Comentários",
+	"ep_comments_page.add_comment.title": "Adicionar um novo comentário sobre a seleção",
+	"ep_comments_page.add_comment.hint": "Favor selecionar primeiro o texto a comentar",
+	"ep_comments_page.delete_comment.title": "Apagar este comentário",
+	"ep_comments_page.edit_comment.title": "Editar este comentário",
 	"ep_comments_page.show_comments": "Mostrar comentários",
+	"ep_comments_page.comments_template.suggested_change": "Alteração Sugerida",
 	"ep_comments_page.comments_template.from": "De",
+	"ep_comments_page.comments_template.accept_change.value": "Aceitar Alteração",
+	"ep_comments_page.comments_template.revert_change.value": "Reverter Alteração",
+	"ep_comments_page.comments_template.suggested_change_from": "Alteração sugerida de \"{{changeFrom}}\" para \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Sugerir alteração de \"{{changeFrom}}\" para",
 	"ep_comments_page.comments_template.to": "Para",
+	"ep_comments_page.comments_template.include_suggestion": "Incluir alteração sugerida",
 	"ep_comments_page.comments_template.comment.value": "Comentário",
 	"ep_comments_page.comments_template.cancel.value": "Cancelar",
 	"ep_comments_page.comments_template.reply.value": "Responder",
 	"ep_comments_page.comments_template.reply.placeholder": "Responder",
 	"ep_comments_page.comments_template.edit_comment.save": "salvar",
-	"ep_comments_page.comments_template.edit_comment.cancel": "cancelar"
+	"ep_comments_page.comments_template.edit_comment.cancel": "cancelar",
+	"ep_comments_page.error.edit_unauth": "Não é possível editar comentários de outros usuários!",
+	"ep_comments_page.error.delete_unauth": "Não é possível apagar comentários de outros usuários!"
 }
