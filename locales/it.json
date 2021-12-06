@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ajeje Brazorf",
+			"Beta16"
+		]
+	},
+	"ep_comments_page.comment": "Commento",
+	"ep_comments_page.comments": "Commenti",
+	"ep_comments_page.delete_comment.title": "Cancella questo commento",
+	"ep_comments_page.comments_template.comment.value": "Commento",
+	"ep_comments_page.comments_template.cancel.value": "Annulla",
+	"ep_comments_page.comments_template.edit_comment.save": "salva",
+	"ep_comments_page.comments_template.edit_comment.cancel": "annulla"
+}
