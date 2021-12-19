@@ -11,13 +11,6 @@ const getCommentsContainer = () => getPadOuter().find('#comments');
 
 /* ***** Public methods: ***** */
 
-const showComment = (commentId, e) => {
-  const commentElm = getCommentsContainer().find(`#${commentId}`);
-  commentElm.show();
-
-  highlightComment(commentId, e);
-};
-
 const hideComment = (commentId, hideCommentTitle) => {
   const commentElm = getCommentsContainer().find(`#${commentId}`);
   commentElm.removeClass('full-display');
@@ -122,7 +115,6 @@ const shouldNotCloseComment = (e) => {
   return false;
 };
 
-exports.showComment = showComment;
 exports.hideComment = hideComment;
 exports.hideAllComments = hideAllComments;
 exports.highlightComment = highlightComment;
