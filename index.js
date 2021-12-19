@@ -27,11 +27,8 @@ exports.padCopy = async (hookName, context) => {
 };
 
 exports.handleMessageSecurity = (hookName, context, callback) => {
-  const {message: {data: {apool} = {}} = {}} = context;
-  if (apool && apool[0] && apool[0][0] === 'comment') {
-    // Comment change, allow it to override readonly security model!!
-    return callback(true);
-  }
+  const {message: {data: {apool: {numToAttrib: {0: [key] = []} = []} = {}} = {}} = {}} = context;
+  if (key === 'comment') return callback(true);
   return callback();
 };
 
