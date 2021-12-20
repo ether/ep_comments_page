@@ -76,4 +76,59 @@ describe(__filename, function () {
       ]);
     });
   });
+
+  describe('other changes are rejected', function () {
+    const testCases = [
+      {
+        desc: 'keep with non-comment attrib add/change',
+        opcode: '=',
+        attribs: [['bold', 'true']],
+      },
+      {
+        desc: 'keep with non-comment attrib removal',
+        opcode: '=',
+        attribs: [['bold', '']],
+      },
+      {
+        desc: 'keep with comment and non-comment attrib adds/changes',
+        opcode: '=',
+        attribs: [['comment', shared.generateCommentId()], ['bold', 'true']],
+      },
+      {
+        desc: 'insert with no attribs',
+        opcode: '+',
+        attribs: [],
+      },
+      {
+        desc: 'insert with comment attrib',
+        opcode: '+',
+        attribs: [['comment', shared.generateCommentId()]],
+      },
+      {
+        desc: 'insert with non-comment attrib',
+        opcode: '+',
+        attribs: [['bold', 'true']],
+      },
+      {
+        desc: 'insert with comment and non-comment attribs',
+        opcode: '+',
+        attribs: [['comment', shared.generateCommentId()], ['bold', 'true']],
+      },
+      {
+        desc: 'remove',
+        opcode: '-',
+        attribs: [],
+      },
+    ];
+
+    for (const {desc, opcode, attribs} of testCases) {
+      it(desc, async function () {
+        const head = pad.head;
+        await common.sendUserChanges(socket, makeUserChanges(opcode, attribs));
+        // common.sendUserChanges() waits for message ack, so if the message was accepted then head
+        // should have already incremented by the time we get here.
+        assert.equal(pad.head, head);
+      });
+    }
+  });
 });

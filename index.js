@@ -1,11 +1,14 @@
 'use strict';
 
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const formidable = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const _ = require('underscore');
+const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
@@ -26,10 +29,31 @@ exports.padCopy = async (hookName, context) => {
   ]);
 };
 
-exports.handleMessageSecurity = (hookName, context, callback) => {
-  const {message: {data: {apool: {numToAttrib: {0: [key] = []} = []} = {}} = {}} = {}} = context;
-  if (key === 'comment') return callback(true);
-  return callback();
+exports.handleMessageSecurity = async (hookName, {message, client: socket}) => {
+  const {type: mtype, data: {type: dtype, apool, changeset} = {}} = message;
+  if (mtype !== 'COLLABROOM') return;
+  if (dtype !== 'USER_CHANGES') return;
+  // Nothing needs to be done if the user already has write access.
+  if (!padMessageHandler.sessioninfos[socket.id].readonly) return;
+  const pool = new AttributePool().fromJsonable(apool);
+  const cs = Changeset.unpack(changeset);
+  const opIter = Changeset.opIterator(cs.ops);
+  while (opIter.hasNext()) {
+    const op = opIter.next();
+    // Only operations that manipulate the 'comment' attribute on existing text are allowed.
+    if (op.opcode !== '=') return;
+    const forbiddenAttrib = new Error();
+    try {
+      Changeset.eachAttribNumber(op.attribs, (n) => {
+        // Use an exception to break out of the iteration early.
+        if (pool.getAttribKey(n) !== 'comment') throw forbiddenAttrib;
+      });
+    } catch (err) {
+      if (err !== forbiddenAttrib) throw err;
+      return;
+    }
+  }
+  return true;
 };
 
 exports.socketio = (hookName, args, cb) => {
