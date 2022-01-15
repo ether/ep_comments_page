@@ -901,12 +901,6 @@ EpComments.prototype.displayNewCommentForm = function () {
   // Write the text to the changeFrom form
   $('#newComment').find('.from-value').text(selectedText);
 
-  // Display form
-  setTimeout(() => {
-    const position = getXYOffsetOfRep(rep);
-    newComment.showNewCommentPopup(position);
-  });
-
   // Check if the first element selected is visible in the viewport
   const $firstSelectedElement = this.getFirstElementSelected();
   const firstSelectedElementInViewport = this.isElementInViewport($firstSelectedElement);
@@ -915,8 +909,9 @@ EpComments.prototype.displayNewCommentForm = function () {
     this.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
   }
 
-  // Adjust focus on the form
-  $('#newComment').find('.comment-content').focus();
+  // Display form
+  const position = getXYOffsetOfRep(rep);
+  newComment.showNewCommentPopup(position);
 };
 
 EpComments.prototype.scrollViewportIfSelectedTextIsNotVisible = function ($firstSelectedElement) {

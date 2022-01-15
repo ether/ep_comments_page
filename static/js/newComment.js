@@ -95,6 +95,7 @@ const showNewCommentPopup = (position) => {
 
   // Show popup
   $newComment.addClass('popup-show');
+  $newComment.find('.comment-content').focus();
 
   // mark selected text, so it is clear to user which text range the comment is being applied to
   pad.plugins.ep_comments_page.preCommentMarker.markSelectedText();
