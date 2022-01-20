@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Can",
 			"Erdemkose",
 			"Hedda"
 		]
@@ -17,6 +18,8 @@
 	"ep_comments_page.comments_template.from": "Gönderen",
 	"ep_comments_page.comments_template.accept_change.value": "Değişikliği Kabul Et",
 	"ep_comments_page.comments_template.revert_change.value": "Değişikliği Geri Al",
+	"ep_comments_page.comments_template.suggested_change_from": "\"{{changeFrom}}\"'dan/den, {{changeTo}}'ye/ya önerilen değişiklik",
+	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\"'den/dan şuraya önerilen değişiklik",
 	"ep_comments_page.comments_template.to": "Alıcı",
 	"ep_comments_page.comments_template.include_suggestion": "Önerilen değişikliği dahil et",
 	"ep_comments_page.comments_template.comment.value": "Yorum",
