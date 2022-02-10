@@ -82,10 +82,18 @@ const showNewCommentPopup = (position) => {
     left = $('.toolbar .addComment').offset().left;
   }
   const top = position[1];
-  $('#newComment').css('left', left);
+
   if (left === position[0]) {
     $('#newComment').css('top', top);
   }
+
+  const padInner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+  const overRight = left + $('#newComment').width() - padInner.width();
+  if (overRight > 0) {
+    left -= overRight;
+  }
+
+  $('#newComment').css('left', left);
   // Reset form to make sure it is all clear
   $('#newComment').find('.suggestion-checkbox').prop('checked', false).trigger('change');
   $('#newComment').find('textarea').val('');
