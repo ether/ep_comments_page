@@ -60,7 +60,7 @@ const EpComments = function (context) {
   this.mapFakeComments = [];
   this.mapOriginalCommentsId = [];
   this.shouldCollectComment = false;
-  this.init();
+  this.initDone = this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
 };
 
@@ -1230,9 +1230,10 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 const hooks = {
 
   // Init pad comments
-  postAceInit: (hookName, context, cb) => {
+  postAceInit: async (hookName, context) => {
     if (!pad.plugins) pad.plugins = {};
     const Comments = new EpComments(context);
+    await Comments.initDone;
     pad.plugins.ep_comments_page = Comments;
 
     if (!$('#editorcontainerbox').hasClass('flex-layout')) {
@@ -1244,7 +1245,6 @@ const hooks = {
         class_name: 'error',
       });
     }
-    return cb();
   },
 
   postToolbarInit: (hookName, args, cb) => {
