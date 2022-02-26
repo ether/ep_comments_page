@@ -140,7 +140,7 @@ describe(__filename, function () {
   context('when pad text has comment in strong', function () {
     before(async function () {
       html = () => buildHTML(
-          textWithComment('c-2342', '<strong>this is a comment and bold</strong>')
+          textWithComment('c-2342', '<strong>this is a comment and bold</strong>'),
       );
     });
 
