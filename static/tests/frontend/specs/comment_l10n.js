@@ -30,7 +30,7 @@ it('localizes comment when Etherpad language is changed', async function () {
 
   // get the 'Suggested Change' label
   const $changeToLabel = outer$(`#${commentId} .from-label`).first();
-  expect($changeToLabel.text()).to.be('Sugerir alteração de');
+  expect($changeToLabel.text()).to.be('Sugerir alteração de "" para');
 });
 
 it("localizes 'new comment' form when Etherpad language is changed", async function () {
