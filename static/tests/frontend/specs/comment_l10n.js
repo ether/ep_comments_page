@@ -77,7 +77,7 @@ const createComment = async () => {
   // fill the comment form and submit it
   const $commentField = chrome$('textarea.comment-content');
   $commentField.val('My comment');
-  const $hasSuggestion = outer$('.suggestion-checkbox');
+  const $hasSuggestion = outer$('#newComment .suggestion-checkbox');
   $hasSuggestion.click();
   const $suggestionField = outer$('textarea.to-value');
   $suggestionField.val('Change to this suggestion');
