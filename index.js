@@ -29,7 +29,10 @@ exports.padCopy = async (hookName, context) => {
   ]);
 };
 
-exports.handleMessageSecurity = async (hookName, {message, client: socket}) => {
+exports.handleMessageSecurity = async (hookName, ctx) => {
+  // ctx.client was renamed to ctx.socket in newer versions of Etherpad. Fall back to ctx.client in
+  // case this plugin is installed on an older version of Etherpad.
+  const {message, socket = ctx.client} = ctx;
   const {type: mtype, data: {type: dtype, apool, changeset} = {}} = message;
   if (mtype !== 'COLLABROOM') return;
   if (dtype !== 'USER_CHANGES') return;
