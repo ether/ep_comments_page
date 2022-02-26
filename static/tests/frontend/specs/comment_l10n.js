@@ -114,10 +114,10 @@ const changeEtherpadLanguageTo = async (lang) => {
 
 const getCommentId = () => {
   const inner$ = helper.padInner$;
-  const comment = inner$('.comment').first();
-  const cls = comment.attr('class');
-  const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
-  const commentId = (classCommentId) ? classCommentId[1] : null;
-
-  return commentId;
+  const comment = inner$('.comment');
+  if (comment.length === 0) return null;
+  for (const cls of comment[0].classList) {
+    if (cls.startsWith('c-')) return cls;
+  }
+  return null;
 };
