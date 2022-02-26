@@ -1,9 +1,11 @@
 'use strict';
 
+const utils = require('../utils');
+
 // create a new pad with comment before each test run
 beforeEach(async function () {
   this.timeout(60000);
-  await helper.aNewPad();
+  await utils.aNewPad();
   await createComment();
   await changeEtherpadLanguageTo('en');
 });

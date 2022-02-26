@@ -1,9 +1,11 @@
 'use strict';
 
+const utils = require('../utils');
+
 // create a new pad before each test run
 beforeEach(async function () {
   this.timeout(60000);
-  await helper.aNewPad();
+  await utils.aNewPad();
 });
 
 it('Fills suggestion Change From field when adding a comment with suggestion', async function () {
