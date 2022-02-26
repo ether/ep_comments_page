@@ -1,48 +1,39 @@
 'use strict';
 
 // create a new pad with comment before each test run
-beforeEach(function (cb) {
-  helper.newPad(() => {
-    createComment(() => {
-      // ensure we start on the default language
-      changeEtherpadLanguageTo('en', cb);
-    });
-  });
+beforeEach(async function () {
   this.timeout(60000);
+  await helper.aNewPad();
+  await createComment();
+  await changeEtherpadLanguageTo('en');
 });
 
 // ensure we go back to English to avoid breaking other tests:
-after(function (cb) {
-  changeEtherpadLanguageTo('en', cb);
+after(async function () {
+  await changeEtherpadLanguageTo('en');
 });
 
-it('uses default values when language was not localized yet', function (done) {
-  changeEtherpadLanguageTo('oc', () => {
-    const outer$ = helper.padOuter$;
+it('uses default values when language was not localized yet', async function () {
+  await changeEtherpadLanguageTo('oc');
+  const outer$ = helper.padOuter$;
 
-    // get the title of the comment
-    const $changeToLabel = outer$('.comment-suggest').first();
-    expect($changeToLabel.text()).to.be(
-        '                                  Include suggested change             ');
-
-    done();
-  });
+  // get the title of the comment
+  const $changeToLabel = outer$('.comment-suggest').first();
+  expect($changeToLabel.text()).to.be(
+      '                                  Include suggested change             ');
 });
 
-it('localizes comment when Etherpad language is changed', function (done) {
-  changeEtherpadLanguageTo('pt-br', () => {
-    const outer$ = helper.padOuter$;
-    const commentId = getCommentId();
+it('localizes comment when Etherpad language is changed', async function () {
+  await changeEtherpadLanguageTo('pt-br');
+  const outer$ = helper.padOuter$;
+  const commentId = getCommentId();
 
-    // get the 'Suggested Change' label
-    const $changeToLabel = outer$(`#${commentId} .from-label`).first();
-    expect($changeToLabel.text()).to.be('Sugerir alteração de');
-
-    done();
-  });
+  // get the 'Suggested Change' label
+  const $changeToLabel = outer$(`#${commentId} .from-label`).first();
+  expect($changeToLabel.text()).to.be('Sugerir alteração de');
 });
 
-it("localizes 'new comment' form when Etherpad language is changed", function (done) {
+it("localizes 'new comment' form when Etherpad language is changed", async function () {
   // make sure form was created before changing the language
   const inner$ = helper.padInner$;
   const outer$ = helper.padOuter$;
@@ -56,18 +47,15 @@ it("localizes 'new comment' form when Etherpad language is changed", function (d
   const $commentButton = chrome$('.addComment');
   $commentButton.click();
 
-  changeEtherpadLanguageTo('pt-br', () => {
-    // get the 'Include suggested change' label
-    const $changeToLabel = outer$('.new-comment label.label-suggestion-checkbox').first();
-    expect($changeToLabel.text()).to.be('Incluir alteração sugerida');
-
-    done();
-  });
+  await changeEtherpadLanguageTo('pt-br');
+  // get the 'Include suggested change' label
+  const $changeToLabel = outer$('.new-comment label.label-suggestion-checkbox').first();
+  expect($changeToLabel.text()).to.be('Incluir alteração sugerida');
 });
 
 /* ********** Helper functions ********** */
 
-const createComment = (callback) => {
+const createComment = async () => {
   const inner$ = helper.padInner$;
   const outer$ = helper.padOuter$;
   const chrome$ = helper.padChrome$;
@@ -96,11 +84,10 @@ const createComment = (callback) => {
   $submittButton.click();
 
   // wait until comment is created and comment id is set
-  helper.waitFor(() => getCommentId() != null)
-      .done(callback);
+  await helper.waitForPromise(() => getCommentId() != null);
 };
 
-const changeEtherpadLanguageTo = (lang, callback) => {
+const changeEtherpadLanguageTo = async (lang) => {
   const boldTitles = {
     'en': 'Bold (Ctrl+B)',
     'pt-br': 'Negrito (Ctrl-B)',
@@ -120,8 +107,8 @@ const changeEtherpadLanguageTo = (lang, callback) => {
   // hide settings again
   $settingsButton.click();
 
-  helper.waitFor(() => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang])
-      .done(callback);
+  await helper.waitForPromise(
+      () => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang]);
 };
 
 const getCommentId = () => {

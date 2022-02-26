@@ -1,9 +1,9 @@
 'use strict';
 
 // create a new pad before each test run
-beforeEach(function (cb) {
-  helper.newPad(cb);
+beforeEach(async function () {
   this.timeout(60000);
+  await helper.aNewPad();
 });
 
 it('Fills suggestion Change From field when adding a comment with suggestion', async function () {

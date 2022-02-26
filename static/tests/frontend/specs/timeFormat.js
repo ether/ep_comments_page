@@ -5,7 +5,7 @@ let originalLanguage = null;
 
 before(async function () {
   this.timeout(60000);
-  await new Promise((resolve) => helper.newPad(resolve));
+  await helper.aNewPad();
   moment = helper.padChrome$.window.require('ep_comments_page/static/js/moment-with-locales.min');
   moment.relativeTimeThreshold('ss', 0);
 });

@@ -2,13 +2,13 @@
 
 // create a new pad with comment before each test run
 beforeEach(async function () {
-  await new Promise((resolve) => helper.newPad(resolve));
+  this.timeout(60000);
+  await helper.aNewPad();
   // make sure Etherpad has enough space to display comment icons
   enlargeScreen();
   // force sidebar comments to be shown
   chooseToShowComments(true);
   await createComment();
-  this.timeout(60000);
 });
 
 after(async function () {
@@ -267,19 +267,7 @@ const addComment = async (commentText) => {
   $submittButton.click();
 
   // wait until comment is created and comment id is set
-  let running = false;
-  let success = false;
-  await helper.waitForPromise(() => {
-    if (success) return true;
-    if (!running) {
-      running = true;
-      getCommentId(numberOfComments).then((id) => {
-        running = false;
-        success = id != null;
-      });
-    }
-    return success;
-  });
+  await helper.waitForPromise(async () => await getCommentId(numberOfComments) != null);
 };
 
 const deleteComment = async () => {
@@ -296,9 +284,7 @@ const deleteComment = async () => {
 
 const getCommentId = async (numberOfComments) => {
   const nthComment = numberOfComments || 0;
-  const p = helper.waitFor(() => helper.padInner$);
-  p.fail(() => {}); // Prevent p from throwing an uncatchable exception on error.
-  await p;
+  await helper.waitForPromise(() => helper.padInner$);
   const inner$ = helper.padInner$;
   const comment = inner$('.comment').eq(nthComment);
   const cls = comment.attr('class');
