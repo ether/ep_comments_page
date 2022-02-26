@@ -124,7 +124,7 @@ describe(__filename, function () {
     for (const {desc, opcode, attribs} of testCases) {
       it(desc, async function () {
         const head = pad.head;
-        await common.sendUserChanges(socket, makeUserChanges(opcode, attribs));
+        await assert.rejects(common.sendUserChanges(socket, makeUserChanges(opcode, attribs)));
         // common.sendUserChanges() waits for message ack, so if the message was accepted then head
         // should have already incremented by the time we get here.
         assert.equal(pad.head, head);
