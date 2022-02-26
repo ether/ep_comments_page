@@ -62,7 +62,11 @@ const createComment = async () => {
 
   // Returns the first line div. Must be a function because Etherpad might replace the div with a
   // new div if the content changes.
-  const $firstTextElement = () => inner$('div').first();
+  const $firstTextElement = () => {
+    const $div = inner$('div').first();
+    expect($div.length).to.be(1);
+    return $div;
+  };
 
   // simulate key presses to delete content
   $firstTextElement().sendkeys('{selectall}'); // select all
@@ -72,16 +76,21 @@ const createComment = async () => {
   // get the comment button and click it
   $firstTextElement().sendkeys('{selectall}'); // needs to select content to add comment to
   const $commentButton = chrome$('.addComment');
+  expect($commentButton.length).to.be(1);
   $commentButton.click();
 
   // fill the comment form and submit it
   const $commentField = chrome$('textarea.comment-content');
+  expect($commentField.length).to.be(1);
   $commentField.val('My comment');
   const $hasSuggestion = outer$('#newComment .suggestion-checkbox');
+  expect($hasSuggestion.length).to.be(1);
   $hasSuggestion.click();
   const $suggestionField = outer$('textarea.to-value');
+  expect($suggestionField.length).to.be(1);
   $suggestionField.val('Change to this suggestion');
   const $submittButton = chrome$('.comment-buttons input[type=submit]');
+  expect($submittButton.length).to.be(1);
   $submittButton.click();
 
   // wait until comment is created and comment id is set
