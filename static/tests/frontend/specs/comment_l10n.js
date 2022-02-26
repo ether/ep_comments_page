@@ -60,16 +60,17 @@ const createComment = async () => {
   const outer$ = helper.padOuter$;
   const chrome$ = helper.padChrome$;
 
-  // get the first text element out of the inner iframe
-  const $firstTextElement = inner$('div').first();
+  // Returns the first line div. Must be a function because Etherpad might replace the div with a
+  // new div if the content changes.
+  const $firstTextElement = () => inner$('div').first();
 
   // simulate key presses to delete content
-  $firstTextElement.sendkeys('{selectall}'); // select all
-  $firstTextElement.sendkeys('{del}'); // clear the first line
-  $firstTextElement.sendkeys('This content will receive a comment'); // insert text
+  $firstTextElement().sendkeys('{selectall}'); // select all
+  $firstTextElement().sendkeys('{del}'); // clear the first line
+  $firstTextElement().sendkeys('This content will receive a comment'); // insert text
 
   // get the comment button and click it
-  $firstTextElement.sendkeys('{selectall}'); // needs to select content to add comment to
+  $firstTextElement().sendkeys('{selectall}'); // needs to select content to add comment to
   const $commentButton = chrome$('.addComment');
   $commentButton.click();
 
