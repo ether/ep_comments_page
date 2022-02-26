@@ -57,7 +57,6 @@ it("localizes 'new comment' form when Etherpad language is changed", async funct
 
 const createComment = async () => {
   const inner$ = helper.padInner$;
-  const outer$ = helper.padOuter$;
   const chrome$ = helper.padChrome$;
 
   // Returns the first line div. Must be a function because Etherpad might replace the div with a
@@ -83,10 +82,10 @@ const createComment = async () => {
   const $commentField = chrome$('textarea.comment-content');
   expect($commentField.length).to.be(1);
   $commentField.val('My comment');
-  const $hasSuggestion = outer$('#newComment .suggestion-checkbox');
+  const $hasSuggestion = chrome$('#newComment .suggestion-checkbox');
   expect($hasSuggestion.length).to.be(1);
   $hasSuggestion.click();
-  const $suggestionField = outer$('textarea.to-value');
+  const $suggestionField = chrome$('textarea.to-value');
   expect($suggestionField.length).to.be(1);
   $suggestionField.val('Change to this suggestion');
   const $submittButton = chrome$('.comment-buttons input[type=submit]');
