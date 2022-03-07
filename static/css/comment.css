@@ -108,6 +108,9 @@ input.error, textarea.error {
   margin-top: 5px;
   white-space: normal;
 }
+.suggestion-display .from-label {
+  line-break: anywhere;
+}
 .suggestion-display .from-label,
 .suggestion-display .to-label {
   margin-right: 2px;
