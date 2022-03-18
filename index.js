@@ -1,11 +1,14 @@
 'use strict';
 
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const formidable = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const _ = require('underscore');
+const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
 
 let io;
@@ -26,13 +29,34 @@ exports.padCopy = async (hookName, context) => {
   ]);
 };
 
-exports.handleMessageSecurity = (hookName, context, callback) => {
-  const {message: {data: {apool} = {}} = {}} = context;
-  if (apool && apool[0] && apool[0][0] === 'comment') {
-    // Comment change, allow it to override readonly security model!!
-    return callback(true);
+exports.handleMessageSecurity = async (hookName, ctx) => {
+  // ctx.client was renamed to ctx.socket in newer versions of Etherpad. Fall back to ctx.client in
+  // case this plugin is installed on an older version of Etherpad.
+  const {message, socket = ctx.client} = ctx;
+  const {type: mtype, data: {type: dtype, apool, changeset} = {}} = message;
+  if (mtype !== 'COLLABROOM') return;
+  if (dtype !== 'USER_CHANGES') return;
+  // Nothing needs to be done if the user already has write access.
+  if (!padMessageHandler.sessioninfos[socket.id].readonly) return;
+  const pool = new AttributePool().fromJsonable(apool);
+  const cs = Changeset.unpack(changeset);
+  const opIter = Changeset.opIterator(cs.ops);
+  while (opIter.hasNext()) {
+    const op = opIter.next();
+    // Only operations that manipulate the 'comment' attribute on existing text are allowed.
+    if (op.opcode !== '=') return;
+    const forbiddenAttrib = new Error();
+    try {
+      Changeset.eachAttribNumber(op.attribs, (n) => {
+        // Use an exception to break out of the iteration early.
+        if (pool.getAttribKey(n) !== 'comment') throw forbiddenAttrib;
+      });
+    } catch (err) {
+      if (err !== forbiddenAttrib) throw err;
+      return;
+    }
   }
-  return callback();
+  return true;
 };
 
 exports.socketio = (hookName, args, cb) => {

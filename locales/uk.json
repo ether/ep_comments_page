@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"DDPAT",
+			"Ice bulldog"
+		]
+	},
+	"ep_comments_page.comment": "Коментар",
+	"ep_comments_page.comments": "Коментарі",
+	"ep_comments_page.add_comment.title": "Додати новий коментар до вибору",
+	"ep_comments_page.add_comment": "Додати новий коментар до вибору",
+	"ep_comments_page.add_comment.hint": "Будь ласка, спочатку виберіть текст для коментування",
+	"ep_comments_page.delete_comment.title": "Видалити цей коментар",
+	"ep_comments_page.edit_comment.title": "Редагувати цей коментар",
+	"ep_comments_page.show_comments": "Показати коментарі",
+	"ep_comments_page.comments_template.suggested_change": "Запропонована зміна",
+	"ep_comments_page.comments_template.from": "Від",
+	"ep_comments_page.comments_template.accept_change.value": "Прийняти зміну",
+	"ep_comments_page.comments_template.revert_change.value": "Скасувати зміни",
+	"ep_comments_page.comments_template.suggested_change_from": "Пропонована зміна з «{{changeFrom}}» на «{{changeTo}}»",
+	"ep_comments_page.comments_template.suggest_change_from": "Запропонувати зміну з «{{changeFrom}}» на",
+	"ep_comments_page.comments_template.to": "Кому:",
+	"ep_comments_page.comments_template.include_suggestion": "Включити запропоновану зміну",
+	"ep_comments_page.comments_template.comment.value": "Коментар",
+	"ep_comments_page.comments_template.cancel.value": "Скасувати",
+	"ep_comments_page.comments_template.reply.value": "Відповісти",
+	"ep_comments_page.comments_template.reply.placeholder": "Відповісти",
+	"ep_comments_page.comments_template.edit_comment.save": "зберегти",
+	"ep_comments_page.comments_template.edit_comment.cancel": "скасувати",
+	"ep_comments_page.error.edit_unauth": "Ви не можете редагувати коментарі інших користувачів!",
+	"ep_comments_page.error.delete_unauth": "Ви не можете видаляти коментарі інших користувачів!"
+}
