@@ -4,7 +4,7 @@ const AttributePool = require('ep_etherpad-lite/static/js/AttributePool');
 const Changeset = require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
-const formidable = require('formidable');
+const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const _ = require('underscore');
@@ -226,10 +226,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
 
   args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
     const fields = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields) => {
-        if (err != null) return reject(err);
-        resolve(fields);
-      });
+      new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
 
     // check the api key
@@ -289,10 +286,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
 
   args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
     const fields = await new Promise((resolve, reject) => {
-      (new formidable.IncomingForm()).parse(req, (err, fields) => {
-        if (err != null) return reject(err);
-        resolve(fields);
-      });
+      new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
 
     // check the api key
