@@ -24,7 +24,7 @@
   "dependencies": {
     "cheerio": "^0.22.0",
     "formidable": "^1.2.2",
-    "underscore": "^1.13.1"
+    "underscore": "^1.13.2"
   },
   "devDependencies": {
     "eslint": "^8.11.0",
