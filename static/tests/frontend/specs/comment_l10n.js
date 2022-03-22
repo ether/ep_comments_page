@@ -2,6 +2,9 @@
 
 const utils = require('../utils');
 
+const commentedText = 'This content will receive a comment';
+const suggestedText = 'Change to this suggestion';
+
 // create a new pad with comment before each test run
 beforeEach(async function () {
   this.timeout(60000);
@@ -32,7 +35,8 @@ it('localizes comment when Etherpad language is changed', async function () {
 
   // get the 'Suggested Change' label
   const $changeToLabel = outer$(`#${commentId} .from-label`).first();
-  expect($changeToLabel.text()).to.be('Sugerir alteração de "" para');
+  expect($changeToLabel.text())
+      .to.be(`Alteração sugerida de "${commentedText}" para "${suggestedText}"`);
 });
 
 it("localizes 'new comment' form when Etherpad language is changed", async function () {
@@ -72,7 +76,7 @@ const createComment = async () => {
   // simulate key presses to delete content
   $firstTextElement().sendkeys('{selectall}'); // select all
   $firstTextElement().sendkeys('{del}'); // clear the first line
-  $firstTextElement().sendkeys('This content will receive a comment'); // insert text
+  $firstTextElement().sendkeys(commentedText); // insert text
 
   // get the comment button and click it
   $firstTextElement().sendkeys('{selectall}'); // needs to select content to add comment to
@@ -89,7 +93,7 @@ const createComment = async () => {
   $hasSuggestion.click();
   const $suggestionField = chrome$('textarea.to-value');
   expect($suggestionField.length).to.be(1);
-  $suggestionField.val('Change to this suggestion');
+  $suggestionField.val(suggestedText);
   const $submittButton = chrome$('.comment-buttons input[type=submit]');
   expect($submittButton.length).to.be(1);
   $submittButton.click();
