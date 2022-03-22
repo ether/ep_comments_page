@@ -43,23 +43,40 @@ describe('ep_comments_page - Comment Suggestion', function () {
     const outer$ = helper.padOuter$;
     const inner$ = helper.padInner$;
     const chrome$ = helper.padChrome$;
-    const suggestedText = 'A new suggested text';
-    await openCommentFormWithSuggestion('This content will receive a comment');
+    const origText = 'This content will receive a comment';
+    const suggestedText = 'amp: & dq: " sq: \' lt: < gt: > bs: \\ end';
+    await openCommentFormWithSuggestion(origText);
 
     await helper.waitForPromise(() => chrome$('#newComment.popup-show').is(':visible'));
     chrome$('#newComment').find('textarea.comment-content').val('A new comment text');
-    chrome$('#newComment').find('textarea.to-value').val(suggestedText);
-    chrome$('#comment-create-btn').click();
-    await helper.waitForPromise(() => inner$('div').first().find('.comment').length);
-    let comment$ = inner$('div').first().find('.comment');
-    comment$.click();
+    chrome$('#newComment').find('suggestion-checkbox').click();
+    let newCommentSuggestion;
     await helper.waitForPromise(() => {
-      outer$('.approve-suggestion-btn:visible').click();
-      return true;
+      newCommentSuggestion = chrome$('#newComment').find('textarea.to-value');
+      return newCommentSuggestion.length > 0 && newCommentSuggestion.is(':visible');
     });
-    comment$ = inner$('div').first().find('.comment');
-    await helper.waitForPromise(() => comment$.text() === suggestedText);
-    expect(comment$.text()).to.be(suggestedText);
+    newCommentSuggestion.val(suggestedText);
+    chrome$('#comment-create-btn').click();
+
+    let commentedText$;
+    await helper.waitForPromise(() => {
+      commentedText$ = inner$('div').first().find('.comment');
+      return commentedText$.length > 0;
+    });
+    commentedText$.click();
+    let comment$;
+    await helper.waitForPromise(() => {
+      comment$ = outer$('.comment-container');
+      const fd$ = comment$.find('.full-display-content');
+      return comment$.length > 0 && fd$.length > 0 && fd$.is(':visible');
+    });
+    await helper.waitForPromise(
+        () => comment$.find('.comment-title-wrapper .from-label').text().includes(suggestedText));
+
+    outer$('.approve-suggestion-btn:visible').click();
+    commentedText$ = inner$('div').first().find('.comment');
+    await helper.waitForPromise(
+        () => inner$('div').first().find('.comment').text() === suggestedText);
   });
 });
 
