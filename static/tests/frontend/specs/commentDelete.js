@@ -1,5 +1,7 @@
 'use strict';
 
+const utils = require('../utils');
+
 let helperFunctions;
 const textOfComment = 'original comment';
 const textOfReply = 'original reply';
@@ -28,7 +30,7 @@ context('when user presses the delete button on other users comment', function (
   it('should not delete comment', async function () {
     let outer$ = helper.padOuter$;
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await helper.aNewPad({id: helperFunctions.padId});
+    await utils.aNewPad({id: helperFunctions.padId});
     await helper.waitForPromise(() => {
       outer$ = helper.padOuter$;
       return !!outer$ && outer$('.comment-delete').length;
@@ -47,7 +49,7 @@ const commentDelete = {
   padId: undefined,
   async createPad(test) {
     test.timeout(60000);
-    this.padId = await helper.aNewPad();
+    this.padId = await utils.aNewPad();
     this.enlargeScreen();
     await this.createOrResetPadText();
   },
