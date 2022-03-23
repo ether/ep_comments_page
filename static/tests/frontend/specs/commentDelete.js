@@ -69,18 +69,6 @@ const commentDelete = {
       }).done(cb);
     });
   },
-  reloadPad(test, cb) {
-    test.timeout(20000);
-    const self = this;
-    const padId = this.padId;
-    // we do nothing for a second while we wait for content to be collected before reloading
-    // this may be hacky, but we need time for CC to run so... :?
-    setTimeout(() => {
-      helper.newPad(() => {
-        self.enlargeScreen(cb);
-      }, padId);
-    }, 1000);
-  },
   cleanPad(callback) {
     const inner$ = helper.padInner$;
     const $padContent = inner$('#innerdocbody');
@@ -164,41 +152,5 @@ const commentDelete = {
   },
   commentIconsEnabled() {
     return helper.padOuter$('#commentIcons').length > 0;
-  },
-  clickEditCommentButton() {
-    const outer$ = helper.padOuter$;
-    const $editButton = outer$('.comment-edit').first();
-    $editButton.click();
-  },
-  clickEditCommentReplyButton() {
-    const outer$ = helper.padOuter$;
-    const $editButton = outer$('.comment-edit').last();
-    $editButton.click();
-  },
-  getEditForm() {
-    const outer$ = helper.padOuter$;
-    return outer$('.comment-edit-form');
-  },
-  checkIfOneFormEditWasAdded() {
-    expect(this.getEditForm().length).to.be(1);
-  },
-  checkIfOneFormEditWasRemoved() {
-    expect(this.getEditForm().length).to.be(0);
-  },
-  checkIfCommentFieldIsHidden(fieldClass) {
-    const outer$ = helper.padOuter$;
-    const $field = outer$(`.${fieldClass}`).first();
-    expect($field.is(':visible')).to.be(false);
-  },
-  pressCancel() {
-    const $cancelButton = this.getEditForm().find('.comment-edit-cancel');
-    $cancelButton.click();
-  },
-  pressSave() {
-    const $saveButton = this.getEditForm().find('.comment-edit-submit');
-    $saveButton.click();
-  },
-  writeCommentText(commentText) {
-    this.getEditForm().find('.comment-edit-text').text(commentText);
   },
 };
