@@ -590,6 +590,10 @@ EpComments.prototype.insertComment = function (commentId, comment, index) {
   comment.commentId = commentId;
   comment.reply = true;
   content = $('#commentsTemplate').tmpl(comment);
+  content.find('.from-label')[0].dataset.l10nArgs = JSON.stringify({
+    changeFrom: comment.changeFrom,
+    changeTo: comment.changeTo,
+  });
   if (comment.author !== clientVars.userId) {
     $(content).find('.comment-actions-wrapper').addClass('hidden');
   }
