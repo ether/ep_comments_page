@@ -6,11 +6,10 @@ const textOfReply = 'original reply';
 const FIRST_LINE = 0;
 
 // create pad with a comment and a reply
-beforeEach(function (done) {
+beforeEach(async function () {
   helperFunctions = commentDelete;
-  helperFunctions.createPad(this, () => {
-    helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
-  });
+  await helperFunctions.createPad(this);
+  await helperFunctions.addCommentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply);
 });
 
 context('when user presses the delete button on a comment', function () {
@@ -29,7 +28,7 @@ context('when user presses the delete button on other users comment', function (
   it('should not delete comment', async function () {
     let outer$ = helper.padOuter$;
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await new Promise((resolve) => helper.newPad(resolve, helperFunctions.padId));
+    await helper.aNewPad({id: helperFunctions.padId});
     await helper.waitForPromise(() => {
       outer$ = helper.padOuter$;
       return !!outer$ && outer$('.comment-delete').length;
@@ -46,51 +45,41 @@ context('when user presses the delete button on other users comment', function (
 
 const commentDelete = {
   padId: undefined,
-  createPad(test, cb) {
-    const self = this;
-    this.padId = helper.newPad(() => {
-      self.enlargeScreen(() => {
-        self.createOrResetPadText(() => {
-          cb();
-        });
-      });
-    });
+  async createPad(test) {
     test.timeout(60000);
+    this.padId = await helper.aNewPad();
+    this.enlargeScreen();
+    await this.createOrResetPadText();
   },
-  createOrResetPadText(cb) {
-    this.cleanPad(() => {
+  async createOrResetPadText() {
+    await this.cleanPad();
+    const inner$ = helper.padInner$;
+    inner$('div').first().sendkeys('something\n anything');
+    await helper.waitForPromise(() => {
       const inner$ = helper.padInner$;
-      inner$('div').first().sendkeys('something\n anything');
-      helper.waitFor(() => {
-        const inner$ = helper.padInner$;
-        const lineLength = inner$('div').length;
-
-        return lineLength > 1;
-      }).done(cb);
+      const lineLength = inner$('div').length;
+      return lineLength > 1;
     });
   },
-  cleanPad(callback) {
+  async cleanPad() {
     const inner$ = helper.padInner$;
     const $padContent = inner$('#innerdocbody');
     $padContent.html(' ');
 
     // wait for Etherpad to re-create first line
-    helper.waitFor(() => {
+    await helper.waitForPromise(() => {
       const lineNumber = inner$('div').length;
       return lineNumber === 1;
-    }, 20000).done(callback);
+    }, 20000);
   },
-  enlargeScreen(callback) {
+  enlargeScreen() {
     $('#iframe-container iframe').css('max-width', '3000px');
-    callback();
   },
-  addComentAndReplyToLine(line, textOfComment, textOfReply, callback) {
-    const self = this;
-    this.addCommentToLine(line, textOfComment, () => {
-      self.addCommentReplyToLine(line, textOfReply, callback);
-    });
+  async addCommentAndReplyToLine(line, textOfComment, textOfReply) {
+    await this.addCommentToLine(line, textOfComment);
+    await this.addCommentReplyToLine(line, textOfReply);
   },
-  addCommentToLine(line, textOfComment, callback) {
+  async addCommentToLine(line, textOfComment) {
     const chrome$ = helper.padChrome$;
     const $line = this.getLine(line);
     $line.sendkeys('{selectall}'); // needs to select content to add comment to
@@ -104,9 +93,9 @@ const commentDelete = {
     $submittButton.click();
 
     // wait until comment is created and comment id is set
-    this.createdCommentOnLine(line, callback);
+    await this.createdCommentOnLine(line);
   },
-  addCommentReplyToLine(line, textOfReply, callback) {
+  async addCommentReplyToLine(line, textOfReply) {
     const outer$ = helper.padOuter$;
     const commentId = this.getCommentIdOfLine(line);
     const existingReplies = outer$('.sidebar-comment-reply').length;
@@ -127,19 +116,18 @@ const commentDelete = {
     $submitReplyButton.click();
 
     // wait for the reply to be saved
-    helper.waitFor(() => {
+    await helper.waitForPromise(() => {
       const hasSavedReply = outer$('.sidebar-comment-reply').length === existingReplies + 1;
       return hasSavedReply;
-    }).done(callback);
+    });
   },
   getLine(lineNum) {
     const inner$ = helper.padInner$;
     const $line = inner$('div').slice(lineNum, lineNum + 1);
     return $line;
   },
-  createdCommentOnLine(line, cb) {
-    const self = this;
-    helper.waitFor(() => self.getCommentIdOfLine(line) != null).done(cb);
+  async createdCommentOnLine(line) {
+    await helper.waitForPromise(() => this.getCommentIdOfLine(line) != null);
   },
   getCommentIdOfLine(line) {
     const $line = this.getLine(line);
