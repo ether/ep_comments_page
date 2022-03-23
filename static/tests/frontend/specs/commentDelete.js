@@ -1,48 +1,46 @@
 'use strict';
 
-describe('ep_comments_page - Comment Delete', function () {
-  let helperFunctions;
-  const textOfComment = 'original comment';
-  const textOfReply = 'original reply';
-  const FIRST_LINE = 0;
+let helperFunctions;
+const textOfComment = 'original comment';
+const textOfReply = 'original reply';
+const FIRST_LINE = 0;
 
-  // create pad with a comment and a reply
-  beforeEach(function (done) {
-    helperFunctions = commentDelete;
-    helperFunctions.createPad(this, () => {
-      helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
+// create pad with a comment and a reply
+beforeEach(function (done) {
+  helperFunctions = commentDelete;
+  helperFunctions.createPad(this, () => {
+    helperFunctions.addComentAndReplyToLine(FIRST_LINE, textOfComment, textOfReply, done);
+  });
+});
+
+context('when user presses the delete button on a comment', function () {
+  it('should delete comment', function (done) {
+    const outer$ = helper.padOuter$;
+    const inner$ = helper.padInner$;
+    outer$('.comment-delete').click();
+    helper.waitFor(() => inner$('.comment').length === 0).done(() => {
+      if (inner$('.comment').length !== 0) throw new Error('Error deleting comment');
+      done();
     });
   });
+});
 
-  context('when user presses the delete button on a comment', function () {
-    it('should delete comment', function (done) {
-      const outer$ = helper.padOuter$;
-      const inner$ = helper.padInner$;
-      outer$('.comment-delete').click();
-      helper.waitFor(() => inner$('.comment').length === 0).done(() => {
-        if (inner$('.comment').length !== 0) throw new Error('Error deleting comment');
-        done();
-      });
+context('when user presses the delete button on other users comment', function () {
+  it('should not delete comment', async function () {
+    let outer$ = helper.padOuter$;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => helper.newPad(resolve, helperFunctions.padId));
+    await helper.waitForPromise(() => {
+      outer$ = helper.padOuter$;
+      return !!outer$ && outer$('.comment-delete').length;
     });
-  });
-
-  context('when user presses the delete button on other users comment', function () {
-    it('should not delete comment', async function () {
-      let outer$ = helper.padOuter$;
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await new Promise((resolve) => helper.newPad(resolve, helperFunctions.padId));
-      await helper.waitForPromise(() => {
-        outer$ = helper.padOuter$;
-        return !!outer$ && outer$('.comment-delete').length;
-      });
-      outer$('.comment-delete').click();
-      await helper.waitForPromise(() => {
-        const chrome$ = helper.padChrome$;
-        return chrome$('#gritter-container').find('.error').length > 0;
-      });
-      const inner$ = helper.padInner$;
-      if (inner$('.comment').length === 0) throw new Error('Comment should not have been deleted');
+    outer$('.comment-delete').click();
+    await helper.waitForPromise(() => {
+      const chrome$ = helper.padChrome$;
+      return chrome$('#gritter-container').find('.error').length > 0;
     });
+    const inner$ = helper.padInner$;
+    if (inner$('.comment').length === 0) throw new Error('Comment should not have been deleted');
   });
 });
 
