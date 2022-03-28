@@ -60,7 +60,7 @@ const EpComments = function (context) {
   this.mapFakeComments = [];
   this.mapOriginalCommentsId = [];
   this.shouldCollectComment = false;
-  this.init();
+  this.initDone = this.init();
   this.preCommentMarker = preCommentMark.init(this.ace);
 };
 
@@ -130,6 +130,7 @@ EpComments.prototype.init = async function () {
         commentId,
         authorId: clientVars.userId,
       });
+      commentBoxes.hideComment(commentId);
     } catch (err) {
       if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
       $.gritter.add({
@@ -590,6 +591,10 @@ EpComments.prototype.insertComment = function (commentId, comment, index) {
   comment.commentId = commentId;
   comment.reply = true;
   content = $('#commentsTemplate').tmpl(comment);
+  content.find('.from-label')[0].dataset.l10nArgs = JSON.stringify({
+    changeFrom: comment.changeFrom,
+    changeTo: comment.changeTo,
+  });
   if (comment.author !== clientVars.userId) {
     $(content).find('.comment-actions-wrapper').addClass('hidden');
   }
@@ -899,12 +904,6 @@ EpComments.prototype.displayNewCommentForm = function () {
   // Write the text to the changeFrom form
   $('#newComment').find('.from-value').text(selectedText);
 
-  // Display form
-  setTimeout(() => {
-    const position = getXYOffsetOfRep(rep);
-    newComment.showNewCommentPopup(position);
-  });
-
   // Check if the first element selected is visible in the viewport
   const $firstSelectedElement = this.getFirstElementSelected();
   const firstSelectedElementInViewport = this.isElementInViewport($firstSelectedElement);
@@ -913,8 +912,9 @@ EpComments.prototype.displayNewCommentForm = function () {
     this.scrollViewportIfSelectedTextIsNotVisible($firstSelectedElement);
   }
 
-  // Adjust focus on the form
-  $('#newComment').find('.comment-content').focus();
+  // Display form
+  const position = getXYOffsetOfRep(rep);
+  newComment.showNewCommentPopup(position);
 };
 
 EpComments.prototype.scrollViewportIfSelectedTextIsNotVisible = function ($firstSelectedElement) {
@@ -1228,9 +1228,10 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 const hooks = {
 
   // Init pad comments
-  postAceInit: (hookName, context, cb) => {
+  postAceInit: async (hookName, context) => {
     if (!pad.plugins) pad.plugins = {};
     const Comments = new EpComments(context);
+    await Comments.initDone;
     pad.plugins.ep_comments_page = Comments;
 
     if (!$('#editorcontainerbox').hasClass('flex-layout')) {
@@ -1242,7 +1243,6 @@ const hooks = {
         class_name: 'error',
       });
     }
-    return cb();
   },
 
   postToolbarInit: (hookName, args, cb) => {

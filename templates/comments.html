@@ -97,9 +97,6 @@
     {{if changeTo}}
     <form class="comment-changeTo-form suggestion-display">
         <div>
-          <!-- TODO: Fix below line to properly handle escaped characters -->
-          <!-- Using escape() is a temp fix designed to handle suggestions to "foo" -->
-          <!-- which historically would break a pad :( -->
             <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggested_change_from" data-l10n-args='{"changeFrom": "${changeFrom}", "changeTo": "${escape(changeTo)}"}'>Suggested Change From</span>
             <span class="hidden from-value">${changeFrom}</span>
             <span class="hidden to-value">${changeTo}</span>

@@ -16,6 +16,13 @@ exports.exportHtmlAdditionalTagsWithData =
   async (hookName, pad) => findAllCommentUsedOn(pad).map((name) => ['comment', name]);
 
 exports.getLineHTMLForExport = async (hookName, context) => {
+  const content = $('<div>').html(context.lineContent);
+  content.find('span').each(function (key, el) {
+    console.log(el);
+    const span = $(this);
+    const commentId = span.data('comment');
+    console.log(commentId, span.html());
+  });
   if (settings.ep_comments_page && settings.ep_comments_page.exportHtml === false) return;
 
   // I'm not sure how optimal this is - it will do a database lookup for each line..
@@ -23,7 +30,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   let hasPlugin = false;
   // Load the HTML into a throwaway div instead of calling $.load() to avoid
   // https://github.com/cheeriojs/cheerio/issues/1031
-  const content = $('<div>').html(context.lineContent);
+  //const content = $('<div>').html(context.lineContent);
   // include links for each comment which we will add content later.
   content.find('span').each(function () {
     const span = $(this);
