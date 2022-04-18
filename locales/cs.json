@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Spotter"
+		]
+	},
+	"ep_comments_page.comment": "Komentář",
+	"ep_comments_page.comments": "Komentáře",
+	"ep_comments_page.add_comment.title": "Přidat nový komentář k výběru",
+	"ep_comments_page.add_comment": "Přidat nový komentář k výběru",
+	"ep_comments_page.add_comment.hint": "Nejprve vyberte text, který chcete komentovat",
+	"ep_comments_page.delete_comment.title": "Smazat tento komentář",
+	"ep_comments_page.edit_comment.title": "Upravit tento komentář",
+	"ep_comments_page.show_comments": "Zobrazit komentáře",
+	"ep_comments_page.comments_template.suggested_change": "Navrhovaná změna",
+	"ep_comments_page.comments_template.from": "Od",
+	"ep_comments_page.comments_template.accept_change.value": "Přijmout změnu",
+	"ep_comments_page.comments_template.revert_change.value": "Vrátit změnu",
+	"ep_comments_page.comments_template.to": "Komu",
+	"ep_comments_page.comments_template.include_suggestion": "Zahrnout navrhovanou změnu",
+	"ep_comments_page.comments_template.comment.value": "Komentář",
+	"ep_comments_page.comments_template.cancel.value": "Zrušit",
+	"ep_comments_page.comments_template.reply.value": "Odpovědět",
+	"ep_comments_page.comments_template.reply.placeholder": "Odpovědět",
+	"ep_comments_page.comments_template.edit_comment.save": "Uložit",
+	"ep_comments_page.comments_template.edit_comment.cancel": "Zrušit",
+	"ep_comments_page.error.edit_unauth": "Komentáře ostatních uživatelů nelze upravovat!",
+	"ep_comments_page.error.delete_unauth": "Komentáře ostatních uživatelů nelze mazat!"
+}

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"ಮಲ್ನಾಡಾಚ್ ಕೊಂಕ್ಣೊ"
+		]
+	},
+	"ep_comments_page.comment": "ಟಿಪ್ಪಣಿ",
+	"ep_comments_page.comments": "ಟಿಪ್ಪಣಿಗಳು",
+	"ep_comments_page.delete_comment.title": "ಈ ಟಿಪ್ಪಣಿಯನ್ನು ಅಳಿಸಿ",
+	"ep_comments_page.edit_comment.title": "ಈ ಟಿಪ್ಪಣಿಯನ್ನು ಸಂಪಾದಿಸಿ",
+	"ep_comments_page.show_comments": "ಟಿಪ್ಪಣಿಗಳನ್ನು ತೋರಿಸಿ",
+	"ep_comments_page.comments_template.suggested_change": "ಸೂಚಿಸಲ್ಪಟ್ಟ ಬದಲಾವಣೆ",
+	"ep_comments_page.comments_template.from": "ಇಂದ",
+	"ep_comments_page.comments_template.accept_change.value": "ಬದಲಾವಣೆ ಸ್ವೀಕರಿಸಿ",
+	"ep_comments_page.comments_template.to": "ಗೆ",
+	"ep_comments_page.comments_template.comment.value": "ಟಿಪ್ಪಣಿ",
+	"ep_comments_page.comments_template.cancel.value": "ರದ್ದುಮಾಡಿ",
+	"ep_comments_page.comments_template.reply.value": "ಪ್ರತಿಕ್ರಿಯೆ",
+	"ep_comments_page.comments_template.reply.placeholder": "ಪ್ರತಿಕ್ರಿಯೆ",
+	"ep_comments_page.comments_template.edit_comment.save": "ಉಳಿಸಿ",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ರದ್ದುಮಾಡಿ",
+	"ep_comments_page.error.edit_unauth": "ನೀವು ಬೇರೆಯವರ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸಂಪಾದಿಸಲಾಗುವುದಿಲ್ಲ!",
+	"ep_comments_page.error.delete_unauth": "ನೀವು ಬೇರೆಯವರ ಟಿಪ್ಪಣಿಗಳನ್ನು ಅಳಿಸಲಾಗುವುದಿಲ್ಲ!"
+}
