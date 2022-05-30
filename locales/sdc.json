@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"F Samaritani"
+		]
+	},
+	"ep_comments_page.comment": "Oggettu",
+	"ep_comments_page.comments_template.from": "Da",
+	"ep_comments_page.comments_template.cancel.value": "Annullà",
+	"ep_comments_page.comments_template.reply.value": "Ripundì",
+	"ep_comments_page.comments_template.reply.placeholder": "Ripundì",
+	"ep_comments_page.comments_template.edit_comment.save": "Saivva",
+	"ep_comments_page.comments_template.edit_comment.cancel": "Annullà"
+}
