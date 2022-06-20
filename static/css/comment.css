@@ -208,3 +208,8 @@ input.error, textarea.error {
 .hidden {
   display: none;
 }
+
+.comment-actions-wrapper .buttonicon {
+  display: inline-block;
+  opacity: .8;
+}

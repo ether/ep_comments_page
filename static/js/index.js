@@ -792,7 +792,7 @@ EpComments.prototype.getCommentData = function () {
 
 // Delete a pad comment
 EpComments.prototype.deleteComment = function (commentId) {
-  $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
+  $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
 };
 
 const cloneLine = (line) => {
