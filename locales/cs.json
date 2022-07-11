@@ -16,6 +16,8 @@
 	"ep_comments_page.comments_template.from": "Od",
 	"ep_comments_page.comments_template.accept_change.value": "Přijmout změnu",
 	"ep_comments_page.comments_template.revert_change.value": "Vrátit změnu",
+	"ep_comments_page.comments_template.suggested_change_from": "Navrhovaná změna z „{{changeFrom}}“ na „{{changeTo}}“",
+	"ep_comments_page.comments_template.suggest_change_from": "Navrhněte změnu z „{{changeFrom}}“ na",
 	"ep_comments_page.comments_template.to": "Komu",
 	"ep_comments_page.comments_template.include_suggestion": "Zahrnout navrhovanou změnu",
 	"ep_comments_page.comments_template.comment.value": "Komentář",
