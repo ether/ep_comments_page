@@ -30,7 +30,7 @@ exports.getLineHTMLForExport = async (hookName, context) => {
   let hasPlugin = false;
   // Load the HTML into a throwaway div instead of calling $.load() to avoid
   // https://github.com/cheeriojs/cheerio/issues/1031
-  //const content = $('<div>').html(context.lineContent);
+  // const content = $('<div>').html(context.lineContent);
   // include links for each comment which we will add content later.
   content.find('span').each(function () {
     const span = $(this);

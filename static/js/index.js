@@ -166,20 +166,46 @@ EpComments.prototype.init = async function () {
   // Here, it adds a form to edit the comment text
   this.container.parent().on('click', '.comment-edit', function () {
     const $commentBox = $(this).closest('.comment-container');
-    $commentBox.addClass('editing');
 
+    const changeAcceptedState = $commentBox.hasClass('change-accepted');
+    $commentBox.addClass('editing');
+    const changeTo = $commentBox.find('.to-value').first().text();
+    const changeFrom = $commentBox.find('.from-value').first().text();
     const textBox = self.findCommentText($commentBox).last();
+    const commentId = $commentBox.data('commentid');
 
     // if edit form not already there
     if (textBox.siblings('.comment-edit-form').length === 0) {
       // add a form to edit the field
       const data = {};
+      data.changeAcceptedState = changeAcceptedState;
+      data.commentId = commentId;
       data.text = textBox.text();
+      data.changeFrom = changeFrom;
+      data.changeTo = changeTo;
       const content = $('#editCommentTemplate').tmpl(data);
       // localize the comment/reply edit form
       commentL10n.localize(content);
       // insert form
       textBox.before(content);
+      const editForm = textBox.parent().find('.comment-edit-form').first();
+      if (changeTo) {
+        editForm.find('.suggestion').show();
+        editForm.find('.label-suggestion-checkbox')
+            .siblings('input[type="checkbox"]')
+            .prop('checked', true);
+      }
+      editForm.on('change', '.suggestion-checkbox', function () {
+        if ($(this).is(':checked')) {
+          editForm.find('.suggestion').show();
+        } else {
+          editForm.find('.suggestion').hide();
+        }
+      });
+
+      editForm.find('.label-suggestion-checkbox').click(function () {
+        $(this).siblings('input[type="checkbox"]').click();
+      });
     }
   });
 
@@ -191,14 +217,25 @@ EpComments.prototype.init = async function () {
     const $commentForm = $(this).closest('.comment-edit-form');
     const commentId = $commentBox.data('commentid');
     const commentText = $commentForm.find('.comment-edit-text').val();
+    const changeFrom = $commentForm.find('.from-value').first().text();
+    const changeTo = $commentForm.find('.to-value').val();
+
     const data = {};
     data.commentId = commentId;
     data.padId = clientVars.padId;
     data.commentText = commentText;
     data.authorId = clientVars.userId;
+    data.changeFrom = null;
+    data.changeTo = null;
+    if ($commentForm.find('.label-suggestion-checkbox')
+        .siblings('input[type="checkbox"]')
+        .is(':checked')) {
+      data.changeFrom = changeFrom;
+      data.changeTo = changeTo;
+    }
 
     try {
-      await self._send('updateCommentText', data);
+      await self._send('updateComment', data);
     } catch (err) {
       if (err.message !== 'unauth') throw err; // Let the uncaught error handler handle it.
       $.gritter.add({
@@ -212,7 +249,7 @@ EpComments.prototype.init = async function () {
     $commentForm.remove();
     $commentBox.removeClass('editing');
     self.updateCommentBoxText(commentId, commentText);
-
+    self.updateCommentBoxChangeTo(commentId, data);
     // although the comment or reply was saved on the data base successfully, it needs
     // to update the comment or comment reply variable with the new text saved
     self.setCommentOrReplyNewText(commentId, commentText);
@@ -381,6 +418,7 @@ EpComments.prototype.findCommentText = function ($commentBox) {
   return $commentBox.find('.compact-display-content .comment-text, ' +
                           '.full-display-content .comment-title-wrapper .comment-text');
 };
+
 // This function is useful to collect new comments on the collaborators
 EpComments.prototype.collectCommentsAfterSomeIntervalsOfTime = async function () {
   await new Promise((resolve) => window.setTimeout(resolve, 300));
@@ -1165,6 +1203,33 @@ EpComments.prototype.updateCommentBoxText = function (commentId, commentText) {
   textBox.text(commentText);
 };
 
+EpComments.prototype.updateCommentBoxChangeTo = function (commentId, data) {
+  const $comment = this.container.parent().find(`[data-commentid='${commentId}']`);
+  const $suggest = $('#display-suggestion').tmpl(data);
+  if (data.changeTo) {
+    $($suggest[2]).find('.from-label').each((key, item) => {
+      if (item.dataset) {
+        item.dataset.l10nArgs = JSON.stringify({
+          changeFrom: data.changeFrom,
+          changeTo: data.changeTo,
+        });
+      }
+    });
+
+    commentL10n.localize($($suggest[2]));
+    if (!$comment.find('.comment-changeTo-form').length) {
+      const textBox = this.findCommentText($comment);
+      textBox.after($suggest);
+    }
+    $comment.find('.comment-changeTo-form').replaceWith($suggest);
+
+
+    this.container.parent().find(`[data-commentid='${commentId}']`).replaceWith($comment);
+  } else {
+    $comment.find('.comment-changeTo-form').remove();
+  }
+};
+
 EpComments.prototype.showChangeAsAccepted = function (commentId) {
   const self = this;
 
@@ -1195,6 +1260,12 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 
   socket.on('textCommentUpdated', (commentId, commentText) => {
     this.updateCommentBoxText(commentId, commentText);
+  });
+
+  socket.on('commentUpdated', (commentId, commentText, changeFrom, changeTo) => {
+    console.log('commentUpdated', changeFrom, changeTo);
+    this.updateCommentBoxText(commentId, commentText);
+    this.updateCommentBoxChangeTo(commentId, {commentId, commentText, changeFrom, changeTo});
   });
 
   socket.on('commentDeleted', (commentId) => {

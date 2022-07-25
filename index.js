@@ -137,6 +137,13 @@ exports.socketio = (hookName, args, cb) => {
       socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
     }));
 
+    socket.on('updateComment', handler(async (data) => {
+      const {commentId, commentText, authorId, changeFrom, changeTo, changeAcceptedState} = data;
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      await commentManager.changeComment(padId, commentId, commentText, changeFrom, changeTo, authorId, changeAcceptedState); // eslint-disable max-len
+      socket.broadcast.to(padId).emit('commentUpdated', commentId, commentText, changeFrom, changeTo); // eslint-disable max-len
+    }));
+
     socket.on('addCommentReply', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       const [replyId, reply] = await commentManager.addCommentReply(padId, data);

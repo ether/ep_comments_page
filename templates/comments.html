@@ -131,6 +131,19 @@
 <script id="editCommentTemplate" type="text/html">
   <div class="comment-edit-form">
     <textarea class="comment-edit-text">${text}</textarea>
+    {{if !changeAcceptedState}}
+    <div class="form-more">
+        <p class="comment-suggest">
+            <input type="checkbox" id="suggestion-checkbox-${commentId}" name="suggestion-checkbox-${commentId}" class="suggestion-checkbox">
+            <label for="suggestion-checkbox-${commentId}" class="label-suggestion-checkbox" data-l10n-id="ep_comments_page.comments_template.include_suggestion">Include suggested change</label>
+        </p>
+        <div class="suggestion suggestion-create">
+            <span class="from-label" data-l10n-id="ep_comments_page.comments_template.suggest_change_from"  data-l10n-args='{"changeFrom": "${changeFrom}"}'>Suggest Change From</span>
+            <span class="hidden from-value">${changeFrom}</span>
+            <textarea class="to-value">${changeTo}</textarea>
+        </div>
+    </div>
+    {{/if}}
     <p>
       <button class="btn btn-primary comment-edit-submit" data-l10n-id="ep_comments_page.comments_template.edit_comment.save">Save</button>
       <button class="btn btn-default comment-edit-cancel" data-l10n-id="ep_comments_page.comments_template.edit_comment.cancel">Cancel</button>

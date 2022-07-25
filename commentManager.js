@@ -207,3 +207,52 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
   // save the comment updated back
   await db.set(prefix + padId, comments);
 };
+
+exports.changeComment = async (padId, commentId, commentText, changeFrom, changeTo, authorId, state) => { // eslint-disable max-len
+  if (commentText.length <= 0) {
+    logger.debug(`ignoring attempt to change comment ${commentId} to the empty string`);
+    throw new Error('comment_cannot_be_empty');
+  }
+
+  // Given a comment we update the comment text
+
+  // If we're dealing with comment replies we need to a different query
+  let prefix = 'comments:';
+  if (commentId.substring(0, 7) === 'c-reply') {
+    prefix = 'comment-replies:';
+  }
+
+  // get the entry
+  const comments = await db.get(prefix + padId);
+  if (comments == null || comments[commentId] == null) {
+    logger.debug(`ignoring attempt to edit non-existent comment ${commentId}`);
+    throw new Error('no_such_comment');
+  }
+  if (comments[commentId].author !== authorId) {
+    logger.debug(`author ${authorId} attempted to edit comment ${commentId} ` +
+                 `belonging to author ${comments[commentId].author}`);
+    throw new Error('unauth');
+  }
+  // update the comment text
+  comments[commentId].text = commentText;
+  if (changeTo) {
+    comments[commentId].changeTo = changeTo;
+    if (!comments[commentId].changeFrom) {
+      comments[commentId].changeFrom = changeFrom;
+    }
+  }
+
+  if (comments[commentId].changeTo && !changeTo) {
+    comments[commentId].changeTo = null;
+  }
+
+  if (state) {
+    comments[commentId].changeAccepted = true;
+    comments[commentId].changeReverted = false;
+  } else {
+    comments[commentId].changeAccepted = false;
+    comments[commentId].changeReverted = true;
+  }
+  // save the comment updated back
+  await db.set(prefix + padId, comments);
+};
