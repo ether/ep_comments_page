@@ -4,11 +4,14 @@
 			"Yupik"
 		]
 	},
+	"ep_comments_page.comment": "Kommeʹntt",
 	"ep_comments_page.comments": "Kommeeʹnt",
 	"ep_comments_page.delete_comment.title": "Jaukkâd tän kommeeʹnt",
 	"ep_comments_page.edit_comment.title": "Muuʹtt tän kommeeʹnt",
 	"ep_comments_page.show_comments": "Čuäʹjet kommeeʹntid",
 	"ep_comments_page.comments_template.suggested_change": "Eʹtǩǩuum muuttâs",
+	"ep_comments_page.comments_template.accept_change.value": "Priim muttâz",
+	"ep_comments_page.comments_template.revert_change.value": "Kååʹmet muttâz",
 	"ep_comments_page.comments_template.reply.value": "Vaʹstted",
 	"ep_comments_page.comments_template.reply.placeholder": "Vaʹstted",
 	"ep_comments_page.comments_template.edit_comment.save": "ruõkk"
