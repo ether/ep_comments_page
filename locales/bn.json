@@ -1,16 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
+			"আজিজ",
 			"আফতাবুজ্জামান"
 		]
 	},
 	"ep_comments_page.comment": "মন্তব্য",
 	"ep_comments_page.comments": "মন্তব্য",
+	"ep_comments_page.delete_comment.title": "এই মন্তব্যটি মুছুন",
+	"ep_comments_page.edit_comment.title": "এই মন্তব্যটি সম্পাদনা করুন",
 	"ep_comments_page.show_comments": "মন্তব্য দেখান",
+	"ep_comments_page.comments_template.suggested_change": "পরামর্শকৃত পরিবর্তন",
 	"ep_comments_page.comments_template.comment.value": "মন্তব্য",
 	"ep_comments_page.comments_template.cancel.value": "বাতিল",
 	"ep_comments_page.comments_template.reply.value": "উত্তর দিন",
 	"ep_comments_page.comments_template.reply.placeholder": "উত্তর দিন",
 	"ep_comments_page.comments_template.edit_comment.save": "সংরক্ষণ",
-	"ep_comments_page.comments_template.edit_comment.cancel": "বাতিল"
+	"ep_comments_page.comments_template.edit_comment.cancel": "বাতিল",
+	"ep_comments_page.error.edit_unauth": "আপনি অন্য ব্যবহারকারীর মন্তব্য সম্পাদনা করতে পারবেন না!",
+	"ep_comments_page.error.delete_unauth": "আপনি অন্য ব্যবহারকারীর মন্তব্য মুছে ফেলতে পারবেন না!"
 }
