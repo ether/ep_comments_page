@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Eduardoaddad",
-			"Svjatysberega"
+			"Svjatysberega",
+			"YuriNikolai"
 		]
 	},
 	"ep_comments_page.comment": "Comentário",
 	"ep_comments_page.comments": "Comentários",
 	"ep_comments_page.add_comment.title": "Adicionar um novo comentário sobre a seleção",
+	"ep_comments_page.add_comment": "Adicionar novo comentário na seleção",
 	"ep_comments_page.add_comment.hint": "Favor selecionar primeiro o texto a comentar",
 	"ep_comments_page.delete_comment.title": "Apagar este comentário",
 	"ep_comments_page.edit_comment.title": "Editar este comentário",
