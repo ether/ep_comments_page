@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Veracious"
+		]
+	},
+	"ep_comments_page.comments_template.comment.value": "Komentar",
+	"ep_comments_page.comments_template.cancel.value": "Batalkan",
+	"ep_comments_page.comments_template.reply.value": "Balas",
+	"ep_comments_page.comments_template.reply.placeholder": "Balas",
+	"ep_comments_page.comments_template.edit_comment.save": "simpan",
+	"ep_comments_page.comments_template.edit_comment.cancel": "batalkan",
+	"ep_comments_page.error.edit_unauth": "Anda tidak dapat menyunting komentar pengguna lain!",
+	"ep_comments_page.error.delete_unauth": "Anda tidak dapat menghapus komentar pengguna lain!"
+}
