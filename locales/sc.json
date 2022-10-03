@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adr mm"
+		]
+	},
+	"ep_comments_page.comment": "Cummentu",
+	"ep_comments_page.comments": "Cummentos",
+	"ep_comments_page.add_comment.title": "Agiunghe unu cummentu nou a sa seletzione",
+	"ep_comments_page.add_comment": "Agiunghe unu cummentu a sa seletzione",
+	"ep_comments_page.add_comment.hint": "Seletziona prima su testu chi boles cummentare",
+	"ep_comments_page.delete_comment.title": "Cantzella custu cummentu",
+	"ep_comments_page.edit_comment.title": "Modìfica custu cummentu",
+	"ep_comments_page.show_comments": "Ammustra cummentos",
+	"ep_comments_page.comments_template.suggested_change": "Modìficas sugeridas",
+	"ep_comments_page.comments_template.from": "Dae",
+	"ep_comments_page.comments_template.accept_change.value": "Atzeta sa modìfica",
+	"ep_comments_page.comments_template.revert_change.value": "Refuda sa modìfica",
+	"ep_comments_page.comments_template.suggested_change_from": "Modìfica sugerida dae \"{{changeFrom}}\" in \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Modìfica sugerida dae \"{{changeFrom}}\" in",
+	"ep_comments_page.comments_template.to": "In",
+	"ep_comments_page.comments_template.include_suggestion": "Include sa modìfica sugerida",
+	"ep_comments_page.comments_template.comment.value": "Cummentu",
+	"ep_comments_page.comments_template.cancel.value": "Annulla",
+	"ep_comments_page.comments_template.reply.value": "Risponde",
+	"ep_comments_page.comments_template.reply.placeholder": "Risponde",
+	"ep_comments_page.comments_template.edit_comment.save": "sarva",
+	"ep_comments_page.comments_template.edit_comment.cancel": "annulla",
+	"ep_comments_page.error.edit_unauth": "Non podes modificare is cummentos de is àteros autores.",
+	"ep_comments_page.error.delete_unauth": "Non podes cantzellare is cummentos de is àteros autores."
+}

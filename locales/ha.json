@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Abbaty",
+			"Amire80",
 			"Omar Ali",
 			"Salihu aliyu"
 		]
@@ -25,7 +26,7 @@
 	"ep_comments_page.comments_template.reply.value": "Maidawa",
 	"ep_comments_page.comments_template.reply.placeholder": "maidawa",
 	"ep_comments_page.comments_template.edit_comment.save": "adanawa",
-	"ep_comments_page.comments_template.edit_comment.cancel": "Soke",
+	"ep_comments_page.comments_template.edit_comment.cancel": "soke",
 	"ep_comments_page.error.edit_unauth": "bazaka iya gheran sharhin wani bah",
 	"ep_comments_page.error.delete_unauth": "bazaka iya goge sharhin wani bah"
 }
