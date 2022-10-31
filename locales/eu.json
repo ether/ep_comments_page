@@ -1,11 +1,13 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Izendegi"
+		]
 	},
 	"ep_comments_page.comment": "Iruzkina",
 	"ep_comments_page.comments": "Iruzkinak",
-	"ep_comments_page.add_comment.title": "Gehitu iruzkin berria hautapenari",
-	"ep_comments_page.add_comment": "Gehitu iruzkin berria hautapenari",
+	"ep_comments_page.add_comment.title": "Gehitu iruzkin berria hautapenean",
+	"ep_comments_page.add_comment": "Gehitu iruzkin berria hautapenean",
 	"ep_comments_page.add_comment.hint": "Aukeratu ezazu lehenengo iruzkina gehitzeko testua",
 	"ep_comments_page.delete_comment.title": "Ezabatu iruzkin hau",
 	"ep_comments_page.edit_comment.title": "Editatu iruzkin hau",
