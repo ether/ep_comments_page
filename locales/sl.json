@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleassar"
+		]
+	},
+	"ep_comments_page.comment": "Komentar",
+	"ep_comments_page.comments": "Komentarji",
+	"ep_comments_page.add_comment.title": "Dodaj nov komentar k izbiri",
+	"ep_comments_page.add_comment": "Dodaj nov komentar k izbiri",
+	"ep_comments_page.add_comment.hint": "Najprej izberite besedilo za komentiranje",
+	"ep_comments_page.delete_comment.title": "Izbriši komentar",
+	"ep_comments_page.edit_comment.title": "Uredi komentar",
+	"ep_comments_page.show_comments": "Prikaži komentarje",
+	"ep_comments_page.comments_template.suggested_change": "Predlagana sprememba",
+	"ep_comments_page.comments_template.from": "Iz",
+	"ep_comments_page.comments_template.accept_change.value": "Sprejmi spremembo",
+	"ep_comments_page.comments_template.revert_change.value": "Vrni spremembo",
+	"ep_comments_page.comments_template.suggested_change_from": "Predlagana sprememba iz »{{changeFrom}}« v »{{changeTo}}«",
+	"ep_comments_page.comments_template.suggest_change_from": "Predlagajte spremembo iz »{{changeFrom}}« v",
+	"ep_comments_page.comments_template.to": "V",
+	"ep_comments_page.comments_template.include_suggestion": "Vključi predlagano spremembo",
+	"ep_comments_page.comments_template.comment.value": "Komentar",
+	"ep_comments_page.comments_template.cancel.value": "Prekliči",
+	"ep_comments_page.comments_template.reply.value": "Odgovor",
+	"ep_comments_page.comments_template.reply.placeholder": "Odgovor",
+	"ep_comments_page.comments_template.edit_comment.save": "shrani",
+	"ep_comments_page.comments_template.edit_comment.cancel": "Prekliči",
+	"ep_comments_page.error.edit_unauth": "Ne morete urejati komentarjev drugih uporabnikov!",
+	"ep_comments_page.error.delete_unauth": "Ne morete izbrisati komentarjev drugih uporabnikov!"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Meno25"
+		]
+	},
+	"ep_comments_page.comment": "تعليق",
+	"ep_comments_page.comments": "تعليقات",
+	"ep_comments_page.add_comment.title": "إضافة تعليق جديد على الاختيار",
+	"ep_comments_page.add_comment": "إضافة تعليق جديد على الاختيار",
+	"ep_comments_page.add_comment.hint": "يرجى أولا تحديد النص للتعليق",
+	"ep_comments_page.delete_comment.title": "احذف هذا التعليق",
+	"ep_comments_page.edit_comment.title": "قم بتحرير هذا التعليق",
+	"ep_comments_page.show_comments": "إظهار التعليقات",
+	"ep_comments_page.comments_template.suggested_change": "التغيير المقترح",
+	"ep_comments_page.comments_template.from": "من",
+	"ep_comments_page.comments_template.accept_change.value": "قبول التغيير",
+	"ep_comments_page.comments_template.revert_change.value": "التراجع عن التغيير",
+	"ep_comments_page.comments_template.suggested_change_from": "التغيير المقترح من \"{{changeFrom}}\" إلى \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "اقترح التغيير من \"{{changeFrom}}\" إلى",
+	"ep_comments_page.comments_template.to": "إلى",
+	"ep_comments_page.comments_template.include_suggestion": "تضمين التغيير المقترح",
+	"ep_comments_page.comments_template.comment.value": "تعليق",
+	"ep_comments_page.comments_template.cancel.value": "إلغاء",
+	"ep_comments_page.comments_template.reply.value": "رد",
+	"ep_comments_page.comments_template.reply.placeholder": "رد",
+	"ep_comments_page.comments_template.edit_comment.save": "حفظ",
+	"ep_comments_page.comments_template.edit_comment.cancel": "إلغاء",
+	"ep_comments_page.error.edit_unauth": "لا يمكنك تعديل تعليقات المستخدمين الآخرين!",
+	"ep_comments_page.error.delete_unauth": "لا يمكنك حذف تعليقات المستخدمين الآخرين!"
+}

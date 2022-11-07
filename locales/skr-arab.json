@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Saraiki"
+		]
+	},
+	"ep_comments_page.comment": "تبصرہ",
+	"ep_comments_page.comments": "تبصرے",
+	"ep_comments_page.comments_template.comment.value": "تبصرہ",
+	"ep_comments_page.comments_template.cancel.value": "منسوخ",
+	"ep_comments_page.comments_template.reply.value": "جواب",
+	"ep_comments_page.comments_template.reply.placeholder": "جواب",
+	"ep_comments_page.comments_template.edit_comment.save": "بچاؤ",
+	"ep_comments_page.comments_template.edit_comment.cancel": "منسوخ"
+}
