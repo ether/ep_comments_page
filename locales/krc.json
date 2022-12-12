@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Къарачайлы"
+		]
+	},
+	"ep_comments_page.comment": "Комментарий",
+	"ep_comments_page.comments": "Комментарийле",
+	"ep_comments_page.add_comment.title": "Сайлаугъа джангы комментарий къош",
+	"ep_comments_page.add_comment": "Сайлаугъа джангы комментарий къош",
+	"ep_comments_page.add_comment.hint": "Тилейбиз, алгъын комментарий этиллик текстни сайла",
+	"ep_comments_page.delete_comment.title": "Бу комментарийни кетер",
+	"ep_comments_page.edit_comment.title": "Бу комментарийни тюзет",
+	"ep_comments_page.show_comments": "Комментарийлени кёргюзт",
+	"ep_comments_page.comments_template.suggested_change": "Теджелген тюрлендириу",
+	"ep_comments_page.comments_template.from": "Джиберген",
+	"ep_comments_page.comments_template.accept_change.value": "Тюрлениуню къабыл эт",
+	"ep_comments_page.comments_template.revert_change.value": "Тюрлениуню кери ал",
+	"ep_comments_page.comments_template.suggested_change_from": "\"{{changeFrom}}\"-дан/ден, {{changeTo}}-гъа/ге теджелген тюрлениу",
+	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\"-ден/дан былайгъа теджелген тюрлениу",
+	"ep_comments_page.comments_template.to": "Алыучу",
+	"ep_comments_page.comments_template.include_suggestion": "Теджелген тюрлендириуню къош",
+	"ep_comments_page.comments_template.comment.value": "Комментарий",
+	"ep_comments_page.comments_template.cancel.value": "Ызына алыу",
+	"ep_comments_page.comments_template.reply.value": "Джууабла",
+	"ep_comments_page.comments_template.reply.placeholder": "Джууабла",
+	"ep_comments_page.comments_template.edit_comment.save": "сакъла",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ызына алыу",
+	"ep_comments_page.error.edit_unauth": "Башха къошулуучуланы комментарийлерин тюзеталлыкъ тюлсюз!",
+	"ep_comments_page.error.delete_unauth": "Башха къошулуучуланы комментарийлерин кетераллыкъ тюлсюз!"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ghose"
+		]
+	},
+	"ep_comments_page.comment": "Comentar",
+	"ep_comments_page.comments": "Comentarios",
+	"ep_comments_page.add_comment.title": "Engdir novo comentario na selección",
+	"ep_comments_page.add_comment": "Engadir novo comentario na selección",
+	"ep_comments_page.add_comment.hint": "Primeiro elixa o texto a comentar",
+	"ep_comments_page.delete_comment.title": "Eliminar este comentario",
+	"ep_comments_page.edit_comment.title": "Editar este comentario",
+	"ep_comments_page.show_comments": "Mostrar comentarios",
+	"ep_comments_page.comments_template.suggested_change": "Cambio suxerido",
+	"ep_comments_page.comments_template.from": "Desde",
+	"ep_comments_page.comments_template.accept_change.value": "Aceptar cambio",
+	"ep_comments_page.comments_template.revert_change.value": "Rexeitar o cambio",
+	"ep_comments_page.comments_template.suggested_change_from": "Cambio suxerido de \"{{changeFrom}}\" a \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Suxerir o cambio de \"{{changeFrom}}\" a",
+	"ep_comments_page.comments_template.to": "Para",
+	"ep_comments_page.comments_template.include_suggestion": "Incluír cambio suxerido",
+	"ep_comments_page.comments_template.comment.value": "Comentar",
+	"ep_comments_page.comments_template.cancel.value": "Cancelar",
+	"ep_comments_page.comments_template.reply.value": "Responder",
+	"ep_comments_page.comments_template.reply.placeholder": "Responder",
+	"ep_comments_page.comments_template.edit_comment.save": "gardar",
+	"ep_comments_page.comments_template.edit_comment.cancel": "cancelar",
+	"ep_comments_page.error.edit_unauth": "Non pode editar os comentarios doutras usuarias!",
+	"ep_comments_page.error.delete_unauth": "Non pode eliminar os comentarios doutras usuarias!"
+}
