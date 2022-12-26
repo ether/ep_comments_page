@@ -1,11 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Artnay",
 			"MITO"
 		]
 	},
 	"ep_comments_page.comment": "Kommentoi",
 	"ep_comments_page.comments": "Kommentit",
+	"ep_comments_page.add_comment.title": "Lisää uusi kommentti valintaan",
+	"ep_comments_page.add_comment": "Lisää uusi kommentti valintaan",
+	"ep_comments_page.add_comment.hint": "Valitse ensin teksti, jota haluat kommentoida",
 	"ep_comments_page.delete_comment.title": "Poista tämä kommentti",
 	"ep_comments_page.edit_comment.title": "Muokkaa tätä kommenttia",
 	"ep_comments_page.show_comments": "Näytä kommentit",
@@ -14,6 +18,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Hyväksy muutos",
 	"ep_comments_page.comments_template.revert_change.value": "Peruuta muutos",
 	"ep_comments_page.comments_template.to": "Vastaanottaja",
+	"ep_comments_page.comments_template.include_suggestion": "Sisällytä ehdotettu muutos",
 	"ep_comments_page.comments_template.comment.value": "Kommentoi",
 	"ep_comments_page.comments_template.cancel.value": "Peruuta",
 	"ep_comments_page.comments_template.reply.value": "Vastaa",
