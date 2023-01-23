@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Besnik b"
+		]
+	},
+	"ep_comments_page.comment": "Koment",
+	"ep_comments_page.comments": "Komente",
+	"ep_comments_page.add_comment.title": "Shtoni te përzgjedhja një koment të ri",
+	"ep_comments_page.add_comment": "Shtoni te përzgjedhja një koment të ri",
+	"ep_comments_page.add_comment.hint": "Ju lutemi, së pari përzgjidhni tekstin për komentim",
+	"ep_comments_page.delete_comment.title": "Fshije këtë koment",
+	"ep_comments_page.edit_comment.title": "Përpunojeni këtë koment",
+	"ep_comments_page.show_comments": "Shfaqi Komentet",
+	"ep_comments_page.comments_template.suggested_change": "Ndryshim i Sugjeruar",
+	"ep_comments_page.comments_template.from": "Nga",
+	"ep_comments_page.comments_template.accept_change.value": "Pranoje Ndryshimin",
+	"ep_comments_page.comments_template.revert_change.value": "Prapaktheje Ndryshimin",
+	"ep_comments_page.comments_template.suggested_change_from": "Ndryshim i sugjeruar nga “{{changeFrom}}” në “{{changeTo}}”",
+	"ep_comments_page.comments_template.suggest_change_from": "Sugjeroni ndryshim nga “{{changeFrom}}” në",
+	"ep_comments_page.comments_template.to": "Në",
+	"ep_comments_page.comments_template.include_suggestion": "Përfshije ndryshimin e sugjeruar",
+	"ep_comments_page.comments_template.comment.value": "Koment",
+	"ep_comments_page.comments_template.cancel.value": "Anuloje",
+	"ep_comments_page.comments_template.reply.value": "Përgjigjuni",
+	"ep_comments_page.comments_template.reply.placeholder": "Përgjigjuni",
+	"ep_comments_page.comments_template.edit_comment.save": "ruaje",
+	"ep_comments_page.comments_template.edit_comment.cancel": "anuloje",
+	"ep_comments_page.error.edit_unauth": "S’mund të përpunoni komente përdoruesish të tjerë!",
+	"ep_comments_page.error.delete_unauth": "S’mund të fshini komente përdoruesish të tjerë!"
+}
