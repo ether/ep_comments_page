@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"ep_comments_page.comment": "Commento",
+	"ep_comments_page.comments": "Commentos",
+	"ep_comments_page.add_comment.title": "Adder un nove commento sur le selection",
+	"ep_comments_page.add_comment": "Adder un nove commento sur le selection",
+	"ep_comments_page.add_comment.hint": "Per favor selige primo le texto a commentar",
+	"ep_comments_page.delete_comment.title": "Deler iste commento",
+	"ep_comments_page.edit_comment.title": "Modificar iste commento",
+	"ep_comments_page.show_comments": "Monstrar commentos",
+	"ep_comments_page.comments_template.suggested_change": "Cambiamento suggerite",
+	"ep_comments_page.comments_template.from": "De",
+	"ep_comments_page.comments_template.accept_change.value": "Acceptar cambiamento",
+	"ep_comments_page.comments_template.revert_change.value": "Reverter cambiamento",
+	"ep_comments_page.comments_template.suggested_change_from": "Cambiamento suggerite de \"{{changeFrom}}\" a \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Suggerer cambiamento de \"{{changeFrom}}\" a",
+	"ep_comments_page.comments_template.to": "A",
+	"ep_comments_page.comments_template.include_suggestion": "Includer cambiamento suggerite",
+	"ep_comments_page.comments_template.comment.value": "Commento",
+	"ep_comments_page.comments_template.cancel.value": "Cancellar",
+	"ep_comments_page.comments_template.reply.value": "Responder",
+	"ep_comments_page.comments_template.reply.placeholder": "Responsa",
+	"ep_comments_page.comments_template.edit_comment.save": "salveguardar",
+	"ep_comments_page.comments_template.edit_comment.cancel": "cancellar",
+	"ep_comments_page.error.edit_unauth": "Tu non pote modificar le commentos de altere usatores!",
+	"ep_comments_page.error.delete_unauth": "Tu non pote deler le commentos de altere usatores!"
+}
