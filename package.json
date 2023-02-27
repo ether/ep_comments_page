@@ -27,7 +27,7 @@
     "underscore": "^1.13.2"
   },
   "devDependencies": {
-    "eslint": "^8.11.0",
+    "eslint": "^8.35.0",
     "eslint-config-etherpad": "^3.0.9",
     "socket.io-client": "^2.3.0",
     "superagent": "^7.1.1",
