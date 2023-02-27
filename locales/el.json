@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Norhorn"
+		]
+	},
+	"ep_comments_page.comment": "Σχόλιο",
+	"ep_comments_page.comments": "Σχόλια",
+	"ep_comments_page.add_comment.title": "Προσθήκη νέου σχολίου στην επιλογή",
+	"ep_comments_page.add_comment": "Προσθήκη νέου σχολίου στην επιλογή",
+	"ep_comments_page.add_comment.hint": "Επιλέξτε πρώτα το κείμενο για να σχολιάσετε",
+	"ep_comments_page.delete_comment.title": "Διαγραφή αυτού του σχόλιου",
+	"ep_comments_page.edit_comment.title": "Επεξεργασία αυτού του σχόλιου",
+	"ep_comments_page.show_comments": "Προβολή σχολίων",
+	"ep_comments_page.comments_template.suggested_change": "Προτεινόμενη αλλαγή",
+	"ep_comments_page.comments_template.from": "Από",
+	"ep_comments_page.comments_template.accept_change.value": "Αποδοχή αλλαγής",
+	"ep_comments_page.comments_template.revert_change.value": "Επαναφορά αλλαγής",
+	"ep_comments_page.comments_template.suggested_change_from": "Προτεινόμενη αλλαγή από \"{{changeFrom}}\" σε \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Πρόταση αλλαγής από \"{{changeFrom}}\" σε",
+	"ep_comments_page.comments_template.to": "Προς",
+	"ep_comments_page.comments_template.include_suggestion": "Να συμπεριληφθεί η προτεινόμενη αλλαγή",
+	"ep_comments_page.comments_template.comment.value": "Σχόλιο",
+	"ep_comments_page.comments_template.cancel.value": "Ακύρωση",
+	"ep_comments_page.comments_template.reply.value": "Απάντηση",
+	"ep_comments_page.comments_template.reply.placeholder": "Απάντηση",
+	"ep_comments_page.comments_template.edit_comment.save": "Αποθήκευση",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ακύρωση",
+	"ep_comments_page.error.edit_unauth": "Δεν μπορείτε να επεξεργαστείτε τα σχόλια άλλων χρηστών!",
+	"ep_comments_page.error.delete_unauth": "Δεν μπορείτε να διαγράψετε σχόλια άλλων χρηστών!"
+}
