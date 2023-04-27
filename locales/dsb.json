@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"ep_comments_page.comment": "Komentar",
+	"ep_comments_page.comments": "Komentary",
+	"ep_comments_page.add_comment.title": "K wuběrkoju nowy komentar pśidaś",
+	"ep_comments_page.add_comment": "K wuběrkoju nowy komentar pśidaś",
+	"ep_comments_page.add_comment.hint": "Pšosym wubjeŕśo nejpjerwjej tekst, kótaryž se ma komentěrowaś",
+	"ep_comments_page.delete_comment.title": "Toś ten komentar wulašowaś",
+	"ep_comments_page.edit_comment.title": "Toś ten komentar wobźěłaś",
+	"ep_comments_page.show_comments": "Komentary pokazaś",
+	"ep_comments_page.comments_template.suggested_change": "Naraźona změna",
+	"ep_comments_page.comments_template.from": "Wót",
+	"ep_comments_page.comments_template.accept_change.value": "Změnu akceptěrowaś",
+	"ep_comments_page.comments_template.revert_change.value": "Změnu anulěrowaś",
+	"ep_comments_page.comments_template.suggested_change_from": "Naraźona změna wót \"{{changeFrom}}\" do \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Změnu naraźiś wót \"{{changeFrom}}\" do",
+	"ep_comments_page.comments_template.to": "Do",
+	"ep_comments_page.comments_template.include_suggestion": "Naraźonu změnu zapśimjeś",
+	"ep_comments_page.comments_template.comment.value": "Komentar",
+	"ep_comments_page.comments_template.cancel.value": "Pśetergnuś",
+	"ep_comments_page.comments_template.reply.value": "Wótegroniś",
+	"ep_comments_page.comments_template.reply.placeholder": "Wótegroniś",
+	"ep_comments_page.comments_template.edit_comment.save": "składowaś",
+	"ep_comments_page.comments_template.edit_comment.cancel": "pśetergnuś",
+	"ep_comments_page.error.edit_unauth": "Njamóžoš komentary drugich wužywarjow wobźěłaś!",
+	"ep_comments_page.error.delete_unauth": "Njamóžoš komentary drugich wužywarjow lašowaś!"
+}

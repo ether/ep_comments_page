@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"ep_comments_page.comment": "Komentar",
+	"ep_comments_page.comments": "Komentary",
+	"ep_comments_page.add_comment.title": "K wuběrej nowy komentar přidać",
+	"ep_comments_page.add_comment": "K wuběrej nowy komentar přidać",
+	"ep_comments_page.add_comment.hint": "Prošu wubjerće najprjedy tekst, kotryž so ma komentować",
+	"ep_comments_page.delete_comment.title": "Tutón komentar zhašeć",
+	"ep_comments_page.edit_comment.title": "Tutón komentar wobdźěłać",
+	"ep_comments_page.show_comments": "Komentary pokazać",
+	"ep_comments_page.comments_template.suggested_change": "Namjetowana změna",
+	"ep_comments_page.comments_template.from": "Wot",
+	"ep_comments_page.comments_template.accept_change.value": "Změnu přiwzać",
+	"ep_comments_page.comments_template.revert_change.value": "Změnu cofnyć",
+	"ep_comments_page.comments_template.suggested_change_from": "Namjetowana změna wot \"{{changeFrom}}\" do \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Změnu namjetować wot \"{{changeFrom}}\" do",
+	"ep_comments_page.comments_template.to": "Do",
+	"ep_comments_page.comments_template.include_suggestion": "Namjetowanu změnu zapřijeć",
+	"ep_comments_page.comments_template.comment.value": "Komentar",
+	"ep_comments_page.comments_template.cancel.value": "Přetorhnyć",
+	"ep_comments_page.comments_template.reply.value": "Wotmołwić",
+	"ep_comments_page.comments_template.reply.placeholder": "Wotmołwić",
+	"ep_comments_page.comments_template.edit_comment.save": "składować",
+	"ep_comments_page.comments_template.edit_comment.cancel": "přetorhnyć",
+	"ep_comments_page.error.edit_unauth": "Njemóžeš komentary druhich wužiwarjow wobdźěłać!",
+	"ep_comments_page.error.delete_unauth": "Njemóžeš komentary druhich wužiwarjow zhašeć!"
+}
