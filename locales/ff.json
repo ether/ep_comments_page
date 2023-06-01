@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ibrahima Malal Sarr"
+		]
+	},
+	"ep_comments_page.comment": "Yowre",
+	"ep_comments_page.comments": "Jowe",
+	"ep_comments_page.add_comment.title": "Ɓeydu yowre hesere e labagol",
+	"ep_comments_page.add_comment": "Ɓeydu yowre hesere e labagol",
+	"ep_comments_page.add_comment.hint": "Tiiɗno labo tawo bonndol ngol njiɗ-ɗaa yowde e mum",
+	"ep_comments_page.delete_comment.title": "Momtu ndee yowre",
+	"ep_comments_page.edit_comment.title": "Taƴto ndee yowre",
+	"ep_comments_page.show_comments": "Hollu Jowe",
+	"ep_comments_page.comments_template.suggested_change": "Wasiyo Bayle",
+	"ep_comments_page.comments_template.from": "Iwde e",
+	"ep_comments_page.comments_template.accept_change.value": "Jaɓ Baylol",
+	"ep_comments_page.comments_template.revert_change.value": "Firlit Baylol",
+	"ep_comments_page.comments_template.suggested_change_from": "Wasiya baylol iwde e {{changeFrom}} wonta {{changeTo}}",
+	"ep_comments_page.comments_template.suggest_change_from": "Wasiyo baylol iwde e {{changeFrom}} wonta",
+	"ep_comments_page.comments_template.to": "Wonta",
+	"ep_comments_page.comments_template.include_suggestion": "Waɗor heen baylol basiyangol",
+	"ep_comments_page.comments_template.comment.value": "Ɓeydu yowre",
+	"ep_comments_page.comments_template.cancel.value": "Haaytu",
+	"ep_comments_page.comments_template.reply.value": "Jaabo",
+	"ep_comments_page.comments_template.reply.placeholder": "jaabawol",
+	"ep_comments_page.comments_template.edit_comment.save": "danndu",
+	"ep_comments_page.comments_template.edit_comment.cancel": "haaytu",
+	"ep_comments_page.error.edit_unauth": "A waawaa taƴtaade jowe woɗɓe!",
+	"ep_comments_page.error.delete_unauth": "A waawaa momtude jowe woɗɓe!"
+}
