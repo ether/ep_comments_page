@@ -124,7 +124,7 @@ const changeEtherpadLanguageTo = async (lang) => {
   // get the value of the bold button
   const $boldButton = chrome$('.buttonicon-bold').parent();
 
-  return helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
+  return await helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
 };
 
 const getCommentId = () => {
