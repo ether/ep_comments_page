@@ -119,12 +119,12 @@ const changeEtherpadLanguageTo = async (lang) => {
   const $language = chrome$('#languagemenu');
   // select passed language
   $language.val(lang);
-  $language.change();
+  $language.trigger('change')
 
   // get the value of the bold button
   const $boldButton = chrome$('.buttonicon-bold').parent();
 
-  return await helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
+  await helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
 };
 
 const getCommentId = () => {
