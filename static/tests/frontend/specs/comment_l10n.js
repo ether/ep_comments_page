@@ -123,11 +123,10 @@ const changeEtherpadLanguageTo = async (lang) => {
   // hide settings again
   $settingsButton.click();
 
+  const $boldButton = chrome$('.buttonicon-bold').parent();
+  console.log($boldButton[0].title);
   await helper.waitForPromise(
-      () => {
-        console.log(chrome$('.buttonicon-bold').parent()[0].title);
-        return chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang];
-      });
+      () => chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang]);
 };
 
 const getCommentId = () => {
