@@ -116,8 +116,9 @@ const changeEtherpadLanguageTo = async (lang) => {
 
   // select the language
   const $language = chrome$('#languagemenu');
-  $language.val(lang);
-  $language.change();
+  const $languageoption = $language.find(`[value=${lang}]`);
+  $languageoption.attr('selected', 'selected');
+  $language.trigger('change');
 
   // hide settings again
   $settingsButton.click();
