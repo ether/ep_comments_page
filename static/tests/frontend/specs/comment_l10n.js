@@ -108,7 +108,6 @@ const changeEtherpadLanguageTo = async (lang) => {
     'pt-br': 'Negrito (Ctrl-B)',
     'oc': 'Gras (Ctrl-B)',
   };
-  this.timeout(1000);
   const chrome$ = helper.padChrome$;
 
   // click on the settings button to make settings visible
@@ -119,12 +118,12 @@ const changeEtherpadLanguageTo = async (lang) => {
   const $language = chrome$('#languagemenu');
   // select passed language
   $language.val(lang);
-  $language.trigger('change')
+  $language.trigger('change');
 
   // get the value of the bold button
   const $boldButton = chrome$('.buttonicon-bold').parent();
 
-  await helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
+  return helper.waitForPromise(() => $boldButton[0].title.contains(boldTitles[lang]));
 };
 
 const getCommentId = () => {
