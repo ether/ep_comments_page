@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "formidable": "^2.1.1",
+    "formidable": "^3.5.0",
     "underscore": "^1.13.6"
   },
   "devDependencies": {
