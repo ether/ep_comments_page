@@ -1,6 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
+			"Brettchenweber",
+			"SamTV",
 			"Tim.krieger"
 		]
 	},
@@ -17,15 +19,15 @@
 	"ep_comments_page.comments_template.accept_change.value": "Änderung akzeptieren",
 	"ep_comments_page.comments_template.revert_change.value": "Änderung zurücknehmen",
 	"ep_comments_page.comments_template.suggested_change_from": "Ersetze \"{{changeFrom}}\" durch \"{{changeTo}}\"",
-	"ep_comments_page.comments_template.suggest_change_from": "Ersetze \"{{changeFrom}}\" durch",
+	"ep_comments_page.comments_template.suggest_change_from": "Änderung vorschlagen von \"{{changeFrom}}\" zu",
 	"ep_comments_page.comments_template.to": "zu",
-	"ep_comments_page.comments_template.include_suggestion": "Änderungsvorschlag",
+	"ep_comments_page.comments_template.include_suggestion": "Änderungsvorschlag hinzufügen",
 	"ep_comments_page.comments_template.comment.value": "Kommentar",
 	"ep_comments_page.comments_template.cancel.value": "Abbrechen",
 	"ep_comments_page.comments_template.reply.value": "Antworten",
 	"ep_comments_page.comments_template.reply.placeholder": "Antworten",
 	"ep_comments_page.comments_template.edit_comment.save": "Speichern",
 	"ep_comments_page.comments_template.edit_comment.cancel": "Abbrechen",
-	"ep_comments_page.error.edit_unauth": "Du kannst nur eigene Kommentare bearbeiten!",
-	"ep_comments_page.error.delete_unauth": "Du kannst nur eigene Kommentare löschen!"
+	"ep_comments_page.error.edit_unauth": "Du kannst Kommentare anderer Benutzer nicht bearbeiten!",
+	"ep_comments_page.error.delete_unauth": "Du kannst Kommentare anderer Benutzer nicht löschen!"
 }
