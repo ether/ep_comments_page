@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokeoo"
+		]
+	},
+	"ep_comments_page.comment": "Komentaras",
+	"ep_comments_page.comments": "Komentarai",
+	"ep_comments_page.add_comment.title": "Pridėkite naują komentarą prie pasirinkimo",
+	"ep_comments_page.add_comment": "Pridėkite naują komentarą prie pasirinkimo",
+	"ep_comments_page.add_comment.hint": "Pirmiausia pasirinkite tekstą, kurį norite komentuoti",
+	"ep_comments_page.delete_comment.title": "Ištrinti šį komentarą",
+	"ep_comments_page.edit_comment.title": "Redaguoti šį komentarą",
+	"ep_comments_page.show_comments": "Rodyti komentarus",
+	"ep_comments_page.comments_template.suggested_change": "Siūlomas keitimas",
+	"ep_comments_page.comments_template.from": "Nuo",
+	"ep_comments_page.comments_template.accept_change.value": "Priimti keitimą",
+	"ep_comments_page.comments_template.revert_change.value": "Atmesti keitimą",
+	"ep_comments_page.comments_template.suggested_change_from": "Siūlomas keitimas iš „{{changeFrom}}“ į „{{changeTo}}“",
+	"ep_comments_page.comments_template.suggest_change_from": "Siūlyti keisti iš „{{changeFrom}}“ į",
+	"ep_comments_page.comments_template.to": "Į",
+	"ep_comments_page.comments_template.include_suggestion": "Įtraukti pasiūlytą keitimą",
+	"ep_comments_page.comments_template.comment.value": "Komentaras",
+	"ep_comments_page.comments_template.cancel.value": "Atšaukti",
+	"ep_comments_page.comments_template.reply.value": "Atsakyti",
+	"ep_comments_page.comments_template.reply.placeholder": "Atsakyti",
+	"ep_comments_page.comments_template.edit_comment.save": "išsaugoti",
+	"ep_comments_page.comments_template.edit_comment.cancel": "atšaukti",
+	"ep_comments_page.error.edit_unauth": "Negalite redaguoti kitų naudotojų komentarų!",
+	"ep_comments_page.error.delete_unauth": "Negalite trinti kitų naudotojų komentarų!"
+}
