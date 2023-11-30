@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"A2y4",
+			"Chqaz"
+		]
+	},
+	"ep_comments_page.comment": "コメント",
+	"ep_comments_page.comments": "コメント",
+	"ep_comments_page.comments_template.comment.value": "コメント",
+	"ep_comments_page.comments_template.cancel.value": "キャンセル",
+	"ep_comments_page.comments_template.reply.value": "返信",
+	"ep_comments_page.comments_template.reply.placeholder": "返信",
+	"ep_comments_page.comments_template.edit_comment.save": "保存",
+	"ep_comments_page.comments_template.edit_comment.cancel": "キャンセル"
+}
