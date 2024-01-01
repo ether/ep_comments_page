@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"HellojoeAoPS",
 			"TsuyaMarisa",
 			"列维劳德"
 		]
@@ -8,20 +9,20 @@
 	"ep_comments_page.comment": "评论",
 	"ep_comments_page.comments": "评论",
 	"ep_comments_page.add_comment.title": "在选项中添加新评论",
-	"ep_comments_page.add_comment": "添加新的评论",
-	"ep_comments_page.add_comment.hint": "请先选择文本用以评论",
+	"ep_comments_page.add_comment": "对选择添加新评论",
+	"ep_comments_page.add_comment.hint": "请先选择要发表评论的文字",
 	"ep_comments_page.delete_comment.title": "删除此评论",
 	"ep_comments_page.edit_comment.title": "编辑此注释",
 	"ep_comments_page.show_comments": "显示评论",
 	"ep_comments_page.comments_template.suggested_change": "建议更改",
 	"ep_comments_page.comments_template.from": "来自",
 	"ep_comments_page.comments_template.accept_change.value": "接受更改",
-	"ep_comments_page.comments_template.revert_change.value": "最近更改",
-	"ep_comments_page.comments_template.suggested_change_from": "从“{{changeFrom}}”提出的变化到“{{changeTo}}”",
-	"ep_comments_page.comments_template.suggest_change_from": "建议从“{{changeFrom}}”变化",
+	"ep_comments_page.comments_template.revert_change.value": "恢复更改",
+	"ep_comments_page.comments_template.suggested_change_from": "建议从“{{changeFrom}}”更改为“{{changeTo}}”",
+	"ep_comments_page.comments_template.suggest_change_from": "建议从“{{changeFrom}}”更改为",
 	"ep_comments_page.comments_template.to": "至",
-	"ep_comments_page.comments_template.include_suggestion": "包括建议的变化",
-	"ep_comments_page.comments_template.comment.value": "注释",
+	"ep_comments_page.comments_template.include_suggestion": "包括建议的更改",
+	"ep_comments_page.comments_template.comment.value": "评论",
 	"ep_comments_page.comments_template.cancel.value": "取消",
 	"ep_comments_page.comments_template.reply.value": "回复",
 	"ep_comments_page.comments_template.reply.placeholder": "回复",

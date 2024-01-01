@@ -1,23 +1,24 @@
 {
 	"@metadata": {
 		"authors": [
+			"HellojoeAoPS",
 			"Kly"
 		]
 	},
 	"ep_comments_page.comment": "意見",
 	"ep_comments_page.comments": "意見",
-	"ep_comments_page.add_comment.title": "在所選添加新的意見",
-	"ep_comments_page.add_comment": "在所選添加新的意見",
-	"ep_comments_page.add_comment.hint": "請先選擇意見內容的文字",
-	"ep_comments_page.delete_comment.title": "刪除此意見",
+	"ep_comments_page.add_comment.title": "對選擇新增意見",
+	"ep_comments_page.add_comment": "對選擇新增意見",
+	"ep_comments_page.add_comment.hint": "請先選擇要發表評論的文字",
+	"ep_comments_page.delete_comment.title": "刪除這則意見",
 	"ep_comments_page.edit_comment.title": "編輯此意見",
 	"ep_comments_page.show_comments": "顯示意見",
 	"ep_comments_page.comments_template.suggested_change": "建議更改",
 	"ep_comments_page.comments_template.from": "來自",
 	"ep_comments_page.comments_template.accept_change.value": "接受更改",
-	"ep_comments_page.comments_template.revert_change.value": "回復更改",
-	"ep_comments_page.comments_template.suggested_change_from": "將「{{changeFrom}}」改成「{{changeTo}}」的建議更改",
-	"ep_comments_page.comments_template.suggest_change_from": "建議更改，將「{{changeFrom}}」改成",
+	"ep_comments_page.comments_template.revert_change.value": "恢復更改",
+	"ep_comments_page.comments_template.suggested_change_from": "建議從“{{changeFrom}}”更改為“{{changeTo}}”",
+	"ep_comments_page.comments_template.suggest_change_from": "建議從“{{changeFrom}}”更改為",
 	"ep_comments_page.comments_template.to": "至",
 	"ep_comments_page.comments_template.include_suggestion": "包含建議更改",
 	"ep_comments_page.comments_template.comment.value": "意見",
@@ -26,6 +27,6 @@
 	"ep_comments_page.comments_template.reply.placeholder": "回覆",
 	"ep_comments_page.comments_template.edit_comment.save": "儲存",
 	"ep_comments_page.comments_template.edit_comment.cancel": "取消",
-	"ep_comments_page.error.edit_unauth": "您不能編輯其他使用者的意見！",
-	"ep_comments_page.error.delete_unauth": "您不能刪除其他使用者的意見！"
+	"ep_comments_page.error.edit_unauth": "您無法編輯其他使用者的意見！",
+	"ep_comments_page.error.delete_unauth": "您無法刪除其他使用者的意見！"
 }
