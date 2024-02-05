@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yupik"
+		]
+	},
+	"ep_comments_page.comment": "Čääli komment",
+	"ep_comments_page.comments_template.comment.value": "Čääli komment",
+	"ep_comments_page.comments_template.cancel.value": "Jooskâ",
+	"ep_comments_page.comments_template.reply.value": "Västid",
+	"ep_comments_page.comments_template.reply.placeholder": "Västid",
+	"ep_comments_page.comments_template.edit_comment.save": "vuorkkii",
+	"ep_comments_page.comments_template.edit_comment.cancel": "jooskâ"
+}
