@@ -254,6 +254,7 @@ describe(__filename, function () {
         });
       });
     });
+
     afterEach(function (done) {
       socket.close();
       done();
