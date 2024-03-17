@@ -9,7 +9,7 @@ const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const _ = require('underscore');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
-const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager.js');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager');
 
 let io;
 
