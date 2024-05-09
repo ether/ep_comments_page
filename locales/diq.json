@@ -1,14 +1,32 @@
 {
 	"@metadata": {
 		"authors": [
+			"GolyatGeri",
 			"Mirzali"
 		]
 	},
 	"ep_comments_page.comment": "Mışewre",
+	"ep_comments_page.comments": "Mışewrehi",
+	"ep_comments_page.add_comment.title": "Weçinay rên yo mısewreh tede kerên",
+	"ep_comments_page.add_comment": "Weçinay rên yo mısewreh tede kerên",
+	"ep_comments_page.add_comment.hint": "Veri mışore kerdeye metini weçinên",
+	"ep_comments_page.delete_comment.title": "Nê mışori bıester",
+	"ep_comments_page.edit_comment.title": "Nê mışori bıvurne",
+	"ep_comments_page.show_comments": "Mışori bıvine",
+	"ep_comments_page.comments_template.suggested_change": "Wesebyaye Vurnayış",
+	"ep_comments_page.comments_template.from": "Rıster",
+	"ep_comments_page.comments_template.accept_change.value": "Vurnayışa qebul bıkerê",
+	"ep_comments_page.comments_template.revert_change.value": "Vurnayışi bıgêrên pey",
+	"ep_comments_page.comments_template.suggested_change_from": "Wesebyaye Vurnayış  \"{{changeFrom}}\" ra heta  \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Wesebyaye Vurnayış  \"{{changeFrom}}\" heta",
+	"ep_comments_page.comments_template.to": "Gırewter",
+	"ep_comments_page.comments_template.include_suggestion": "Wesebyaye vurnayışi dexil kerên",
 	"ep_comments_page.comments_template.comment.value": "Mışewre",
 	"ep_comments_page.comments_template.cancel.value": "Bıtexelne",
 	"ep_comments_page.comments_template.reply.value": "Cewab bıde",
 	"ep_comments_page.comments_template.reply.placeholder": "Cewab bıde",
 	"ep_comments_page.comments_template.edit_comment.save": "qeyd ke",
-	"ep_comments_page.comments_template.edit_comment.cancel": "bıtexelne"
+	"ep_comments_page.comments_template.edit_comment.cancel": "bıtexelne",
+	"ep_comments_page.error.edit_unauth": "Şoma nêeşken mısorey karkeranên binan bıvurnên",
+	"ep_comments_page.error.delete_unauth": "Şoma nêeşken mısorey karkeranên binan esternin"
 }
