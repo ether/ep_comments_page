@@ -1,12 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Darafsh",
 			"Jeeputer"
 		]
 	},
 	"ep_comments_page.comment": "توضیح",
 	"ep_comments_page.comments": "نظرات",
+	"ep_comments_page.add_comment.title": "افزودن توضیح تازه برای منتخب‌ها",
 	"ep_comments_page.add_comment": "افزودن توضیح تازه برای منتخب‌ها",
+	"ep_comments_page.add_comment.hint": "لطفاً ابتدا متن را برای نظر دادن انتخاب کنید",
 	"ep_comments_page.delete_comment.title": "حذف این نظر",
 	"ep_comments_page.edit_comment.title": "ویرایش این نظر",
 	"ep_comments_page.show_comments": "نمایش نظرات",
