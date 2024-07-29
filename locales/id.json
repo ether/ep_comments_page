@@ -1,9 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
+			"Atriwidada",
 			"Veracious"
 		]
 	},
+	"ep_comments_page.comment": "Komentar",
+	"ep_comments_page.comments": "Komentar",
+	"ep_comments_page.add_comment.title": "Tambahkan komentar baru pada pilihan",
+	"ep_comments_page.add_comment": "Tambahkan komentar baru pada pilihan",
+	"ep_comments_page.add_comment.hint": "Harap pilih terlebih dahulu teks yang akan dikomentari",
+	"ep_comments_page.delete_comment.title": "Hapus komentar ini",
+	"ep_comments_page.edit_comment.title": "Sunting komentar ini",
+	"ep_comments_page.show_comments": "Tampilkan Komentar",
+	"ep_comments_page.comments_template.suggested_change": "Sarankan Perubahan",
+	"ep_comments_page.comments_template.from": "Dari",
+	"ep_comments_page.comments_template.accept_change.value": "Terima Perubahan",
+	"ep_comments_page.comments_template.revert_change.value": "Balikkan Perubahan",
+	"ep_comments_page.comments_template.suggested_change_from": "Menyarankan perubahan dari \"{{changeFrom}}\" menjadi \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Menyarankan perubahan dari \"{{changeFrom}}\" menjadi",
+	"ep_comments_page.comments_template.to": "Ke",
+	"ep_comments_page.comments_template.include_suggestion": "Sertakan perubahan yang disarankan",
 	"ep_comments_page.comments_template.comment.value": "Komentar",
 	"ep_comments_page.comments_template.cancel.value": "Batalkan",
 	"ep_comments_page.comments_template.reply.value": "Balas",
