@@ -1,7 +1,7 @@
 {
   "description": "Adds comments on sidebar and link it to the text.  For no-skin use ep_page_view.",
   "name": "ep_comments_page",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "author": {
     "name": "Nicolas Lescop",
     "email": "limplementeur@gmail.com"
