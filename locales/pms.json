@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt"
+		]
+	},
+	"ep_comments_page.comment": "Coment",
+	"ep_comments_page.comments": "Coment",
+	"ep_comments_page.add_comment.title": "Gionté un coment neuv an sla selession",
+	"ep_comments_page.add_comment": "Gionté un coment neuv an sla selession",
+	"ep_comments_page.add_comment.hint": "Për piasì, prima ch'a serna ël test da comenté",
+	"ep_comments_page.delete_comment.title": "Eliminé cost coment",
+	"ep_comments_page.edit_comment.title": "Modifiché cost coment",
+	"ep_comments_page.show_comments": "Smon-e ij coment",
+	"ep_comments_page.comments_template.suggested_change": "Modìfiche proponùe",
+	"ep_comments_page.comments_template.from": "Da",
+	"ep_comments_page.comments_template.accept_change.value": "Aceté la modìfica",
+	"ep_comments_page.comments_template.revert_change.value": "Anulé la modìfica",
+	"ep_comments_page.comments_template.suggested_change_from": "Propon-e ëd rampiassé «{{changeFrom}}» con «{{changeTo}}»",
+	"ep_comments_page.comments_template.suggest_change_from": "Propon-e ëd rampiassé «{{changeFrom}}» con",
+	"ep_comments_page.comments_template.to": "A",
+	"ep_comments_page.comments_template.include_suggestion": "Anclude la modìfica sugerìa",
+	"ep_comments_page.comments_template.comment.value": "Coment",
+	"ep_comments_page.comments_template.cancel.value": "Anulé",
+	"ep_comments_page.comments_template.reply.value": "Rësponde",
+	"ep_comments_page.comments_template.reply.placeholder": "Rësponde",
+	"ep_comments_page.comments_template.edit_comment.save": "argistré",
+	"ep_comments_page.comments_template.edit_comment.cancel": "anulé",
+	"ep_comments_page.error.edit_unauth": "A peul pa modifiché ij coment dj'àutri utent!",
+	"ep_comments_page.error.delete_unauth": "A peul nen dëscancelé ij coment ëd j'àutri utent!"
+}
