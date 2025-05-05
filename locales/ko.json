@@ -3,7 +3,8 @@
 		"authors": [
 			"Dr1t jg",
 			"Ykhwong",
-			"그냥기여자"
+			"그냥기여자",
+			"아라"
 		]
 	},
 	"ep_comments_page.comment": "의견",
@@ -14,7 +15,7 @@
 	"ep_comments_page.delete_comment.title": "이 의견 삭제",
 	"ep_comments_page.edit_comment.title": "이 의견 편집하기",
 	"ep_comments_page.show_comments": "의견 표시",
-	"ep_comments_page.comments_template.suggested_change": "제안된 변경 사항",
+	"ep_comments_page.comments_template.suggested_change": "제안된 변경사항",
 	"ep_comments_page.comments_template.from": "출발지",
 	"ep_comments_page.comments_template.accept_change.value": "변경 수락",
 	"ep_comments_page.comments_template.revert_change.value": "변경사항 되돌리기",
