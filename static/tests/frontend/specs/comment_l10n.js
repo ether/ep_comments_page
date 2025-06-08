@@ -112,22 +112,18 @@ const changeEtherpadLanguageTo = async (lang) => {
 
   // click on the settings button to make settings visible
   const $settingsButton = chrome$('.buttonicon-settings');
-  $settingsButton.click();
+  $settingsButton.trigger('click');
 
-  // select the language
+  // click the language button
   const $language = chrome$('#languagemenu');
-  const $languageoption = $language.find(`[value=${lang}]`);
-  $languageoption.attr('selected', 'selected');
+  // select passed language
+  $language.val(lang);
   $language.trigger('change');
 
-  // hide settings again
-  $settingsButton.click();
-
-  await helper.waitForPromise(
-      () => {
-        console.log(chrome$('.buttonicon-bold').parent()[0].title);
-        return chrome$('.buttonicon-bold').parent()[0].title === boldTitles[lang];
-      });
+  // get the value of the bold button
+  const $boldButton = chrome$('.buttonicon-bold').parent();
+  console.log($boldButton[0].title);
+  return helper.waitForPromise(() => $boldButton[0].title === boldTitles[lang]);
 };
 
 const getCommentId = () => {
