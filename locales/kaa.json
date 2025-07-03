@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Inabat Allanova"
+		]
+	},
+	"ep_comments_page.comment": "Pikir",
+	"ep_comments_page.comments": "Pikirler",
+	"ep_comments_page.add_comment.title": "Tańlawǵa jańa pikir qosıw",
+	"ep_comments_page.add_comment": "Tańlawǵa jańa pikir qosıw",
+	"ep_comments_page.add_comment.hint": "Dáslep, pikir jazıw ushın tekstti tańlań",
+	"ep_comments_page.delete_comment.title": "Pikirdi óshiriw",
+	"ep_comments_page.edit_comment.title": "Pikirdi redaktorlaw",
+	"ep_comments_page.show_comments": "Pikirlerdi kórsetiw",
+	"ep_comments_page.comments_template.suggested_change": "Usınılǵan ózgeris",
+	"ep_comments_page.comments_template.from": "Usıdan baslap:",
+	"ep_comments_page.comments_template.accept_change.value": "Ózgeristi qabıl etiw",
+	"ep_comments_page.comments_template.revert_change.value": "Ózgeristi qaytarıw",
+	"ep_comments_page.comments_template.suggested_change_from": "«{{changeFrom}}»tan «{{changeTo}}»qa ózgertiw usınıs etildi",
+	"ep_comments_page.comments_template.suggest_change_from": "«{{changeFrom}}» ornına basqasın usınıs etiń",
+	"ep_comments_page.comments_template.to": "Usıǵan shekem",
+	"ep_comments_page.comments_template.include_suggestion": "Usınılǵan ózgeristi kirgiziw",
+	"ep_comments_page.comments_template.comment.value": "Pikir",
+	"ep_comments_page.comments_template.cancel.value": "Biykarlaw",
+	"ep_comments_page.comments_template.reply.value": "Juwap beriw",
+	"ep_comments_page.comments_template.reply.placeholder": "Juwap beriw",
+	"ep_comments_page.comments_template.edit_comment.save": "saqlaw",
+	"ep_comments_page.comments_template.edit_comment.cancel": "biykarlaw",
+	"ep_comments_page.error.edit_unauth": "Siz basqa paydalanıwshılardıń pikirlerin redaktorlay almaysız!",
+	"ep_comments_page.error.delete_unauth": "Siz basqa paydalanıwshılardıń pikirlerin óshire almaysız!"
+}
