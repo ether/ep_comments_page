@@ -1,6 +1,8 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Urbalazs"
+		]
 	},
 	"ep_comments_page.comment": "Megjegyzés",
 	"ep_comments_page.comments": "Megjegyzések",
@@ -19,7 +21,7 @@
 	"ep_comments_page.comments_template.to": "Címzett:",
 	"ep_comments_page.comments_template.include_suggestion": "Javasolt változtatás tartalmazása",
 	"ep_comments_page.comments_template.comment.value": "Megjegyzés",
-	"ep_comments_page.comments_template.cancel.value": "Mégsem",
+	"ep_comments_page.comments_template.cancel.value": "Mégse",
 	"ep_comments_page.comments_template.reply.value": "Válasz",
 	"ep_comments_page.comments_template.reply.placeholder": "Válasz",
 	"ep_comments_page.comments_template.edit_comment.save": "mentés",
