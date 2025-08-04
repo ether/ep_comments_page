@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Besnik b"
+			"Besnik b",
+			"Xhulianoo"
 		]
 	},
 	"ep_comments_page.comment": "Koment",
 	"ep_comments_page.comments": "Komente",
-	"ep_comments_page.add_comment.title": "Shtoni te përzgjedhja një koment të ri",
-	"ep_comments_page.add_comment": "Shtoni te përzgjedhja një koment të ri",
+	"ep_comments_page.add_comment.title": "Shto koment të ri mbi përzgjedhjen",
+	"ep_comments_page.add_comment": "Shto koment të ri mbi përzgjedhjen",
 	"ep_comments_page.add_comment.hint": "Ju lutemi, së pari përzgjidhni tekstin për komentim",
 	"ep_comments_page.delete_comment.title": "Fshije këtë koment",
 	"ep_comments_page.edit_comment.title": "Përpunojeni këtë koment",
