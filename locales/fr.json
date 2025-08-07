@@ -1,17 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
+			"Meaz",
 			"Verdy p"
 		]
 	},
 	"ep_comments_page.comment": "Annotation",
 	"ep_comments_page.comments": "Annotations",
-	"ep_comments_page.add_comment.title": "Annoter la sélection",
-	"ep_comments_page.add_comment": "Annoter la sélection",
-	"ep_comments_page.add_comment.hint": "Vous devez d'abord sélectionner un texte à annoter",
-	"ep_comments_page.delete_comment.title": "Supprimer cette annotation",
-	"ep_comments_page.edit_comment.title": "Modifier cette annotation",
-	"ep_comments_page.show_comments": "Afficher les annotations",
+	"ep_comments_page.add_comment.title": "Ajouter un nouveau commentaire sur la sélection",
+	"ep_comments_page.add_comment": "Ajouter un nouveau commentaire sur la sélection",
+	"ep_comments_page.add_comment.hint": "Vous devez d'abord sélectionner un texte à commenter",
+	"ep_comments_page.delete_comment.title": "Supprimer ce commentaire",
+	"ep_comments_page.edit_comment.title": "Modifier ce commentaire",
+	"ep_comments_page.show_comments": "Afficher le commentaire",
 	"ep_comments_page.comments_template.suggested_change": "Modification proposée",
 	"ep_comments_page.comments_template.from": "Remplacer",
 	"ep_comments_page.comments_template.accept_change.value": "Appliquer la proposition",
@@ -20,7 +21,7 @@
 	"ep_comments_page.comments_template.suggest_change_from": "Remplacer « {{changeFrom}} » par",
 	"ep_comments_page.comments_template.to": "Par",
 	"ep_comments_page.comments_template.include_suggestion": "Inclure la modification suggérée",
-	"ep_comments_page.comments_template.comment.value": "Annotation",
+	"ep_comments_page.comments_template.comment.value": "Commentaire",
 	"ep_comments_page.comments_template.cancel.value": "Annuler",
 	"ep_comments_page.comments_template.reply.value": "Répondre",
 	"ep_comments_page.comments_template.reply.placeholder": "Répondre",
