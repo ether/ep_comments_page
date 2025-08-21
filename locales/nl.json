@@ -26,6 +26,6 @@
 	"ep_comments_page.comments_template.reply.placeholder": "Antwoord",
 	"ep_comments_page.comments_template.edit_comment.save": "bewaar",
 	"ep_comments_page.comments_template.edit_comment.cancel": "annuleer",
-	"ep_comments_page.error.edit_unauth": "You cannot edit other users comments!",
-	"ep_comments_page.error.delete_unauth": "You cannot delete other users comments!"
+	"ep_comments_page.error.edit_unauth": "U kunt de opmerkingen van andere gebruikers niet bewerken!",
+	"ep_comments_page.error.delete_unauth": "U kunt de opmerkingen van andere gebruikers niet verwijderen!"
 }
