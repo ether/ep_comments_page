@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"شاه زمان پټان"
+		]
+	},
+	"ep_comments_page.comment": "څرگندونه",
+	"ep_comments_page.comments": "څرگندونې",
+	"ep_comments_page.add_comment.title": "په ټاکنې کې نوې څرگندونه ورگډول",
+	"ep_comments_page.add_comment": "په ټاکنې کې نوې څرگندونه ورگډول",
+	"ep_comments_page.add_comment.hint": "مهرباني وکړئ د څرگندونې لپاره لومړی ليکنه وټاکئ",
+	"ep_comments_page.delete_comment.title": "دا څرگندونه ړنگول",
+	"ep_comments_page.edit_comment.title": "دا څرگندونه سمول",
+	"ep_comments_page.show_comments": "څرگندونې ښودل",
+	"ep_comments_page.comments_template.suggested_change": "وړانديزشوی بدلون",
+	"ep_comments_page.comments_template.from": "له",
+	"ep_comments_page.comments_template.accept_change.value": "بدلون منل",
+	"ep_comments_page.comments_template.revert_change.value": "بدلون په‌څټ‌گرځول",
+	"ep_comments_page.comments_template.comment.value": "څرگندونه",
+	"ep_comments_page.comments_template.cancel.value": "ناگارل",
+	"ep_comments_page.comments_template.reply.value": "ځوابول",
+	"ep_comments_page.comments_template.reply.placeholder": "ځوابول",
+	"ep_comments_page.comments_template.edit_comment.save": "خوندي کول",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ناگارل",
+	"ep_comments_page.error.edit_unauth": "تاسو د نورو کارنانو څرگندونې نشئ سمولی!",
+	"ep_comments_page.error.delete_unauth": "تاسو د نورو کارنانو څرگندونې نشئ ړنگولی!"
+}

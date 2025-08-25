@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"ButterflyOfFire"
+		]
+	},
+	"ep_comments_page.comment": "Awennit",
+	"ep_comments_page.comments": "Iwenniten",
+	"ep_comments_page.comments_template.cancel.value": "Semmet",
+	"ep_comments_page.comments_template.reply.value": "Tiririt",
+	"ep_comments_page.comments_template.reply.placeholder": "Tiririt",
+	"ep_comments_page.comments_template.edit_comment.save": "sekles",
+	"ep_comments_page.comments_template.edit_comment.cancel": "semmet"
+}
