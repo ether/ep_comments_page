@@ -16,6 +16,8 @@
 	"ep_comments_page.comments_template.from": "له",
 	"ep_comments_page.comments_template.accept_change.value": "بدلون منل",
 	"ep_comments_page.comments_template.revert_change.value": "بدلون په‌څټ‌گرځول",
+	"ep_comments_page.comments_template.to": "ته",
+	"ep_comments_page.comments_template.include_suggestion": "وړانديزشوی بدلون رانغاړل",
 	"ep_comments_page.comments_template.comment.value": "څرگندونه",
 	"ep_comments_page.comments_template.cancel.value": "ناگارل",
 	"ep_comments_page.comments_template.reply.value": "ځوابول",
