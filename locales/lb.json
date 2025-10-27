@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robby"
+			"Robby",
+			"Volvox"
 		]
 	},
 	"ep_comments_page.comment": "Bemierkung",
@@ -12,7 +13,7 @@
 	"ep_comments_page.comments_template.suggested_change": "Proposéiert Ännerung",
 	"ep_comments_page.comments_template.from": "Vum",
 	"ep_comments_page.comments_template.accept_change.value": "Ännerung akzeptéieren",
-	"ep_comments_page.comments_template.revert_change.value": "Ännerung zrécksetzen",
+	"ep_comments_page.comments_template.revert_change.value": "Ännerung zerécksetzen",
 	"ep_comments_page.comments_template.to": "Fir",
 	"ep_comments_page.comments_template.comment.value": "Bemierkung",
 	"ep_comments_page.comments_template.cancel.value": "Ofbriechen",
