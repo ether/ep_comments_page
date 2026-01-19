@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cabal"
+		]
+	},
+	"ep_comments_page.comments": "ਟਿੱਪਣੀਆਂ",
+	"ep_comments_page.comments_template.from": "ਵੱਲੋਂ",
+	"ep_comments_page.comments_template.accept_change.value": "ਤਬਦੀਲੀ ਸਵੀਕਾਰੋ",
+	"ep_comments_page.comments_template.cancel.value": "ਰੱਦ ਕਰੋ",
+	"ep_comments_page.comments_template.reply.value": "ਜਵਾਬ ਦਿਓ",
+	"ep_comments_page.comments_template.reply.placeholder": "ਜਵਾਬ ਦਿਓ",
+	"ep_comments_page.comments_template.edit_comment.save": "ਸਾਂਭੋ",
+	"ep_comments_page.comments_template.edit_comment.cancel": "ਰੱਦ ਕਰੋ"
+}
