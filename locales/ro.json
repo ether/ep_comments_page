@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"SZ475"
+		]
+	},
+	"ep_comments_page.comment": "Comentează",
+	"ep_comments_page.comments": "Comentarii",
+	"ep_comments_page.comments_template.from": "De la",
+	"ep_comments_page.comments_template.accept_change.value": "Acceptă schimbarea",
+	"ep_comments_page.comments_template.revert_change.value": "Anulează schimbarea",
+	"ep_comments_page.comments_template.to": "Către",
+	"ep_comments_page.error.edit_unauth": "Nu poți edita comentariile altor utilizatori!",
+	"ep_comments_page.error.delete_unauth": "Nu poți șterge comentariile altor utilizatori!"
+}
