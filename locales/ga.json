@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aindriu80"
+		]
+	},
+	"ep_comments_page.comment": "Trácht",
+	"ep_comments_page.comments": "Tráchtanna",
+	"ep_comments_page.add_comment.title": "Cuir trácht nua leis an rogha",
+	"ep_comments_page.add_comment": "Cuir trácht nua leis an rogha",
+	"ep_comments_page.add_comment.hint": "Roghnaigh an téacs le trácht a dhéanamh air ar dtús",
+	"ep_comments_page.delete_comment.title": "Scrios an trácht seo",
+	"ep_comments_page.edit_comment.title": "Cuir an trácht seo in eagar",
+	"ep_comments_page.show_comments": "Taispeáin Tráchtanna",
+	"ep_comments_page.comments_template.suggested_change": "Athrú Molta",
+	"ep_comments_page.comments_template.from": "Ó",
+	"ep_comments_page.comments_template.accept_change.value": "Glac leis an Athrú",
+	"ep_comments_page.comments_template.revert_change.value": "Athraigh a Chur Ar Ais",
+	"ep_comments_page.comments_template.suggested_change_from": "Athrú molta ó \"{{changeFrom}}\" go \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggest_change_from": "Mol athrú ó \"{{changeFrom}}\" go",
+	"ep_comments_page.comments_template.to": "Chuig",
+	"ep_comments_page.comments_template.include_suggestion": "Cuir an t-athrú molta san áireamh",
+	"ep_comments_page.comments_template.comment.value": "Trácht",
+	"ep_comments_page.comments_template.cancel.value": "Cealaigh",
+	"ep_comments_page.comments_template.reply.value": "Freagra",
+	"ep_comments_page.comments_template.reply.placeholder": "Freagra",
+	"ep_comments_page.comments_template.edit_comment.save": "sábháil",
+	"ep_comments_page.comments_template.edit_comment.cancel": "cealaigh",
+	"ep_comments_page.error.edit_unauth": "Ní féidir leat tuairimí úsáideoirí eile a chur in eagar!",
+	"ep_comments_page.error.delete_unauth": "Ní féidir leat tuairimí úsáideoirí eile a scriosadh!"
+}
