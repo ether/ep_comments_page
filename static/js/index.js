@@ -446,56 +446,13 @@ EpComments.prototype.collectComments = function (callback) {
       // localize comment element
       commentL10n.localize(commentElm);
     }
-    const prevCommentElm = commentElm.prev();
-    let commentPos = 0;
-
-    if (prevCommentElm.length !== 0) {
-      const prevCommentPos = prevCommentElm.css('top');
-      const prevCommentHeight = prevCommentElm.innerHeight();
-
-      commentPos = parseInt(prevCommentPos) + prevCommentHeight + 30;
-    }
-
-    commentElm.css({top: commentPos});
   });
 
-  // HOVER SIDEBAR COMMENT
-  let hideCommentTimer;
-  this.container.on('mouseover', '.sidebar-comment', (e) => {
-    // highlight comment
-    clearTimeout(hideCommentTimer);
-    commentBoxes.highlightComment(e.currentTarget.id, e);
-  }).on('mouseout', '.sidebar-comment', (e) => {
-    // do not hide directly the comment, because sometime the mouse get out accidently
-    hideCommentTimer = setTimeout(() => {
-      commentBoxes.hideComment(e.currentTarget.id);
-    }, 1000);
-  });
-
-  // HOVER OR CLICK THE COMMENTED TEXT IN THE EDITOR
-  // hover event
-  this.padInner.contents().on('mouseover', '.comment', function (e) {
-    if (container.is(':visible')) { // not on mobile
-      clearTimeout(hideCommentTimer);
-      const commentId = self.commentIdOf(e);
-      commentBoxes.highlightComment(commentId, e, $(this));
-    }
-  });
-
+  // CLICK THE COMMENTED TEXT IN THE EDITOR
   // click event
   this.padInner.contents().on('click', '.comment', function (e) {
     const commentId = self.commentIdOf(e);
     commentBoxes.highlightComment(commentId, e, $(this));
-  });
-
-  this.padInner.contents().on('mouseleave', '.comment', (e) => {
-    const commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
-    // only closes comment if it was not opened by a click on the icon
-    if (!commentOpenedByClickOnIcon && container.is(':visible')) {
-      hideCommentTimer = setTimeout(() => {
-        self.closeOpenedComment(e);
-      }, 1000);
-    }
   });
 
   this.addListenersToCloseOpenedComment();
@@ -619,29 +576,46 @@ EpComments.prototype.insertComment = function (commentId, comment, index) {
 EpComments.prototype.setYofComments = function () {
   // for each comment in the pad
   const padOuter = $('iframe[name="ace_outer"]').contents();
-  const padInner = padOuter.find('iframe[name="ace_inner"]');
+  const padInner = padOuter.find('iframe[name="ace_inner"]').contents();
   const inlineComments = this.getFirstOcurrenceOfCommentIds();
   const commentsToBeShown = [];
-
+  
+  let prevLineOffset = null;
+  
+  // Process all comments
   $.each(inlineComments, function () {
-    // classname is the ID of the comment
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if (!commentId || !commentId[1]) return;
-    const commentEle = padOuter.find(`#${commentId[1]}`);
-
-    let topOffset = this.offsetTop;
-    topOffset += parseInt(padInner.css('padding-top').split('px')[0]);
-    topOffset += parseInt($(this).css('padding-top').split('px')[0]);
-
-    if (commentId) {
-      // adjust outer comment...
-      commentBoxes.adjustTopOf(commentId[1], topOffset);
-      // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], topOffset);
-
-      // mark this comment to be displayed if it was visible before we start adjusting its position
-      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
+    const commentIdMatch = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
+    if (!commentIdMatch || !commentIdMatch[1]) return;
+    
+    const commentId = commentIdMatch[1];
+    const commentEle = padOuter.find(`#${commentId}`);
+    
+    // Remove previous line-separator class
+    commentEle.removeClass('line-separator');
+    
+    // Get current comment's line offset position
+    const currentLineOffset = this.offsetTop;
+    
+    // Get the real line number of the comment in editor
+    const $aceLine = $(this).closest('.ace-line');
+    const realLineNumber = padInner.find('.ace-line').index($aceLine) + 1;
+    
+    // Add line-separator class if not the first comment and on a different line
+    if (prevLineOffset !== null && currentLineOffset !== prevLineOffset) {
+      commentEle.addClass('line-separator');
+    } else if (prevLineOffset === null) {
+      // First comment also gets line-separator class
+      commentEle.addClass('line-separator');
     }
+    
+    // Add real line number data attribute
+    commentEle.attr('data-line', realLineNumber);
+    
+    // Update previous comment's line offset
+    prevLineOffset = currentLineOffset;
+    
+    // mark this comment to be displayed if it was visible before we start adjusting its position
+    if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
   });
 
   // re-display comments that were visible before
@@ -679,18 +653,8 @@ EpComments.prototype.allCommentsOnCorrectYPosition = function () {
   const inlineComments = padInner.contents().find('.comment');
   let allCommentsAreCorrect = true;
 
-  $.each(inlineComments, function () {
-    const y = this.offsetTop;
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if (commentId && commentId[1]) {
-      if (!commentBoxes.isOnTop(commentId[1], y)) { // found one comment on the incorrect place
-        allCommentsAreCorrect = false;
-        return false; // to break loop
-      }
-    }
-  });
-
-  return allCommentsAreCorrect;
+  // With relative positioning, we don't need to check comment positions
+  return true;
 };
 
 EpComments.prototype.localizeExistingComments = function () {
@@ -791,12 +755,7 @@ EpComments.prototype.getCommentData = function () {
 
 // Delete a pad comment
 EpComments.prototype.deleteComment = function (commentId) {
-  while($('iframe[name="ace_outer"]').contents().find(`#${commentId}`).length > 0){
-    $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
-  }
-  while($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0){
-    $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
-  }
+  $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
 };
 
 const cloneLine = (line) => {
