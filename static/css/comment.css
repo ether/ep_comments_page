@@ -24,8 +24,29 @@
 }
 
 .sidebar-comment {
-  position: absolute;
+  position: relative;
   width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Add red dashed line separator for comments on different lines */
+.sidebar-comment.line-separator {
+  padding-top: 15px;
+  border-top: 2px dashed red;
+  position: relative;
+}
+
+.sidebar-comment.line-separator::before {
+  content: 'Line ' attr(data-line);
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 0 10px;
+  font-size: 12px;
+  color: red;
+  font-weight: bold;
 }
 
 /* WITH ICONS */
@@ -58,31 +79,20 @@ input.error, textarea.error {
 }
 
 /* COMMENT COMPACTED (Visible on right side) */
-.sidebar-comment:not(.full-display) .full-display-content {
-  display: none;
-}
 .compact-display-content {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  padding: 0 10px;
-  background-color: #eeeeed;
+  display: none;
 }
 
-/* COMMENT FULL (when mouse hover) */
-.sidebar-comment.full-display {
+/* COMMENT FULL (always display) */
+.sidebar-comment {
   z-index: 2;
 }
-.sidebar-comment.full-display .full-display-content {
+.sidebar-comment .full-display-content {
   display: block;
-  margin-top: -10px;
-}
-.sidebar-comment.full-display .compact-display-content {
-  display: none;
 }
 .full-display-content {
   background-color: white;
-  border-radius: 5px;
+
   overflow: hidden;
   box-shadow: 0 2px 4px #ddd;
   z-index: 99;
