@@ -3,7 +3,7 @@
 const common = require('ep_etherpad-lite/tests/backend/common');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
-const apiKey = common.apiKey;
+const generateJWTToken = common.generateJWTToken;
 const apiVersion = 1;
 
 // Functions to validate API responses:
@@ -29,9 +29,10 @@ const commentRepliesEndPointFor = function (pad) {
 
 // Creates a pad and returns the pad id. Calls the callback when finished.
 const createPad = function (done) {
-  common.init().then((agent) => {
+  common.init().then(async (agent) => {
     const pad = randomString(5);
-    agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${pad}`)
+    agent.get(`/api/${apiVersion}/createPad?padID=${pad}`)
+        .set('Authorization', await generateJWTToken())
         .end((err, res) => {
           if (err || (res.body.code !== 0)) return done(new Error('Unable to create new Pad'));
           done(null, pad);
@@ -40,8 +41,9 @@ const createPad = function (done) {
 };
 
 const readOnlyId = function (padID, done) {
-  common.init().then((agent) => {
-    agent.get(`/api/${apiVersion}/getReadOnlyID?apikey=${apiKey}&padID=${padID}`)
+  common.init().then(async (agent) => {
+    agent.get(`/api/${apiVersion}/getReadOnlyID?padID=${padID}`)
+        .set('Authorization', await generateJWTToken())
         .end((err, res) => {
           if (err || (res.body.code !== 0)) return done(new Error('Unable to get read only id'));
           done(null, res.body.data.readOnlyID);
@@ -54,10 +56,10 @@ const createComment = function (pad, commentData, done) {
   commentData = commentData || {};
   commentData.name = commentData.name || 'John Doe';
   commentData.text = commentData.text || 'This is a comment';
-  common.init().then((agent) => {
+  common.init().then(async (agent) => {
     agent.post(commentsEndPointFor(pad))
+        .set('Authorization', await generateJWTToken())
         .send({
-          apikey: apiKey,
           data: JSON.stringify([commentData]),
         })
         .expect(200)
@@ -76,10 +78,10 @@ const createCommentReply = function (pad, comment, replyData, done) {
   replyData.commentId = comment;
   replyData.name = replyData.name || 'John Doe';
   replyData.text = replyData.text || 'This is a reply';
-  common.init().then((agent) => {
+  common.init().then(async (agent) => {
     agent.post(commentRepliesEndPointFor(pad))
+        .set('Authorization', await generateJWTToken())
         .send({
-          apikey: apiKey,
           data: JSON.stringify([replyData]),
         })
         .expect(200)

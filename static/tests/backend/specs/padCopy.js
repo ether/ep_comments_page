@@ -1,6 +1,7 @@
 'use strict';
 
 const common = require('ep_etherpad-lite/tests/backend/common');
+const generateJWTToken = common.generateJWTToken;
 const utils = require('../../utils');
 const createPad = utils.createPad;
 const createComment = utils.createComment;
@@ -9,7 +10,6 @@ const commentsEndPointFor = utils.commentsEndPointFor;
 const commentRepliesEndPointFor = utils.commentRepliesEndPointFor;
 
 let api;
-const apiKey = common.apiKey;
 
 describe(__filename, function () {
   let padID;
@@ -29,10 +29,10 @@ describe(__filename, function () {
       if (err) throw err;
       // ... duplicate pad...
       const copiedPadID = `${padID}-copy`;
-      copyPad(padID, copiedPadID, () => {
+      copyPad(padID, copiedPadID, async () => {
         // ... and finally check if comments are returned
-        const getCommentsRoute = `${commentsEndPointFor(copiedPadID)}?apikey=${apiKey}`;
-        api.get(getCommentsRoute)
+        api.get(commentsEndPointFor(copiedPadID))
+            .set('Authorization', await generateJWTToken())
             .expect((res) => {
               const commentsFound = Object.keys(res.body.data.comments);
               if (commentsFound.length !== 1) {
@@ -55,10 +55,10 @@ describe(__filename, function () {
 
         // ... duplicate pad...
         const copiedPadID = `${padID}-copy`;
-        copyPad(padID, copiedPadID, () => {
+        copyPad(padID, copiedPadID, async () => {
           // ... and finally check if replies are returned
-          const getRepliesRoute = `${commentRepliesEndPointFor(copiedPadID)}?apikey=${apiKey}`;
-          api.get(getRepliesRoute)
+          api.get(commentRepliesEndPointFor(copiedPadID))
+              .set('Authorization', await generateJWTToken())
               .expect((res) => {
                 const repliesFound = Object.keys(res.body.data.replies);
                 if (repliesFound.length !== 1) {
@@ -72,14 +72,17 @@ describe(__filename, function () {
   });
 });
 
-const copyPad = function (originalPadID, copiedPadID, callback) {
+const copyPad = async function (originalPadID, copiedPadID, callback) {
   const copyPadRoute =
-    `/api/1.2.9/copyPad?apikey=${apiKey}&sourceID=${originalPadID}&destinationID=${copiedPadID}`;
-  api.get(copyPadRoute).end((err, res) => {
-    if (err || res.body.code !== 0) {
-      throw (err || res.body.message || `unknown error while calling API route ${copyPadRoute}`);
-    }
+    `/api/1.2.9/copyPad?sourceID=${originalPadID}&destinationID=${copiedPadID}`;
+  api.get(copyPadRoute)
+      .set('Authorization', await generateJWTToken())
+      .end((err, res) => {
+        if (err || res.body.code !== 0) {
+          throw (err || res.body.message ||
+                 `unknown error while calling API route ${copyPadRoute}`);
+        }
 
-    callback();
-  });
+        callback();
+      });
 };

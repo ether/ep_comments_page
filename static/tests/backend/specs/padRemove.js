@@ -1,6 +1,7 @@
 'use strict';
 
 const common = require('ep_etherpad-lite/tests/backend/common');
+const generateJWTToken = common.generateJWTToken;
 const utils = require('../../utils');
 const createPad = utils.createPad;
 const createComment = utils.createComment;
@@ -9,7 +10,6 @@ const commentsEndPointFor = utils.commentsEndPointFor;
 const commentRepliesEndPointFor = utils.commentRepliesEndPointFor;
 
 let api;
-const apiKey = common.apiKey;
 
 describe(__filename, function () {
   let padID;
@@ -28,10 +28,10 @@ describe(__filename, function () {
     createComment(padID, {}, (err, comment) => {
       if (err) throw err;
       // ... remove pad...
-      deletePad(padID, () => {
+      deletePad(padID, async () => {
         // ... and finally check if comments are returned
-        const getCommentsRoute = `${commentsEndPointFor(padID)}?apikey=${apiKey}`;
-        api.get(getCommentsRoute)
+        api.get(commentsEndPointFor(padID))
+            .set('Authorization', await generateJWTToken())
             .expect((res) => {
               const commentsFound = Object.keys(res.body.data.comments);
               if (commentsFound.length !== 0) {
@@ -54,10 +54,10 @@ describe(__filename, function () {
         if (err) throw err;
 
         // ... remove pad...
-        deletePad(padID, () => {
+        deletePad(padID, async () => {
           // ... and finally check if replies are returned
-          const getRepliesRoute = `${commentRepliesEndPointFor(padID)}?apikey=${apiKey}`;
-          api.get(getRepliesRoute)
+          api.get(commentRepliesEndPointFor(padID))
+              .set('Authorization', await generateJWTToken())
               .expect((res) => {
                 const repliesFound = Object.keys(res.body.data.replies);
                 if (repliesFound.length !== 0) {
@@ -72,13 +72,16 @@ describe(__filename, function () {
   });
 });
 
-const deletePad = function (padID, callback) {
-  const deletePadRoute = `/api/1/deletePad?apikey=${apiKey}&padID=${padID}`;
-  api.get(deletePadRoute).end((err, res) => {
-    if (err || res.body.code !== 0) {
-      throw (err || res.body.message || `unknown error while calling API route ${deletePadRoute}`);
-    }
+const deletePad = async function (padID, callback) {
+  const deletePadRoute = `/api/1/deletePad?padID=${padID}`;
+  api.get(deletePadRoute)
+      .set('Authorization', await generateJWTToken())
+      .end((err, res) => {
+        if (err || res.body.code !== 0) {
+          throw (err || res.body.message ||
+                 `unknown error while calling API route ${deletePadRoute}`);
+        }
 
-    callback();
-  });
+        callback();
+      });
 };

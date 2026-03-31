@@ -6,10 +6,10 @@ const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const common = require('ep_etherpad-lite/tests/backend/common');
+const generateJWTToken = common.generateJWTToken;
 const db = require('ep_etherpad-lite/node/db/DB');
 
 let agent;
-const apiKey = common.apiKey;
 
 describe(__filename, function () {
   let padID;
@@ -19,11 +19,13 @@ describe(__filename, function () {
 
   beforeEach(async function () {
     padID = randomString(5);
-    await agent.get(`/api/${apiVersion}/createPad?apikey=${apiKey}&padID=${padID}`)
+    await agent.get(`/api/${apiVersion}/createPad?padID=${padID}`)
+        .set('Authorization', await generateJWTToken())
         .expect(200)
         .expect('Content-Type', /json/)
         .expect(codeToBe0);
-    await agent.get(`/api/${apiVersion}/setHTML?apikey=${apiKey}&padID=${padID}&html=${html()}`)
+    await agent.get(`/api/${apiVersion}/setHTML?padID=${padID}&html=${html()}`)
+        .set('Authorization', await generateJWTToken())
         .expect(200)
         .expect('Content-Type', /json/)
         .expect(codeToBe0);
@@ -35,7 +37,8 @@ describe(__filename, function () {
     });
 
     it('returns ok', async function () {
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
           .expect(200);
@@ -43,7 +46,8 @@ describe(__filename, function () {
 
     it('returns HTML with comment class', async function () {
       await insertCommentToDB(padID, 'c-1234');
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
             const expectedComments = new RegExp(expectedRegex);
@@ -64,7 +68,8 @@ describe(__filename, function () {
     it('returns HTML with two comments spans', async function () {
       await insertCommentToDB(padID, 'c-1234');
       await insertCommentToDB(padID, 'c-82a3');
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const firstComment = regexWithComment('c-1234');
             const secondComment = regexWithComment('c-82a3');
@@ -86,8 +91,9 @@ describe(__filename, function () {
       html = () => buildHTML('empty pad');
     });
 
-    it('returns HTML with no comment', function (done) {
-      agent.get(getHTMLEndPointFor(padID))
+    it('returns HTML with no comment', async function () {
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const expectedRegex = '.*empty pad.*';
             const noComment = new RegExp(expectedRegex);
@@ -98,8 +104,7 @@ describe(__filename, function () {
               throw new Error('Comment exported, should not have any. ' +
                               `Regex used: ${expectedRegex}, html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
@@ -111,8 +116,9 @@ describe(__filename, function () {
 
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
     // comment)
-    xit('returns HTML with strong and comment, in any order', function (done) {
-      agent.get(getHTMLEndPointFor(padID))
+    xit('returns HTML with strong and comment, in any order', async function () {
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(200)
           .expect('Content-Type', /json/)
           .expect(codeToBe0)
@@ -132,8 +138,7 @@ describe(__filename, function () {
                               `[${strongInsideCommentRegex} || ${commentInsideStrongRegex}], ` +
                               `html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
@@ -146,16 +151,16 @@ describe(__filename, function () {
 
     // Etherpad exports tags using the order they are defined on the array (bold is always inside
     // comment)
-    it('returns HTML with strong and comment, in any order', function (done) {
-      agent.get(getHTMLEndPointFor(padID))
+    it('returns HTML with strong and comment, in any order', async function () {
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const html = res.body.data.html;
             const foundComment = (html.indexOf('<strong>') !== -1);
             if (!foundComment) {
               throw new Error(`Comment not exported. Regex used: <strong>, html exported: ${html}`);
             }
-          })
-          .end(done);
+          });
     });
   });
 
@@ -166,7 +171,8 @@ describe(__filename, function () {
 
     it('returns HTML with part with comment and part without it', async function () {
       await insertCommentToDB(padID, 'c-2342');
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const expectedRegex = `no comment here ${regexWithComment('c-2342')}`;
             const expectedComments = new RegExp(expectedRegex);
@@ -188,7 +194,8 @@ describe(__filename, function () {
 
     it('returns ok', async function () {
       settings.ep_comments_page = {exportHTML: false};
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
           .expect(200);
@@ -196,7 +203,8 @@ describe(__filename, function () {
 
     it('returns HTML without comment class', async function () {
       settings.ep_comments_page = {exportHtml: false};
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
             const expectedComments = new RegExp(expectedRegex);
@@ -217,7 +225,8 @@ describe(__filename, function () {
 
     it('returns ok', async function () {
       settings.ep_comments_page = {exportHTML: true};
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
           .expect(200);
@@ -226,7 +235,8 @@ describe(__filename, function () {
     it('returns HTML with comment class', async function () {
       settings.ep_comments_page = {exportHtml: true};
       await insertCommentToDB(padID, 'c-1234');
-      agent.get(getHTMLEndPointFor(padID))
+      await agent.get(getHTMLEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect((res) => {
             const expectedRegex = regexWithComment('c-1234');
             const expectedComments = new RegExp(expectedRegex);
@@ -241,7 +251,7 @@ describe(__filename, function () {
   });
 });
 
-const getHTMLEndPointFor = (padID) => `/api/${apiVersion}/getHTML?apikey=${apiKey}&padID=${padID}`;
+const getHTMLEndPointFor = (padID) => `/api/${apiVersion}/getHTML?padID=${padID}`;
 
 const buildHTML = (body) => `<html><body>${body}</body></html>`;
 

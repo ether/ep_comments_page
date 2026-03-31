@@ -1,6 +1,7 @@
 'use strict';
 
 const common = require('ep_etherpad-lite/tests/backend/common');
+const generateJWTToken = common.generateJWTToken;
 const io = require('socket.io-client');
 const utils = require('../../../utils');
 const createPad = utils.createPad;
@@ -13,7 +14,6 @@ const commentsEndPointFor = utils.commentsEndPointFor;
 
 let api;
 let appUrl;
-const apiKey = common.apiKey;
 
 describe(__filename, function () {
   before(async function () {
@@ -32,34 +32,37 @@ describe(__filename, function () {
       });
     });
 
-    it('returns code 4 if API key is missing', function (done) {
-      api.get(listCommentsEndPointFor(padID))
+    it('returns code 4 if authorization header is missing', async function () {
+      await api.get(listCommentsEndPointFor(padID))
           .expect(codeToBe4)
           .expect('Content-Type', /json/)
-          .expect(401, done);
+          .expect(401);
     });
 
-    it('returns code 4 if API key is wrong', function (done) {
-      api.get(listCommentsEndPointFor(padID, 'wrongApiKey'))
+    it('returns code 4 if authorization header is wrong', async function () {
+      await api.get(listCommentsEndPointFor(padID))
+          .set('Authorization', 'Bearer wrongtoken')
           .expect(codeToBe4)
           .expect('Content-Type', /json/)
-          .expect(401, done);
+          .expect(401);
     });
 
-    it('returns code 0 when API key is provided', function (done) {
-      api.get(listCommentsEndPointFor(padID, apiKey))
+    it('returns code 0 when properly authorized', async function () {
+      await api.get(listCommentsEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns comment list when API key is provided', function (done) {
+    it('returns comment list when properly authorized', function (done) {
       // creates first comment...
       createComment(padID, {}, (err, comment) => {
         // ... creates second comment...
-        createComment(padID, {}, (err, comment) => {
+        createComment(padID, {}, async (err, comment) => {
           // ... and finally checks if comments are returned
-          api.get(listCommentsEndPointFor(padID, apiKey))
+          api.get(listCommentsEndPointFor(padID))
+              .set('Authorization', await generateJWTToken())
               .expect((res) => {
                 if (res.body.data.comments === undefined) {
                   throw new Error('Response should have list of comments.');
@@ -85,8 +88,9 @@ describe(__filename, function () {
         changeTo,
         changeFrom,
       };
-      createComment(padID, data, (err, commentId) => {
-        api.get(listCommentsEndPointFor(padID, apiKey))
+      createComment(padID, data, async (err, commentId) => {
+        api.get(listCommentsEndPointFor(padID))
+            .set('Authorization', await generateJWTToken())
             .expect((res) => {
               const commentData = res.body.data.comments[commentId];
               if (commentData.name !== name) {
@@ -113,12 +117,14 @@ describe(__filename, function () {
     });
 
     it('returns same data for read-write and read-only pad ids', function (done) {
-      createComment(padID, {}, (err, commentId) => {
-        api.get(listCommentsEndPointFor(padID, apiKey))
+      createComment(padID, {}, async (err, commentId) => {
+        api.get(listCommentsEndPointFor(padID))
+            .set('Authorization', await generateJWTToken())
             .end((err, res) => {
               const rwData = JSON.stringify(res.body.data);
-              readOnlyId(padID, (err, roPadId) => {
-                api.get(listCommentsEndPointFor(roPadId, apiKey))
+              readOnlyId(padID, async (err, roPadId) => {
+                api.get(listCommentsEndPointFor(roPadId))
+                    .set('Authorization', await generateJWTToken())
                     .expect((res) => {
                       const roData = JSON.stringify(res.body.data);
                       if (roData !== rwData) {
@@ -144,53 +150,53 @@ describe(__filename, function () {
       });
     });
 
-    it('returns code 1 if data is missing', function (done) {
-      api.post(commentsEndPointFor(padID))
-          .field('apikey', apiKey)
+    it('returns code 1 if data is missing', async function () {
+      await api.post(commentsEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .expect(codeToBe1)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns code 1 if data is not a JSON', function (done) {
-      api.post(commentsEndPointFor(padID))
-          .field('apikey', apiKey)
+    it('returns code 1 if data is not a JSON', async function () {
+      await api.post(commentsEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .field('data', 'not a JSON')
           .expect(codeToBe1)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns code 4 if API key is missing', function (done) {
-      api.post(commentsEndPointFor(padID))
+    it('returns code 4 if authorization header is missing', async function () {
+      await api.post(commentsEndPointFor(padID))
           .field('data', commentsData())
           .expect(codeToBe4)
           .expect('Content-Type', /json/)
-          .expect(401, done);
+          .expect(401);
     });
 
-    it('returns code 4 if API key is wrong', function (done) {
-      api.post(commentsEndPointFor(padID))
-          .field('apikey', 'wrongApiKey')
+    it('returns code 4 if authorization header is wrong', async function () {
+      await api.post(commentsEndPointFor(padID))
+          .set('Authorization', 'Bearer wrongtoken')
           .field('data', commentsData())
           .expect(codeToBe4)
           .expect('Content-Type', /json/)
-          .expect(401, done);
+          .expect(401);
     });
 
-    it('returns code 0 when comment is successfully added', function (done) {
-      api.post(commentsEndPointFor(padID))
-          .field('apikey', apiKey)
+    it('returns code 0 when comment is successfully added', async function () {
+      await api.post(commentsEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .field('data', commentsData())
           .expect(codeToBe0)
           .expect('Content-Type', /json/)
-          .expect(200, done);
+          .expect(200);
     });
 
-    it('returns comment ids when comment is successfully added', function (done) {
+    it('returns comment ids when comment is successfully added', async function () {
       const twoComments = commentsData([commentData(), commentData()]);
-      api.post(commentsEndPointFor(padID))
-          .field('apikey', apiKey)
+      await api.post(commentsEndPointFor(padID))
+          .set('Authorization', await generateJWTToken())
           .field('data', twoComments)
           .expect((res) => {
             if (res.body.commentIds === undefined) {
@@ -199,16 +205,15 @@ describe(__filename, function () {
             if (res.body.commentIds.length !== 2) {
               throw new Error('Response should have two comment ids.');
             }
-          })
-          .end(done);
+          });
     });
 
     context('when pad already have comments', function () {
       it('returns only the new comment ids', function (done) {
-        createComment(padID, {}, (err, touch) => {
+        createComment(padID, {}, async (err, touch) => {
           const twoComments = commentsData([commentData(), commentData()]);
           api.post(commentsEndPointFor(padID))
-              .field('apikey', apiKey)
+              .set('Authorization', await generateJWTToken())
               .field('data', twoComments)
               .expect((res) => {
                 if (res.body.commentIds === undefined) {
@@ -302,12 +307,8 @@ describe(__filename, function () {
   });
 });
 
-const listCommentsEndPointFor = function (padID, apiKey) {
-  let extraParams = '';
-  if (apiKey) {
-    extraParams = `?apikey=${apiKey}`;
-  }
-  return commentsEndPointFor(padID) + extraParams;
+const listCommentsEndPointFor = function (padID) {
+  return commentsEndPointFor(padID);
 };
 
 const commentsData = function (comments) {

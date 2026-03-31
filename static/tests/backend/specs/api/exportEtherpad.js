@@ -6,13 +6,13 @@
 
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
+const generateJWTToken = common.generateJWTToken;
 const superagent = require('superagent');
 const fs = require('fs');
 
 // test doc
 const etherpadDoc = fs.readFileSync(`${__dirname}/test.etherpad`);
 const apiVersion = 1;
-const apiKey = common.apiKey;
 const testPadId = makeid();
 let api;
 
@@ -22,12 +22,14 @@ describe(__filename, function () {
   describe('Imports and Exports', function () {
     it('creates a new Pad, imports content to it, checks that content', async function () {
       await api.get(`${endPoint('createPad')}&padID=${testPadId}`)
+          .set('Authorization', await generateJWTToken())
           .expect(200)
           .expect('Content-Type', /json/);
     });
 
     it('imports .etherpad incuding a comment', async function () {
       await api.post(`/p/${testPadId}/import`)
+          .set('Authorization', await generateJWTToken())
           .attach('file', etherpadDoc, {
             filename: '/test.etherpad',
             contentType: 'application/etherpad',
@@ -39,6 +41,7 @@ describe(__filename, function () {
 
     it('exports .etherpad and checks it includes comments', async function () {
       await api.get(`/p/${testPadId}/export/etherpad`)
+          .set('Authorization', await generateJWTToken())
           .buffer(true).parse(superagent.parse.text)
           .expect(200)
           .expect(/comments:/);
@@ -49,7 +52,7 @@ describe(__filename, function () {
 
 const endPoint = function (point, version) {
   version = version || apiVersion;
-  return `/api/${version}/${point}?apikey=${apiKey}`;
+  return `/api/${version}/${point}?`;
 };
 
 function makeid() {
