@@ -205,10 +205,6 @@ exports.clientVars = (hook, context, cb) => {
 
 exports.expressCreateServer = (hookName, args, callback) => {
   args.app.get('/p/:pad{/:rev}/comments', async (req, res) => {
-    const fields = req.query;
-    // check the api key
-    if (!apiUtils.validateApiKey(fields, res)) return;
-
     // sanitize pad id before continuing
     const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
@@ -228,9 +224,6 @@ exports.expressCreateServer = (hookName, args, callback) => {
     const fields = await new Promise((resolve, reject) => {
       new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
-
-    // check the api key
-    if (!apiUtils.validateApiKey(fields, res)) return;
 
     // check required fields from comment data
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
@@ -263,11 +256,6 @@ exports.expressCreateServer = (hookName, args, callback) => {
   });
 
   args.app.get('/p/:pad{/:rev}/commentReplies', async (req, res) => {
-    // it's the same thing as the formidable's fields
-    const fields = req.query;
-    // check the api key
-    if (!apiUtils.validateApiKey(fields, res)) return;
-
     // sanitize pad id before continuing
     const padIdReceived = (await readOnlyManager.getIds(apiUtils.sanitizePadId(req))).padId;
 
@@ -288,9 +276,6 @@ exports.expressCreateServer = (hookName, args, callback) => {
     const fields = await new Promise((resolve, reject) => {
       new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
-
-    // check the api key
-    if (!apiUtils.validateApiKey(fields, res)) return;
 
     // check required fields from comment data
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;

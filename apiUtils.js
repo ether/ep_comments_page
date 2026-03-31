@@ -1,32 +1,7 @@
 'use strict';
 
-const absolutePaths = require('ep_etherpad-lite/node/utils/AbsolutePaths');
-const fs = require('fs');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
-
-// ensure we have an apiKey
-let apiKey = '';
-try {
-  apiKey = fs.readFileSync(absolutePaths.makeAbsolute('./APIKEY.txt'), 'utf8').trim();
-} catch (e) {
-  console.warn('Could not find APIKEY');
-}
-
-// Checks if api key is correct and prepare response if it is not.
-// Returns true if valid, false otherwise.
-const validateApiKey = (fields, res) => {
-  let valid = true;
-
-  const apiKeyReceived = fields.apikey || fields.api_key;
-  if (apiKeyReceived !== apiKey) {
-    res.statusCode = 401;
-    res.json({code: 4, message: 'no or wrong API Key', data: null});
-    valid = false;
-  }
-
-  return valid;
-};
 
 const validateRequiredField =
   (originalFields, fieldName) => typeof originalFields[fieldName] !== 'undefined';
@@ -70,7 +45,6 @@ const broadcastUrlFor = (endPoint) => {
 
 /* ********** Available functions/values: ********** */
 
-exports.validateApiKey = validateApiKey;
 exports.validateRequiredFields = validateRequiredFields;
 exports.sanitizePadId = sanitizePadId;
 exports.broadcastUrlFor = broadcastUrlFor;
