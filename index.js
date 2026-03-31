@@ -17,8 +17,8 @@ exports.exportEtherpadAdditionalContent = (hookName, context, callback) => callb
 
 exports.padRemove = async (hookName, context) => {
   await Promise.all([
-    commentManager.deleteCommentReplies(context.padID),
-    commentManager.deleteComments(context.padID),
+    commentManager.deleteCommentReplies(context.pad.id),
+    commentManager.deleteComments(context.pad.id),
   ]);
 };
 
