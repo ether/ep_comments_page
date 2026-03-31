@@ -204,7 +204,7 @@ exports.clientVars = (hook, context, cb) => {
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {
-  args.app.get('/p/:pad/:rev?/comments', async (req, res) => {
+  args.app.get('/p/:pad{/:rev}/comments', async (req, res) => {
     const fields = req.query;
     // check the api key
     if (!apiUtils.validateApiKey(fields, res)) return;
@@ -224,7 +224,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
     res.json({code: 0, data});
   });
 
-  args.app.post('/p/:pad/:rev?/comments', async (req, res) => {
+  args.app.post('/p/:pad{/:rev}/comments', async (req, res) => {
     const fields = await new Promise((resolve, reject) => {
       new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
@@ -262,7 +262,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
     res.json({code: 0, commentIds});
   });
 
-  args.app.get('/p/:pad/:rev?/commentReplies', async (req, res) => {
+  args.app.get('/p/:pad{/:rev}/commentReplies', async (req, res) => {
     // it's the same thing as the formidable's fields
     const fields = req.query;
     // check the api key
@@ -284,7 +284,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
     res.json({code: 0, data});
   });
 
-  args.app.post('/p/:pad/:rev?/commentReplies', async (req, res) => {
+  args.app.post('/p/:pad{/:rev}/commentReplies', async (req, res) => {
     const fields = await new Promise((resolve, reject) => {
       new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
