@@ -791,10 +791,10 @@ EpComments.prototype.getCommentData = function () {
 
 // Delete a pad comment
 EpComments.prototype.deleteComment = function (commentId) {
-  while($('iframe[name="ace_outer"]').contents().find(`#${commentId}`).length > 0){
+  while ($('iframe[name="ace_outer"]').contents().find(`#${commentId}`).length > 0) {
     $('iframe[name="ace_outer"]').contents().find(`#${commentId}`).remove();
   }
-  while($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0){
+  while ($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0) {
     $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
   }
 };
