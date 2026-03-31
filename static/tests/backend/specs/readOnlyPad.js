@@ -5,7 +5,7 @@ const Changeset = require('ep_etherpad-lite/static/js/Changeset');
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
-const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const shared = require('../../../js/shared.js');
 
 describe(__filename, function () {
