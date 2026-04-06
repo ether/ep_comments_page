@@ -1,7 +1,7 @@
 'use strict';
 
-const AttributePool = require('ep_etherpad-lite/static/js/AttributePool');
-const Changeset = require('ep_etherpad-lite/static/js/Changeset');
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');

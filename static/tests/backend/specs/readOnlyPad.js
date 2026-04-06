@@ -1,7 +1,7 @@
 'use strict';
 
-const AttributePool = require('ep_etherpad-lite/static/js/AttributePool');
-const Changeset = require('ep_etherpad-lite/static/js/Changeset');
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
