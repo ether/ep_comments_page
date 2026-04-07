@@ -63,7 +63,8 @@ jobs:
         run: |
           # ep_comments_page tests use socket.io broadcasts that require
           # loadTesting mode to expose internal client APIs.
-          node -e "const fs=require('fs');const f='settings.json';const s=JSON.parse(fs.readFileSync(f,'utf8'));s.loadTest=true;fs.writeFileSync(f,JSON.stringify(s,null,2));"
+          # settings.json contains JSON5-style comments so we use sed.
+          sed -i 's/"loadTest": *false/"loadTest": true/' settings.json
       -
         name: Run the backend tests
         working-directory: ./etherpad-lite/src
