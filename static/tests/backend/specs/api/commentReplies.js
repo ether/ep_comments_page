@@ -248,7 +248,7 @@ describe(__filename, function () {
   // is started with loadTest mode enabled. We don't enable loadTest in normal
   // CI (it's only enabled in the periodic load test cron job), so skip them
   // here to keep regular PR CI green.
-  (process.env.LOAD_TEST ? describe : describe.skip)('create comment reply API broadcast', function () {
+  (process.env.LOAD_TEST ? describe : describe.skip)('create comment reply API broadcast', () => {
     let padID;
     let commentID;
     let timesMessageWasReceived;
