@@ -221,11 +221,26 @@ exports.expressCreateServer = (hookName, args, callback) => {
     res.json({code: 0, data});
   });
 
-  args.app.post('/p/:pad{/:rev}/comments', async (req, res) => {
-    if (!await apiUtils.validateAuth(req, res)) return;
-    const fields = await new Promise((resolve, reject) => {
+  // Helper that returns request fields from either req.body (when Etherpad's
+  // express body-parser middleware has already parsed JSON or urlencoded) or
+  // by parsing the raw body with Formidable (multipart/form-data uploads).
+  // Formidable v3 returns array values; flatten them so callers can use
+  // fields.data without indexing.
+  const parseRequestFields = async (req) => {
+    if (req.body && Object.keys(req.body).length > 0) return req.body;
+    const raw = await new Promise((resolve, reject) => {
       new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
     });
+    const flat = {};
+    for (const [k, v] of Object.entries(raw || {})) {
+      flat[k] = Array.isArray(v) ? v[0] : v;
+    }
+    return flat;
+  };
+
+  args.app.post('/p/:pad{/:rev}/comments', async (req, res) => {
+    if (!await apiUtils.validateAuth(req, res)) return;
+    const fields = await parseRequestFields(req);
 
     // check required fields from comment data
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
@@ -277,9 +292,7 @@ exports.expressCreateServer = (hookName, args, callback) => {
 
   args.app.post('/p/:pad{/:rev}/commentReplies', async (req, res) => {
     if (!await apiUtils.validateAuth(req, res)) return;
-    const fields = await new Promise((resolve, reject) => {
-      new Formidable().parse(req, (err, fields) => err ? reject(err) : resolve(fields));
-    });
+    const fields = await parseRequestFields(req);
 
     // check required fields from comment data
     if (!apiUtils.validateRequiredFields(fields, ['data'], res)) return;
