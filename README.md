@@ -7,7 +7,7 @@
 
 ## Installing this plugin with npm.
 ```
-npm install ep_comments_page
+pnpm run plugins install ep_comments_page
 ```
 
 ## Extra settings
