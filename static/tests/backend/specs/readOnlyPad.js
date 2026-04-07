@@ -2,6 +2,8 @@
 
 const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
 const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
+const SmartOpAssemblerModule = require('ep_etherpad-lite/static/js/SmartOpAssembler');
+const SmartOpAssembler = SmartOpAssemblerModule.SmartOpAssembler || SmartOpAssemblerModule.default || SmartOpAssemblerModule;
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
@@ -22,7 +24,7 @@ describe(__filename, function () {
     const op = Changeset.newOp(opcode);
     op.chars = 1;
     op.attribs = Changeset.makeAttribsString(opcode, attribs, apool);
-    const assem = Changeset.smartOpAssembler();
+    const assem = new SmartOpAssembler();
     assem.append(op);
     const cs = assem.toString();
     const newLen = oldLen + assem.getLengthChange();
