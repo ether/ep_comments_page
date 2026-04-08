@@ -9,9 +9,14 @@ const common = require('ep_etherpad-lite/tests/backend/common');
 const generateJWTToken = common.generateJWTToken;
 const superagent = require('superagent');
 const fs = require('fs');
+const path = require('path');
 
-// test doc
-const etherpadDoc = fs.readFileSync(`${__dirname}/test.etherpad`);
+// test doc — kept under ../../fixtures/ rather than alongside this spec
+// because etherpad-lite's mocha glob is `static/tests/backend/specs/**` (no
+// extension filter), so any non-JS file inside specs/ trips the ESM loader
+// with `ERR_UNKNOWN_FILE_EXTENSION`. Fixtures must live OUTSIDE specs/.
+const etherpadDoc = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'fixtures', 'test.etherpad'));
 const apiVersion = 1;
 const testPadId = makeid();
 let api;
