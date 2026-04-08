@@ -1,5 +1,5 @@
 [![Publish Status](https://github.com/ether/ep_comments_page/workflows/Node.js%20Package/badge.svg)](https://github.com/ether/ep_comments_page/actions/workflows/test-and-release.yml)
-[![Backend Tests Status](https://github.com/ether/ep_comments_page/workflows/Backend%20tests/badge.svg)](https://github.com/ether/ep_comments_page/actions/workflows/backend-tests.yml)
+[![Backend Tests Status](https://github.com/ether/ep_comments_page/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/ether/ep_comments_page/actions/workflows/test-and-release.yml)
 
 # Comments and annotations for Etherpad
 
