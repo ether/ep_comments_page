@@ -1,7 +1,7 @@
 {
   "description": "Adds comments on sidebar and link it to the text.  For no-skin use ep_page_view.",
   "name": "ep_comments_page",
-  "version": "11.0.4",
+  "version": "11.0.5",
   "author": {
     "name": "Nicolas Lescop",
     "email": "limplementeur@gmail.com"
@@ -31,7 +31,7 @@
     "eslint-config-etherpad": "^4.0.4",
     "socket.io-client": "^4.8.3",
     "superagent": "^10.3.0",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "lint": "eslint .",
