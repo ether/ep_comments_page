@@ -334,10 +334,10 @@ EpComments.prototype.init = async function () {
   // Enable and handle cookies
   if (padcookie.getPref('comments') === false) {
     this.padOuter.find('#comments, #commentIcons').removeClass('active');
-    $('#options-comments').attr('checked', 'unchecked');
-    $('#options-comments').attr('checked', false);
+    $('#options-comments').prop('checked', false);
+    $('#options-comments').prop('checked', false);
   } else {
-    $('#options-comments').attr('checked', 'checked');
+    $('#options-comments').prop('checked', true);
   }
 
   $('#options-comments').on('change', () => {
