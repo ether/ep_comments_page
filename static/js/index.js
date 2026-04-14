@@ -459,46 +459,47 @@ EpComments.prototype.collectComments = function (callback) {
     commentElm.css({top: commentPos});
   });
 
-  // HOVER SIDEBAR COMMENT
-  let hideCommentTimer;
-  this.container.on('mouseover', '.sidebar-comment', (e) => {
-    // highlight comment
-    clearTimeout(hideCommentTimer);
-    commentBoxes.highlightComment(e.currentTarget.id, e);
-  }).on('mouseout', '.sidebar-comment', (e) => {
-    // do not hide directly the comment, because sometime the mouse get out accidently
-    hideCommentTimer = setTimeout(() => {
-      commentBoxes.hideComment(e.currentTarget.id);
-    }, 1000);
-  });
+  // Bind event handlers only once — collectComments is called repeatedly
+  // and re-binding causes handlers to stack up (fixes #214).
+  if (!this._eventsBound) {
+    this._eventsBound = true;
+    let hideCommentTimer;
 
-  // HOVER OR CLICK THE COMMENTED TEXT IN THE EDITOR
-  // hover event
-  this.padInner.contents().on('mouseover', '.comment', function (e) {
-    if (container.is(':visible')) { // not on mobile
+    // HOVER SIDEBAR COMMENT
+    this.container.on('mouseover', '.sidebar-comment', (e) => {
       clearTimeout(hideCommentTimer);
+      commentBoxes.highlightComment(e.currentTarget.id, e);
+    }).on('mouseout', '.sidebar-comment', (e) => {
+      hideCommentTimer = setTimeout(() => {
+        commentBoxes.hideComment(e.currentTarget.id);
+      }, 1000);
+    });
+
+    // HOVER OR CLICK THE COMMENTED TEXT IN THE EDITOR
+    this.padInner.contents().on('mouseover', '.comment', function (e) {
+      if (container.is(':visible')) {
+        clearTimeout(hideCommentTimer);
+        const commentId = self.commentIdOf(e);
+        commentBoxes.highlightComment(commentId, e, $(this));
+      }
+    });
+
+    this.padInner.contents().on('click', '.comment', function (e) {
       const commentId = self.commentIdOf(e);
       commentBoxes.highlightComment(commentId, e, $(this));
-    }
-  });
+    });
 
-  // click event
-  this.padInner.contents().on('click', '.comment', function (e) {
-    const commentId = self.commentIdOf(e);
-    commentBoxes.highlightComment(commentId, e, $(this));
-  });
+    this.padInner.contents().on('mouseleave', '.comment', (e) => {
+      const commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
+      if (!commentOpenedByClickOnIcon && container.is(':visible')) {
+        hideCommentTimer = setTimeout(() => {
+          self.closeOpenedComment(e);
+        }, 1000);
+      }
+    });
 
-  this.padInner.contents().on('mouseleave', '.comment', (e) => {
-    const commentOpenedByClickOnIcon = commentIcons.isCommentOpenedByClickOnIcon();
-    // only closes comment if it was not opened by a click on the icon
-    if (!commentOpenedByClickOnIcon && container.is(':visible')) {
-      hideCommentTimer = setTimeout(() => {
-        self.closeOpenedComment(e);
-      }, 1000);
-    }
-  });
-
-  this.addListenersToCloseOpenedComment();
+    this.addListenersToCloseOpenedComment();
+  }
 
   this.setYofComments();
   if (callback) callback();
