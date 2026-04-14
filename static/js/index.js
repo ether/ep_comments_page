@@ -19,8 +19,8 @@ const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
-// eslint-disable-next-line no-redeclare
-const io = require('socket.io-client');
+const socketIoClient = require('socket.io-client');
+const io = socketIoClient.default || socketIoClient;
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
