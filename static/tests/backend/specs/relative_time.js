@@ -15,9 +15,11 @@ describe(__filename, function () {
 
   it('registers a setInterval that calls refreshRelativeDates (#154)', function () {
     // Any cadence works, but the interval must actually be scheduled so the
-    // relative-time strings update without a page reload.
-    assert(/setInterval\([^)]*refreshRelativeDates[^)]*\)/.test(src),
-        'init should call setInterval(() => this.refreshRelativeDates(), ...)');
+    // relative-time strings update without a page reload. A one-line regex
+    // can't reliably parse nested parens (`setInterval(() => ...)`), so
+    // just require the two identifiers to live in the same statement.
+    const stmt = src.match(/setInterval[\s\S]*?refreshRelativeDates[\s\S]*?\);/);
+    assert(stmt, 'init should schedule setInterval(() => this.refreshRelativeDates(), ...)');
   });
 
   it('refreshRelativeDates recomputes text from the datetime attribute (#154)',
