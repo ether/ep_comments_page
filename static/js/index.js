@@ -481,6 +481,12 @@ EpComments.prototype.collectComments = function (callback) {
     });
 
     this.padInner.contents().on('click', '.comment', function (e) {
+      // When comments are displayed as gutter icons, the user opens the
+      // comment by clicking the icon — the inline `.comment` span should
+      // behave like ordinary prose, so links inside a comment remain
+      // clickable. Previously the click handler popped up a modal
+      // intercepting the link click (#90).
+      if (clientVars.displayCommentAsIcon) return;
       const commentId = self.commentIdOf(e);
       commentBoxes.highlightComment(commentId, e, $(this));
     });
