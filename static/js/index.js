@@ -7,7 +7,6 @@
 
 
 const _ = require('underscore');
-const browser = require('ep_etherpad-lite/static/js/browser');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
@@ -351,29 +350,21 @@ EpComments.prototype.init = async function () {
   // Check to see if we should show already..
   $('#options-comments').trigger('change');
 
-  // TODO - Implement to others browser like, Microsoft Edge, Opera, IE
-  // Override  copy, cut, paste events on Google chrome and Mozilla Firefox.
-  // When an user copies a comment and selects only the span, or part of it, Google chrome
-  // does not copy the classes only the styles, for example:
-  // <comment class='comment'><span>text to be copied</span></comment>
-  // As the comment classes are not only used for styling we have to add these classes when it
-  // pastes the content
-  // The same does not occur when the user selects more than the span, for example:
-  // text<comment class='comment'><span>to be copied</span></comment>
-  if (browser.chrome || browser.firefox) {
-    this.padInner.contents().on('copy', (e) => {
-      events.addTextOnClipboard(
-          e, this.ace, this.padInner, false, this.comments, this.commentReplies);
-    });
+  // Override copy, cut, paste events so that the comment class is preserved.
+  // Chrome doesn't copy classes when only the inner span of a comment is
+  // selected, so we re-apply them on paste.
+  this.padInner.contents().on('copy', (e) => {
+    events.addTextOnClipboard(
+        e, this.ace, this.padInner, false, this.comments, this.commentReplies);
+  });
 
-    this.padInner.contents().on('cut', (e) => {
-      events.addTextOnClipboard(e, this.ace, this.padInner, true);
-    });
+  this.padInner.contents().on('cut', (e) => {
+    events.addTextOnClipboard(e, this.ace, this.padInner, true);
+  });
 
-    this.padInner.contents().on('paste', (e) => {
-      events.saveCommentsAndReplies(e);
-    });
-  }
+  this.padInner.contents().on('paste', (e) => {
+    events.saveCommentsAndReplies(e);
+  });
 };
 
 EpComments.prototype.findCommentText = function ($commentBox) {
