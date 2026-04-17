@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "eslint": "^8.57.1",
-    "eslint-config-etherpad": "^4.0.4",
+    "eslint-config-etherpad": "^4.0.5",
     "socket.io-client": "^4.8.3",
     "superagent": "^10.3.0",
     "typescript": "^6.0.2"
