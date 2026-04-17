@@ -113,6 +113,11 @@ EpComments.prototype.init = async function () {
   });
   $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
 
+  // Refresh the "N minutes ago" relative-time strings (#154). The original
+  // date is stored in the `datetime` attribute so we can recompute
+  // `fromNow()` without needing to track the cached string anywhere.
+  setInterval(() => this.refreshRelativeDates(), 60 * 1000);
+
   // On click comment icon toolbar
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
@@ -692,6 +697,19 @@ EpComments.prototype.allCommentsOnCorrectYPosition = function () {
   });
 
   return allCommentsAreCorrect;
+};
+
+// Recompute "N minutes ago" style text on every `.comment-created-at`
+// element, using the ISO timestamp stored in the element's `datetime`
+// attribute as the source of truth (#154).
+EpComments.prototype.refreshRelativeDates = function () {
+  if (this.container == null) return;
+  this.container.find('.comment-created-at[datetime]').each(function () {
+    const iso = $(this).attr('datetime');
+    if (!iso) return;
+    const next = moment(iso).fromNow();
+    if ($(this).text() !== next) $(this).text(next);
+  });
 };
 
 EpComments.prototype.localizeExistingComments = function () {
