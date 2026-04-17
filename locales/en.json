@@ -12,6 +12,7 @@
   "ep_comments_page.comments_template.accept_change.value" : "Accept Change",
   "ep_comments_page.comments_template.revert_change.value" : "Revert Change",
   "ep_comments_page.comments_template.suggested_change_from" : "Suggested change from \"{{changeFrom}}\" to \"{{changeTo}}\"",
+  "ep_comments_page.comments_template.suggested_change_from_label" : "Suggested change from",
   "ep_comments_page.comments_template.suggest_change_from" : "Suggest change from \"{{changeFrom}}\" to",
   "ep_comments_page.comments_template.to" : "To",
   "ep_comments_page.comments_template.include_suggestion" : "Include suggested change",
