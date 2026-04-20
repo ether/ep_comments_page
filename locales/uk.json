@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"DDPAT",
-			"Ice bulldog"
+			"Ice bulldog",
+			"Movses"
 		]
 	},
 	"ep_comments_page.comment": "Коментар",
@@ -18,6 +19,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Прийняти зміну",
 	"ep_comments_page.comments_template.revert_change.value": "Скасувати зміни",
 	"ep_comments_page.comments_template.suggested_change_from": "Пропонована зміна з «{{changeFrom}}» на «{{changeTo}}»",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Запропонована зміна з",
 	"ep_comments_page.comments_template.suggest_change_from": "Запропонувати зміну з «{{changeFrom}}» на",
 	"ep_comments_page.comments_template.to": "Кому:",
 	"ep_comments_page.comments_template.include_suggestion": "Включити запропоновану зміну",

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ghose"
+			"Ghose",
+			"Toliño"
 		]
 	},
 	"ep_comments_page.comment": "Comentar",
@@ -17,6 +18,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Aceptar cambio",
 	"ep_comments_page.comments_template.revert_change.value": "Rexeitar o cambio",
 	"ep_comments_page.comments_template.suggested_change_from": "Cambio suxerido de \"{{changeFrom}}\" a \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Cambio suxerido de",
 	"ep_comments_page.comments_template.suggest_change_from": "Suxerir o cambio de \"{{changeFrom}}\" a",
 	"ep_comments_page.comments_template.to": "Para",
 	"ep_comments_page.comments_template.include_suggestion": "Incluír cambio suxerido",

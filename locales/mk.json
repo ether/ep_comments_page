@@ -17,6 +17,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Прифати промена",
 	"ep_comments_page.comments_template.revert_change.value": "Отповикај промена",
 	"ep_comments_page.comments_template.suggested_change_from": "Предложена промена од „{{changeFrom}}“ во „{{changeTo}}“",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Предложена промена од",
 	"ep_comments_page.comments_template.suggest_change_from": "Предложена промена од „{{changeFrom}}“ во",
 	"ep_comments_page.comments_template.to": "На",
 	"ep_comments_page.comments_template.include_suggestion": "Вклучи предложена промена",

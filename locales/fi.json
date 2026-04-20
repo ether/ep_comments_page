@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Artnay",
-			"MITO"
+			"MITO",
+			"Wikipeedikko"
 		]
 	},
 	"ep_comments_page.comment": "Kommentoi",
@@ -17,6 +18,7 @@
 	"ep_comments_page.comments_template.from": "Lähettäjä",
 	"ep_comments_page.comments_template.accept_change.value": "Hyväksy muutos",
 	"ep_comments_page.comments_template.revert_change.value": "Peruuta muutos",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Muutosehdotus käyttäjältä",
 	"ep_comments_page.comments_template.to": "Vastaanottaja",
 	"ep_comments_page.comments_template.include_suggestion": "Sisällytä ehdotettu muutos",
 	"ep_comments_page.comments_template.comment.value": "Kommentoi",

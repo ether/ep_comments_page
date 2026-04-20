@@ -17,6 +17,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Glac leis an Athrú",
 	"ep_comments_page.comments_template.revert_change.value": "Athraigh a Chur Ar Ais",
 	"ep_comments_page.comments_template.suggested_change_from": "Athrú molta ó \"{{changeFrom}}\" go \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Athrú molta ó",
 	"ep_comments_page.comments_template.suggest_change_from": "Mol athrú ó \"{{changeFrom}}\" go",
 	"ep_comments_page.comments_template.to": "Chuig",
 	"ep_comments_page.comments_template.include_suggestion": "Cuir an t-athrú molta san áireamh",

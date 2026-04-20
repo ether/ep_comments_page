@@ -17,6 +17,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "قبول التغيير",
 	"ep_comments_page.comments_template.revert_change.value": "التراجع عن التغيير",
 	"ep_comments_page.comments_template.suggested_change_from": "التغيير المقترح من \"{{changeFrom}}\" إلى \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "التغيير المقترح من",
 	"ep_comments_page.comments_template.suggest_change_from": "اقترح التغيير من \"{{changeFrom}}\" إلى",
 	"ep_comments_page.comments_template.to": "إلى",
 	"ep_comments_page.comments_template.include_suggestion": "تضمين التغيير المقترح",
