@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"GuoPC",
 			"HellojoeAoPS",
 			"TsuyaMarisa",
 			"列维劳德"
@@ -19,6 +20,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "接受更改",
 	"ep_comments_page.comments_template.revert_change.value": "恢复更改",
 	"ep_comments_page.comments_template.suggested_change_from": "建议从“{{changeFrom}}”更改为“{{changeTo}}”",
+	"ep_comments_page.comments_template.suggested_change_from_label": "建议的更改来自",
 	"ep_comments_page.comments_template.suggest_change_from": "建议从“{{changeFrom}}”更改为",
 	"ep_comments_page.comments_template.to": "至",
 	"ep_comments_page.comments_template.include_suggestion": "包括建议的更改",

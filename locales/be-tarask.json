@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ucukor"
+		]
+	},
+	"ep_comments_page.comment": "Камэнтар",
+	"ep_comments_page.comments": "Камэнтары",
+	"ep_comments_page.delete_comment.title": "Выдаліць гэты камэнтар",
+	"ep_comments_page.edit_comment.title": "Рэдагаваць гэты камэнтар",
+	"ep_comments_page.show_comments": "Паказаць камэнтары",
+	"ep_comments_page.comments_template.suggested_change": "Прапанаваная зьмена",
+	"ep_comments_page.comments_template.from": "Ад",
+	"ep_comments_page.comments_template.accept_change.value": "Прыняць зьмены",
+	"ep_comments_page.comments_template.revert_change.value": "Адкаціць зьмены",
+	"ep_comments_page.comments_template.to": "Да",
+	"ep_comments_page.comments_template.comment.value": "Камэнтар",
+	"ep_comments_page.comments_template.cancel.value": "Скасаваць",
+	"ep_comments_page.comments_template.reply.value": "Адказаць",
+	"ep_comments_page.comments_template.reply.placeholder": "Адказаць",
+	"ep_comments_page.comments_template.edit_comment.save": "захаваць",
+	"ep_comments_page.comments_template.edit_comment.cancel": "скасаваць"
+}

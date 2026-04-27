@@ -18,6 +18,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "Accepteer wijziging",
 	"ep_comments_page.comments_template.revert_change.value": "Draai wijziging terug",
 	"ep_comments_page.comments_template.suggested_change_from": "Voorgestelde wijziging van \"{{changeFrom}}\" in \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Voorgestelde wijziging van",
 	"ep_comments_page.comments_template.suggest_change_from": "Voorgestelde wijziging van \"{{changeFrom}}\" in",
 	"ep_comments_page.comments_template.to": "Naar",
 	"ep_comments_page.comments_template.include_suggestion": "Voeg voorgestelde wijziging toe",
