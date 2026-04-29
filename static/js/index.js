@@ -769,11 +769,24 @@ EpComments.prototype.setCommentOrReplyNewText = function (commentOrReplyId, text
 };
 
 EpComments.prototype._send = async function (type, ...args) {
+  // Time-bound socket.emit so a failed/idle /comment namespace doesn't
+  // wedge plugin init forever. The init flow needs getComments and
+  // getCommentReplies to resolve so pad.plugins.ep_comments_page lands
+  // on window; if the socket is silently disconnected (e.g. namespace
+  // mounting changed across an Etherpad upgrade) the plugin would hang
+  // every pad load. After 5s, resolve with an empty payload so init
+  // completes; live comment add/remove events still flow once the
+  // socket recovers via socket.io's own reconnect logic.
   return await new Promise((resolve, reject) => {
-    this.socket.emit(type, ...args, (errj, val) => {
-      if (errj != null) return reject(Object.assign(new Error(errj.message), {name: errj.name}));
+    let settled = false;
+    const finish = (err, val) => {
+      if (settled) return;
+      settled = true;
+      if (err != null) return reject(Object.assign(new Error(err.message), {name: err.name}));
       resolve(val);
-    });
+    };
+    this.socket.emit(type, ...args, finish);
+    setTimeout(() => finish(null, {}), 5_000);
   });
 };
 

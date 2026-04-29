@@ -179,10 +179,15 @@ export const chooseToShowComments = async (
   await settings.click();
 };
 
-// Change Etherpad UI language.
+// Change Etherpad UI language. niceSelect.js wraps the language <select>
+// with a sibling .nice-select div and intercepts native change events,
+// so plain selectOption() won't actually flip the locale. Drive the
+// niceSelect dropdown the same way etherpad core's language.spec does.
 export const changeLanguageTo = async (page: Page, lang: string): Promise<void> => {
   const settings = page.locator('.buttonicon-settings');
   await settings.click();
-  await page.locator('#languagemenu').selectOption(lang);
+  const dropdown = page.locator('#languagemenu + .nice-select');
+  await dropdown.click();
+  await page.locator('.nice-select.open').locator(`[data-value=${lang}]`).click();
   await settings.click();
 };
