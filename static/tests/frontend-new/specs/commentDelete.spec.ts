@@ -7,9 +7,9 @@ import {
   aNewCommentsPad,
   enlargeScreen,
   expandSidebarComment,
-  getCommentIdOfLine,
   reopenCommentsPad,
   setPadLines,
+  waitForCommentOnLine,
 } from '../helper/comments';
 
 const textOfComment = 'original comment';
@@ -45,10 +45,13 @@ test.describe('ep_comments_page - Comment Delete', () => {
 
       const outer = await getPadOuter(page);
       const inner = await getPadBody(page);
-      const commentId = await getCommentIdOfLine(page, FIRST_LINE);
+      // Wait for the comment marker to re-attach in the inner pad before
+      // resolving its id; right after reopen the .comment span hasn't
+      // necessarily been re-applied yet.
+      const commentId = await waitForCommentOnLine(page, FIRST_LINE);
       // After a fresh load the sidebar comment is collapsed; expand it so
       // .comment-delete becomes visible.
-      await expandSidebarComment(page, commentId!);
+      await expandSidebarComment(page, commentId);
       await expect.poll(async () => outer.locator('.comment-delete').count())
           .toBeGreaterThan(0);
       await outer.locator('.comment-delete').first().click();
