@@ -156,16 +156,27 @@ export const addReplyToLine = async (
 
   if (await commentIconsEnabled(page)) {
     await o.locator(`#commentIcons #icon-${commentId}`).first().click();
+  } else {
+    // Reply form is inside .full-display-content which is display:none on
+    // the sidebar comment until it gets the .full-display class. Hover the
+    // sidebar comment to trigger commentBoxes.highlightComment, which sets
+    // it; otherwise locator.fill() times out on a hidden input.
+    await o.locator(`#${commentId}`).first().hover();
+    await expect.poll(async () =>
+      o.locator(`#${commentId}.full-display`).count()).toBeGreaterThan(0);
   }
 
-  await o.locator('.comment-content').first().fill(replyText);
+  // Scope to the reply form's input — the new-comment popup may also
+  // have a `.comment-content` element open at this point.
+  const replyForm = o.locator(`#${commentId} form.new-comment`).first();
+  await replyForm.locator('.comment-content').fill(replyText);
   if (withSuggestion) {
-    await o.locator('.label-suggestion-checkbox').first().click();
+    await replyForm.locator('.label-suggestion-checkbox').first().click();
     if (suggestionText !== undefined) {
-      await o.locator('textarea.to-value').first().fill(suggestionText);
+      await replyForm.locator('textarea.to-value').first().fill(suggestionText);
     }
   }
-  await o.locator("form.new-comment input[type='submit']").first().click();
+  await replyForm.locator("input[type='submit']").first().click();
   await expect.poll(async () => o.locator('.sidebar-comment-reply').count())
       .toBe(existing + 1);
 };
