@@ -6,6 +6,8 @@ import {
   addReplyToLine,
   aNewCommentsPad,
   enlargeScreen,
+  expandSidebarComment,
+  getCommentIdOfLine,
   reopenCommentsPad,
   setPadLines,
 } from '../helper/comments';
@@ -94,6 +96,10 @@ test.describe('ep_comments_page - Comment Edit', () => {
       // Reopen as a "new" user (fresh page load).
       await reopenCommentsPad(page, padId);
       const outer = await getPadOuter(page);
+      const commentId = await getCommentIdOfLine(page, FIRST_LINE);
+      // After a fresh load the sidebar comment is collapsed; expand it so
+      // .comment-edit becomes visible.
+      await expandSidebarComment(page, commentId!);
       await expect.poll(async () =>
         outer.locator('#comments .comment-edit').count()).toBeGreaterThan(0);
 

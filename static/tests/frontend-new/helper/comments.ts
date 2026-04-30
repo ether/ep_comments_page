@@ -181,6 +181,21 @@ export const addReplyToLine = async (
       .toBe(existing + 1);
 };
 
+// Expand a sidebar comment so its .full-display-content (containing
+// .comment-edit / .comment-delete / reply form) is visible. The plugin
+// only adds .full-display on mouseover, so any test that touches those
+// children after a fresh page load needs to call this first.
+export const expandSidebarComment = async (
+  page: Page,
+  commentId: string,
+): Promise<void> => {
+  const o = await getPadOuter(page);
+  await expect.poll(async () => o.locator(`#${commentId}`).count()).toBeGreaterThan(0);
+  await o.locator(`#${commentId}`).first().hover();
+  await expect.poll(async () =>
+    o.locator(`#${commentId}.full-display`).count()).toBeGreaterThan(0);
+};
+
 // Open Etherpad settings, toggle Show Comments to desired state, close settings.
 export const chooseToShowComments = async (
   page: Page, shouldShow: boolean,
