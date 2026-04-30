@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Dr1t jg",
+			"Tensama0415",
 			"Ykhwong",
 			"그냥기여자",
 			"아라"
@@ -20,6 +21,7 @@
 	"ep_comments_page.comments_template.accept_change.value": "변경 수락",
 	"ep_comments_page.comments_template.revert_change.value": "변경사항 되돌리기",
 	"ep_comments_page.comments_template.suggested_change_from": "\"{{changeFrom}}\"에서 \"{{changeTo}}\"(으)로 변경 제안됨",
+	"ep_comments_page.comments_template.suggested_change_from_label": "다음으로부터 변경 제안됨:",
 	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\"에서 다음으로 변경할 것으로 제안:",
 	"ep_comments_page.comments_template.to": "도착지",
 	"ep_comments_page.comments_template.include_suggestion": "제안된 변경사항 포함",
