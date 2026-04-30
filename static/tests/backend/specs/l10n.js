@@ -56,6 +56,18 @@ describe(__filename, function () {
         // The template references the new label key.
         assert(template.includes(`data-l10n-id="${labelKey}"`),
             `comments.html should reference ${labelKey} for the suggestion display label`);
+
+        // The display-suggestion block must surface the actual changeFrom /
+        // changeTo values to the user. Hiding both spans (as the original
+        // #273 fix accidentally left them) leaves "Suggested change from"
+        // followed by nothing — the user can no longer see what the
+        // suggestion is.
+        const display = template.match(/<script id="display-suggestion"[\s\S]*?<\/script>/);
+        assert(display, 'display-suggestion template must exist');
+        assert(!/class="hidden from-value"/.test(display[0]),
+            '.from-value in display-suggestion must be visible');
+        assert(!/class="hidden to-value"/.test(display[0]),
+            '.to-value in display-suggestion must be visible');
       });
 
   it('new-comment form label does not use a key with unresolved placeholders',
