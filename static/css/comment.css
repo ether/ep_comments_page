@@ -55,6 +55,8 @@ input.error, textarea.error {
 }
 .comment-actions-wrapper {
   float: right;
+  display: inline-flex;
+  gap: 4px;
 }
 
 /* COMMENT COMPACTED (Visible on right side) */
