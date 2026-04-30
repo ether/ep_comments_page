@@ -57,4 +57,30 @@ describe(__filename, function () {
         assert(template.includes(`data-l10n-id="${labelKey}"`),
             `comments.html should reference ${labelKey} for the suggestion display label`);
       });
+
+  it('new-comment form label does not use a key with unresolved placeholders',
+      function () {
+        // The new-comment template previously used `suggest_change_from`
+        // whose English value contains "{{changeFrom}}". The data-l10n-args
+        // attribute relied on jquery.tmpl substituting the selected text into
+        // valid JSON, which broke whenever the selection contained quotes or
+        // backslashes. The replacement label key must not require args.
+        const fromLabel = 'ep_comments_page.comments_template.suggest_change_from_label';
+        const toLabel = 'ep_comments_page.comments_template.suggest_change_to_label';
+        for (const key of [fromLabel, toLabel]) {
+          assert(Object.prototype.hasOwnProperty.call(en, key),
+              `expected ${key} in en.json`);
+          assert(!/\{\{/.test(en[key]),
+              `${key} must not contain {{placeholders}}; got: ${en[key]}`);
+        }
+        assert(template.includes(`data-l10n-id="${fromLabel}"`),
+            `comments.html should reference ${fromLabel} for the new-comment label`);
+        assert(template.includes(`data-l10n-id="${toLabel}"`),
+            `comments.html should reference ${toLabel} for the new-comment label`);
+
+        // The placeholder-laden key must not be referenced from the template.
+        const placeholderKey = 'ep_comments_page.comments_template.suggest_change_from';
+        assert(!template.includes(`data-l10n-id="${placeholderKey}"`),
+            'comments.html must not reference the placeholder-laden suggest_change_from key');
+      });
 });

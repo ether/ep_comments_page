@@ -14,6 +14,8 @@
   "ep_comments_page.comments_template.suggested_change_from" : "Suggested change from \"{{changeFrom}}\" to \"{{changeTo}}\"",
   "ep_comments_page.comments_template.suggested_change_from_label" : "Suggested change from",
   "ep_comments_page.comments_template.suggest_change_from" : "Suggest change from \"{{changeFrom}}\" to",
+  "ep_comments_page.comments_template.suggest_change_from_label" : "Suggest change from",
+  "ep_comments_page.comments_template.suggest_change_to_label" : "to",
   "ep_comments_page.comments_template.to" : "To",
   "ep_comments_page.comments_template.include_suggestion" : "Include suggested change",
   "ep_comments_page.comments_template.comment.value" : "Comment",

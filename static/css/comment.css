@@ -127,6 +127,16 @@ input.error, textarea.error {
   font-weight: bold;
   margin: 5px 0;
 }
+.suggestion-create .from-value {
+  display: block;
+  opacity: .8;
+  font-style: italic;
+  margin: 5px 0;
+}
+.suggestion-create .from-value:before,
+.suggestion-create .from-value:after {
+  content: '"';
+}
 .approve-suggestion-btn, .revert-suggestion-btn {
   display: block;
   margin-bottom: 10px;
