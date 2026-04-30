@@ -55,8 +55,10 @@ input.error, textarea.error {
 }
 .comment-actions-wrapper {
   float: right;
-  display: inline-flex;
-  gap: 4px;
+}
+.comment-actions-wrapper .comment-edit,
+.comment-actions-wrapper .comment-delete {
+  display: inline;
 }
 
 /* COMMENT COMPACTED (Visible on right side) */
