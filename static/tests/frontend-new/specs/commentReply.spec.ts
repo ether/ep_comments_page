@@ -20,7 +20,7 @@ const createReply = async (page: import('@playwright/test').Page, withSuggestion
   }
   await outer.locator('.comment-content').first().fill('My reply');
   if (withSuggestion) {
-    await outer.locator('.suggestion-checkbox').first().click();
+    await outer.locator('.label-suggestion-checkbox').first().click();
     await outer.locator('textarea.to-value').first().fill('My suggestion');
   }
   await outer.locator("form.new-comment input[type='submit']").first().click();
@@ -40,7 +40,7 @@ test.describe('ep_comments_page - Comment Reply', () => {
     await page.locator('.addComment').first().click();
     await page.locator('textarea.comment-content').fill('My comment');
     const outer = await getPadOuter(page);
-    await outer.locator('.suggestion-checkbox').first().click();
+    await outer.locator('.label-suggestion-checkbox').first().click();
     await outer.locator('textarea.to-value').first().fill('Change to this suggestion');
     await page.locator('.comment-buttons input[type=submit]').first().click();
     await waitForCommentOnLine(page, 0);

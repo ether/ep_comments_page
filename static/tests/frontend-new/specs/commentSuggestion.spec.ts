@@ -29,7 +29,7 @@ const openCommentFormWithSuggestion = async (
   await page.locator('.addComment').first().click();
   await expect.poll(async () =>
     page.locator('#newComment.popup-show .suggestion-checkbox').count()).toBeGreaterThan(0);
-  await page.locator('#newComment.popup-show .suggestion-checkbox').first().click();
+  await page.locator('#newComment.popup-show .label-suggestion-checkbox').first().click();
 };
 
 test.describe('ep_comments_page - Comment Suggestion', () => {

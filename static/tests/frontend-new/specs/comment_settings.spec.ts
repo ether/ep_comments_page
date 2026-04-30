@@ -35,7 +35,7 @@ test.describe('ep_comments_page - Comment settings', () => {
           await inner.locator('div').first().click({clickCount: 3});
           await page.locator('.addComment').first().click();
           await page.locator('textarea.comment-content').fill('My comment');
-          await outer.locator('.suggestion-checkbox').first().click();
+          await outer.locator('.label-suggestion-checkbox').first().click();
           await outer.locator('textarea.to-value').first().fill('Change to this suggestion');
           await page.locator('.comment-buttons input[type=submit]').first().click();
           // After creating the comment, click Add Comment again — sidebar must remain hidden.

@@ -21,7 +21,7 @@ test.describe('ep_comments_page - l10n', () => {
     await inner.locator('div').first().click({clickCount: 3});
     await page.locator('.addComment').first().click();
     await page.locator('textarea.comment-content').fill('My comment');
-    await page.locator('#newComment .suggestion-checkbox').first().click();
+    await page.locator('#newComment .label-suggestion-checkbox').first().click();
     await page.locator('textarea.to-value').fill(suggestedText);
     await page.locator('.comment-buttons input[type=submit]').first().click();
     await waitForCommentOnLine(page, 0);

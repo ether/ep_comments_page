@@ -86,7 +86,10 @@ export const fillCommentForm = async (
   const field = page.locator('textarea.comment-content');
   await field.fill(commentText);
   if (suggestion !== undefined) {
-    await page.locator('#newComment .suggestion-checkbox').first().click();
+    // Click the label (not the input): the adjacent <label> intercepts pointer
+    // events on the small native checkbox in some browsers, so click the label
+    // — which is also how a user toggles the checkbox in the UI.
+    await page.locator('#newComment .label-suggestion-checkbox').first().click();
     await page.locator('textarea.to-value').fill(suggestion);
   }
 };
@@ -157,7 +160,7 @@ export const addReplyToLine = async (
 
   await o.locator('.comment-content').first().fill(replyText);
   if (withSuggestion) {
-    await o.locator('.suggestion-checkbox').first().click();
+    await o.locator('.label-suggestion-checkbox').first().click();
     if (suggestionText !== undefined) {
       await o.locator('textarea.to-value').first().fill(suggestionText);
     }
