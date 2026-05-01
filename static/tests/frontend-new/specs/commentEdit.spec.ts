@@ -98,6 +98,9 @@ test.describe('ep_comments_page - Comment Edit', () => {
       // authorId — otherwise the edit-auth check sees the original author
       // and the test's "should not update" assertion is silently bypassed.
       await reopenCommentsPadAsFreshUser(page, padId);
+      // The iframe maxWidth tweak from beforeEach is wiped by the reload;
+      // re-apply so the sidebar column (and thus .comment-edit) is visible.
+      await enlargeScreen(page);
       const outer = await getPadOuter(page);
       // Wait for the comment marker to re-attach in the inner pad before
       // resolving its id; right after reopen the .comment span hasn't

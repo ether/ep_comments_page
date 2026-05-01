@@ -44,6 +44,9 @@ test.describe('ep_comments_page - Comment Delete', () => {
       // the original author and silently succeeds.
       await page.waitForTimeout(500);
       await reopenCommentsPadAsFreshUser(page, padId);
+      // The iframe maxWidth tweak from beforeEach is wiped by the reload;
+      // re-apply so the sidebar column is visible.
+      await enlargeScreen(page);
 
       const outer = await getPadOuter(page);
       const inner = await getPadBody(page);
