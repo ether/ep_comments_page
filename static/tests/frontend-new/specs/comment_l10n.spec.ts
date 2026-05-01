@@ -21,7 +21,7 @@ test.describe('ep_comments_page - l10n', () => {
     await inner.locator('div').first().click({clickCount: 3});
     await page.locator('.addComment').first().click();
     await page.locator('textarea.comment-content').fill('My comment');
-    await page.locator('#newComment .suggestion-checkbox').first().click();
+    await page.locator('#newComment .label-suggestion-checkbox').first().click();
     await page.locator('textarea.to-value').fill(suggestedText);
     await page.locator('.comment-buttons input[type=submit]').first().click();
     await waitForCommentOnLine(page, 0);
@@ -45,8 +45,23 @@ test.describe('ep_comments_page - l10n', () => {
     await changeLanguageTo(page, 'pt-br');
     const outer = await getPadOuter(page);
     const commentId = await getCommentIdOfLine(page, 0);
-    const text = await outer.locator(`#${commentId} .from-label`).first().textContent();
-    expect(text).toBe(`Alteração sugerida de "${commentedText}" para "${suggestedText}"`);
+    // The display-suggestion block now renders four sibling spans
+    // (from-label / from-value / to-label / to-value) instead of a single
+    // string with {{changeFrom}} / {{changeTo}} placeholders, so the
+    // assertion covers the assembled text rather than a single key.
+    //
+    // Until translatewiki syncs `suggested_change_from_label` and
+    // `suggest_change_to_label` for non-English locales, those labels fall
+    // back to English even when the page locale is pt-br (tracked in
+    // ether/ep_comments_page#379). The values themselves do not depend on
+    // locale, so we still assert they round-trip into the rendered DOM.
+    const block = outer.locator(`#${commentId} .suggestion-display`).first();
+    expect((await block.locator('.from-label').first().textContent() || '').trim())
+        .not.toBe('');
+    expect((await block.locator('.from-value').first().textContent() || '').trim())
+        .toBe(commentedText);
+    expect((await block.locator('.to-value').first().textContent() || '').trim())
+        .toBe(suggestedText);
   });
 
   test("localizes 'new comment' form when Etherpad language is changed", async ({page}) => {

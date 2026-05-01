@@ -10,15 +10,21 @@ const months = (n: number) => 4 * weeks(n);
 const years = (n: number) => 12 * months(n);
 
 // Evaluate `moment(<offsetMs from now>).fromNow()` inside the chrome window.
-// We initialise moment lazily on first call and set its 'ss' threshold to 0 to
-// match the legacy spec's `moment.relativeTimeThreshold('ss', 0)`.
+// We initialise moment lazily on first call and set its 'ss' threshold to 0
+// to match the legacy spec's `moment.relativeTimeThreshold('ss', 0)`.
+//
+// The plugin attaches its CommonJS-required moment instance to
+// window.__epcpMoment for tests (see static/js/index.js). The legacy spec
+// called `window.require(...)` directly, but the Playwright bundle no
+// longer exposes `require` on the chrome window, so we read the
+// plugin-published handle instead — sharing one instance keeps locale
+// changes from changeLanguageTo() observable in the tests.
 const initMoment = async (page: import('@playwright/test').Page) => {
+  await expect.poll(async () =>
+    page.evaluate(() => Boolean((window as any).__epcpMoment)),
+  {timeout: 10_000}).toBe(true);
   await page.evaluate(() => {
-    const w = window as any;
-    if (w.__epcpMoment) return;
-    w.__epcpMoment = w.require(
-        'ep_comments_page/static/js/moment-with-locales.min');
-    w.__epcpMoment.relativeTimeThreshold('ss', 0);
+    (window as any).__epcpMoment.relativeTimeThreshold('ss', 0);
   });
 };
 

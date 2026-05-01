@@ -101,7 +101,7 @@ test.describe('ep_comments_page - Pre-comment text mark', () => {
       if (!(await highlightSelectedTextEnabled(page))) return;
       const outer = await getPadOuter(page);
       await page.locator('textarea.comment-content').fill('My comment');
-      await outer.locator('.suggestion-checkbox').first().click();
+      await outer.locator('.label-suggestion-checkbox').first().click();
       await outer.locator('textarea.to-value').first().fill('Change to this suggestion');
       await page.locator('.comment-buttons input[type=submit]').first().click();
       await waitForCommentOnLine(page, 0);

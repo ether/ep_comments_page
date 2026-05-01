@@ -56,6 +56,10 @@ input.error, textarea.error {
 .comment-actions-wrapper {
   float: right;
 }
+.comment-actions-wrapper .comment-edit,
+.comment-actions-wrapper .comment-delete {
+  display: inline;
+}
 
 /* COMMENT COMPACTED (Visible on right side) */
 .sidebar-comment:not(.full-display) .full-display-content {
@@ -126,6 +130,16 @@ input.error, textarea.error {
   display: block;
   font-weight: bold;
   margin: 5px 0;
+}
+.suggestion-create .from-value {
+  display: block;
+  opacity: .8;
+  font-style: italic;
+  margin: 5px 0;
+}
+.suggestion-create .from-value:before,
+.suggestion-create .from-value:after {
+  content: '"';
 }
 .approve-suggestion-btn, .revert-suggestion-btn {
   display: block;

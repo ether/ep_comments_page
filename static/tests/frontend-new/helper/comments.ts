@@ -16,6 +16,23 @@ export const reopenCommentsPad = async (page: Page, padId: string): Promise<void
   await waitForCommentsInit(page);
 };
 
+// Reopen the same pad as a fresh user so a new authorId is allocated. Used
+// by the delete/edit "other user" specs which assert that one user cannot
+// modify another user's comment. Plain reopenCommentsPad reuses the same
+// session cookies (token / express_sid), so Etherpad keeps the original
+// authorId and the auth-check on delete/edit short-circuits to success.
+export const reopenCommentsPadAsFreshUser = async (
+  page: Page, padId: string,
+): Promise<void> => {
+  await page.context().clearCookies();
+  await page.evaluate(() => {
+    try { window.localStorage.clear(); } catch {}
+    try { window.sessionStorage.clear(); } catch {}
+  }).catch(() => {});
+  await goToPad(page, padId);
+  await waitForCommentsInit(page);
+};
+
 export const waitForCommentsInit = async (page: Page): Promise<void> => {
   await expect.poll(async () => page.evaluate(async () => {
     const w = window as any;
@@ -86,7 +103,10 @@ export const fillCommentForm = async (
   const field = page.locator('textarea.comment-content');
   await field.fill(commentText);
   if (suggestion !== undefined) {
-    await page.locator('#newComment .suggestion-checkbox').first().click();
+    // Click the label (not the input): the adjacent <label> intercepts pointer
+    // events on the small native checkbox in some browsers, so click the label
+    // — which is also how a user toggles the checkbox in the UI.
+    await page.locator('#newComment .label-suggestion-checkbox').first().click();
     await page.locator('textarea.to-value').fill(suggestion);
   }
 };
@@ -153,18 +173,44 @@ export const addReplyToLine = async (
 
   if (await commentIconsEnabled(page)) {
     await o.locator(`#commentIcons #icon-${commentId}`).first().click();
+  } else {
+    // Reply form is inside .full-display-content which is display:none on
+    // the sidebar comment until it gets the .full-display class. Hover the
+    // sidebar comment to trigger commentBoxes.highlightComment, which sets
+    // it; otherwise locator.fill() times out on a hidden input.
+    await o.locator(`#${commentId}`).first().hover();
+    await expect.poll(async () =>
+      o.locator(`#${commentId}.full-display`).count()).toBeGreaterThan(0);
   }
 
-  await o.locator('.comment-content').first().fill(replyText);
+  // Scope to the reply form's input — the new-comment popup may also
+  // have a `.comment-content` element open at this point.
+  const replyForm = o.locator(`#${commentId} form.new-comment`).first();
+  await replyForm.locator('.comment-content').fill(replyText);
   if (withSuggestion) {
-    await o.locator('.suggestion-checkbox').first().click();
+    await replyForm.locator('.label-suggestion-checkbox').first().click();
     if (suggestionText !== undefined) {
-      await o.locator('textarea.to-value').first().fill(suggestionText);
+      await replyForm.locator('textarea.to-value').first().fill(suggestionText);
     }
   }
-  await o.locator("form.new-comment input[type='submit']").first().click();
+  await replyForm.locator("input[type='submit']").first().click();
   await expect.poll(async () => o.locator('.sidebar-comment-reply').count())
       .toBe(existing + 1);
+};
+
+// Expand a sidebar comment so its .full-display-content (containing
+// .comment-edit / .comment-delete / reply form) is visible. The plugin
+// only adds .full-display on mouseover, so any test that touches those
+// children after a fresh page load needs to call this first.
+export const expandSidebarComment = async (
+  page: Page,
+  commentId: string,
+): Promise<void> => {
+  const o = await getPadOuter(page);
+  await expect.poll(async () => o.locator(`#${commentId}`).count()).toBeGreaterThan(0);
+  await o.locator(`#${commentId}`).first().hover();
+  await expect.poll(async () =>
+    o.locator(`#${commentId}.full-display`).count()).toBeGreaterThan(0);
 };
 
 // Open Etherpad settings, toggle Show Comments to desired state, close settings.

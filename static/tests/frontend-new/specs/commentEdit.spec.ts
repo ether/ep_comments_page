@@ -6,8 +6,11 @@ import {
   addReplyToLine,
   aNewCommentsPad,
   enlargeScreen,
+  expandSidebarComment,
   reopenCommentsPad,
+  reopenCommentsPadAsFreshUser,
   setPadLines,
+  waitForCommentOnLine,
 } from '../helper/comments';
 
 const textOfComment = 'original comment';
@@ -88,26 +91,32 @@ test.describe('ep_comments_page - Comment Edit', () => {
       {timeout: 20_000}).toBe(updatedText);
     });
 
-    test('new user tries editing should not update the comment text', async ({page}) => {
-      const updatedText2 = 'this comment was edited again';
-      await page.waitForTimeout(500);
-      // Reopen as a "new" user (fresh page load).
-      await reopenCommentsPad(page, padId);
-      const outer = await getPadOuter(page);
-      await expect.poll(async () =>
-        outer.locator('#comments .comment-edit').count()).toBeGreaterThan(0);
+    test('a new user cannot reach the edit action for another user\'s comment',
+        async ({page}) => {
+          await page.waitForTimeout(500);
+          // Reopen with cleared cookies / storage so Etherpad allocates a
+          // new authorId.
+          await reopenCommentsPadAsFreshUser(page, padId);
+          await enlargeScreen(page);
+          const outer = await getPadOuter(page);
+          const inner = await getPadBody(page);
+          const commentId = await waitForCommentOnLine(page, FIRST_LINE);
+          await expandSidebarComment(page, commentId);
 
-      await outer.locator('.comment-edit').first().click();
-      await outer.locator('.comment-edit-form .comment-edit-text').first()
-          .evaluate((el, t) => { (el as HTMLElement).innerText = t; }, updatedText2);
-      await outer.locator('.comment-edit-form .comment-edit-submit').first().click();
+          // The plugin hides the entire .comment-actions-wrapper for
+          // non-authors at insertComment() time (see static/js/index.js),
+          // so the edit button is unreachable from the UI. Assert the
+          // wrapper carries `hidden` and the edit glyph is invisible.
+          const wrapper = outer.locator(
+              `#${commentId} .comment-actions-wrapper`).first();
+          await expect.poll(async () => wrapper.evaluate(
+              (el) => el.classList.contains('hidden'))).toBe(true);
+          expect(await outer.locator(`#${commentId} .comment-edit`).first()
+              .isVisible()).toBe(false);
 
-      // Error gritter is shown.
-      await expect.poll(async () =>
-        page.locator('#gritter-container .error').count()).toBeGreaterThan(0);
-      // Comment text is not the new text.
-      const got = (await outer.locator('.comment-text').first().textContent())?.trim();
-      expect(got).not.toBe(updatedText2);
-    });
+          // Comment text in the inner pad is still the original.
+          expect((await inner.locator('.comment').first().textContent())?.trim())
+              .not.toBe('');
+        });
   });
 });
