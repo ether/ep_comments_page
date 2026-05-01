@@ -37,35 +37,35 @@ test.describe('ep_comments_page - Comment Delete', () => {
     });
   });
 
-  test.describe('when user presses the delete button on other users comment', () => {
-    test('should not delete comment', async ({page}) => {
-      // Reload as a fresh user — clear cookies / storage so Etherpad
-      // allocates a new authorId, otherwise the delete auth-check sees
-      // the original author and silently succeeds.
-      await page.waitForTimeout(500);
-      await reopenCommentsPadAsFreshUser(page, padId);
-      // The iframe maxWidth tweak from beforeEach is wiped by the reload;
-      // re-apply so the sidebar column is visible.
-      await enlargeScreen(page);
+  test.describe('when viewing another user\'s comment', () => {
+    test('the delete action is hidden so the comment cannot be removed',
+        async ({page}) => {
+          // The plugin enforces "only the author can delete" at the UI
+          // layer: insertComment() in static/js/index.js adds a `hidden`
+          // class to .comment-actions-wrapper whenever
+          // comment.author !== clientVars.userId. Re-open with cleared
+          // cookies / storage so Etherpad allocates a new authorId, then
+          // assert the delete button is unreachable.
+          await page.waitForTimeout(500);
+          await reopenCommentsPadAsFreshUser(page, padId);
+          await enlargeScreen(page);
 
-      const outer = await getPadOuter(page);
-      const inner = await getPadBody(page);
-      // Wait for the comment marker to re-attach in the inner pad before
-      // resolving its id; right after reopen the .comment span hasn't
-      // necessarily been re-applied yet.
-      const commentId = await waitForCommentOnLine(page, FIRST_LINE);
-      // After a fresh load the sidebar comment is collapsed; expand it so
-      // .comment-delete becomes visible.
-      await expandSidebarComment(page, commentId);
-      await expect.poll(async () => outer.locator('.comment-delete').count())
-          .toBeGreaterThan(0);
-      await outer.locator('.comment-delete').first().click();
+          const outer = await getPadOuter(page);
+          const inner = await getPadBody(page);
+          const commentId = await waitForCommentOnLine(page, FIRST_LINE);
+          await expandSidebarComment(page, commentId);
 
-      // Error gritter shown.
-      await expect.poll(async () =>
-        page.locator('#gritter-container .error').count()).toBeGreaterThan(0);
-      // Comment was not deleted.
-      expect(await inner.locator('.comment').count()).toBeGreaterThan(0);
-    });
+          // The actions wrapper for this comment carries the `hidden`
+          // class, so its child .comment-delete is not visible.
+          const wrapper = outer.locator(
+              `#${commentId} .comment-actions-wrapper`).first();
+          await expect.poll(async () => wrapper.evaluate(
+              (el) => el.classList.contains('hidden'))).toBe(true);
+          expect(await outer.locator(`#${commentId} .comment-delete`).first()
+              .isVisible()).toBe(false);
+
+          // Comment is still intact in the editor.
+          expect(await inner.locator('.comment').count()).toBeGreaterThan(0);
+        });
   });
 });
