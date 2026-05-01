@@ -12,6 +12,11 @@ const commentIcons = require('ep_comments_page/static/js/commentIcons');
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
 const events = require('ep_comments_page/static/js/copyPasteEvents');
 const moment = require('ep_comments_page/static/js/moment-with-locales.min');
+// Expose the moment instance on the chrome window so frontend tests (which
+// no longer have `window.require` available in the Playwright bundle) can
+// share locale state with the plugin. Harmless in production — a single
+// read-only reference to the already-loaded module.
+if (typeof window !== 'undefined') window.__epcpMoment = moment;
 const newComment = require('ep_comments_page/static/js/newComment');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 const preCommentMark = require('ep_comments_page/static/js/preCommentMark');

@@ -8,6 +8,7 @@ import {
   enlargeScreen,
   expandSidebarComment,
   reopenCommentsPad,
+  reopenCommentsPadAsFreshUser,
   setPadLines,
   waitForCommentOnLine,
 } from '../helper/comments';
@@ -93,8 +94,10 @@ test.describe('ep_comments_page - Comment Edit', () => {
     test('new user tries editing should not update the comment text', async ({page}) => {
       const updatedText2 = 'this comment was edited again';
       await page.waitForTimeout(500);
-      // Reopen as a "new" user (fresh page load).
-      await reopenCommentsPad(page, padId);
+      // Reopen with cleared cookies / storage so Etherpad allocates a new
+      // authorId — otherwise the edit-auth check sees the original author
+      // and the test's "should not update" assertion is silently bypassed.
+      await reopenCommentsPadAsFreshUser(page, padId);
       const outer = await getPadOuter(page);
       // Wait for the comment marker to re-attach in the inner pad before
       // resolving its id; right after reopen the .comment span hasn't

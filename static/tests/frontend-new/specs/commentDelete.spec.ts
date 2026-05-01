@@ -7,7 +7,7 @@ import {
   aNewCommentsPad,
   enlargeScreen,
   expandSidebarComment,
-  reopenCommentsPad,
+  reopenCommentsPadAsFreshUser,
   setPadLines,
   waitForCommentOnLine,
 } from '../helper/comments';
@@ -39,9 +39,11 @@ test.describe('ep_comments_page - Comment Delete', () => {
 
   test.describe('when user presses the delete button on other users comment', () => {
     test('should not delete comment', async ({page}) => {
-      // Reload as a fresh user — re-opens the same pad and waits for plugin init.
+      // Reload as a fresh user — clear cookies / storage so Etherpad
+      // allocates a new authorId, otherwise the delete auth-check sees
+      // the original author and silently succeeds.
       await page.waitForTimeout(500);
-      await reopenCommentsPad(page, padId);
+      await reopenCommentsPadAsFreshUser(page, padId);
 
       const outer = await getPadOuter(page);
       const inner = await getPadBody(page);

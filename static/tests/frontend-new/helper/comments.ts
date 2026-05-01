@@ -16,6 +16,23 @@ export const reopenCommentsPad = async (page: Page, padId: string): Promise<void
   await waitForCommentsInit(page);
 };
 
+// Reopen the same pad as a fresh user so a new authorId is allocated. Used
+// by the delete/edit "other user" specs which assert that one user cannot
+// modify another user's comment. Plain reopenCommentsPad reuses the same
+// session cookies (token / express_sid), so Etherpad keeps the original
+// authorId and the auth-check on delete/edit short-circuits to success.
+export const reopenCommentsPadAsFreshUser = async (
+  page: Page, padId: string,
+): Promise<void> => {
+  await page.context().clearCookies();
+  await page.evaluate(() => {
+    try { window.localStorage.clear(); } catch {}
+    try { window.sessionStorage.clear(); } catch {}
+  }).catch(() => {});
+  await goToPad(page, padId);
+  await waitForCommentsInit(page);
+};
+
 export const waitForCommentsInit = async (page: Page): Promise<void> => {
   await expect.poll(async () => page.evaluate(async () => {
     const w = window as any;

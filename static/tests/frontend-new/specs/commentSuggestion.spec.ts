@@ -83,11 +83,15 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
     await expect.poll(async () =>
       outer.locator('.comment-container .full-display-content:visible').count())
         .toBeGreaterThan(0);
+    // The suggested ("to") text now lives in its own .to-value span, not
+    // inside the localized label — the placeholder-laden key was retired
+    // (see #379). Assert the value round-trips into that span (special
+    // chars and all) instead of substring-matching the label.
     await expect.poll(async () => {
-      const t = await outer.locator('.comment-container .comment-title-wrapper .from-label')
+      const t = await outer.locator('.comment-container .comment-title-wrapper .to-value')
           .first().textContent();
-      return t && t.includes(suggestedText);
-    }).toBe(true);
+      return (t || '').trim();
+    }).toBe(suggestedText);
 
     await outer.locator('.approve-suggestion-btn:visible').first().click();
     await expect.poll(async () =>
