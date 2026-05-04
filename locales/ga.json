@@ -19,6 +19,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "Athrú molta ó \"{{changeFrom}}\" go \"{{changeTo}}\"",
 	"ep_comments_page.comments_template.suggested_change_from_label": "Athrú molta ó",
 	"ep_comments_page.comments_template.suggest_change_from": "Mol athrú ó \"{{changeFrom}}\" go",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Mol athrú ó",
+	"ep_comments_page.comments_template.suggest_change_to_label": "go",
 	"ep_comments_page.comments_template.to": "Chuig",
 	"ep_comments_page.comments_template.include_suggestion": "Cuir an t-athrú molta san áireamh",
 	"ep_comments_page.comments_template.comment.value": "Trácht",

@@ -19,6 +19,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "Предложена промена од „{{changeFrom}}“ во „{{changeTo}}“",
 	"ep_comments_page.comments_template.suggested_change_from_label": "Предложена промена од",
 	"ep_comments_page.comments_template.suggest_change_from": "Предложена промена од „{{changeFrom}}“ во",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Предложи промена од",
+	"ep_comments_page.comments_template.suggest_change_to_label": "на",
 	"ep_comments_page.comments_template.to": "На",
 	"ep_comments_page.comments_template.include_suggestion": "Вклучи предложена промена",
 	"ep_comments_page.comments_template.comment.value": "Коментирај",

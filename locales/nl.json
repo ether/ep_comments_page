@@ -20,6 +20,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "Voorgestelde wijziging van \"{{changeFrom}}\" in \"{{changeTo}}\"",
 	"ep_comments_page.comments_template.suggested_change_from_label": "Voorgestelde wijziging van",
 	"ep_comments_page.comments_template.suggest_change_from": "Voorgestelde wijziging van \"{{changeFrom}}\" in",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Stel wijziging voor van",
+	"ep_comments_page.comments_template.suggest_change_to_label": "tot",
 	"ep_comments_page.comments_template.to": "Naar",
 	"ep_comments_page.comments_template.include_suggestion": "Voeg voorgestelde wijziging toe",
 	"ep_comments_page.comments_template.comment.value": "Opmerking",
