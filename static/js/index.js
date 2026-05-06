@@ -54,10 +54,16 @@ const EpComments = function (context) {
   // This probably needs some work for instances running on root or not on /p/
   const loc = document.location;
   const port = loc.port === '' ? (loc.protocol === 'https:' ? 443 : 80) : loc.port;
+
+  // Derive the socket.io path from the Etherpad base URL so that it works
+  // behind a reverse proxy with a path prefix (e.g. /etherpad/api/{group}/).
+  const pad = require('ep_etherpad-lite/static/js/pad');
+  const basePath = pad.baseURL || new URL('..', loc.href).pathname;
   const url = `${loc.protocol}//${loc.hostname}:${port}/comment`;
 
   this.padId = clientVars.padId;
   this.socket = io.connect(url, {
+    path: `${basePath}socket.io`,
     query: `padId=${this.padId}`,
   });
 
