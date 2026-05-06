@@ -241,16 +241,22 @@ EpComments.prototype.init = async function () {
   // Listen for include suggested change toggle
   this.container.parent().on('change', '.suggestion-checkbox', function () {
     const parentComment = $(this).closest('.comment-container');
-    const parentSuggest = $(this).closest('.comment-reply');
+    const parentSuggest = $(this).closest('.comment-reply, .new-comment-popup');
 
     if ($(this).is(':checked')) {
       const commentId = parentComment.data('commentid');
       const padOuter = $('iframe[name="ace_outer"]').contents();
       const padInner = padOuter.find('iframe[name="ace_inner"]');
 
-      const currentString = padInner.contents().find(`.${commentId}`).html();
+      const currentString = padInner.contents().find(`.${commentId}`).text();
 
       parentSuggest.find('.from-value').html(currentString);
+      // Update l10n args so the translated label shows the actual selected text
+      const fromLabel = parentSuggest.find('.suggestion-create .from-label')[0];
+      if (fromLabel) {
+        fromLabel.dataset.l10nArgs = JSON.stringify({changeFrom: currentString || ''});
+        html10n.translateElement(html10n.translations, fromLabel);
+      }
       parentSuggest.find('.suggestion').show();
     } else {
       parentSuggest.find('.suggestion').hide();
