@@ -283,6 +283,12 @@ EpComments.prototype.init = async function () {
     // Write the new pad contents
     padCommentSpan.html(newString);
 
+    // Force ace to pick up the DOM change so it is committed to the
+    // changeset and propagated to other users.
+    self.ace.callWithAce((ace) => {
+      ace.ace_fastIncorp();
+    }, 'acceptOrRevertSuggestion', true);
+
     if (isRevert) {
       // Tell all users this change was reverted
       self._send('revertChange', data);
