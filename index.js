@@ -10,6 +10,21 @@ const apiUtils = require('./apiUtils');
 const _ = require('underscore');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const {padToggle} = require('ep_plugin_helpers/pad-toggle-server');
+
+// Parallel User Settings + Pad Wide Settings checkboxes for comment-pane
+// visibility. Helper owns the storage, broadcast, enforce, and i18n wiring.
+const commentsToggle = padToggle({
+  pluginName: 'ep_comments_page',
+  settingId: 'comments',
+  l10nId: 'ep_comments_page.show_comments',
+  defaultLabel: 'Show Comments',
+  defaultEnabled: true,
+});
+
+exports.loadSettings = commentsToggle.loadSettings;
+exports.eejsBlock_mySettings = commentsToggle.eejsBlock_mySettings;
+exports.eejsBlock_padSettings = commentsToggle.eejsBlock_padSettings;
 
 let io;
 
@@ -153,11 +168,6 @@ exports.eejsBlock_dd_insert = (hookName, args, cb) => {
   return cb();
 };
 
-exports.eejsBlock_mySettings = (hookName, args, cb) => {
-  args.content += eejs.require('ep_comments_page/templates/settings.ejs');
-  return cb();
-};
-
 exports.padInitToolbar = (hookName, args, cb) => {
   const toolbar = args.toolbar;
 
@@ -192,15 +202,15 @@ exports.eejsBlock_styles = (hookName, args, cb) => {
   return cb();
 };
 
-exports.clientVars = (hook, context, cb) => {
+exports.clientVars = async (hook, context) => {
   const displayCommentAsIcon =
     settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
-  return cb({
-    displayCommentAsIcon,
-    highlightSelectedText,
-  });
+  // Merge in the padToggle helper's clientVars block so the client-side
+  // helper can read padWideSupported/initialPadEnabled/etc.
+  const helperVars = await commentsToggle.clientVars(hook, context);
+  return Object.assign({displayCommentAsIcon, highlightSelectedText}, helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {
