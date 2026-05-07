@@ -18,7 +18,11 @@ const moment = require('ep_comments_page/static/js/moment-with-locales.min');
 // read-only reference to the already-loaded module.
 if (typeof window !== 'undefined') window.__epcpMoment = moment;
 const newComment = require('ep_comments_page/static/js/newComment');
-const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+// Sub-path import keeps the client bundle clean. Importing the top-level
+// `ep_plugin_helpers` index pulls in every helper's getters; `settings` and
+// `toggle` reach server-only modules (eejs, Settings) which esbuild can't
+// resolve for the browser.
+const {padToggle} = require('ep_plugin_helpers/pad-toggle');
 const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
@@ -30,6 +34,17 @@ const cssFiles = [
   'ep_comments_page/static/css/comment.css',
   'ep_comments_page/static/css/commentIcon.css',
 ];
+
+// Same config as the server-side instance — must agree on pluginName,
+// settingId, l10nId, and defaultLabel for the checkbox ids and clientVars
+// lookup to line up.
+const commentsToggle = padToggle({
+  pluginName: 'ep_comments_page',
+  settingId: 'comments',
+  l10nId: 'ep_comments_page.show_comments',
+  defaultLabel: 'Show Comments',
+  defaultEnabled: true,
+});
 
 const UPDATE_COMMENT_LINE_POSITION_EVENT = 'updateCommentLinePosition';
 
@@ -358,25 +373,15 @@ EpComments.prototype.init = async function () {
   });
 
 
-  // Enable and handle cookies
-  if (padcookie.getPref('comments') === false) {
-    this.padOuter.find('#comments, #commentIcons').removeClass('active');
-    $('#options-comments').prop('checked', false);
-    $('#options-comments').prop('checked', false);
-  } else {
-    $('#options-comments').prop('checked', true);
-  }
-
-  $('#options-comments').on('change', () => {
-    const checked = $('#options-comments').is(':checked');
-    padcookie.setPref('comments', checked);
+  // Wire up parallel User Settings + Pad Wide Settings checkboxes. Helper
+  // owns cookie persistence, broadcast sync, and enforce; we just react to
+  // the resolved effective value.
+  const applyVisibility = (checked) => {
     this.padOuter.find('#comments, #commentIcons').toggleClass('active', checked);
     $('body').toggleClass('comments-active', checked);
     $('iframe[name="ace_outer"]').contents().find('body').toggleClass('comments-active', checked);
-  });
-
-  // Check to see if we should show already..
-  $('#options-comments').trigger('change');
+  };
+  commentsToggle.init({onChange: applyVisibility});
 
   // Override copy, cut, paste events so that the comment class is preserved.
   // Chrome doesn't copy classes when only the inner span of a comment is
@@ -1362,6 +1367,9 @@ exports.postAceInit = hooks.postAceInit;
 exports.postToolbarInit = hooks.postToolbarInit;
 exports.aceAttribsToClasses = hooks.aceAttribsToClasses;
 exports.aceEditEvent = hooks.aceEditEvent;
+// Re-export so the helper sees pad-wide broadcasts and refreshes our state
+// when another user toggles the pad-wide checkbox.
+exports.handleClientMessage_CLIENT_MESSAGE = commentsToggle.handleClientMessage_CLIENT_MESSAGE;
 
 // Given a CSS selector and a target element (in this case pad inner)
 // return the rep as an array of array of tuples IE [[[0,1],[0,2]], [[1,3],[1,5]]]
