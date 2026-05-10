@@ -1,5 +1,7 @@
 'use strict';
 
+const {template} = require('ep_plugin_helpers');
+
 const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
 const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs/');
@@ -163,10 +165,8 @@ exports.socketio = (hookName, args, cb) => {
   return cb();
 };
 
-exports.eejsBlock_dd_insert = (hookName, args, cb) => {
-  args.content += eejs.require('ep_comments_page/templates/menuButtons.ejs');
-  return cb();
-};
+exports.eejsBlock_dd_insert =
+    template('ep_comments_page/templates/menuButtons.ejs');
 
 exports.padInitToolbar = (hookName, args, cb) => {
   const toolbar = args.toolbar;
@@ -197,10 +197,8 @@ exports.eejsBlock_scripts = (hookName, args, cb) => {
   return cb();
 };
 
-exports.eejsBlock_styles = (hookName, args, cb) => {
-  args.content += eejs.require('ep_comments_page/templates/styles.html');
-  return cb();
-};
+exports.eejsBlock_styles =
+    template('ep_comments_page/templates/styles.html');
 
 exports.clientVars = async (hook, context) => {
   const displayCommentAsIcon =
