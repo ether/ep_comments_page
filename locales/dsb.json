@@ -19,6 +19,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "Naraźona změna wót \"{{changeFrom}}\" do \"{{changeTo}}\"",
 	"ep_comments_page.comments_template.suggested_change_from_label": "Naraźona změna wót",
 	"ep_comments_page.comments_template.suggest_change_from": "Změnu naraźiś wót \"{{changeFrom}}\" do",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Změnu naraźiś wót",
+	"ep_comments_page.comments_template.suggest_change_to_label": "do",
 	"ep_comments_page.comments_template.to": "Do",
 	"ep_comments_page.comments_template.include_suggestion": "Naraźonu změnu zapśimjeś",
 	"ep_comments_page.comments_template.comment.value": "Komentar",

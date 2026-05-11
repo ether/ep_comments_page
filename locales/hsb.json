@@ -19,6 +19,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "Namjetowana změna wot \"{{changeFrom}}\" do \"{{changeTo}}\"",
 	"ep_comments_page.comments_template.suggested_change_from_label": "Namjetowana změna wot",
 	"ep_comments_page.comments_template.suggest_change_from": "Změnu namjetować wot \"{{changeFrom}}\" do",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Změnu namjetować z",
+	"ep_comments_page.comments_template.suggest_change_to_label": "do",
 	"ep_comments_page.comments_template.to": "Do",
 	"ep_comments_page.comments_template.include_suggestion": "Namjetowanu změnu zapřijeć",
 	"ep_comments_page.comments_template.comment.value": "Komentar",
