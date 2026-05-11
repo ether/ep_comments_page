@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "cheerio": "^1.2.0",
-    "ep_plugin_helpers": "^0.5.1",
+    "ep_plugin_helpers": "^0.5.2",
     "formidable": "^3.5.4",
     "underscore": "^1.13.8"
   },
