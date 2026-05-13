@@ -653,6 +653,8 @@ EpComments.prototype.setYofComments = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]');
   const inlineComments = this.getFirstOcurrenceOfCommentIds();
   const commentsToBeShown = [];
+  let minTopOffset = 0;
+  const spacingBetweenComments = 30;
 
   $.each(inlineComments, function () {
     // classname is the ID of the comment
@@ -663,10 +665,13 @@ EpComments.prototype.setYofComments = function () {
     let topOffset = this.offsetTop;
     topOffset += parseInt(padInner.css('padding-top').split('px')[0]);
     topOffset += parseInt($(this).css('padding-top').split('px')[0]);
+    const commentHeight = commentEle.outerHeight() || 0;
+    const adjustedTopOffset = Math.max(topOffset, minTopOffset);
+    minTopOffset = adjustedTopOffset + commentHeight + spacingBetweenComments;
 
     if (commentId) {
       // adjust outer comment...
-      commentBoxes.adjustTopOf(commentId[1], topOffset);
+      commentBoxes.adjustTopOf(commentId[1], adjustedTopOffset);
       // ... and adjust icons too
       commentIcons.adjustTopOf(commentId[1], topOffset);
 
