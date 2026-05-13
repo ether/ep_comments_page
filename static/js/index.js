@@ -143,10 +143,14 @@ EpComments.prototype.init = async function () {
   // `fromNow()` without needing to track the cached string anywhere.
   setInterval(() => this.refreshRelativeDates(), 60 * 1000);
 
+  // Cache the toolbar button element so it can be toggled efficiently in
+  // aceEditEvent (which fires on every keystroke / selection change).
+  this.$addCommentBtn = $('.addComment');
+
   // On click comment icon toolbar
-  $('.addComment').on('click', (e) => {
+  this.$addCommentBtn.on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
-    if ($('.addComment').hasClass('disabled')) return;
+    if (this.$addCommentBtn.hasClass('disabled')) return;
     this.displayNewCommentForm();
   });
 
@@ -1039,7 +1043,8 @@ EpComments.prototype.checkNoTextSelected = function (rep) {
 
 // Enable or disable the "Add Comment" toolbar button based on whether text is selected.
 EpComments.prototype.updateAddCommentButtonState = function (hasSelection) {
-  const $btn = $('.addComment');
+  const $btn = this.$addCommentBtn;
+  if (!$btn) return;
   const $a = $btn.find('a');
   if (hasSelection) {
     $btn.removeClass('disabled');
