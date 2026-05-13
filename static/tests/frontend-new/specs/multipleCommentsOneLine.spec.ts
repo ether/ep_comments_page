@@ -32,6 +32,7 @@ test.describe('ep_comments_page - Multiple comments on one line', () => {
         return {top: rect.top, height: rect.height};
       });
     });
+    expect(positions).toHaveLength(2);
     const sortedByTop = positions.sort((a, b) => a.top - b.top);
     expect(sortedByTop[1].top).toBeGreaterThanOrEqual(
         sortedByTop[0].top + sortedByTop[0].height);
