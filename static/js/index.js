@@ -146,6 +146,7 @@ EpComments.prototype.init = async function () {
   // On click comment icon toolbar
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
+    if ($('.addComment').hasClass('disabled')) return;
     this.displayNewCommentForm();
   });
 
@@ -1036,6 +1037,19 @@ EpComments.prototype.checkNoTextSelected = function (rep) {
   return noTextSelected;
 };
 
+// Enable or disable the "Add Comment" toolbar button based on whether text is selected.
+EpComments.prototype.updateAddCommentButtonState = function (hasSelection) {
+  const $btn = $('.addComment');
+  const $a = $btn.find('a');
+  if (hasSelection) {
+    $btn.removeClass('disabled');
+    $a.removeAttr('aria-disabled');
+  } else {
+    $btn.addClass('disabled');
+    $a.attr('aria-disabled', 'true');
+  }
+};
+
 // Create form to add comment
 EpComments.prototype.createNewCommentFormIfDontExist = function (rep) {
   const data = this.getCommentData();
@@ -1295,6 +1309,9 @@ const hooks = {
     await Comments.initDone;
     pad.plugins.ep_comments_page = Comments;
 
+    // Start with the button disabled — no text is selected on load.
+    Comments.updateAddCommentButtonState(false);
+
     if (!$('#editorcontainerbox').hasClass('flex-layout')) {
       $.gritter.add({
         title: 'Error',
@@ -1342,6 +1359,14 @@ const hooks = {
           pad.plugins.ep_comments_page.collectCommentReplies();
           pad.plugins.ep_comments_page.shouldCollectComment = false;
         });
+      }
+
+      // Update toolbar button enabled/disabled state based on whether text is selected.
+      const rep = context.rep;
+      if (rep) {
+        const hasSelection = rep.selStart[0] !== rep.selEnd[0] ||
+                             rep.selStart[1] !== rep.selEnd[1];
+        pad.plugins.ep_comments_page.updateAddCommentButtonState(hasSelection);
       }
     }
     return;
