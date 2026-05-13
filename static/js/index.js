@@ -1370,8 +1370,8 @@ const hooks = {
       // Update toolbar button enabled/disabled state based on whether text is selected.
       const rep = context.rep;
       if (rep) {
-        pad.plugins.ep_comments_page.updateAddCommentButtonState(
-            !pad.plugins.ep_comments_page.checkNoTextSelected(rep));
+        const ep = pad.plugins.ep_comments_page;
+        ep.updateAddCommentButtonState(!ep.checkNoTextSelected(rep));
       }
     }
     return;

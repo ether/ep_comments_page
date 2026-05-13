@@ -26,6 +26,7 @@ test.describe('ep_comments_page - New comment', () => {
 
 test.describe('ep_comments_page - Add Comment button disabled state', () => {
   test.beforeEach(async ({page}) => {
+    // aNewCommentsPad waits for the plugin to initialise, which can take up to 60s.
     test.setTimeout(60_000);
   });
 
@@ -36,8 +37,7 @@ test.describe('ep_comments_page - Add Comment button disabled state', () => {
         (el: Element) => el.classList.contains('disabled')
       )
     ).toBe(true);
-    const ariaDisabled = await page.locator('.addComment a').first()
-        .getAttribute('aria-disabled');
+    const ariaDisabled = await page.locator('.addComment a').first().getAttribute('aria-disabled');
     expect(ariaDisabled).toBe('true');
   });
 
@@ -53,8 +53,7 @@ test.describe('ep_comments_page - Add Comment button disabled state', () => {
         (el: Element) => el.classList.contains('disabled')
       )
     ).toBe(false);
-    const ariaDisabled = await page.locator('.addComment a').first()
-        .getAttribute('aria-disabled');
+    const ariaDisabled = await page.locator('.addComment a').first().getAttribute('aria-disabled');
     expect(ariaDisabled).toBeNull();
   });
 
