@@ -146,6 +146,7 @@ EpComments.prototype.init = async function () {
   // Cache the toolbar button element so it can be toggled efficiently in
   // aceEditEvent (which fires on every keystroke / selection change).
   this.$addCommentBtn = $('.addComment');
+  this.$addCommentBtnLink = this.$addCommentBtn.find('a');
 
   // On click comment icon toolbar
   this.$addCommentBtn.on('click', (e) => {
@@ -1044,8 +1045,8 @@ EpComments.prototype.checkNoTextSelected = function (rep) {
 // Enable or disable the "Add Comment" toolbar button based on whether text is selected.
 EpComments.prototype.updateAddCommentButtonState = function (hasSelection) {
   const $btn = this.$addCommentBtn;
+  const $a = this.$addCommentBtnLink;
   if (!$btn) return;
-  const $a = $btn.find('a');
   if (hasSelection) {
     $btn.removeClass('disabled');
     $a.removeAttr('aria-disabled');
@@ -1369,9 +1370,8 @@ const hooks = {
       // Update toolbar button enabled/disabled state based on whether text is selected.
       const rep = context.rep;
       if (rep) {
-        const hasSelection = rep.selStart[0] !== rep.selEnd[0] ||
-                             rep.selStart[1] !== rep.selEnd[1];
-        pad.plugins.ep_comments_page.updateAddCommentButtonState(hasSelection);
+        pad.plugins.ep_comments_page.updateAddCommentButtonState(
+            !pad.plugins.ep_comments_page.checkNoTextSelected(rep));
       }
     }
     return;
