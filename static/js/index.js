@@ -143,9 +143,15 @@ EpComments.prototype.init = async function () {
   // `fromNow()` without needing to track the cached string anywhere.
   setInterval(() => this.refreshRelativeDates(), 60 * 1000);
 
+  // Cache the toolbar button element so it can be toggled efficiently in
+  // aceEditEvent (which fires on every keystroke / selection change).
+  this.$addCommentBtn = $('.addComment');
+  this.$addCommentBtnLink = this.$addCommentBtn.find('a');
+
   // On click comment icon toolbar
-  $('.addComment').on('click', (e) => {
+  this.$addCommentBtn.on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
+    if (this.$addCommentBtn.hasClass('disabled')) return;
     this.displayNewCommentForm();
   });
 
@@ -1036,6 +1042,20 @@ EpComments.prototype.checkNoTextSelected = function (rep) {
   return noTextSelected;
 };
 
+// Enable or disable the "Add Comment" toolbar button based on whether text is selected.
+EpComments.prototype.updateAddCommentButtonState = function (hasSelection) {
+  const $btn = this.$addCommentBtn;
+  const $a = this.$addCommentBtnLink;
+  if (!$btn) return;
+  if (hasSelection) {
+    $btn.removeClass('disabled');
+    $a.removeAttr('aria-disabled');
+  } else {
+    $btn.addClass('disabled');
+    $a.attr('aria-disabled', 'true');
+  }
+};
+
 // Create form to add comment
 EpComments.prototype.createNewCommentFormIfDontExist = function (rep) {
   const data = this.getCommentData();
@@ -1295,6 +1315,9 @@ const hooks = {
     await Comments.initDone;
     pad.plugins.ep_comments_page = Comments;
 
+    // Start with the button disabled — no text is selected on load.
+    Comments.updateAddCommentButtonState(false);
+
     if (!$('#editorcontainerbox').hasClass('flex-layout')) {
       $.gritter.add({
         title: 'Error',
@@ -1342,6 +1365,13 @@ const hooks = {
           pad.plugins.ep_comments_page.collectCommentReplies();
           pad.plugins.ep_comments_page.shouldCollectComment = false;
         });
+      }
+
+      // Update toolbar button enabled/disabled state based on whether text is selected.
+      const rep = context.rep;
+      if (rep) {
+        const ep = pad.plugins.ep_comments_page;
+        ep.updateAddCommentButtonState(!ep.checkNoTextSelected(rep));
       }
     }
     return;

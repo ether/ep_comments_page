@@ -222,3 +222,12 @@ input.error, textarea.error {
 .hidden {
   display: none;
 }
+
+/* Disabled state for the Add Comment toolbar button */
+.addComment.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.addComment.disabled > a {
+  pointer-events: none;
+}
