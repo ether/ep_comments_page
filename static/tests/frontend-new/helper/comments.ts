@@ -94,9 +94,9 @@ export const selectLine = async (page: Page, lineIndex: number): Promise<void> =
 // Waits for the button to be enabled (i.e., text is currently selected in the editor).
 export const clickAddCommentButton = async (page: Page): Promise<void> => {
   await expect.poll(async () =>
-    !(await page.locator('.addComment').first().evaluate(
-      (el: Element) => el.classList.contains('disabled')
-    ))
+    page.locator('.addComment').first().evaluate(
+      (el: Element) => !el.classList.contains('disabled')
+    )
   ).toBe(true);
   await page.locator('.addComment').first().click();
 };
