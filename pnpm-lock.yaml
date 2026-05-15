@@ -12,8 +12,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       ep_plugin_helpers:
-        specifier: ^0.5.2
-        version: 0.5.2
+        specifier: ^0.5.3
+        version: 0.5.3
       formidable:
         specifier: ^3.5.4
         version: 3.5.4
@@ -499,8 +499,8 @@ packages:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
-  ep_plugin_helpers@0.5.2:
-    resolution: {integrity: sha512-6M0gYqRTaF2SnTvV1OiqOZQ4B37ZHL0Zjoz3/eOIAXeCEBA4jId62uz9uboLs87Qcfae7eirDYWpdir5u5zkEQ==}
+  ep_plugin_helpers@0.5.3:
+    resolution: {integrity: sha512-L/8ALIvQYUcwzC2ZUdkC5Vy50TQ4N41t8ektL/pVDOuvU593YwD8kLXNVa/9LFTccOPmTugub53VdFXUDLl0ug==}
     engines: {node: '>=18.0.0'}
 
   es-abstract@1.24.2:
@@ -1979,7 +1979,7 @@ snapshots:
 
   entities@7.0.1: {}
 
-  ep_plugin_helpers@0.5.2: {}
+  ep_plugin_helpers@0.5.3: {}
 
   es-abstract@1.24.2:
     dependencies:
