@@ -69,6 +69,19 @@ jobs:
       - name: Create settings.json
         working-directory: ./etherpad-lite
         run: cp ./src/tests/settings.json settings.json
+      # Etherpad v2.7.x added a "severely outdated" version-badge that polls
+      # GitHub for the latest release and renders an absolutely-positioned
+      # banner at top-right when the running core is a full major behind.
+      # Now that 3.x is tagged on GitHub, this matrix cell (core v2.7.3)
+      # sees latest=3.x, paints the banner, and the banner intercepts
+      # pointer events on #chaticon — every chat-related Playwright test
+      # times out. Set updates.tier=off so /api/version-status is never
+      # registered and the badge stays hidden. Harmless no-op on cores
+      # without the updater (older tags, develop with tier already off).
+      - name: Disable updater poll in test settings
+        working-directory: ./etherpad-lite
+        run: |
+          node -e 'const fs=require("fs");const s=JSON.parse(fs.readFileSync("settings.json","utf8"));s.updates={...(s.updates||{}),tier:"off"};fs.writeFileSync("settings.json",JSON.stringify(s,null,2));'
       - name: Run the frontend tests
         working-directory: ./etherpad-lite
         shell: bash
