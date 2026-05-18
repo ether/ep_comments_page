@@ -23,6 +23,8 @@
 	"ep_comments_page.comments_template.suggested_change_from": "\"{{changeFrom}}\"에서 \"{{changeTo}}\"(으)로 변경 제안됨",
 	"ep_comments_page.comments_template.suggested_change_from_label": "다음으로부터 변경 제안됨:",
 	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\"에서 다음으로 변경할 것으로 제안:",
+	"ep_comments_page.comments_template.suggest_change_from_label": "다음으로부터 변경 제안됨",
+	"ep_comments_page.comments_template.suggest_change_to_label": "받는이",
 	"ep_comments_page.comments_template.to": "도착지",
 	"ep_comments_page.comments_template.include_suggestion": "제안된 변경사항 포함",
 	"ep_comments_page.comments_template.comment.value": "의견",
