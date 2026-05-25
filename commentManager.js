@@ -2,11 +2,11 @@
 
 const _ = require('underscore');
 const db = require('ep_etherpad-lite/node/db/DB');
-const log4js = require('ep_etherpad-lite/node_modules/log4js');
+const {createLogger} = require('ep_plugin_helpers/logger');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const shared = require('./static/js/shared');
 
-const logger = log4js.getLogger('ep_comments_page');
+const logger = createLogger('ep_comments_page');
 
 exports.getComments = async (padId) => {
   // Not sure if we will encouter race conditions here..  Be careful.
