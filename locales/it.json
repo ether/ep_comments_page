@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Ajeje Brazorf",
+			"Albano",
 			"Beta16"
 		]
 	},
@@ -18,7 +19,9 @@
 	"ep_comments_page.comments_template.accept_change.value": "Accetta modifica",
 	"ep_comments_page.comments_template.revert_change.value": "Annulla modifica",
 	"ep_comments_page.comments_template.suggested_change_from": "Modifica suggerita da \"{{changeFrom}}\" a \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Modifica suggerita da",
 	"ep_comments_page.comments_template.suggest_change_from": "Suggerisci modifica da \"{{changeFrom}}\" a",
+	"ep_comments_page.comments_template.suggest_change_to_label": "a",
 	"ep_comments_page.comments_template.to": "A",
 	"ep_comments_page.comments_template.include_suggestion": "Suggerisci modfica",
 	"ep_comments_page.comments_template.comment.value": "Commenta",
