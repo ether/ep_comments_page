@@ -133,10 +133,12 @@ const injectCss = () => {
 
 const buildSidebar = () => {
   if (built) return;
+  // Retry until #editorcontainerbox exists rather than disabling permanently —
+  // postTimesliderInit can run before the timeslider DOM is fully in place.
+  const box = document.getElementById('editorcontainerbox');
+  if (!box) { window.requestAnimationFrame(buildSidebar); return; }
   built = true;
   injectCss();
-  const box = document.getElementById('editorcontainerbox');
-  if (!box) return;
   let container = document.getElementById('comments');
   if (!container) {
     container = document.createElement('div');
@@ -144,6 +146,7 @@ const buildSidebar = () => {
     box.appendChild(container);
   }
   container.classList.add('ts-comments', 'active'); // .active defeats #comments:not(.active){display:none}
+  scheduleRender();
 };
 
 const setText = (el, cls, text) => {
@@ -300,12 +303,24 @@ const commentIdOfNode = (node) => {
 };
 
 const observeContent = () => {
-  const target = document.getElementById('innerdocbody');
-  if (!target) { window.requestAnimationFrame(observeContent); return; }
-  new MutationObserver(scheduleRender).observe(target, {childList: true, subtree: true});
+  // Observe the stable scroll container, not #innerdocbody itself: the
+  // timeslider can (re)build #innerdocbody while loading the first revision, and
+  // an observer bound to the original node would miss the content — and with it
+  // the comment spans. Ignore mutations inside our own #comments sidebar so
+  // re-rendering it doesn't loop.
+  const container = document.getElementById('editorcontainerbox');
+  if (!container) { window.requestAnimationFrame(observeContent); return; }
+  new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (!(m.target instanceof Element) || !m.target.closest('#comments')) {
+        scheduleRender();
+        return;
+      }
+    }
+  }).observe(container, {childList: true, subtree: true});
   // Inverse hover: hovering commented text highlights its sidebar box.
-  target.addEventListener('mouseover', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, true); });
-  target.addEventListener('mouseout', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, false); });
+  container.addEventListener('mouseover', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, true); });
+  container.addEventListener('mouseout', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, false); });
   scheduleRender();
 };
 
@@ -314,9 +329,17 @@ exports.postTimesliderInit = async () => {
     buildSidebar();
     const padId = padIdFromUrl();
     connect(padId);
-    const res = await send('getComments', {padId});
-    comments = (res && res.comments) || {};
     observeContent();
+    // Fetch the comments now (the emit queues until the socket connects) and
+    // again on every (re)connect, so a slow initial connection can't leave the
+    // history view empty.
+    const load = async () => {
+      const res = await send('getComments', {padId});
+      comments = (res && res.comments) || {};
+      scheduleRender();
+    };
+    socket.on('connect', () => { load(); });
+    await load();
     // Live "Show Comments" toggling: in in-place history the outer pad flips
     // `comments-active` on its <body> when the user toggles, so re-render
     // whenever that class changes (render() re-resolves the preference).
@@ -325,9 +348,19 @@ exports.postTimesliderInit = async () => {
       new MutationObserver(scheduleRender)
           .observe(pb, {attributes: true, attributeFilter: ['class']});
     }
-    // Live add/delete while viewing history (best-effort, read-only).
+    // Keep the read-only view live with the same comment-mutation events the
+    // editor client listens to, so an open history view never goes stale.
     socket.on('pushAddComment', (commentId, comment) => { comments[commentId] = comment; scheduleRender(); });
     socket.on('commentDeleted', (commentId) => { delete comments[commentId]; scheduleRender(); });
+    socket.on('textCommentUpdated', (commentId, commentText) => {
+      if (comments[commentId]) { comments[commentId].text = commentText; scheduleRender(); }
+    });
+    socket.on('changeAccepted', (commentId) => {
+      if (comments[commentId]) { comments[commentId].changeAccepted = true; scheduleRender(); }
+    });
+    socket.on('changeReverted', (commentId) => {
+      if (comments[commentId]) { comments[commentId].changeAccepted = false; scheduleRender(); }
+    });
   } catch (_e) {
     // The timeslider must never break because of comments — fail silent.
   }
