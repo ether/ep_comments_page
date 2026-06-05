@@ -12,7 +12,8 @@
         "aceEditorCSS": "ep_comments_page/static/js/index",
         "aceEditEvent": "ep_comments_page/static/js/index",
         "aceInitialized": "ep_comments_page/static/js/index",
-        "handleClientMessage_CLIENT_MESSAGE": "ep_comments_page/static/js/index"
+        "handleClientMessage_CLIENT_MESSAGE": "ep_comments_page/static/js/index",
+        "postTimesliderInit": "ep_comments_page/static/js/timeslider"
       },
       "hooks": {
         "padInitToolbar": "ep_comments_page/index",
