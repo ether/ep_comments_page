@@ -19,6 +19,12 @@ through history. Suggested changes are shown too, with the original text struck
 through once the change has been accepted. Toggling **Show Comments** off hides
 the comments — both the sidebar and the inline highlight — in history as well.
 
+This works on the latest Etherpad release as well as develop. Older timeslider
+bundles can't load plugin client hooks, so the read-only viewer is injected as a
+plain script and reconstructs the comment positions from the server — no core
+update required. (Reading comments while scrubbing *in-place* history on the pad
+URL additionally needs develop's in-place history mode.)
+
 ## Extra settings
 This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
 

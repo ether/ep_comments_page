@@ -84,18 +84,20 @@ test.describe('ep_comments_page - timeslider read-only comments', () => {
     await openEmbedTimeslider(page, padId);
     await expect(page.locator('#comments .sidebar-comment')).toHaveCount(1, {timeout: 30_000});
 
-    // Scrub to the very first revision (before the commented text existed).
-    await expect.poll(() => page.evaluate(() =>
-      typeof (window as any).BroadcastSlider?.setSliderPosition === 'function')).toBe(true);
-    await page.evaluate(() => (window as any).BroadcastSlider.setSliderPosition(0));
+    // Load the empty first revision (#0). The timeslider reads the revision from
+    // the URL on load (works on every core, unlike runtime window.BroadcastSlider
+    // which only exists on develop). A bare goto to a hash-only-different URL is
+    // a same-document nav and won't re-init, so force a reload.
+    await page.goto(`${embedTimeslider(padId)}#0`);
+    await page.reload();
+    await page.locator('#innerdocbody').waitFor({timeout: 30_000});
     await expect(page.locator('#comments .sidebar-comment')).toHaveCount(0);
 
     // Back to the latest revision -> the comment returns.
-    await page.evaluate(() => {
-      const bs = (window as any).BroadcastSlider;
-      bs.setSliderPosition(bs.getSliderLength());
-    });
-    await expect(page.locator('#comments .sidebar-comment')).toHaveCount(1);
+    await page.goto(embedTimeslider(padId));
+    await page.reload();
+    await page.locator('#innerdocbody').waitFor({timeout: 30_000});
+    await expect(page.locator('#comments .sidebar-comment')).toHaveCount(1, {timeout: 30_000});
   });
 
   test('a suggested change shows from -> to, struck through when accepted', async ({page}) => {
@@ -149,9 +151,12 @@ test.describe('ep_comments_page - timeslider read-only comments', () => {
     await setPadLines(page, ['A commented passage']);
     await addCommentAndCommit(page, 0, 'note');
 
-    // In-place history: the "Show Comments" toggle lives on the outer pad.
+    // In-place history (#7659) is develop-only; the toggle lives on the outer
+    // pad and drives the mounted history iframe. Skip on cores without it.
     await page.goto(`http://localhost:9001/p/${padId}#rev/latest`);
-    await page.locator('#history-frame').waitFor({timeout: 30_000});
+    const inPlaceHistory = await page.locator('#history-frame')
+        .waitFor({timeout: 10_000}).then(() => true).catch(() => false);
+    test.skip(!inPlaceHistory, 'requires in-place history mode (Etherpad develop / 2.8+)');
     const frame = page.frameLocator('#history-frame');
     await expect(frame.locator('#comments .sidebar-comment')).toHaveCount(1, {timeout: 30_000});
 
@@ -177,6 +182,7 @@ test.describe('ep_comments_page - timeslider read-only comments', () => {
     // Open the timeslider in a second tab; its socket joins the same room.
     const ts = await context.newPage();
     await ts.goto(embedTimeslider(padId));
+    await ts.locator('#innerdocbody').waitFor({timeout: 30_000});
     await expect(ts.locator('#comments .comment-text').first())
         .toContainText('original text', {timeout: 30_000});
 

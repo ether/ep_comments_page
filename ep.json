@@ -12,8 +12,7 @@
         "aceEditorCSS": "ep_comments_page/static/js/index",
         "aceEditEvent": "ep_comments_page/static/js/index",
         "aceInitialized": "ep_comments_page/static/js/index",
-        "handleClientMessage_CLIENT_MESSAGE": "ep_comments_page/static/js/index",
-        "postTimesliderInit": "ep_comments_page/static/js/timeslider"
+        "handleClientMessage_CLIENT_MESSAGE": "ep_comments_page/static/js/index"
       },
       "hooks": {
         "padInitToolbar": "ep_comments_page/index",
@@ -27,6 +26,7 @@
         "eejsBlock_mySettings": "ep_comments_page/index",
         "eejsBlock_padSettings": "ep_comments_page/index",
         "eejsBlock_styles": "ep_comments_page/index",
+        "eejsBlock_timesliderScripts": "ep_comments_page/index",
         "loadSettings": "ep_comments_page/index",
         "clientVars": "ep_comments_page/index",
         "exportHtmlAdditionalTagsWithData": "ep_comments_page/exportHTML",
