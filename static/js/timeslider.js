@@ -46,7 +46,12 @@ const send = (type, payload) => new Promise((resolve) => {
   let done = false;
   const finish = (_err, val) => { if (!done) { done = true; resolve(val || {}); } };
   try { socket.emit(type, payload, finish); } catch (_e) { finish(null, {}); }
-  setTimeout(() => finish(null, {}), 5000); // never wedge the timeslider
+  // Safety net so a broken socket never wedges the timeslider — but generous
+  // enough to outlast a cold `/comment` namespace connect on a loaded CI
+  // runner. A 5s ceiling let the very first getComments lose that race and
+  // resolve `{}`, leaving comments permanently empty (no boxes); the server
+  // acks quickly once connected, so a comment-less pad pays nothing for this.
+  setTimeout(() => finish(null, {}), 15000);
 });
 
 // The outer pad body this timeslider is embedded in (in-place history mode),
