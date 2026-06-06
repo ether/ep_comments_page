@@ -81,7 +81,13 @@ const highlightComment = (commentId, e, editorComment) => {
     // (or pushed it past the left edge from the icon's `offset - 20`) on
     // narrow / mobile viewports (#192). max() keeps the left margin valid even
     // when the modal is wider than the container.
-    const margin = 10;
+    // Read the safe-margin from the CSS custom property so JS and CSS stay in
+    // sync (single source of truth on .comment-modal); fall back to 10px.
+    const $modal = getPadOuter().find('.comment-modal');
+    const marginProp = $modal.length
+      ? parseFloat(getComputedStyle($modal[0]).getPropertyValue('--comment-modal-margin'))
+      : NaN;
+    const margin = Number.isFinite(marginProp) ? marginProp : 10;
     const maxLeft = Math.max(margin, containerWidth - modalWitdh - margin);
     targetLeft = Math.min(Math.max(targetLeft, margin), maxLeft);
     const editorCommentHeight = editorComment ? editorComment.outerHeight(true) : 30;

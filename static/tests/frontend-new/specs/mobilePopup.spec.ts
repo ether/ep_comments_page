@@ -5,8 +5,11 @@ import {aNewCommentsPad} from '../helper/comments';
 // #192: on small / mobile viewports the comment sidebar is hidden and comments
 // open in a floating ".comment-modal" instead. The modal was positioned with
 // only a right-edge guard, so it spilled off-screen (the reported iPad bug).
-// This spec uses a narrow viewport (below the 900px sidebar breakpoint) to take
-// the modal path and asserts the popup stays fully within the viewport.
+// This spec uses a narrow viewport to take the modal path and asserts the popup
+// stays fully within the viewport. Rather than hard-coding the sidebar
+// breakpoint, it asserts the sidebar is actually hidden first, so the test
+// fails loudly (instead of silently exercising the sidebar path) if the
+// breakpoint ever changes.
 test.describe('ep_comments_page - Mobile comment popup (#192)', () => {
   const VIEWPORT = {width: 320, height: 700};
   test.use({viewport: VIEWPORT});
@@ -36,8 +39,13 @@ test.describe('ep_comments_page - Mobile comment popup (#192)', () => {
     const commentSpan = inner.locator('div').first().locator('.comment').first();
     await expect.poll(async () => commentSpan.count()).toBeGreaterThan(0);
 
-    // Tap the commented text to open the floating modal (sidebar is hidden at
-    // this width, so highlightComment takes the modal branch).
+    // Precondition: the sidebar must be hidden at this viewport so that
+    // highlightComment takes the modal branch. Assert it explicitly so a
+    // breakpoint change surfaces as a clear failure here rather than silently
+    // exercising the sidebar path.
+    await expect(outer.locator('#comments')).toBeHidden();
+
+    // Tap the commented text to open the floating modal.
     await commentSpan.click();
 
     const modal = outer.locator('.comment-modal.popup-show');
