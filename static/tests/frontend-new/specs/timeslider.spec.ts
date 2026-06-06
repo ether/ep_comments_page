@@ -100,6 +100,30 @@ test.describe('ep_comments_page - timeslider read-only comments', () => {
     await expect(page.locator('#comments .sidebar-comment')).toHaveCount(1, {timeout: 30_000});
   });
 
+  test('comment boxes carry the author-colour left-border accent (#2)', async ({page}) => {
+    const padId = await aNewCommentsPad(page);
+    await setPadLines(page, ['A coloured note line']);
+    await addCommentAndCommit(page, 0, 'note with colour');
+
+    await openEmbedTimeslider(page, padId);
+    const box = page.locator('#comments .sidebar-comment').first();
+    await expect(box).toBeVisible({timeout: 30_000});
+
+    // The author resolves to a real palette colour, so the left border must be a
+    // solid, non-transparent colour (not the reserved transparent placeholder).
+    const border = await box.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        width: cs.borderLeftWidth,
+        style: cs.borderLeftStyle,
+        color: cs.borderLeftColor,
+      };
+    });
+    expect(border.style).toBe('solid');
+    expect(parseFloat(border.width)).toBeGreaterThan(0);
+    expect(['rgba(0, 0, 0, 0)', 'transparent']).not.toContain(border.color);
+  });
+
   test('a suggested change shows from -> to, struck through when accepted', async ({page}) => {
     const padId = await aNewCommentsPad(page);
     await setPadLines(page, ['Teh quick fox']);

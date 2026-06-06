@@ -90,7 +90,7 @@
         margin: 0; z-index: 5; display: block;
       }
       @media (max-width: 1180px) { #comments.ts-comments { display: none; } }
-      #comments.ts-comments .sidebar-comment { right: 8px; cursor: default; }
+      #comments.ts-comments .sidebar-comment { right: 8px; cursor: default; border-left: 3px solid transparent; }
       #comments.ts-comments .comment-actions-wrapper,
       #comments.ts-comments .comment-reply,
       #comments.ts-comments .new-comment,
@@ -203,6 +203,28 @@
     if (comment.text && comment.text.length > 0) setText(parent, 'comment-text', comment.text);
     else setText(parent, 'comment-text default-text', 'Suggested Change');
   };
+  // Resolve a comment author's Etherpad colour (#2) — mirrors the editor's
+  // EpComments.authorColor. The current user's colour is on clientVars.userColor;
+  // other authors come from the historical author data core ships in clientVars.
+  // colorId is normally a hex string but may be a palette index. Returns null
+  // when unknown or when author colours are disabled.
+  const authorColor = (authorId) => {
+    try {
+      const cv = window.clientVars || {};
+      if (cv.showAuthorColor === false) return null;
+      let colorId = null;
+      if (authorId && authorId === cv.userId && cv.userColor != null) {
+        colorId = cv.userColor;
+      } else {
+        const ccv = cv.collab_client_vars;
+        const data = ccv && ccv.historicalAuthorData && ccv.historicalAuthorData[authorId];
+        colorId = data ? data.colorId : null;
+      }
+      if (colorId == null) return null;
+      if (typeof colorId === 'number') colorId = (cv.colorPalette || [])[colorId];
+      return colorId || null;
+    } catch (_e) { return null; }
+  };
   const relate = (commentId, on) => {
     const box = document.getElementById(commentId);
     if (box) box.classList.toggle('ts-related', on);
@@ -214,6 +236,9 @@
     el.id = commentId;
     el.dataset.commentid = commentId;
     el.className = `sidebar-comment comment-container${comment.changeAccepted ? ' change-accepted' : ''}`;
+    // #2: author-colour left-border accent, matching the editor sidebar.
+    const color = authorColor(comment.author);
+    if (color) el.style.borderLeft = `3px solid ${color}`;
     const compact = document.createElement('div');
     compact.className = 'compact-display-content';
     setText(compact, 'comment-author-name', comment.name);
