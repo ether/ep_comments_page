@@ -9,9 +9,41 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
-const _ = require('underscore');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const padManager = require('ep_etherpad-lite/node/db/PadManager');
+
+// Comment char-ranges per line for a given revision's atext. The timeslider on
+// older Etherpad cores can't run the plugin's client hooks, so it never paints
+// the `comment` class; this lets the client reconstruct those ranges and render
+// comments read-only there (issue #33). Returns {commentId: [{line, start, end}]}.
+const commentLocationsFromAText = (atext, apool) => {
+  const text = atext.text;
+  const out = {};
+  let charIdx = 0;
+  let line = 0;
+  let col = 0;
+  const opIter = Changeset.opIterator(atext.attribs);
+  while (opIter.hasNext()) {
+    const op = opIter.next();
+    let commentId = null;
+    Changeset.eachAttribNumber(op.attribs, (n) => {
+      if (apool.getAttribKey(n) === 'comment') commentId = apool.getAttribValue(n);
+    });
+    for (let i = 0; i < op.chars; i++) {
+      const ch = text[charIdx++];
+      if (ch === '\n') { line++; col = 0; continue; }
+      if (commentId) {
+        const ranges = out[commentId] || (out[commentId] = []);
+        const last = ranges[ranges.length - 1];
+        if (last && last.line === line && last.end === col) last.end = col + 1;
+        else ranges.push({line, start: col, end: col + 1});
+      }
+      col++;
+    }
+  }
+  return out;
+};
 const {padToggle} = require('ep_plugin_helpers/pad-toggle-server');
 
 // Parallel User Settings + Pad Wide Settings checkboxes for comment-pane
@@ -55,6 +87,10 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
   if (dtype !== 'USER_CHANGES') return;
   // Nothing needs to be done if the user already has write access.
   if (!padMessageHandler.sessioninfos[socket.id].readonly) return;
+  // Read-only commenting is opt-in (#8). When it's off (the default), fall
+  // through without granting permission so core's normal read-only enforcement
+  // rejects the change.
+  if (!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments)) return;
   const pool = new AttributePool().fromJsonable(apool);
   const cs = Changeset.unpack(changeset);
   const opIter = Changeset.opIterator(cs.ops);
@@ -100,6 +136,17 @@ exports.socketio = (hookName, args, cb) => {
       return await commentManager.getCommentReplies(padId);
     }));
 
+    // Where each comment's text sits at a given revision (for the timeslider).
+    socket.on('getCommentLocations', handler(async (data) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      const pad = await padManager.getPad(padId);
+      const head = pad.getHeadRevisionNumber();
+      let rev = Number(data.rev);
+      if (!Number.isInteger(rev) || rev < 0 || rev > head) rev = head;
+      const atext = await pad.getInternalRevisionAText(rev);
+      return {rev, locations: commentLocationsFromAText(atext, pad.pool)};
+    }));
+
     // On add events
     socket.on('addComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
@@ -137,14 +184,15 @@ exports.socketio = (hookName, args, cb) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-      return _.object(commentIds, comments); // {c-123:data, c-124:data}
+      // {c-123:data, c-124:data}
+      return Object.fromEntries(commentIds.map((id, i) => [id, comments[i]]));
     }));
 
     socket.on('bulkAddCommentReplies', handler(async (padId, data) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-      return _.zip(repliesId, replies);
+      return repliesId.map((id, i) => [id, replies[i]]);
     }));
 
     socket.on('updateCommentText', handler(async (data) => {
@@ -174,7 +222,9 @@ exports.padInitToolbar = (hookName, args, cb) => {
   const button = toolbar.button({
     command: 'addComment',
     localizationId: 'ep_comments_page.add_comment.title',
-    class: 'buttonicon buttonicon-comment-medical',
+    // `acl-write` lets Etherpad core hide the button on read-only pads
+    // (`.readonly .acl-write { display: none }`) — see issue #204.
+    class: 'buttonicon buttonicon-comment-medical acl-write',
   });
 
   toolbar.registerButton('addComment', button);
@@ -200,15 +250,30 @@ exports.eejsBlock_scripts = (hookName, args, cb) => {
 exports.eejsBlock_styles =
     template('ep_comments_page/templates/styles.html');
 
+// Read-only comments in the timeslider (issue #33). Injected as plain scripts
+// rather than a client hook because older timeslider bundles can't load plugin
+// hooks. socket.io's served client is loaded first so the script has a global
+// `io`. Relative paths resolve from /p/<pad>/timeslider to the site root.
+exports.eejsBlock_timesliderScripts = (hookName, args, cb) => {
+  args.content +=
+    '<script src="../../socket.io/socket.io.js"></script>' +
+    '<script src="../../static/plugins/ep_comments_page/static/js/timeslider.js"></script>';
+  return cb();
+};
+
 exports.clientVars = async (hook, context) => {
   const displayCommentAsIcon =
     settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  // #8: read-only viewers may comment only when an admin opts in (default off).
+  const allowReadonlyComments =
+    !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
   // Merge in the padToggle helper's clientVars block so the client-side
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
-  return Object.assign({displayCommentAsIcon, highlightSelectedText}, helperVars);
+  return Object.assign(
+      {displayCommentAsIcon, highlightSelectedText, allowReadonlyComments}, helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {
