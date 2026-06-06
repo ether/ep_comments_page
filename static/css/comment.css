@@ -26,6 +26,10 @@
 .sidebar-comment {
   position: absolute;
   width: 100%;
+  box-sizing: border-box;
+  /* Reserve room for the author-colour accent (#6) so commented boxes with and
+     without a known author colour stay aligned; the colour is set inline. */
+  border-left: 3px solid transparent;
 }
 
 /* WITH ICONS */
