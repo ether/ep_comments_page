@@ -205,10 +205,14 @@ exports.clientVars = async (hook, context) => {
     settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  // #12: the all-comments overview panel is on unless an admin disables it.
+  const showCommentsOverview = !(settings.ep_comments_page &&
+    settings.ep_comments_page.showCommentsOverview === false);
   // Merge in the padToggle helper's clientVars block so the client-side
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
-  return Object.assign({displayCommentAsIcon, highlightSelectedText}, helperVars);
+  return Object.assign(
+      {displayCommentAsIcon, highlightSelectedText, showCommentsOverview}, helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {
