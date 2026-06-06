@@ -6,6 +6,7 @@ const SmartOpAssemblerModule = require('ep_etherpad-lite/static/js/SmartOpAssemb
 const SmartOpAssembler = SmartOpAssemblerModule.SmartOpAssembler || SmartOpAssemblerModule.default || SmartOpAssemblerModule;
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
+const settings = require('ep_etherpad-lite/node/utils/Settings');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const shared = require('../../../js/shared.js');
@@ -57,7 +58,16 @@ describe(__filename, function () {
     pad = null;
   });
 
-  describe('comment-only changes are accepted', function () {
+  describe('comment-only changes are accepted (read-only commenting enabled)', function () {
+    // Read-only commenting is opt-in (#8); enable it so comment-only changes
+    // from a read-only session are granted permission.
+    let origSettings;
+    before(function () {
+      origSettings = settings.ep_comments_page;
+      settings.ep_comments_page = {...origSettings, allowReadonlyComments: true};
+    });
+    after(function () { settings.ep_comments_page = origSettings; });
+
     it('add/change comment attribute', async function () {
       await Promise.all([
         common.waitForAcceptCommit(socket, pad.head + 1),
@@ -79,7 +89,33 @@ describe(__filename, function () {
     });
   });
 
-  describe('other changes are rejected', function () {
+  describe('comment-only changes are rejected when read-only commenting is disabled (default)',
+      function () {
+        let origSettings;
+        before(function () {
+          origSettings = settings.ep_comments_page;
+          settings.ep_comments_page = {...origSettings, allowReadonlyComments: false};
+        });
+        after(function () { settings.ep_comments_page = origSettings; });
+
+        it('add comment attribute is rejected', async function () {
+          const head = pad.head;
+          await assert.rejects(common.sendUserChanges(
+              socket, makeUserChanges('=', [['comment', shared.generateCommentId()]])));
+          assert.equal(pad.head, head);
+        });
+      });
+
+  describe('other changes are rejected (even with read-only commenting enabled)', function () {
+    // Enable read-only commenting so these assertions prove the security
+    // boundary holds: comments are allowed, but text/format edits are not.
+    let origSettings;
+    before(function () {
+      origSettings = settings.ep_comments_page;
+      settings.ep_comments_page = {...origSettings, allowReadonlyComments: true};
+    });
+    after(function () { settings.ep_comments_page = origSettings; });
+
     const testCases = [
       {
         desc: 'keep with non-comment attrib add/change',

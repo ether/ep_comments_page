@@ -7,6 +7,27 @@
   color: orange !important;
 }
 
+/* High-contrast / forced-colors mode (e.g. Windows High Contrast Mode), #217.
+   In forced-colors mode the UA discards the fixed yellow/dark fill above, so
+   commented text becomes indistinguishable from the rest of the document, and
+   the orange open-state colour is unreadable against the highlight. Opt back
+   into author colours with the system "marked text" pair — the semantic
+   colours browsers reserve for highlighted text — so the highlight stays
+   visible and legible whatever the active high-contrast palette is, and mark
+   the open comment with an outline (which forced-colors honours) instead of a
+   colour that cannot guarantee contrast. */
+@media (forced-colors: active) {
+  #innerdocbody .ace-line .comment {
+    background-color: Mark;
+    color: MarkText;
+    forced-color-adjust: none;
+  }
+  #innerdocbody .ace-line .comment[data-open="true"] {
+    color: MarkText !important;
+    outline: 2px solid CanvasText;
+  }
+}
+
 
 /* Comment right side container */
 #comments {
@@ -59,6 +80,50 @@ input.error, textarea.error {
 .comment-actions-wrapper .comment-edit,
 .comment-actions-wrapper .comment-delete {
   display: inline;
+}
+
+/* #241: previous/next comment navigation arrows in the comment header. */
+.comment-nav-wrapper {
+  float: right;
+  margin-left: 6px;
+}
+.comment-nav-prev,
+.comment-nav-next {
+  /* A fixed, comfortably-clickable icon box. The localized label html10n writes
+     into the element is clipped/invisible (kept as the accessible name via
+     aria-label); the ‹ / › glyph is painted by ::before over the whole box. */
+  position: relative;
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  overflow: hidden;
+  white-space: nowrap;
+  color: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.comment-nav-prev:before,
+.comment-nav-next:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  line-height: 1.5em;
+  text-align: center;
+  color: #666;
+  font-size: 18px;
+  font-weight: bold;
+}
+.comment-nav-prev:hover:before,
+.comment-nav-next:hover:before {
+  color: #000;
+}
+.comment-nav-prev:before {
+  content: "\2039"; /* ‹ */
+}
+.comment-nav-next:before {
+  content: "\203A"; /* › */
 }
 
 /* COMMENT COMPACTED (Visible on right side) */
@@ -220,6 +285,16 @@ input.error, textarea.error {
 }
 .comment-modal-comment .comment-content {
   margin-top: 0 !important;
+}
+
+/* READ-ONLY: hide write-only comment actions (edit / delete) on read-only
+   pads (#112). The comment sidebar and modal live in the ace_outer iframe,
+   which does not receive core's `readonly` body class, so the plugin tags the
+   outer body with `comments-readonly` itself (see static/js/index.js). The
+   server already rejects edits/deletes from read-only sessions; this removes
+   the now-dead controls from the UI. */
+.comments-readonly .comment-actions-wrapper {
+  display: none !important;
 }
 
 /* #12/#5: all-comments overview panel (opened from the "Show all comments"
