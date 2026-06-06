@@ -164,8 +164,10 @@ EpComments.prototype.init = async function () {
     e.preventDefault(); // stops focus from being lost
     // An aria-disabled control must not be activatable by mouse or keyboard
     // (keyboard Enter/Space on the link also fires click), so don't open the
-    // form while there is no selection (#96).
-    if (this._addCommentDisabled) return;
+    // form while there is no selection (#96). Check the LIVE selection rather
+    // than the cached disabled-state, which can lag a just-made selection and
+    // would wrongly block a valid click.
+    if (!this.hasSelectionForComment()) return;
     this.displayNewCommentForm();
   });
   // Start disabled-looking: nothing is selected on load (#96). aceEditEvent
@@ -1266,6 +1268,26 @@ EpComments.prototype.navigateComment = function ($el, dir) {
   if (padOuter.find('#comments').is(':visible')) {
     commentBoxes.highlightComment(targetId);
   }
+};
+
+// True when there is a non-collapsed selection right now. Read live from ace so
+// the add-comment activation guard (#96) reflects the actual selection rather
+// than the cached, possibly-stale, disabled-state flag.
+EpComments.prototype.hasSelectionForComment = function () {
+  // Default to allowing: displayNewCommentForm reads the selection itself and
+  // bails (with a hint) when empty, so only block here when we affirmatively
+  // observe a collapsed selection — never on a read failure (#96).
+  let hasSelection = true;
+  try {
+    this.ace.callWithAce((ace) => {
+      const rep = ace.ace_getRep();
+      if (rep && rep.selStart && rep.selEnd) {
+        hasSelection =
+          rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+      }
+    }, 'hasSelectionForComment', true);
+  } catch (err) { hasSelection = true; }
+  return hasSelection;
 };
 
 EpComments.prototype.displayNewCommentForm = function () {
