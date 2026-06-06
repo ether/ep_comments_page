@@ -971,6 +971,7 @@ EpComments.prototype.hideFloatingAddCommentButton = function () {
 };
 
 EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
+  if (clientVars.floatingCommentButton === false) return;
   if (!rep || !rep.selStart || !rep.selEnd) return;
   const hasSelection =
     rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
