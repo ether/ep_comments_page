@@ -396,6 +396,14 @@ input.error, textarea.error {
   margin-right: 6px;
 }
 
+/* #96: visually mark the toolbar "Add comment" button as unavailable until
+   text is selected (commenting needs a selection). It is also not activatable
+   while disabled (see the click guard in static/js/index.js). */
+.addComment.comment-btn-disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
 /* OTHER */
 .hidden {
   display: none;

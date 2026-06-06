@@ -162,8 +162,21 @@ EpComments.prototype.init = async function () {
   // On click comment icon toolbar
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
+    // An aria-disabled control must not be activatable by mouse or keyboard
+    // (keyboard Enter/Space on the link also fires click), so don't open the
+    // form while there is no selection (#96). Check the LIVE selection rather
+    // than the cached disabled-state, which can lag a just-made selection and
+    // would wrongly block a valid click.
+    if (!this.hasSelectionForComment()) return;
     this.displayNewCommentForm();
   });
+  // Start disabled-looking: nothing is selected on load (#96). aceEditEvent
+  // keeps it in sync from here on.
+  this.$addCommentButtons = $('.addComment');
+  this._addCommentDisabled = true;
+  this._lastHasSelection = false;
+  this.$addCommentButtons.addClass('comment-btn-disabled').attr('aria-disabled', 'true');
+
   // #8: don't offer commenting to read-only viewers unless an admin enabled it.
   if (clientVars.readonly && !clientVars.allowReadonlyComments) {
     $('.addComment').hide();
@@ -1043,6 +1056,27 @@ const getXYOffsetOfRep = (rep) => {
   }
 };
 
+// #96: keep the toolbar "Add comment" button's state in sync with the
+// selection — commenting requires a non-empty selection. While disabled the
+// button is also not activatable (see the click guard above).
+EpComments.prototype.updateAddCommentButtonState = function (rep) {
+  if (!rep || !rep.selStart || !rep.selEnd) return;
+  const hasSelection =
+    rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+  // aceEditEvent is a hot hook; skip the DOM query/writes when the selection
+  // state hasn't changed since the last event (#96).
+  if (hasSelection === this._lastHasSelection) return;
+  this._lastHasSelection = hasSelection;
+  this._addCommentDisabled = !hasSelection;
+  // Reuse the cached button collection; re-query once if it wasn't ready yet.
+  if (!this.$addCommentButtons || !this.$addCommentButtons.length) {
+    this.$addCommentButtons = $('.addComment');
+  }
+  this.$addCommentButtons
+      .toggleClass('comment-btn-disabled', !hasSelection)
+      .attr('aria-disabled', String(!hasSelection));
+}
+
 // #95: floating "add comment" button anchored to the current selection.
 // Lazily build the element once, in the same container the new-comment popup
 // uses (#editorcontainerbox), so it shares the popup's coordinate space.
@@ -1234,6 +1268,26 @@ EpComments.prototype.navigateComment = function ($el, dir) {
   if (padOuter.find('#comments').is(':visible')) {
     commentBoxes.highlightComment(targetId);
   }
+};
+
+// True when there is a non-collapsed selection right now. Read live from ace so
+// the add-comment activation guard (#96) reflects the actual selection rather
+// than the cached, possibly-stale, disabled-state flag.
+EpComments.prototype.hasSelectionForComment = function () {
+  // Default to allowing: displayNewCommentForm reads the selection itself and
+  // bails (with a hint) when empty, so only block here when we affirmatively
+  // observe a collapsed selection — never on a read failure (#96).
+  let hasSelection = true;
+  try {
+    this.ace.callWithAce((ace) => {
+      const rep = ace.ace_getRep();
+      if (rep && rep.selStart && rep.selEnd) {
+        hasSelection =
+          rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+      }
+    }, 'hasSelectionForComment', true);
+  } catch (err) { hasSelection = true; }
+  return hasSelection;
 };
 
 EpComments.prototype.displayNewCommentForm = function () {
@@ -1648,10 +1702,11 @@ const hooks = {
 
     if (['setup', 'setBaseText', 'importText'].includes(eventType)) return;
 
-    // Show/position the floating "add comment" button next to the current
-    // selection (#95). aceEditEvent fires on selection changes, so this keeps
-    // the button anchored to the text and hidden when nothing is selected.
+    // aceEditEvent fires on cursor/selection changes — keep both selection-driven
+    // affordances current: the toolbar comment button's enabled-look (#96) and
+    // the floating add-comment button anchored to the selection (#95).
     if (pad.plugins.ep_comments_page) {
+      pad.plugins.ep_comments_page.updateAddCommentButtonState(context.rep);
       pad.plugins.ep_comments_page.updateFloatingAddCommentButton(context.rep);
     }
 
