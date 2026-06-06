@@ -148,6 +148,9 @@ EpComments.prototype.init = async function () {
     e.preventDefault(); // stops focus from being lost
     this.displayNewCommentForm();
   });
+  // Start disabled-looking: nothing is selected on load (#96). aceEditEvent
+  // keeps it in sync from here on.
+  $('.addComment').addClass('comment-btn-disabled').attr('aria-disabled', 'true');
 
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
@@ -937,6 +940,20 @@ const getXYOffsetOfRep = (rep) => {
   }
 };
 
+// #96: keep the toolbar "Add comment" button's enabled-look in sync with the
+// selection — commenting requires a non-empty selection. Visual only (the
+// button stays clickable and falls back to the "select text first" hint), so
+// the primary action can never get stuck disabled if a selection event is
+// missed.
+EpComments.prototype.updateAddCommentButtonState = function (rep) {
+  if (!rep || !rep.selStart || !rep.selEnd) return;
+  const hasSelection =
+    rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+  $('.addComment')
+      .toggleClass('comment-btn-disabled', !hasSelection)
+      .attr('aria-disabled', String(!hasSelection));
+};
+
 EpComments.prototype.displayNewCommentForm = function () {
   const rep = {};
   const ace = this.ace;
@@ -1326,6 +1343,13 @@ const hooks = {
     }
 
     if (['setup', 'setBaseText', 'importText'].includes(eventType)) return;
+
+    // Keep the toolbar comment button's enabled-look in sync with the selection
+    // (#96). aceEditEvent fires on cursor/selection changes, so reading the rep
+    // here keeps the affordance current.
+    if (pad.plugins.ep_comments_page) {
+      pad.plugins.ep_comments_page.updateAddCommentButtonState(context.rep);
+    }
 
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.setYofComments();

@@ -218,6 +218,15 @@ input.error, textarea.error {
   margin-top: 0 !important;
 }
 
+/* #96: visually mark the toolbar "Add comment" button as unavailable until
+   text is selected (commenting needs a selection — clicking it with none only
+   shows a hint). Kept clickable so the action can never wedge if the selection
+   state lags; the hint still fires as the fallback. */
+.addComment.comment-btn-disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
 /* OTHER */
 .hidden {
   display: none;
