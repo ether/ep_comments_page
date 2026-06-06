@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('underscore');
 const db = require('ep_etherpad-lite/node/db/DB');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {createLogger} = require('ep_plugin_helpers/logger');
@@ -86,7 +85,8 @@ exports.copyComments = async (originalPadId, newPadID) => {
   // get the comments of original pad
   const originalComments = await db.get(`comments:${originalPadId}`);
   // make sure we have different copies of the comment between pads
-  const copiedComments = _.mapObject(originalComments, (thisComment) => _.clone(thisComment));
+  const copiedComments = Object.fromEntries(
+      Object.entries(originalComments || {}).map(([id, comment]) => [id, {...comment}]));
 
   // save the comments on new pad
   await db.set(`comments:${newPadID}`, copiedComments);
@@ -149,7 +149,8 @@ exports.copyCommentReplies = async (originalPadId, newPadID) => {
   // get the replies of original pad
   const originalReplies = await db.get(`comment-replies:${originalPadId}`);
   // make sure we have different copies of the reply between pads
-  const copiedReplies = _.mapObject(originalReplies, (thisReply) => _.clone(thisReply));
+  const copiedReplies = Object.fromEntries(
+      Object.entries(originalReplies || {}).map(([id, reply]) => [id, {...reply}]));
 
   // save the comment replies on new pad
   await db.set(`comment-replies:${newPadID}`, copiedReplies);

@@ -9,7 +9,6 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
-const _ = require('underscore');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const {padToggle} = require('ep_plugin_helpers/pad-toggle-server');
@@ -137,14 +136,15 @@ exports.socketio = (hookName, args, cb) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-      return _.object(commentIds, comments); // {c-123:data, c-124:data}
+      // {c-123:data, c-124:data}
+      return Object.fromEntries(commentIds.map((id, i) => [id, comments[i]]));
     }));
 
     socket.on('bulkAddCommentReplies', handler(async (padId, data) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-      return _.zip(repliesId, replies);
+      return repliesId.map((id, i) => [id, replies[i]]);
     }));
 
     socket.on('updateCommentText', handler(async (data) => {
