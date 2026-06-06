@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test';
 import {getPadBody} from 'ep_etherpad-lite/tests/frontend-new/helper/padHelper';
-import {aNewCommentsPad} from '../helper/comments';
+import {aNewCommentsPad, clickAddCommentButton, waitForCommentsInit} from '../helper/comments';
 
 // #79: copying commented text from one pad and pasting it into another should
 // carry the whole comment, not just yellow-highlighted text. The copy handler
@@ -21,27 +21,25 @@ test.describe('ep_comments_page - Cross-pad comment copy (#79)', () => {
     await page.keyboard.type('text copied between pads');
     await expect.poll(async () => {
       await inner.locator('div').first().click({clickCount: 3});
-      await page.locator('.addComment').click();
+      await clickAddCommentButton(page); // disambiguated (.first()) helper
       return page.locator('#newComment.popup-show').count();
     }, {timeout: 20_000}).toBeGreaterThan(0);
     await page.locator('#newComment textarea.comment-content').fill('CROSS_PAD_COMMENT');
     await page.locator('#comment-create-btn').click();
     await expect.poll(async () => inner.locator('.comment').count()).toBeGreaterThan(0);
 
-    // Copy the commented text.
+    // Copy the commented text, then wait until the clipboard actually holds it
+    // (deterministic, instead of a fixed sleep).
     await inner.locator('div').first().locator('.comment').first().click({clickCount: 3});
     await page.keyboard.press('Control+C');
-    await page.waitForTimeout(400);
+    await expect.poll(async () =>
+      page.evaluate(() => navigator.clipboard.readText().catch(() => '')),
+    {timeout: 10_000}).toContain('text copied between pads');
 
     // Pad B: a different pad in the same browser context.
     const base = page.url().split('/p/')[0];
     await page.goto(`${base}/p/cross_pad_dest_${Date.now()}`);
-    await expect.poll(async () => page.evaluate(async () => {
-      const ep = (window as any).pad?.plugins?.ep_comments_page;
-      if (!ep || !ep.initDone) return false;
-      await ep.initDone;
-      return true;
-    }), {timeout: 30_000}).toBe(true);
+    await waitForCommentsInit(page); // shared 60s init wait (no duplicated logic)
 
     inner = await getPadBody(page);
     await inner.click();
