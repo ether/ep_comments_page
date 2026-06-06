@@ -9,7 +9,10 @@ import {aNewCommentsPad} from '../helper/comments';
 // pair under `@media (forced-colors: active)`. This spec drives Chromium's
 // forced-colors emulation and verifies the highlight survives.
 test.describe('ep_comments_page - High contrast / forced colors (#217)', () => {
-  test('comment highlight stays visible under forced-colors', async ({page}) => {
+  test('comment highlight stays visible under forced-colors', async ({page, browserName}) => {
+    // forced-colors emulation is only implemented in Chromium; guard so the
+    // suite stays correct if it is ever run under other Playwright projects.
+    test.skip(browserName !== 'chromium', 'forced-colors emulation is Chromium-only');
     await aNewCommentsPad(page);
     const inner = await getPadBody(page);
 
@@ -30,7 +33,7 @@ test.describe('ep_comments_page - High contrast / forced colors (#217)', () => {
     // Turn on forced-colors emulation (Windows High Contrast Mode equivalent).
     await page.emulateMedia({forcedColors: 'active'});
 
-    const style = await commentSpan.evaluate((el) => {
+    const readStyle = () => commentSpan.evaluate((el) => {
       const cs = getComputedStyle(el);
       return {
         background: cs.backgroundColor,
@@ -40,6 +43,15 @@ test.describe('ep_comments_page - High contrast / forced colors (#217)', () => {
       };
     });
 
+    // Forced-colors / media-query application can lag a tick, so poll until the
+    // forced-colors rule is actually reflected before asserting on the values.
+    await expect.poll(async () => {
+      const s = await readStyle();
+      return s.forcedColorAdjust === 'none' &&
+        s.background !== 'rgba(0, 0, 0, 0)' && s.background !== 'transparent';
+    }, {timeout: 10_000}).toBe(true);
+
+    const style = await readStyle();
     // Our forced-colors rule opts back into author colours...
     expect(style.forcedColorAdjust).toBe('none');
     // ...and keeps a real (non-transparent) highlight fill so commented text
