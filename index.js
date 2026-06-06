@@ -12,6 +12,41 @@ const apiUtils = require('./apiUtils');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
+const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default || require('ep_etherpad-lite/node/db/AuthorManager');
+
+// Resolve the authoritative authorId for a /comment socket connection from the
+// HttpOnly author-token cookie on its handshake — the same cookie core uses to
+// identify the author. The cookie is never exposed to the page, so a client
+// cannot spoof another user's authorId (#222). Returns null when it can't be
+// resolved (e.g. no token cookie), in which case authorship checks fail closed.
+// Mirrors core's PadMessageHandler cookie parsing (the socket.io handshake does
+// not run cookie-parser, so read the Cookie header directly).
+const authorIdForSocket = async (socket) => {
+  try {
+    const cookiePrefix = (settings.cookie && settings.cookie.prefix) || '';
+    const cookieHeader =
+      (socket && socket.request && socket.request.headers && socket.request.headers.cookie) || '';
+    const match = cookieHeader.split(/;\s*/).find(
+        (c) => c.split('=')[0] === `${cookiePrefix}token`);
+    if (!match) return null;
+    let token;
+    try {
+      token = decodeURIComponent(match.split('=').slice(1).join('='));
+    } catch (err) {
+      if (err instanceof URIError) return null; // malformed cookie -> treat as absent
+      throw err;
+    }
+    if (!token) return null;
+    const getAuthorId = authorManager.getAuthorId
+      ? (t) => authorManager.getAuthorId(t, {})
+      : (t) => authorManager.getAuthor4Token(t); // older cores
+    return await getAuthorId(token);
+  } catch (err) {
+    return null;
+  }
+};
+// Exported for tests (verifies author identity derives from the token cookie).
+exports.authorIdForSocket = authorIdForSocket;
 
 // Comment char-ranges per line for a given revision's atext. The timeslider on
 // older Etherpad cores can't run the plugin's client hooks, so it never paints
@@ -166,6 +201,11 @@ exports.socketio = (hookName, args, cb) => {
     socket.on('addComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       const content = data.comment;
+      // Stamp the authoritative author server-side so a comment can't be created
+      // labelled as someone else (#222). Fall back to the supplied value when no
+      // token is resolvable (e.g. API/test contexts without the cookie).
+      const resolvedAuthor = await authorIdForSocket(socket);
+      if (content && resolvedAuthor) content.author = resolvedAuthor;
       const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
@@ -175,7 +215,10 @@ exports.socketio = (hookName, args, cb) => {
 
     socket.on('deleteComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
-      await commentManager.deleteComment(padId, data.commentId, data.authorId);
+      // Authorize against the server-resolved author, never the client-supplied
+      // authorId (which is spoofable) (#222).
+      const authorId = await authorIdForSocket(socket);
+      await commentManager.deleteComment(padId, data.commentId, authorId);
       socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
     }));
 
@@ -211,14 +254,21 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('updateCommentText', handler(async (data) => {
-      const {commentId, commentText, authorId} = data;
+      const {commentId, commentText} = data;
       const {padId} = await readOnlyManager.getIds(data.padId);
+      // Authorize against the server-resolved author, never the client-supplied
+      // authorId (which is spoofable) (#222).
+      const authorId = await authorIdForSocket(socket);
       await commentManager.changeCommentText(padId, commentId, commentText, authorId);
       socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
     }));
 
     socket.on('addCommentReply', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
+      // Stamp the authoritative author server-side (#222); fall back to the
+      // supplied value when no token is resolvable (API/test contexts).
+      const resolvedAuthor = await authorIdForSocket(socket);
+      if (data && resolvedAuthor) data.author = resolvedAuthor;
       const [replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
       socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);

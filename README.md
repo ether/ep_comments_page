@@ -55,6 +55,17 @@ To enable this feature, add the following code to your `settings.json`:
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
+### Who can edit or delete comments
+By default a comment can only be edited or deleted by the author who created it
+(verified server-side from the author's Etherpad session, so it can't be
+spoofed). To instead let **anyone with write access to the pad** edit or delete
+any comment, add the following to your `settings.json`:
+```
+"ep_comments_page": {
+  "allowAnyoneToEditComments": true
+},
+```
+
 ### Let read-only viewers comment
 By default a read-only viewer cannot add comments (the add-comment button is
 hidden and the server rejects comment changes from a read-only session). To let
@@ -80,6 +91,9 @@ by default; disable it with:
 ```
 "ep_comments_page": {
   "showAuthorColor": false
+},
+```
+
 ### Floating comment button
 When text is selected, a small floating button appears next to it for quickly
 adding a comment. This is on by default; disable it with:

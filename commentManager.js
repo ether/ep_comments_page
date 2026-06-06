@@ -1,9 +1,17 @@
 'use strict';
 
 const db = require('ep_etherpad-lite/node/db/DB');
+const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {createLogger} = require('ep_plugin_helpers/logger');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const shared = require('./static/js/shared');
+
+// #222: by default a comment may only be edited/deleted by its original author
+// (the restrictive behaviour introduced in #163). Setting
+// `ep_comments_page.allowAnyoneToEditComments: true` switches to the permissive
+// model where anyone with write access to the pad may edit/delete any comment.
+const anyoneMayEditComments = () =>
+  !!(settings.ep_comments_page && settings.ep_comments_page.allowAnyoneToEditComments);
 
 const logger = createLogger('ep_comments_page');
 
@@ -22,7 +30,7 @@ exports.deleteComment = async (padId, commentId, authorId) => {
     logger.debug(`ignoring attempt to delete non-existent comment ${commentId}`);
     throw new Error('no_such_comment');
   }
-  if (comments[commentId].author !== authorId) {
+  if (!anyoneMayEditComments() && comments[commentId].author !== authorId) {
     logger.debug(`author ${authorId} attempted to delete comment ${commentId} ` +
                  `belonging to author ${comments[commentId].author}`);
     throw new Error('unauth');
@@ -197,7 +205,7 @@ exports.changeCommentText = async (padId, commentId, commentText, authorId) => {
     logger.debug(`ignoring attempt to edit non-existent comment ${commentId}`);
     throw new Error('no_such_comment');
   }
-  if (comments[commentId].author !== authorId) {
+  if (!anyoneMayEditComments() && comments[commentId].author !== authorId) {
     logger.debug(`author ${authorId} attempted to edit comment ${commentId} ` +
                  `belonging to author ${comments[commentId].author}`);
     throw new Error('unauth');
