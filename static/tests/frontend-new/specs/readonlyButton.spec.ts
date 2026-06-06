@@ -16,8 +16,10 @@ test.describe('ep_comments_page - read-only', () => {
     expect(readOnlyId).toMatch(/^r\./);
 
     // Open the read-only view of the same pad. (Don't use the goToPad helper —
-    // its waitForEditorReady never settles on a read-only pad.)
-    await page.goto(`http://localhost:9001/p/${readOnlyId}`);
+    // its waitForEditorReady never settles on a read-only pad.) Navigate
+    // relative to the current origin so the spec is independent of the
+    // configured baseURL / host:port.
+    await page.goto(new URL(`/p/${readOnlyId}`, page.url()).toString());
     await page.locator('iframe[name="ace_outer"]').waitFor({timeout: 30_000});
 
     await expect(page.locator('body')).toHaveClass(/readonly/);
