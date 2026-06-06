@@ -7,6 +7,27 @@
   color: orange !important;
 }
 
+/* High-contrast / forced-colors mode (e.g. Windows High Contrast Mode), #217.
+   In forced-colors mode the UA discards the fixed yellow/dark fill above, so
+   commented text becomes indistinguishable from the rest of the document, and
+   the orange open-state colour is unreadable against the highlight. Opt back
+   into author colours with the system "marked text" pair — the semantic
+   colours browsers reserve for highlighted text — so the highlight stays
+   visible and legible whatever the active high-contrast palette is, and mark
+   the open comment with an outline (which forced-colors honours) instead of a
+   colour that cannot guarantee contrast. */
+@media (forced-colors: active) {
+  #innerdocbody .ace-line .comment {
+    background-color: Mark;
+    color: MarkText;
+    forced-color-adjust: none;
+  }
+  #innerdocbody .ace-line .comment[data-open="true"] {
+    color: MarkText !important;
+    outline: 2px solid CanvasText;
+  }
+}
+
 
 /* Comment right side container */
 #comments {
