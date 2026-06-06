@@ -45,6 +45,7 @@ const commentLocationsFromAText = (atext, apool) => {
   return out;
 };
 const {padToggle} = require('ep_plugin_helpers/pad-toggle-server');
+const {toggle} = require('ep_plugin_helpers/settings-toggle');
 
 // Parallel User Settings + Pad Wide Settings checkboxes for comment-pane
 // visibility. Helper owns the storage, broadcast, enforce, and i18n wiring.
@@ -56,8 +57,22 @@ const commentsToggle = padToggle({
   defaultEnabled: true,
 });
 
+// #12/#5: the all-comments overview is a checkbox in the user Settings pane
+// (not a toolbar icon), built with the ep_plugin_helpers `toggle` helper —
+// cookie-persisted, default off. The client shows/hides the panel from it.
+const overviewToggle = toggle({
+  pluginName: 'ep_comments_page',
+  settingId: 'comments-overview',
+  templatePath: 'ep_comments_page/templates/commentsOverviewSetting.ejs',
+  defaultEnabled: false,
+});
+
 exports.loadSettings = commentsToggle.loadSettings;
-exports.eejsBlock_mySettings = commentsToggle.eejsBlock_mySettings;
+// Compose both settings checkboxes (Show Comments + Show all comments) into the
+// single eejsBlock_mySettings hook.
+exports.eejsBlock_mySettings = (hookName, args, cb) =>
+  commentsToggle.eejsBlock_mySettings(hookName, args, () =>
+    overviewToggle.eejsBlock_mySettings(hookName, args, cb));
 exports.eejsBlock_padSettings = commentsToggle.eejsBlock_padSettings;
 
 let io;
@@ -232,14 +247,11 @@ exports.padInitToolbar = (hookName, args, cb) => {
   return cb();
 };
 
-exports.eejsBlock_editbarMenuLeft = (hookName, args, cb) => {
-  // check if custom button is used
-  if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1) {
-    return cb();
-  }
-  args.content += eejs.require('ep_comments_page/templates/commentBarButtons.ejs');
-  return cb();
-};
+// Skip the default toolbar button when the admin placed `addComment` in a
+// custom toolbar layout. Uses the ep_plugin_helpers template() helper.
+exports.eejsBlock_editbarMenuLeft = template('ep_comments_page/templates/commentBarButtons.ejs', {
+  skip: () => JSON.stringify(settings.toolbar).indexOf('addComment') > -1,
+});
 
 exports.eejsBlock_scripts = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/comments.html');

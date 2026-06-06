@@ -89,6 +89,11 @@ adding a comment. This is on by default; disable it with:
 },
 ```
 
+### All-comments overview
+The **Settings** pane has a "Show all comments" checkbox. Tick it to open a panel
+listing every comment in the pad; clicking an entry jumps to that comment, and it
+updates as comments are added or removed. The choice is remembered per pad.
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
