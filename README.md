@@ -80,6 +80,12 @@ by default; disable it with:
 ```
 "ep_comments_page": {
   "showAuthorColor": false
+### Floating comment button
+When text is selected, a small floating button appears next to it for quickly
+adding a comment. This is on by default; disable it with:
+```
+"ep_comments_page": {
+  "floatingCommentButton": false
 },
 ```
 

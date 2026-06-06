@@ -311,6 +311,37 @@ input.error, textarea.error {
   display: none !important;
 }
 
+/* #95: floating "add comment" button that follows the selection. Positioned
+   inline (in #editorcontainerbox space) by the plugin and clamped on-screen, so
+   it works the same on desktop and narrow/mobile viewports. It is shown
+   translucent so it doesn't obscure the selection, and becomes fully opaque on
+   hover/focus (#95). */
+.floating-add-comment {
+  position: absolute;
+  display: none;
+  z-index: 100;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+  cursor: pointer;
+  color: #444;
+  user-select: none;
+  opacity: .55;
+  transition: opacity .15s ease;
+}
+.floating-add-comment.visible {
+  display: block;
+}
+.floating-add-comment:hover,
+.floating-add-comment:focus {
+  background: #f3f3f3;
+  opacity: 1;
+}
+
 /* #12/#5: all-comments overview panel (opened from the "Show all comments"
    checkbox in the Settings pane). */
 #comments-overview {

@@ -1075,6 +1075,78 @@ EpComments.prototype.updateAddCommentButtonState = function (rep) {
       .attr('aria-disabled', String(!hasSelection));
 }
 
+// #95: floating "add comment" button anchored to the current selection.
+// Lazily build the element once, in the same container the new-comment popup
+// uses (#editorcontainerbox), so it shares the popup's coordinate space.
+EpComments.prototype.ensureFloatingAddCommentButton = function () {
+  if (this.$floatingAddComment && this.$floatingAddComment.length) {
+    return this.$floatingAddComment;
+  }
+  const self = this;
+  const $btn = $('<div>')
+      .addClass('floating-add-comment')
+      .attr('role', 'button')
+      .attr('tabindex', '0')
+      // Localize via data-l10n-id (sets the title/accessible name through
+      // html10n) rather than a hardcoded aria-label, so it translates and
+      // re-localizes on language change (#95).
+      .attr('data-l10n-id', 'ep_comments_page.add_comment.title')
+      .attr('title',
+          (html10n.translations && html10n.translations['ep_comments_page.add_comment.title']) ||
+            'Add comment')
+      .append($('<span>').addClass('buttonicon buttonicon-comment-medical'));
+  // mousedown.preventDefault keeps the editor selection intact (same trick the
+  // toolbar button uses), so displayNewCommentForm still sees the selection.
+  $btn.on('mousedown', (e) => e.preventDefault());
+  $btn.on('click', (e) => {
+    e.preventDefault();
+    self.hideFloatingAddCommentButton();
+    self.displayNewCommentForm();
+  });
+  // ARIA button semantics: a non-native button must be activatable by keyboard
+  // (Enter / Space), not just click (#95).
+  $btn.on('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      $btn.trigger('click');
+    }
+  });
+  $btn.appendTo($('#editorcontainerbox'));
+  this.$floatingAddComment = $btn;
+  return $btn;
+};
+
+EpComments.prototype.hideFloatingAddCommentButton = function () {
+  if (this.$floatingAddComment) this.$floatingAddComment.removeClass('visible');
+};
+
+EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
+  if (clientVars.floatingCommentButton === false) return;
+  if (!rep || !rep.selStart || !rep.selEnd) return;
+  const hasSelection =
+    rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+  if (!hasSelection) return this.hideFloatingAddCommentButton();
+  // On read-only pads commenting isn't possible, so don't offer the button.
+  if (clientVars.readonly) return this.hideFloatingAddCommentButton();
+  // Don't compete with the new-comment form once it's open over the selection.
+  if ($('#newComment').hasClass('popup-show')) return this.hideFloatingAddCommentButton();
+
+  const position = getXYOffsetOfRep(rep); // [left, top] in #editorcontainerbox space
+  if (!position) return this.hideFloatingAddCommentButton();
+
+  const $btn = this.ensureFloatingAddCommentButton();
+  const container = $('#editorcontainerbox');
+  const containerWidth = container.width() || 0;
+  const btnWidth = $btn.outerWidth(true) || 28;
+  // Reuse the on-screen clamp idea from #192 so the button never spills off the
+  // edge on a narrow / mobile viewport.
+  const margin = 6;
+  let left = position[0] + 4;
+  left = Math.min(Math.max(left, margin), Math.max(margin, containerWidth - btnWidth - margin));
+  const top = Math.max(margin, position[1] + 2);
+  $btn.css({left: `${left}px`, top: `${top}px`}).addClass('visible');
+}
+
 // #12: a togglable panel listing every comment in the pad, with click-to-jump.
 // Distinct from the Y-aligned sidebar — this is a flat, scrollable index.
 EpComments.prototype.ensureCommentsOverview = function () {
@@ -1197,6 +1269,7 @@ EpComments.prototype.navigateComment = function ($el, dir) {
 };
 
 EpComments.prototype.displayNewCommentForm = function () {
+  this.hideFloatingAddCommentButton();
   const rep = {};
   const ace = this.ace;
 
@@ -1607,11 +1680,12 @@ const hooks = {
 
     if (['setup', 'setBaseText', 'importText'].includes(eventType)) return;
 
-    // Keep the toolbar comment button's enabled-look in sync with the selection
-    // (#96). aceEditEvent fires on cursor/selection changes, so reading the rep
-    // here keeps the affordance current.
+    // aceEditEvent fires on cursor/selection changes — keep both selection-driven
+    // affordances current: the toolbar comment button's enabled-look (#96) and
+    // the floating add-comment button anchored to the selection (#95).
     if (pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.updateAddCommentButtonState(context.rep);
+      pad.plugins.ep_comments_page.updateFloatingAddCommentButton(context.rep);
     }
 
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
