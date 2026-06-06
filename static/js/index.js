@@ -735,7 +735,10 @@ EpComments.prototype.getUniqueCommentsId = function (padInner) {
     if (commentId && commentId[1]) return commentId[1];
   });
   const onlyUnique = (value, index, self) => self.indexOf(value) === index;
-  return commentsId.filter(onlyUnique);
+  // Drop falsy IDs (e.g. fakecomment-* spans created transiently during paste
+  // flows return undefined above) so consumers like navigateComment() never
+  // index into an undefined entry and stall (#241).
+  return commentsId.filter(Boolean).filter(onlyUnique);
 };
 
 // Indicates if all comments are on the correct Y position, and don't need to
