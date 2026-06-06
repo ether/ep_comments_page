@@ -9,10 +9,78 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
-const _ = require('underscore');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const padManager = require('ep_etherpad-lite/node/db/PadManager');
+const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default || require('ep_etherpad-lite/node/db/AuthorManager');
+
+// Resolve the authoritative authorId for a /comment socket connection from the
+// HttpOnly author-token cookie on its handshake — the same cookie core uses to
+// identify the author. The cookie is never exposed to the page, so a client
+// cannot spoof another user's authorId (#222). Returns null when it can't be
+// resolved (e.g. no token cookie), in which case authorship checks fail closed.
+// Mirrors core's PadMessageHandler cookie parsing (the socket.io handshake does
+// not run cookie-parser, so read the Cookie header directly).
+const authorIdForSocket = async (socket) => {
+  try {
+    const cookiePrefix = (settings.cookie && settings.cookie.prefix) || '';
+    const cookieHeader =
+      (socket && socket.request && socket.request.headers && socket.request.headers.cookie) || '';
+    const match = cookieHeader.split(/;\s*/).find(
+        (c) => c.split('=')[0] === `${cookiePrefix}token`);
+    if (!match) return null;
+    let token;
+    try {
+      token = decodeURIComponent(match.split('=').slice(1).join('='));
+    } catch (err) {
+      if (err instanceof URIError) return null; // malformed cookie -> treat as absent
+      throw err;
+    }
+    if (!token) return null;
+    const getAuthorId = authorManager.getAuthorId
+      ? (t) => authorManager.getAuthorId(t, {})
+      : (t) => authorManager.getAuthor4Token(t); // older cores
+    return await getAuthorId(token);
+  } catch (err) {
+    return null;
+  }
+};
+// Exported for tests (verifies author identity derives from the token cookie).
+exports.authorIdForSocket = authorIdForSocket;
+
+// Comment char-ranges per line for a given revision's atext. The timeslider on
+// older Etherpad cores can't run the plugin's client hooks, so it never paints
+// the `comment` class; this lets the client reconstruct those ranges and render
+// comments read-only there (issue #33). Returns {commentId: [{line, start, end}]}.
+const commentLocationsFromAText = (atext, apool) => {
+  const text = atext.text;
+  const out = {};
+  let charIdx = 0;
+  let line = 0;
+  let col = 0;
+  const opIter = Changeset.opIterator(atext.attribs);
+  while (opIter.hasNext()) {
+    const op = opIter.next();
+    let commentId = null;
+    Changeset.eachAttribNumber(op.attribs, (n) => {
+      if (apool.getAttribKey(n) === 'comment') commentId = apool.getAttribValue(n);
+    });
+    for (let i = 0; i < op.chars; i++) {
+      const ch = text[charIdx++];
+      if (ch === '\n') { line++; col = 0; continue; }
+      if (commentId) {
+        const ranges = out[commentId] || (out[commentId] = []);
+        const last = ranges[ranges.length - 1];
+        if (last && last.line === line && last.end === col) last.end = col + 1;
+        else ranges.push({line, start: col, end: col + 1});
+      }
+      col++;
+    }
+  }
+  return out;
+};
 const {padToggle} = require('ep_plugin_helpers/pad-toggle-server');
+const {toggle} = require('ep_plugin_helpers/settings-toggle');
 
 // Parallel User Settings + Pad Wide Settings checkboxes for comment-pane
 // visibility. Helper owns the storage, broadcast, enforce, and i18n wiring.
@@ -24,8 +92,22 @@ const commentsToggle = padToggle({
   defaultEnabled: true,
 });
 
+// #12/#5: the all-comments overview is a checkbox in the user Settings pane
+// (not a toolbar icon), built with the ep_plugin_helpers `toggle` helper —
+// cookie-persisted, default off. The client shows/hides the panel from it.
+const overviewToggle = toggle({
+  pluginName: 'ep_comments_page',
+  settingId: 'comments-overview',
+  templatePath: 'ep_comments_page/templates/commentsOverviewSetting.ejs',
+  defaultEnabled: false,
+});
+
 exports.loadSettings = commentsToggle.loadSettings;
-exports.eejsBlock_mySettings = commentsToggle.eejsBlock_mySettings;
+// Compose both settings checkboxes (Show Comments + Show all comments) into the
+// single eejsBlock_mySettings hook.
+exports.eejsBlock_mySettings = (hookName, args, cb) =>
+  commentsToggle.eejsBlock_mySettings(hookName, args, () =>
+    overviewToggle.eejsBlock_mySettings(hookName, args, cb));
 exports.eejsBlock_padSettings = commentsToggle.eejsBlock_padSettings;
 
 let io;
@@ -55,6 +137,10 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
   if (dtype !== 'USER_CHANGES') return;
   // Nothing needs to be done if the user already has write access.
   if (!padMessageHandler.sessioninfos[socket.id].readonly) return;
+  // Read-only commenting is opt-in (#8). When it's off (the default), fall
+  // through without granting permission so core's normal read-only enforcement
+  // rejects the change.
+  if (!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments)) return;
   const pool = new AttributePool().fromJsonable(apool);
   const cs = Changeset.unpack(changeset);
   const opIter = Changeset.opIterator(cs.ops);
@@ -100,10 +186,26 @@ exports.socketio = (hookName, args, cb) => {
       return await commentManager.getCommentReplies(padId);
     }));
 
+    // Where each comment's text sits at a given revision (for the timeslider).
+    socket.on('getCommentLocations', handler(async (data) => {
+      const {padId} = await readOnlyManager.getIds(data.padId);
+      const pad = await padManager.getPad(padId);
+      const head = pad.getHeadRevisionNumber();
+      let rev = Number(data.rev);
+      if (!Number.isInteger(rev) || rev < 0 || rev > head) rev = head;
+      const atext = await pad.getInternalRevisionAText(rev);
+      return {rev, locations: commentLocationsFromAText(atext, pad.pool)};
+    }));
+
     // On add events
     socket.on('addComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
       const content = data.comment;
+      // Stamp the authoritative author server-side so a comment can't be created
+      // labelled as someone else (#222). Fall back to the supplied value when no
+      // token is resolvable (e.g. API/test contexts without the cookie).
+      const resolvedAuthor = await authorIdForSocket(socket);
+      if (content && resolvedAuthor) content.author = resolvedAuthor;
       const [commentId, comment] = await commentManager.addComment(padId, content);
       if (commentId != null && comment != null) {
         socket.broadcast.to(padId).emit('pushAddComment', commentId, comment);
@@ -113,7 +215,10 @@ exports.socketio = (hookName, args, cb) => {
 
     socket.on('deleteComment', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
-      await commentManager.deleteComment(padId, data.commentId, data.authorId);
+      // Authorize against the server-resolved author, never the client-supplied
+      // authorId (which is spoofable) (#222).
+      const authorId = await authorIdForSocket(socket);
+      await commentManager.deleteComment(padId, data.commentId, authorId);
       socket.broadcast.to(padId).emit('commentDeleted', data.commentId);
     }));
 
@@ -137,25 +242,33 @@ exports.socketio = (hookName, args, cb) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
-      return _.object(commentIds, comments); // {c-123:data, c-124:data}
+      // {c-123:data, c-124:data}
+      return Object.fromEntries(commentIds.map((id, i) => [id, comments[i]]));
     }));
 
     socket.on('bulkAddCommentReplies', handler(async (padId, data) => {
       padId = (await readOnlyManager.getIds(padId)).padId;
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
-      return _.zip(repliesId, replies);
+      return repliesId.map((id, i) => [id, replies[i]]);
     }));
 
     socket.on('updateCommentText', handler(async (data) => {
-      const {commentId, commentText, authorId} = data;
+      const {commentId, commentText} = data;
       const {padId} = await readOnlyManager.getIds(data.padId);
+      // Authorize against the server-resolved author, never the client-supplied
+      // authorId (which is spoofable) (#222).
+      const authorId = await authorIdForSocket(socket);
       await commentManager.changeCommentText(padId, commentId, commentText, authorId);
       socket.broadcast.to(padId).emit('textCommentUpdated', commentId, commentText);
     }));
 
     socket.on('addCommentReply', handler(async (data) => {
       const {padId} = await readOnlyManager.getIds(data.padId);
+      // Stamp the authoritative author server-side (#222); fall back to the
+      // supplied value when no token is resolvable (API/test contexts).
+      const resolvedAuthor = await authorIdForSocket(socket);
+      if (data && resolvedAuthor) data.author = resolvedAuthor;
       const [replyId, reply] = await commentManager.addCommentReply(padId, data);
       reply.replyId = replyId;
       socket.broadcast.to(padId).emit('pushAddCommentReply', replyId, reply);
@@ -174,7 +287,9 @@ exports.padInitToolbar = (hookName, args, cb) => {
   const button = toolbar.button({
     command: 'addComment',
     localizationId: 'ep_comments_page.add_comment.title',
-    class: 'buttonicon buttonicon-comment-medical',
+    // `acl-write` lets Etherpad core hide the button on read-only pads
+    // (`.readonly .acl-write { display: none }`) — see issue #204.
+    class: 'buttonicon buttonicon-comment-medical acl-write',
   });
 
   toolbar.registerButton('addComment', button);
@@ -182,14 +297,11 @@ exports.padInitToolbar = (hookName, args, cb) => {
   return cb();
 };
 
-exports.eejsBlock_editbarMenuLeft = (hookName, args, cb) => {
-  // check if custom button is used
-  if (JSON.stringify(settings.toolbar).indexOf('addComment') > -1) {
-    return cb();
-  }
-  args.content += eejs.require('ep_comments_page/templates/commentBarButtons.ejs');
-  return cb();
-};
+// Skip the default toolbar button when the admin placed `addComment` in a
+// custom toolbar layout. Uses the ep_plugin_helpers template() helper.
+exports.eejsBlock_editbarMenuLeft = template('ep_comments_page/templates/commentBarButtons.ejs', {
+  skip: () => JSON.stringify(settings.toolbar).indexOf('addComment') > -1,
+});
 
 exports.eejsBlock_scripts = (hookName, args, cb) => {
   args.content += eejs.require('ep_comments_page/templates/comments.html');
@@ -200,15 +312,38 @@ exports.eejsBlock_scripts = (hookName, args, cb) => {
 exports.eejsBlock_styles =
     template('ep_comments_page/templates/styles.html');
 
+// Read-only comments in the timeslider (issue #33). Injected as plain scripts
+// rather than a client hook because older timeslider bundles can't load plugin
+// hooks. socket.io's served client is loaded first so the script has a global
+// `io`. Relative paths resolve from /p/<pad>/timeslider to the site root.
+exports.eejsBlock_timesliderScripts = (hookName, args, cb) => {
+  args.content +=
+    '<script src="../../socket.io/socket.io.js"></script>' +
+    '<script src="../../static/plugins/ep_comments_page/static/js/timeslider.js"></script>';
+  return cb();
+};
+
 exports.clientVars = async (hook, context) => {
   const displayCommentAsIcon =
     settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  // #95: the floating add-comment button is on unless an admin disables it.
+  const floatingCommentButton = !(settings.ep_comments_page &&
+    settings.ep_comments_page.floatingCommentButton === false);
+  // #6: author-colour accent is on unless an admin disables it.
+  const showAuthorColor = !(settings.ep_comments_page &&
+    settings.ep_comments_page.showAuthorColor === false);
+  // #8: read-only viewers may comment only when an admin opts in (default off).
+  const allowReadonlyComments =
+    !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
   // Merge in the padToggle helper's clientVars block so the client-side
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
-  return Object.assign({displayCommentAsIcon, highlightSelectedText}, helperVars);
+  return Object.assign(
+      {displayCommentAsIcon, highlightSelectedText, floatingCommentButton, showAuthorColor,
+        allowReadonlyComments},
+      helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {

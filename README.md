@@ -10,6 +10,21 @@
 pnpm run plugins install ep_comments_page
 ```
 
+## Comments in the timeslider
+
+Comments are shown **read-only** in the timeslider and in-place pad history.
+Each comment lines up with the text it annotates and only appears for the
+revisions where that text exists, so you can read the discussion as you scrub
+through history. Suggested changes are shown too, with the original text struck
+through once the change has been accepted. Toggling **Show Comments** off hides
+the comments — both the sidebar and the inline highlight — in history as well.
+
+This works on the latest Etherpad release as well as develop. Older timeslider
+bundles can't load plugin client hooks, so the read-only viewer is injected as a
+plain script and reconstructs the comment positions from the server — no core
+update required. (Reading comments while scrubbing *in-place* history on the pad
+URL additionally needs develop's in-place history mode.)
+
 ## Extra settings
 This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
 
@@ -42,14 +57,56 @@ To enable this feature, add the following code to your `settings.json`:
 
 ### Who can edit or delete comments
 By default a comment can only be edited or deleted by the author who created it
-(and only while their original session is active). To instead let **anyone with
-write access to the pad** edit or delete any comment, add the following to your
-`settings.json`:
+(verified server-side from the author's Etherpad session, so it can't be
+spoofed). To instead let **anyone with write access to the pad** edit or delete
+any comment, add the following to your `settings.json`:
 ```
 "ep_comments_page": {
   "allowAnyoneToEditComments": true
 },
 ```
+
+### Let read-only viewers comment
+By default a read-only viewer cannot add comments (the add-comment button is
+hidden and the server rejects comment changes from a read-only session). To let
+read-only viewers annotate a pad without being able to edit its text, enable:
+```
+"ep_comments_page": {
+  "allowReadonlyComments": true
+},
+```
+
+### Comments in exported documents
+Comments are included when you export a pad. Each commented passage gets a
+numbered footnote marker (`[1]`, `[2]`, …) and a **Comments** section is appended
+listing each comment as `[n] author: text` (suggested changes are noted too).
+Because the markers are numbered they stay correlatable in rich formats such as
+**ODT, DOC, DOCX and PDF**, where the in-document anchor link is lost — so your
+comments are not silently dropped when you export. Plain-text (`.txt`) export
+omits comments, as the core text exporter has no extension point for them.
+
+### Author colour accent
+Each comment box shows a left-border accent in its author's colour. This is on
+by default; disable it with:
+```
+"ep_comments_page": {
+  "showAuthorColor": false
+},
+```
+
+### Floating comment button
+When text is selected, a small floating button appears next to it for quickly
+adding a comment. This is on by default; disable it with:
+```
+"ep_comments_page": {
+  "floatingCommentButton": false
+},
+```
+
+### All-comments overview
+The **Settings** pane has a "Show all comments" checkbox. Tick it to open a panel
+listing every comment in the pad; clicking an entry jumps to that comment, and it
+updates as comments are added or removed. The choice is remembered per pad.
 
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:

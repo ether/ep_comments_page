@@ -6,7 +6,6 @@
 */
 
 
-const _ = require('underscore');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
@@ -29,6 +28,15 @@ const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
 const socketIoClient = require('socket.io-client');
 const io = socketIoClient.default || socketIoClient;
+
+// Trailing-edge debounce (replaces the former underscore dependency, #263).
+const debounce = (fn, wait) => {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), wait);
+  };
+};
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -100,6 +108,14 @@ EpComments.prototype.init = async function () {
   this.findContainers();
   this.insertContainers(); // Insert comment containers in sidebar
 
+  // On read-only pads, tag the outer body so the CSS can hide the edit/delete
+  // controls (#112). The sidebar lives in the ace_outer iframe, which doesn't
+  // get core's `readonly` body class. The server already rejects writes from
+  // read-only sessions; this just removes the dead controls from the UI.
+  if (clientVars.readonly && this.outerBody) {
+    this.outerBody.addClass('comments-readonly');
+  }
+
   // Init icons container
   commentIcons.insertContainer();
 
@@ -136,7 +152,7 @@ EpComments.prototype.init = async function () {
   this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e) => {
     this.setYofComments();
   });
-  $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
+  $(window).resize(debounce(() => { this.setYofComments(); }, 100));
 
   // Refresh the "N minutes ago" relative-time strings (#154). The original
   // date is stored in the `datetime` attribute so we can recompute
@@ -147,6 +163,37 @@ EpComments.prototype.init = async function () {
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
     this.displayNewCommentForm();
+  });
+  // #8: don't offer commenting to read-only viewers unless an admin enabled it.
+  if (clientVars.readonly && !clientVars.allowReadonlyComments) {
+    $('.addComment').hide();
+  }
+
+  // #241: navigate to the previous/next comment from an open comment box, so
+  // you don't have to hover precisely between adjacent comments.
+  this.container.parent().on('click', '.comment-nav-prev', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), -1);
+  });
+  this.container.parent().on('click', '.comment-nav-next', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), 1);
+  });
+
+  // #12/#5: the all-comments overview is driven by the "Show all comments"
+  // checkbox in the user Settings pane (rendered server-side by the
+  // ep_plugin_helpers toggle). Restore its cookie state, reflect it into the
+  // panel, and persist + react on change. (The toggle helper's own init isn't
+  // importable client-side — it pulls server-only modules — so the small
+  // cookie/bind mirrors it here.)
+  const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+  const $overviewToggle = $('#options-comments-overview');
+  if (padcookie.getPref('comments-overview') === true) $overviewToggle.prop('checked', true);
+  this.setCommentsOverviewVisible($overviewToggle.is(':checked'));
+  $overviewToggle.on('change', () => {
+    const on = $overviewToggle.is(':checked');
+    padcookie.setPref('comments-overview', on);
+    this.setCommentsOverviewVisible(on);
   });
 
   // Import for below listener : we are using this.container.parent() so we include
@@ -247,6 +294,8 @@ EpComments.prototype.init = async function () {
     // although the comment or reply was saved on the data base successfully, it needs
     // to update the comment or comment reply variable with the new text saved
     self.setCommentOrReplyNewText(commentId, commentText);
+    // Reflect the edit in an open all-comments overview immediately (#12).
+    self.refreshCommentsOverview();
   });
 
   // hide the edit form and make the comment author and text visible again
@@ -532,6 +581,8 @@ EpComments.prototype.collectComments = function (callback) {
   }
 
   this.setYofComments();
+  // Keep the overview panel (#12) in sync when comments are (re)collected.
+  this.refreshCommentsOverview();
   if (callback) callback();
 };
 
@@ -615,6 +666,31 @@ EpComments.prototype.insertContainers = function () {
 };
 
 // Insert a comment node
+// Resolve a comment author's Etherpad colour (#6). The current user's colour is
+// always on clientVars.userColor; other authors come from the historical author
+// data core ships in clientVars. colorId is normally a hex string, but resolve a
+// palette index too just in case. Returns null when unknown.
+EpComments.prototype.authorColor = function (authorId) {
+  try {
+    if (clientVars.showAuthorColor === false) return null;
+    let colorId = null;
+    if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
+      colorId = clientVars.userColor;
+    } else {
+      const cv = clientVars.collab_client_vars;
+      const data = cv && cv.historicalAuthorData && cv.historicalAuthorData[authorId];
+      colorId = data ? data.colorId : null;
+    }
+    if (colorId == null) return null;
+    // colorId may be a hex string or a palette index, depending on how the
+    // author's colour was stored — resolve the index to a hex either way.
+    if (typeof colorId === 'number') colorId = (clientVars.colorPalette || [])[colorId];
+    return colorId || null;
+  } catch (err) {
+    return null;
+  }
+};
+
 EpComments.prototype.insertComment = function (commentId, comment, index) {
   let content = null;
   const container = this.container;
@@ -630,6 +706,11 @@ EpComments.prototype.insertComment = function (commentId, comment, index) {
   if (comment.author !== clientVars.userId) {
     $(content).find('.comment-actions-wrapper').addClass('hidden');
   }
+  // #6: tag the box with the author's colour as a left-border accent. A border
+  // (rather than text/background colour) keeps the comment readable whatever
+  // the author's pastel happens to be.
+  const color = this.authorColor(comment.author);
+  if (color) content.css('border-left', `3px solid ${color}`);
   commentL10n.localize(content);
 
   // position doesn't seem to be relative to rep
@@ -653,30 +734,48 @@ EpComments.prototype.setYofComments = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]');
   const inlineComments = this.getFirstOcurrenceOfCommentIds();
   const commentsToBeShown = [];
+  const innerPaddingTop = parseInt(padInner.css('padding-top').split('px')[0]) || 0;
 
+  // First pass: compute each comment box's natural target top (aligned to its
+  // commented text). Collected up-front so the second pass can de-overlap
+  // comments that share a line (#181) instead of stacking them at the same Y.
+  const targets = [];
   $.each(inlineComments, function () {
-    // classname is the ID of the comment
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if (!commentId || !commentId[1]) return;
-    const commentEle = padOuter.find(`#${commentId[1]}`);
-
-    let topOffset = this.offsetTop;
-    topOffset += parseInt(padInner.css('padding-top').split('px')[0]);
-    topOffset += parseInt($(this).css('padding-top').split('px')[0]);
-
-    if (commentId) {
-      // adjust outer comment...
-      commentBoxes.adjustTopOf(commentId[1], topOffset);
-      // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], topOffset);
-
-      // mark this comment to be displayed if it was visible before we start adjusting its position
-      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
-    }
+    const match = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
+    if (!match || !match[1]) return;
+    let topOffset = this.offsetTop + innerPaddingTop;
+    topOffset += parseInt($(this).css('padding-top').split('px')[0]) || 0;
+    targets.push({commentId: match[1], top: topOffset});
   });
 
+  // Lay the boxes out top-to-bottom. When two comments resolve to the same (or
+  // overlapping) Y — e.g. two comments on one line — push the later one down so
+  // both stay visible and clickable instead of overlapping (#181). Comments on
+  // distinct lines keep their natural position because their natural top is
+  // already past the previous box's bottom.
+  targets.sort((a, b) => a.top - b.top);
+  const gap = 4;
+  let lastBottom = -Infinity;
+  for (const target of targets) {
+    const commentEle = padOuter.find(`#${target.commentId}`);
+    const top = Math.max(target.top, lastBottom + gap);
+    // adjust outer comment...
+    commentBoxes.adjustTopOf(target.commentId, top);
+    // ... and adjust icons too (icons stay aligned to the text line)
+    commentIcons.adjustTopOf(target.commentId, target.top);
+
+    // A collapsed box is a single compact line; measure it so the next box
+    // clears it. outerHeight may be 0 if the box is hidden — fall back to a
+    // sensible compact-row height so stacking still separates them.
+    const height = commentEle.outerHeight(true) || 24;
+    lastBottom = top + height;
+
+    // mark this comment to be displayed if it was visible before we start adjusting its position
+    if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
+  }
+
   // re-display comments that were visible before
-  _.each(commentsToBeShown, (commentEle) => {
+  commentsToBeShown.forEach((commentEle) => {
     commentEle.show();
   });
 };
@@ -686,19 +785,22 @@ EpComments.prototype.getFirstOcurrenceOfCommentIds = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]').contents();
   const commentsId = this.getUniqueCommentsId(padInner);
   const firstOcurrenceOfCommentIds =
-    _.map(commentsId, (commentId) => padInner.find(`.${commentId}`).first().get(0));
+    commentsId.map((commentId) => padInner.find(`.${commentId}`).first().get(0));
   return firstOcurrenceOfCommentIds;
 };
 
 EpComments.prototype.getUniqueCommentsId = function (padInner) {
-  const inlineComments = padInner.find('.comment');
-  const commentsId = _.map(inlineComments, (inlineComment) => {
+  const inlineComments = padInner.find('.comment').toArray();
+  const commentsId = inlineComments.map((inlineComment) => {
     const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
     // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
     if (commentId && commentId[1]) return commentId[1];
   });
   const onlyUnique = (value, index, self) => self.indexOf(value) === index;
-  return commentsId.filter(onlyUnique);
+  // Drop falsy IDs (e.g. fakecomment-* spans created transiently during paste
+  // flows return undefined above) so consumers like navigateComment() never
+  // index into an undefined entry and stall (#241).
+  return commentsId.filter(Boolean).filter(onlyUnique);
 };
 
 // Indicates if all comments are on the correct Y position, and don't need to
@@ -854,6 +956,10 @@ EpComments.prototype.deleteComment = function (commentId) {
   while ($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0) {
     $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
   }
+  // Drop it from the in-memory store too so the overview panel (#12) and any
+  // other readers don't keep a deleted comment around.
+  if (this.comments && this.comments[commentId]) delete this.comments[commentId];
+  this.refreshCommentsOverview();
 };
 
 const cloneLine = (line) => {
@@ -892,7 +998,7 @@ const getXYOffsetOfRep = (rep) => {
   // make sure end is after start
   if (selStart[0] > selEnd[0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) {
     selEnd = selStart;
-    selStart = _.clone(selStart);
+    selStart = [...selStart];
   }
 
   let startIndex = 0;
@@ -937,7 +1043,201 @@ const getXYOffsetOfRep = (rep) => {
   }
 };
 
+// #95: floating "add comment" button anchored to the current selection.
+// Lazily build the element once, in the same container the new-comment popup
+// uses (#editorcontainerbox), so it shares the popup's coordinate space.
+EpComments.prototype.ensureFloatingAddCommentButton = function () {
+  if (this.$floatingAddComment && this.$floatingAddComment.length) {
+    return this.$floatingAddComment;
+  }
+  const self = this;
+  const $btn = $('<div>')
+      .addClass('floating-add-comment')
+      .attr('role', 'button')
+      .attr('tabindex', '0')
+      // Localize via data-l10n-id (sets the title/accessible name through
+      // html10n) rather than a hardcoded aria-label, so it translates and
+      // re-localizes on language change (#95).
+      .attr('data-l10n-id', 'ep_comments_page.add_comment.title')
+      .attr('title',
+          (html10n.translations && html10n.translations['ep_comments_page.add_comment.title']) ||
+            'Add comment')
+      .append($('<span>').addClass('buttonicon buttonicon-comment-medical'));
+  // mousedown.preventDefault keeps the editor selection intact (same trick the
+  // toolbar button uses), so displayNewCommentForm still sees the selection.
+  $btn.on('mousedown', (e) => e.preventDefault());
+  $btn.on('click', (e) => {
+    e.preventDefault();
+    self.hideFloatingAddCommentButton();
+    self.displayNewCommentForm();
+  });
+  // ARIA button semantics: a non-native button must be activatable by keyboard
+  // (Enter / Space), not just click (#95).
+  $btn.on('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      $btn.trigger('click');
+    }
+  });
+  $btn.appendTo($('#editorcontainerbox'));
+  this.$floatingAddComment = $btn;
+  return $btn;
+};
+
+EpComments.prototype.hideFloatingAddCommentButton = function () {
+  if (this.$floatingAddComment) this.$floatingAddComment.removeClass('visible');
+};
+
+EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
+  if (clientVars.floatingCommentButton === false) return;
+  if (!rep || !rep.selStart || !rep.selEnd) return;
+  const hasSelection =
+    rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
+  if (!hasSelection) return this.hideFloatingAddCommentButton();
+  // On read-only pads commenting isn't possible, so don't offer the button.
+  if (clientVars.readonly) return this.hideFloatingAddCommentButton();
+  // Don't compete with the new-comment form once it's open over the selection.
+  if ($('#newComment').hasClass('popup-show')) return this.hideFloatingAddCommentButton();
+
+  const position = getXYOffsetOfRep(rep); // [left, top] in #editorcontainerbox space
+  if (!position) return this.hideFloatingAddCommentButton();
+
+  const $btn = this.ensureFloatingAddCommentButton();
+  const container = $('#editorcontainerbox');
+  const containerWidth = container.width() || 0;
+  const btnWidth = $btn.outerWidth(true) || 28;
+  // Reuse the on-screen clamp idea from #192 so the button never spills off the
+  // edge on a narrow / mobile viewport.
+  const margin = 6;
+  let left = position[0] + 4;
+  left = Math.min(Math.max(left, margin), Math.max(margin, containerWidth - btnWidth - margin));
+  const top = Math.max(margin, position[1] + 2);
+  $btn.css({left: `${left}px`, top: `${top}px`}).addClass('visible');
+}
+
+// #12: a togglable panel listing every comment in the pad, with click-to-jump.
+// Distinct from the Y-aligned sidebar — this is a flat, scrollable index.
+EpComments.prototype.ensureCommentsOverview = function () {
+  if (this.$commentsOverview && this.$commentsOverview.length) return this.$commentsOverview;
+  const self = this;
+  const $panel = $('<div>').attr('id', 'comments-overview');
+  const headerText =
+    (html10n.translations && html10n.translations['ep_comments_page.comments_overview.header']) ||
+      'All comments';
+  $panel.append($('<div>').addClass('comments-overview-header').text(headerText));
+  $panel.append($('<div>').addClass('comments-overview-list'));
+  // Jump to the clicked comment (event-delegated so it survives re-renders).
+  $panel.on('click', '.comments-overview-row', function () {
+    self.jumpToComment($(this).attr('data-commentid'));
+  });
+  $panel.appendTo($('#editorcontainerbox'));
+  this.$commentsOverview = $panel;
+  return $panel;
+};
+
+// Resolve a comment author's Etherpad colour for the overview tint. The current
+// user's colour is on clientVars.userColor; other authors come from the
+// historical author data core ships in clientVars. colorId is normally a hex
+// string but may be a palette index. Returns null when unknown (#12).
+EpComments.prototype.authorColor = function (authorId) {
+  try {
+    if (clientVars.showAuthorColor === false) return null;
+    let colorId = null;
+    if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
+      colorId = clientVars.userColor;
+    } else {
+      const cv = clientVars.collab_client_vars;
+      const data = cv && cv.historicalAuthorData && cv.historicalAuthorData[authorId];
+      colorId = data ? data.colorId : null;
+    }
+    if (colorId == null) return null;
+    if (typeof colorId === 'number') colorId = (clientVars.colorPalette || [])[colorId];
+    return colorId || null;
+  } catch (err) {
+    return null;
+  }
+};
+
+EpComments.prototype.refreshCommentsOverview = function () {
+  if (!this.$commentsOverview || !this.$commentsOverview.hasClass('visible')) return;
+  const $list = this.$commentsOverview.find('.comments-overview-list').empty();
+  const comments = this.comments || {};
+  const ids = Object.keys(comments);
+  if (!ids.length) {
+    const emptyText =
+      (html10n.translations &&
+        html10n.translations['ep_comments_page.comments_overview.empty']) || 'No comments yet';
+    $list.append($('<div>').addClass('comments-overview-empty').text(emptyText));
+    return;
+  }
+  ids.forEach((commentId) => {
+    const data = (comments[commentId] && comments[commentId].data) || {};
+    const $row = $('<div>')
+        .addClass('comments-overview-row')
+        .attr('data-commentid', commentId);
+    if (data.changeAccepted) $row.addClass('resolved');
+    const color = this.authorColor && this.authorColor(data.author);
+    if (color) $row.css('border-left', `3px solid ${color}`);
+    $row.append($('<span>').addClass('comments-overview-author').text(data.name || 'Anonymous'));
+    $row.append($('<span>').addClass('comments-overview-text').text(data.text || ''));
+    $list.append($row);
+  });
+};
+
+EpComments.prototype.setCommentsOverviewVisible = function (visible) {
+  const $panel = this.ensureCommentsOverview();
+  $panel.toggleClass('visible', !!visible);
+  if (visible) this.refreshCommentsOverview();
+};
+
+EpComments.prototype.jumpToComment = function (commentId) {
+  if (!commentId) return;
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const padInner = padOuter.find('iframe[name="ace_inner"]');
+  const span = padInner.contents().find(`.${commentId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  // Re-align and open the target comment box.
+  this.setYofComments();
+  padOuter.find('#comments .sidebar-comment').removeClass('full-display');
+  padOuter.find(`#${commentId}`).addClass('full-display');
+};
+
+// #241: open the comment adjacent (dir = -1 prev, +1 next) to the one whose
+// nav arrow was clicked, in document order, wrapping around the ends. Scrolls
+// the editor to it and opens its box, so a reviewer can step through comments
+// without hovering precisely over each highlight.
+EpComments.prototype.navigateComment = function ($el, dir) {
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const innerDoc = padOuter.find('iframe[name="ace_inner"]').contents();
+  const currentId = $el.closest('.sidebar-comment').attr('data-commentid');
+  const ordered = this.getUniqueCommentsId(innerDoc); // document order
+  if (!ordered.length) return;
+  const idx = ordered.indexOf(currentId);
+  if (idx === -1) return;
+  const targetId = ordered[(idx + dir + ordered.length) % ordered.length];
+  if (!targetId || targetId === currentId) return;
+
+  const span = innerDoc.find(`.${targetId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  this.setYofComments();
+  // Open the target's sidebar box. On narrow/mobile viewports the sidebar is
+  // hidden (comments use a tap-triggered modal), so just scrolling is the
+  // sensible behaviour there — and it avoids the eventless modal path.
+  if (padOuter.find('#comments').is(':visible')) {
+    commentBoxes.highlightComment(targetId);
+  }
+};
+
 EpComments.prototype.displayNewCommentForm = function () {
+  this.hideFloatingAddCommentButton();
   const rep = {};
   const ace = this.ace;
 
@@ -1136,8 +1436,8 @@ EpComments.prototype.saveCommentWithoutSelection = async function (padId, commen
 };
 
 EpComments.prototype.buildComments = function (commentsData) {
-  const comments =
-    _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
+  const comments = Object.entries(commentsData).map(
+      ([commentId, commentData]) => this.buildComment(commentId, commentData.data));
   return comments;
 };
 
@@ -1163,14 +1463,17 @@ EpComments.prototype.getMapfakeComments = function () {
 EpComments.prototype.saveCommentReplies = async function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
   const replies = await this._send('bulkAddCommentReplies', padId, data);
-  _.each(replies, (reply) => {
+  // _send() resolves to {} on its 5s timeout, so guard with Array.isArray
+  // rather than a truthy check ({} is truthy and has no .forEach). Mirrors the
+  // no-op-on-non-collection behaviour the former _.each gave here.
+  (Array.isArray(replies) ? replies : []).forEach((reply) => {
     this.setCommentReply(reply);
   });
   this.shouldCollectComment = true; // force collect the comment replies saved
 };
 
 EpComments.prototype.buildCommentReplies = function (repliesData) {
-  const replies = _.map(repliesData, (replyData) => this.buildCommentReply(replyData));
+  const replies = Object.values(repliesData).map((replyData) => this.buildCommentReply(replyData));
   return replies;
 };
 
@@ -1199,7 +1502,7 @@ EpComments.prototype.commentListen = function () {
       // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
       // in this.comments
       const commentsProcessed = {};
-      _.map(allComments, (comment, commentId) => {
+      Object.entries(allComments).forEach(([commentId, comment]) => {
         commentsProcessed[commentId] = {};
         commentsProcessed[commentId].data = comment;
       });
@@ -1236,18 +1539,32 @@ EpComments.prototype.showChangeAsAccepted = function (commentId) {
       .find('.comment-container.change-accepted').addBack('.change-accepted')
       .each(function () {
         $(this).removeClass('change-accepted');
-        const data = {commentId: $(this).attr('data-commentid'), padId: self.padId};
+        const cid = $(this).attr('data-commentid');
+        if (self.comments[cid] && self.comments[cid].data) {
+          self.comments[cid].data.changeAccepted = false;
+        }
+        const data = {commentId: cid, padId: self.padId};
         self._send('revertChange', data);
       });
 
   // this comment get accepted
   comment.addClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = true;
+  }
+  this.refreshCommentsOverview();
 };
 
 EpComments.prototype.showChangeAsReverted = function (commentId) {
   // Get the comment
   const comment = this.container.parent().find(`[data-commentid='${commentId}']`);
   comment.removeClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = false;
+  }
+  this.refreshCommentsOverview();
 };
 
 // Push comment from collaborators
@@ -1256,6 +1573,10 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 
   socket.on('textCommentUpdated', (commentId, commentText) => {
     this.updateCommentBoxText(commentId, commentText);
+    // Keep the cached comment data + overview in sync with collaborator edits
+    // (the overview renders from this.comments, not the DOM) (#12).
+    this.setCommentOrReplyNewText(commentId, commentText);
+    this.refreshCommentsOverview();
   });
 
   socket.on('commentDeleted', (commentId) => {
@@ -1326,6 +1647,13 @@ const hooks = {
     }
 
     if (['setup', 'setBaseText', 'importText'].includes(eventType)) return;
+
+    // Show/position the floating "add comment" button next to the current
+    // selection (#95). aceEditEvent fires on selection changes, so this keeps
+    // the button anchored to the text and hidden when nothing is selected.
+    if (pad.plugins.ep_comments_page) {
+      pad.plugins.ep_comments_page.updateFloatingAddCommentButton(context.rep);
+    }
 
     if (context.callstack.docTextChanged && pad.plugins.ep_comments_page) {
       pad.plugins.ep_comments_page.setYofComments();

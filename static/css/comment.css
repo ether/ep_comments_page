@@ -7,6 +7,27 @@
   color: orange !important;
 }
 
+/* High-contrast / forced-colors mode (e.g. Windows High Contrast Mode), #217.
+   In forced-colors mode the UA discards the fixed yellow/dark fill above, so
+   commented text becomes indistinguishable from the rest of the document, and
+   the orange open-state colour is unreadable against the highlight. Opt back
+   into author colours with the system "marked text" pair — the semantic
+   colours browsers reserve for highlighted text — so the highlight stays
+   visible and legible whatever the active high-contrast palette is, and mark
+   the open comment with an outline (which forced-colors honours) instead of a
+   colour that cannot guarantee contrast. */
+@media (forced-colors: active) {
+  #innerdocbody .ace-line .comment {
+    background-color: Mark;
+    color: MarkText;
+    forced-color-adjust: none;
+  }
+  #innerdocbody .ace-line .comment[data-open="true"] {
+    color: MarkText !important;
+    outline: 2px solid CanvasText;
+  }
+}
+
 
 /* Comment right side container */
 #comments {
@@ -26,6 +47,10 @@
 .sidebar-comment {
   position: absolute;
   width: 100%;
+  box-sizing: border-box;
+  /* Reserve room for the author-colour accent (#6) so commented boxes with and
+     without a known author colour stay aligned; the colour is set inline. */
+  border-left: 3px solid transparent;
 }
 
 /* WITH ICONS */
@@ -59,6 +84,50 @@ input.error, textarea.error {
 .comment-actions-wrapper .comment-edit,
 .comment-actions-wrapper .comment-delete {
   display: inline;
+}
+
+/* #241: previous/next comment navigation arrows in the comment header. */
+.comment-nav-wrapper {
+  float: right;
+  margin-left: 6px;
+}
+.comment-nav-prev,
+.comment-nav-next {
+  /* A fixed, comfortably-clickable icon box. The localized label html10n writes
+     into the element is clipped/invisible (kept as the accessible name via
+     aria-label); the ‹ / › glyph is painted by ::before over the whole box. */
+  position: relative;
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  overflow: hidden;
+  white-space: nowrap;
+  color: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.comment-nav-prev:before,
+.comment-nav-next:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  line-height: 1.5em;
+  text-align: center;
+  color: #666;
+  font-size: 18px;
+  font-weight: bold;
+}
+.comment-nav-prev:hover:before,
+.comment-nav-next:hover:before {
+  color: #000;
+}
+.comment-nav-prev:before {
+  content: "\2039"; /* ‹ */
+}
+.comment-nav-next:before {
+  content: "\203A"; /* › */
 }
 
 /* COMMENT COMPACTED (Visible on right side) */
@@ -118,8 +187,13 @@ input.error, textarea.error {
 }
 .suggestion-display .from-value,
 .suggestion-display .to-value {
-  opacity: .8;
   font-style: italic;
+  /* #380: the colibris skin renders these values in its green --primary-color
+     (#64d29b), which is ~1.9:1 against the light comment background — well below
+     WCAG AA. Use the skin's regular text colour instead (readable everywhere,
+     still skin-overridable via the same token) with a dark fallback. !important
+     beats the core skin's non-important rule regardless of load order. */
+  color: var(--text-color, #2b2b2b) !important;
 }
 .suggestion-display .from-value:after, .suggestion-display .from-value:before,
 .suggestion-display .to-value:after, .suggestion-display .to-value:before {
@@ -133,7 +207,6 @@ input.error, textarea.error {
 }
 .suggestion-create .from-value {
   display: block;
-  opacity: .8;
   font-style: italic;
   margin: 5px 0;
 }
@@ -199,6 +272,16 @@ input.error, textarea.error {
 .comment-modal {
   bottom: auto !important;
   right: auto !important;
+  /* Single source of truth for the viewport safe-margin so the CSS width cap
+     and the JS left/top clamp can't drift apart (#192). commentBoxes.js reads
+     this custom property back via getComputedStyle. */
+  --comment-modal-margin: 10px;
+  /* Never let the popup grow wider than the viewport, otherwise it spills off
+     the right edge on narrow / mobile screens regardless of its left position
+     (#192). Pairs with the left/right clamp in commentBoxes.js. */
+  max-width: calc(100% - (2 * var(--comment-modal-margin)));
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 .comment-modal-comment {
   padding: 0;
@@ -216,6 +299,101 @@ input.error, textarea.error {
 }
 .comment-modal-comment .comment-content {
   margin-top: 0 !important;
+}
+
+/* READ-ONLY: hide write-only comment actions (edit / delete) on read-only
+   pads (#112). The comment sidebar and modal live in the ace_outer iframe,
+   which does not receive core's `readonly` body class, so the plugin tags the
+   outer body with `comments-readonly` itself (see static/js/index.js). The
+   server already rejects edits/deletes from read-only sessions; this removes
+   the now-dead controls from the UI. */
+.comments-readonly .comment-actions-wrapper {
+  display: none !important;
+}
+
+/* #95: floating "add comment" button that follows the selection. Positioned
+   inline (in #editorcontainerbox space) by the plugin and clamped on-screen, so
+   it works the same on desktop and narrow/mobile viewports. It is shown
+   translucent so it doesn't obscure the selection, and becomes fully opaque on
+   hover/focus (#95). */
+.floating-add-comment {
+  position: absolute;
+  display: none;
+  z-index: 100;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+  cursor: pointer;
+  color: #444;
+  user-select: none;
+  opacity: .55;
+  transition: opacity .15s ease;
+}
+.floating-add-comment.visible {
+  display: block;
+}
+.floating-add-comment:hover,
+.floating-add-comment:focus {
+  background: #f3f3f3;
+  opacity: 1;
+}
+
+/* #12/#5: all-comments overview panel (opened from the "Show all comments"
+   checkbox in the Settings pane). */
+#comments-overview {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 280px;
+  max-width: calc(100% - 12px);
+  max-height: 70%;
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+  z-index: 101;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+#comments-overview.visible {
+  display: flex;
+}
+.comments-overview-header {
+  font-weight: bold;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  flex: 0 0 auto;
+}
+.comments-overview-list {
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.comments-overview-empty {
+  padding: 10px;
+  color: #888;
+}
+.comments-overview-row {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+.comments-overview-row:hover {
+  background: #f5f5f5;
+}
+.comments-overview-row.resolved {
+  opacity: .6;
+  text-decoration: line-through;
+}
+.comments-overview-author {
+  font-weight: bold;
+  margin-right: 6px;
 }
 
 /* OTHER */
