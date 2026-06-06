@@ -269,6 +269,9 @@ exports.clientVars = async (hook, context) => {
   // #95: the floating add-comment button is on unless an admin disables it.
   const floatingCommentButton = !(settings.ep_comments_page &&
     settings.ep_comments_page.floatingCommentButton === false);
+  // #6: author-colour accent is on unless an admin disables it.
+  const showAuthorColor = !(settings.ep_comments_page &&
+    settings.ep_comments_page.showAuthorColor === false);
   // #8: read-only viewers may comment only when an admin opts in (default off).
   const allowReadonlyComments =
     !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
@@ -276,7 +279,8 @@ exports.clientVars = async (hook, context) => {
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
   return Object.assign(
-      {displayCommentAsIcon, highlightSelectedText, floatingCommentButton, allowReadonlyComments},
+      {displayCommentAsIcon, highlightSelectedText, floatingCommentButton, showAuthorColor,
+        allowReadonlyComments},
       helperVars);
 };
 

@@ -52,8 +52,14 @@ const highlightComment = (commentId, e, editorComment) => {
     // make a full copy of the html, including listeners
     const commentElmCloned = commentElm.clone(true, true);
 
-    // before of appending clear the css (like top positionning)
+    // Clear only the sidebar positioning so the clone sits correctly in the
+    // modal — but preserve the author-colour accent (#6), which insertComment()
+    // sets as an inline border-left and would otherwise be wiped by clearing
+    // the whole style attribute (#436). Read the inline value off the original
+    // element (the clone may be detached, so computed styles aren't available).
+    const authorBorder = commentElm[0] && commentElm[0].style.borderLeft;
     commentElmCloned.attr('style', '');
+    if (authorBorder) commentElmCloned.css('border-left', authorBorder);
     // fix checkbox, because as we are duplicating the sidebar-comment, we lose unique input names
     commentElmCloned.find('.label-suggestion-checkbox').click(function () {
       $(this).siblings('input[type="checkbox"]').click();

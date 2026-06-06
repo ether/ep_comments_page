@@ -646,6 +646,31 @@ EpComments.prototype.insertContainers = function () {
 };
 
 // Insert a comment node
+// Resolve a comment author's Etherpad colour (#6). The current user's colour is
+// always on clientVars.userColor; other authors come from the historical author
+// data core ships in clientVars. colorId is normally a hex string, but resolve a
+// palette index too just in case. Returns null when unknown.
+EpComments.prototype.authorColor = function (authorId) {
+  try {
+    if (clientVars.showAuthorColor === false) return null;
+    let colorId = null;
+    if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
+      colorId = clientVars.userColor;
+    } else {
+      const cv = clientVars.collab_client_vars;
+      const data = cv && cv.historicalAuthorData && cv.historicalAuthorData[authorId];
+      colorId = data ? data.colorId : null;
+    }
+    if (colorId == null) return null;
+    // colorId may be a hex string or a palette index, depending on how the
+    // author's colour was stored — resolve the index to a hex either way.
+    if (typeof colorId === 'number') colorId = (clientVars.colorPalette || [])[colorId];
+    return colorId || null;
+  } catch (err) {
+    return null;
+  }
+};
+
 EpComments.prototype.insertComment = function (commentId, comment, index) {
   let content = null;
   const container = this.container;
@@ -661,6 +686,11 @@ EpComments.prototype.insertComment = function (commentId, comment, index) {
   if (comment.author !== clientVars.userId) {
     $(content).find('.comment-actions-wrapper').addClass('hidden');
   }
+  // #6: tag the box with the author's colour as a left-border accent. A border
+  // (rather than text/background colour) keeps the comment readable whatever
+  // the author's pastel happens to be.
+  const color = this.authorColor(comment.author);
+  if (color) content.css('border-left', `3px solid ${color}`);
   commentL10n.localize(content);
 
   // position doesn't seem to be relative to rep

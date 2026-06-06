@@ -74,6 +74,12 @@ Because the markers are numbered they stay correlatable in rich formats such as
 comments are not silently dropped when you export. Plain-text (`.txt`) export
 omits comments, as the core text exporter has no extension point for them.
 
+### Author colour accent
+Each comment box shows a left-border accent in its author's colour. This is on
+by default; disable it with:
+```
+"ep_comments_page": {
+  "showAuthorColor": false
 ### Floating comment button
 When text is selected, a small floating button appears next to it for quickly
 adding a comment. This is on by default; disable it with:
