@@ -2,24 +2,25 @@ import {expect, test} from '@playwright/test';
 import {getPadBody} from 'ep_etherpad-lite/tests/frontend-new/helper/padHelper';
 import {aNewCommentsPad} from '../helper/comments';
 
-// #68: read-only users can comment. The plugin's handleMessageSecurity hook
-// deliberately permits a read-only session to make changes that only touch the
-// `comment` attribute, so a viewer can annotate a read-only pad even though they
-// can't edit its text. This guards that end-to-end behaviour.
-test.describe('ep_comments_page - Commenting on a read-only pad (#68)', () => {
-  test('a read-only viewer can add a comment that persists', async ({page}) => {
+// #8: read-only viewers must NOT be able to comment by default. The capability
+// is gated behind the `allowReadonlyComments` setting (default false): with it
+// off, the add-comment button is hidden on a read-only pad and the server
+// rejects comment-attribute changes from a read-only session. (When an admin
+// turns it on, the plugin's handleMessageSecurity hook permits comment-only
+// changes — exercised separately, as it needs a settings.json change.)
+test.describe('ep_comments_page - Read-only commenting is off by default (#8)', () => {
+  test('the add-comment button is hidden on a read-only pad', async ({page}) => {
     test.setTimeout(60_000);
 
-    // Author a writable pad with some text.
+    // Author a writable pad, then open it read-only.
     await aNewCommentsPad(page);
-    let inner = await getPadBody(page);
+    const inner = await getPadBody(page);
     await inner.click();
     await page.keyboard.press('Control+A');
     await page.keyboard.press('Delete');
-    await page.keyboard.type('text that a read-only viewer will comment on');
-    await page.waitForTimeout(1000);
+    await page.keyboard.type('a read-only viewer should not be able to comment here');
+    await page.waitForTimeout(800);
 
-    // Open the pad via its read-only id.
     const readOnlyId: string = await page.evaluate(() => (window as any).clientVars.readOnlyId);
     expect(readOnlyId).toMatch(/^r\./);
     const base = page.url().split('/p/')[0];
@@ -31,35 +32,9 @@ test.describe('ep_comments_page - Commenting on a read-only pad (#68)', () => {
       return (window as any).clientVars.readonly === true;
     }), {timeout: 30_000}).toBe(true);
 
-    inner = await getPadBody(page);
-    // Select the text and add a comment from the read-only view.
-    await expect.poll(async () => {
-      await inner.locator('div').first().click({clickCount: 3});
-      await page.locator('.addComment').click();
-      return page.locator('#newComment.popup-show').count();
-    }, {timeout: 20_000}).toBeGreaterThan(0);
-    await page.locator('#newComment textarea.comment-content').fill('a read-only viewer comment');
-    await page.locator('#comment-create-btn').click();
-
-    // The inline highlight appears and the comment is stored server-side.
-    await expect.poll(async () =>
-      inner.locator('.comment').count()).toBeGreaterThan(0);
-    await expect.poll(async () => page.evaluate(async () => {
-      const ep = (window as any).pad.plugins.ep_comments_page;
-      const r = await ep.getComments();
-      const c = r && r.comments ? r.comments : r;
-      return Object.keys(c || {}).length;
-    })).toBeGreaterThan(0);
-
-    // It persists: reload the read-only pad and the highlight is still there.
-    await page.reload();
-    await expect.poll(async () => page.evaluate(async () => {
-      const ep = (window as any).pad?.plugins?.ep_comments_page;
-      if (!ep || !ep.initDone) return false;
-      await ep.initDone;
-      return true;
-    }), {timeout: 30_000}).toBe(true);
-    const innerAfter = await getPadBody(page);
-    await expect.poll(async () => innerAfter.locator('.comment').count()).toBeGreaterThan(0);
+    // With the feature off (default), the add-comment affordance is not shown.
+    expect(await page.evaluate(() => (window as any).clientVars.allowReadonlyComments))
+        .toBeFalsy();
+    await expect.poll(async () => page.locator('.addComment:visible').count()).toBe(0);
   });
 });
