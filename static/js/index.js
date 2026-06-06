@@ -191,6 +191,22 @@ EpComments.prototype.init = async function () {
     self.navigateComment($(this), 1);
   });
 
+  // #12/#5: the all-comments overview is driven by the "Show all comments"
+  // checkbox in the user Settings pane (rendered server-side by the
+  // ep_plugin_helpers toggle). Restore its cookie state, reflect it into the
+  // panel, and persist + react on change. (The toggle helper's own init isn't
+  // importable client-side — it pulls server-only modules — so the small
+  // cookie/bind mirrors it here.)
+  const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+  const $overviewToggle = $('#options-comments-overview');
+  if (padcookie.getPref('comments-overview') === true) $overviewToggle.prop('checked', true);
+  this.setCommentsOverviewVisible($overviewToggle.is(':checked'));
+  $overviewToggle.on('change', () => {
+    const on = $overviewToggle.is(':checked');
+    padcookie.setPref('comments-overview', on);
+    this.setCommentsOverviewVisible(on);
+  });
+
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
 
@@ -289,6 +305,8 @@ EpComments.prototype.init = async function () {
     // although the comment or reply was saved on the data base successfully, it needs
     // to update the comment or comment reply variable with the new text saved
     self.setCommentOrReplyNewText(commentId, commentText);
+    // Reflect the edit in an open all-comments overview immediately (#12).
+    self.refreshCommentsOverview();
   });
 
   // hide the edit form and make the comment author and text visible again
@@ -574,6 +592,8 @@ EpComments.prototype.collectComments = function (callback) {
   }
 
   this.setYofComments();
+  // Keep the overview panel (#12) in sync when comments are (re)collected.
+  this.refreshCommentsOverview();
   if (callback) callback();
 };
 
@@ -947,6 +967,10 @@ EpComments.prototype.deleteComment = function (commentId) {
   while ($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0) {
     $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
   }
+  // Drop it from the in-memory store too so the overview panel (#12) and any
+  // other readers don't keep a deleted comment around.
+  if (this.comments && this.comments[commentId]) delete this.comments[commentId];
+  this.refreshCommentsOverview();
 };
 
 const cloneLine = (line) => {
@@ -1049,6 +1073,97 @@ EpComments.prototype.updateAddCommentButtonState = function (rep) {
   this.$addCommentButtons
       .toggleClass('comment-btn-disabled', !hasSelection)
       .attr('aria-disabled', String(!hasSelection));
+}
+
+// #12: a togglable panel listing every comment in the pad, with click-to-jump.
+// Distinct from the Y-aligned sidebar — this is a flat, scrollable index.
+EpComments.prototype.ensureCommentsOverview = function () {
+  if (this.$commentsOverview && this.$commentsOverview.length) return this.$commentsOverview;
+  const self = this;
+  const $panel = $('<div>').attr('id', 'comments-overview');
+  const headerText =
+    (html10n.translations && html10n.translations['ep_comments_page.comments_overview.header']) ||
+      'All comments';
+  $panel.append($('<div>').addClass('comments-overview-header').text(headerText));
+  $panel.append($('<div>').addClass('comments-overview-list'));
+  // Jump to the clicked comment (event-delegated so it survives re-renders).
+  $panel.on('click', '.comments-overview-row', function () {
+    self.jumpToComment($(this).attr('data-commentid'));
+  });
+  $panel.appendTo($('#editorcontainerbox'));
+  this.$commentsOverview = $panel;
+  return $panel;
+};
+
+// Resolve a comment author's Etherpad colour for the overview tint. The current
+// user's colour is on clientVars.userColor; other authors come from the
+// historical author data core ships in clientVars. colorId is normally a hex
+// string but may be a palette index. Returns null when unknown (#12).
+EpComments.prototype.authorColor = function (authorId) {
+  try {
+    if (clientVars.showAuthorColor === false) return null;
+    let colorId = null;
+    if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
+      colorId = clientVars.userColor;
+    } else {
+      const cv = clientVars.collab_client_vars;
+      const data = cv && cv.historicalAuthorData && cv.historicalAuthorData[authorId];
+      colorId = data ? data.colorId : null;
+    }
+    if (colorId == null) return null;
+    if (typeof colorId === 'number') colorId = (clientVars.colorPalette || [])[colorId];
+    return colorId || null;
+  } catch (err) {
+    return null;
+  }
+};
+
+EpComments.prototype.refreshCommentsOverview = function () {
+  if (!this.$commentsOverview || !this.$commentsOverview.hasClass('visible')) return;
+  const $list = this.$commentsOverview.find('.comments-overview-list').empty();
+  const comments = this.comments || {};
+  const ids = Object.keys(comments);
+  if (!ids.length) {
+    const emptyText =
+      (html10n.translations &&
+        html10n.translations['ep_comments_page.comments_overview.empty']) || 'No comments yet';
+    $list.append($('<div>').addClass('comments-overview-empty').text(emptyText));
+    return;
+  }
+  ids.forEach((commentId) => {
+    const data = (comments[commentId] && comments[commentId].data) || {};
+    const $row = $('<div>')
+        .addClass('comments-overview-row')
+        .attr('data-commentid', commentId);
+    if (data.changeAccepted) $row.addClass('resolved');
+    const color = this.authorColor && this.authorColor(data.author);
+    if (color) $row.css('border-left', `3px solid ${color}`);
+    $row.append($('<span>').addClass('comments-overview-author').text(data.name || 'Anonymous'));
+    $row.append($('<span>').addClass('comments-overview-text').text(data.text || ''));
+    $list.append($row);
+  });
+};
+
+EpComments.prototype.setCommentsOverviewVisible = function (visible) {
+  const $panel = this.ensureCommentsOverview();
+  $panel.toggleClass('visible', !!visible);
+  if (visible) this.refreshCommentsOverview();
+};
+
+EpComments.prototype.jumpToComment = function (commentId) {
+  if (!commentId) return;
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const padInner = padOuter.find('iframe[name="ace_inner"]');
+  const span = padInner.contents().find(`.${commentId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  // Re-align and open the target comment box.
+  this.setYofComments();
+  padOuter.find('#comments .sidebar-comment').removeClass('full-display');
+  padOuter.find(`#${commentId}`).addClass('full-display');
 };
 
 // #241: open the comment adjacent (dir = -1 prev, +1 next) to the one whose
@@ -1383,18 +1498,32 @@ EpComments.prototype.showChangeAsAccepted = function (commentId) {
       .find('.comment-container.change-accepted').addBack('.change-accepted')
       .each(function () {
         $(this).removeClass('change-accepted');
-        const data = {commentId: $(this).attr('data-commentid'), padId: self.padId};
+        const cid = $(this).attr('data-commentid');
+        if (self.comments[cid] && self.comments[cid].data) {
+          self.comments[cid].data.changeAccepted = false;
+        }
+        const data = {commentId: cid, padId: self.padId};
         self._send('revertChange', data);
       });
 
   // this comment get accepted
   comment.addClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = true;
+  }
+  this.refreshCommentsOverview();
 };
 
 EpComments.prototype.showChangeAsReverted = function (commentId) {
   // Get the comment
   const comment = this.container.parent().find(`[data-commentid='${commentId}']`);
   comment.removeClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = false;
+  }
+  this.refreshCommentsOverview();
 };
 
 // Push comment from collaborators
@@ -1403,6 +1532,10 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 
   socket.on('textCommentUpdated', (commentId, commentText) => {
     this.updateCommentBoxText(commentId, commentText);
+    // Keep the cached comment data + overview in sync with collaborator edits
+    // (the overview renders from this.comments, not the DOM) (#12).
+    this.setCommentOrReplyNewText(commentId, commentText);
+    this.refreshCommentsOverview();
   });
 
   socket.on('commentDeleted', (commentId) => {
