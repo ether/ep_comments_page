@@ -148,6 +148,21 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
       return !!comments && Object.values(comments).some((c: any) => c && c.changeTo);
     }), {timeout: 15_000}).toBe(true);
 
+    // The metadata poll above only proves the comment record is stored. The
+    // inline highlight (and thus the rebuilt box) is reconstructed from the pad
+    // atext's `comment` attribute on reload, so also wait for the pad changeset
+    // that applies that attribute to be committed — i.e. the collab revision
+    // stops advancing. Reopening before that races persistence and loads a pad
+    // whose text carries no comment attribute (the flaky failure).
+    let lastRev = -1;
+    await expect.poll(async () => {
+      const rev = await page.evaluate(() =>
+        (window as any).pad?.getCollabRevisionNumber?.() ?? -1);
+      const stable = rev >= 1 && rev === lastRev;
+      lastRev = rev;
+      return stable;
+    }, {timeout: 15_000, intervals: [500]}).toBe(true);
+
     // Reload the pad as a fresh page load so the comment box is rebuilt from
     // the server data (collectComments), not the create-time DOM.
     await reopenCommentsPad(page, padId);
