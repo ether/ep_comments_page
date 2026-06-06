@@ -6,7 +6,6 @@
 */
 
 
-const _ = require('underscore');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
@@ -29,6 +28,15 @@ const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
 const socketIoClient = require('socket.io-client');
 const io = socketIoClient.default || socketIoClient;
+
+// Trailing-edge debounce (replaces the former underscore dependency, #263).
+const debounce = (fn, wait) => {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), wait);
+  };
+};
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -136,7 +144,7 @@ EpComments.prototype.init = async function () {
   this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e) => {
     this.setYofComments();
   });
-  $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
+  $(window).resize(debounce(() => { this.setYofComments(); }, 100));
 
   // Refresh the "N minutes ago" relative-time strings (#154). The original
   // date is stored in the `datetime` attribute so we can recompute
@@ -683,30 +691,48 @@ EpComments.prototype.setYofComments = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]');
   const inlineComments = this.getFirstOcurrenceOfCommentIds();
   const commentsToBeShown = [];
+  const innerPaddingTop = parseInt(padInner.css('padding-top').split('px')[0]) || 0;
 
+  // First pass: compute each comment box's natural target top (aligned to its
+  // commented text). Collected up-front so the second pass can de-overlap
+  // comments that share a line (#181) instead of stacking them at the same Y.
+  const targets = [];
   $.each(inlineComments, function () {
-    // classname is the ID of the comment
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if (!commentId || !commentId[1]) return;
-    const commentEle = padOuter.find(`#${commentId[1]}`);
-
-    let topOffset = this.offsetTop;
-    topOffset += parseInt(padInner.css('padding-top').split('px')[0]);
-    topOffset += parseInt($(this).css('padding-top').split('px')[0]);
-
-    if (commentId) {
-      // adjust outer comment...
-      commentBoxes.adjustTopOf(commentId[1], topOffset);
-      // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], topOffset);
-
-      // mark this comment to be displayed if it was visible before we start adjusting its position
-      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
-    }
+    const match = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
+    if (!match || !match[1]) return;
+    let topOffset = this.offsetTop + innerPaddingTop;
+    topOffset += parseInt($(this).css('padding-top').split('px')[0]) || 0;
+    targets.push({commentId: match[1], top: topOffset});
   });
 
+  // Lay the boxes out top-to-bottom. When two comments resolve to the same (or
+  // overlapping) Y — e.g. two comments on one line — push the later one down so
+  // both stay visible and clickable instead of overlapping (#181). Comments on
+  // distinct lines keep their natural position because their natural top is
+  // already past the previous box's bottom.
+  targets.sort((a, b) => a.top - b.top);
+  const gap = 4;
+  let lastBottom = -Infinity;
+  for (const target of targets) {
+    const commentEle = padOuter.find(`#${target.commentId}`);
+    const top = Math.max(target.top, lastBottom + gap);
+    // adjust outer comment...
+    commentBoxes.adjustTopOf(target.commentId, top);
+    // ... and adjust icons too (icons stay aligned to the text line)
+    commentIcons.adjustTopOf(target.commentId, target.top);
+
+    // A collapsed box is a single compact line; measure it so the next box
+    // clears it. outerHeight may be 0 if the box is hidden — fall back to a
+    // sensible compact-row height so stacking still separates them.
+    const height = commentEle.outerHeight(true) || 24;
+    lastBottom = top + height;
+
+    // mark this comment to be displayed if it was visible before we start adjusting its position
+    if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
+  }
+
   // re-display comments that were visible before
-  _.each(commentsToBeShown, (commentEle) => {
+  commentsToBeShown.forEach((commentEle) => {
     commentEle.show();
   });
 };
@@ -716,13 +742,13 @@ EpComments.prototype.getFirstOcurrenceOfCommentIds = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]').contents();
   const commentsId = this.getUniqueCommentsId(padInner);
   const firstOcurrenceOfCommentIds =
-    _.map(commentsId, (commentId) => padInner.find(`.${commentId}`).first().get(0));
+    commentsId.map((commentId) => padInner.find(`.${commentId}`).first().get(0));
   return firstOcurrenceOfCommentIds;
 };
 
 EpComments.prototype.getUniqueCommentsId = function (padInner) {
-  const inlineComments = padInner.find('.comment');
-  const commentsId = _.map(inlineComments, (inlineComment) => {
+  const inlineComments = padInner.find('.comment').toArray();
+  const commentsId = inlineComments.map((inlineComment) => {
     const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
     // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
     if (commentId && commentId[1]) return commentId[1];
@@ -922,7 +948,7 @@ const getXYOffsetOfRep = (rep) => {
   // make sure end is after start
   if (selStart[0] > selEnd[0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) {
     selEnd = selStart;
-    selStart = _.clone(selStart);
+    selStart = [...selStart];
   }
 
   let startIndex = 0;
@@ -1166,8 +1192,8 @@ EpComments.prototype.saveCommentWithoutSelection = async function (padId, commen
 };
 
 EpComments.prototype.buildComments = function (commentsData) {
-  const comments =
-    _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
+  const comments = Object.entries(commentsData).map(
+      ([commentId, commentData]) => this.buildComment(commentId, commentData.data));
   return comments;
 };
 
@@ -1193,14 +1219,17 @@ EpComments.prototype.getMapfakeComments = function () {
 EpComments.prototype.saveCommentReplies = async function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
   const replies = await this._send('bulkAddCommentReplies', padId, data);
-  _.each(replies, (reply) => {
+  // _send() resolves to {} on its 5s timeout, so guard with Array.isArray
+  // rather than a truthy check ({} is truthy and has no .forEach). Mirrors the
+  // no-op-on-non-collection behaviour the former _.each gave here.
+  (Array.isArray(replies) ? replies : []).forEach((reply) => {
     this.setCommentReply(reply);
   });
   this.shouldCollectComment = true; // force collect the comment replies saved
 };
 
 EpComments.prototype.buildCommentReplies = function (repliesData) {
-  const replies = _.map(repliesData, (replyData) => this.buildCommentReply(replyData));
+  const replies = Object.values(repliesData).map((replyData) => this.buildCommentReply(replyData));
   return replies;
 };
 
@@ -1229,7 +1258,7 @@ EpComments.prototype.commentListen = function () {
       // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
       // in this.comments
       const commentsProcessed = {};
-      _.map(allComments, (comment, commentId) => {
+      Object.entries(allComments).forEach(([commentId, comment]) => {
         commentsProcessed[commentId] = {};
         commentsProcessed[commentId].data = comment;
       });
