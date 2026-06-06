@@ -32,11 +32,15 @@ test.describe('ep_comments_page - Read-only hides comment actions (#112)', () =>
         await expect.poll(async () =>
           inner.locator('div').first().locator('.comment').count()).toBeGreaterThan(0);
 
-        // Sanity: on the writable pad the actions wrapper exists and is visible.
+        // Sanity: on the writable pad the actions wrapper is actually visible.
+        // The wrapper lives under .full-display-content (hidden until the box is
+        // expanded), so expand the box first and assert real visibility rather
+        // than just the wrapper's own display value.
         await expect.poll(async () =>
           outer.locator('#comments .comment-actions-wrapper').count()).toBeGreaterThan(0);
-        expect(await outer.locator('#comments .comment-actions-wrapper').first()
-            .evaluate((el) => window.getComputedStyle(el).display)).not.toBe('none');
+        await outer.locator('#comments .sidebar-comment').first()
+            .evaluate((el) => el.classList.add('full-display'));
+        await expect(outer.locator('#comments .comment-actions-wrapper').first()).toBeVisible();
 
         // Wait for the comment to persist, then open the read-only view.
         const readOnlyId: string = await page.evaluate(async () => {
@@ -61,12 +65,14 @@ test.describe('ep_comments_page - Read-only hides comment actions (#112)', () =>
         await expect.poll(async () =>
           roOuter.locator('#comments .sidebar-comment').count()).toBeGreaterThan(0);
 
-        // The actions wrapper is present in the DOM but hidden by the CSS.
+        // The actions wrapper is present in the DOM but hidden by the CSS — even
+        // when the box is expanded (so .full-display-content is shown), the
+        // wrapper stays hidden by the comments-readonly rule.
         await expect.poll(async () =>
           roOuter.locator('#comments .comment-actions-wrapper').count()).toBeGreaterThan(0);
-        const display = await roOuter.locator('#comments .comment-actions-wrapper').first()
-            .evaluate((el) => window.getComputedStyle(el).display);
-        expect(display).toBe('none');
+        await roOuter.locator('#comments .sidebar-comment').first()
+            .evaluate((el) => el.classList.add('full-display'));
+        await expect(roOuter.locator('#comments .comment-actions-wrapper').first()).toBeHidden();
         // And the outer body carries the marker class.
         expect(await roOuter.locator('#outerdocbody.comments-readonly').count())
             .toBeGreaterThan(0);
