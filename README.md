@@ -65,6 +65,15 @@ read-only viewers annotate a pad without being able to edit its text, enable:
 },
 ```
 
+### Comments in exported documents
+Comments are included when you export a pad. Each commented passage gets a
+numbered footnote marker (`[1]`, `[2]`, …) and a **Comments** section is appended
+listing each comment as `[n] author: text` (suggested changes are noted too).
+Because the markers are numbered they stay correlatable in rich formats such as
+**ODT, DOC, DOCX and PDF**, where the in-document anchor link is lost — so your
+comments are not silently dropped when you export. Plain-text (`.txt`) export
+omits comments, as the core text exporter has no extension point for them.
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
