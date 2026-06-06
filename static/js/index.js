@@ -100,6 +100,14 @@ EpComments.prototype.init = async function () {
   this.findContainers();
   this.insertContainers(); // Insert comment containers in sidebar
 
+  // On read-only pads, tag the outer body so the CSS can hide the edit/delete
+  // controls (#112). The sidebar lives in the ace_outer iframe, which doesn't
+  // get core's `readonly` body class. The server already rejects writes from
+  // read-only sessions; this just removes the dead controls from the UI.
+  if (clientVars.readonly && this.outerBody) {
+    this.outerBody.addClass('comments-readonly');
+  }
+
   // Init icons container
   commentIcons.insertContainer();
 

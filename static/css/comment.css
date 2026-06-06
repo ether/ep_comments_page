@@ -218,6 +218,16 @@ input.error, textarea.error {
   margin-top: 0 !important;
 }
 
+/* READ-ONLY: hide write-only comment actions (edit / delete) on read-only
+   pads (#112). The comment sidebar and modal live in the ace_outer iframe,
+   which does not receive core's `readonly` body class, so the plugin tags the
+   outer body with `comments-readonly` itself (see static/js/index.js). The
+   server already rejects edits/deletes from read-only sessions; this removes
+   the now-dead controls from the UI. */
+.comments-readonly .comment-actions-wrapper {
+  display: none !important;
+}
+
 /* OTHER */
 .hidden {
   display: none;
