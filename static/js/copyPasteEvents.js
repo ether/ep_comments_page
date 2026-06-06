@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('underscore');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const shared = require('./shared');
 
@@ -49,15 +48,15 @@ exports.addTextOnClipboard = (e, ace, padInner, removeSelection, comments, repli
 
 const getReplyData = (replies, commentIds) => {
   let replyData = {};
-  _.each(commentIds, (commentId) => {
-    replyData = _.extend(getRepliesFromCommentId(replies, commentId), replyData);
+  commentIds.forEach((commentId) => {
+    replyData = Object.assign(getRepliesFromCommentId(replies, commentId), replyData);
   });
   return replyData;
 };
 
 const getRepliesFromCommentId = (replies, commentId) => {
   const repliesFromCommentID = {};
-  _.each(replies, (reply, replyId) => {
+  Object.entries(replies || {}).forEach(([replyId, reply]) => {
     if (reply.commentId === commentId) {
       repliesFromCommentID[replyId] = reply;
     }
@@ -67,7 +66,7 @@ const getRepliesFromCommentId = (replies, commentId) => {
 
 const buildCommentIdToFakeIdMap = (commentsData) => {
   const commentIdToFakeId = {};
-  _.each(commentsData, (comment, fakeCommentId) => {
+  Object.entries(commentsData).forEach(([fakeCommentId, comment]) => {
     const commentId = comment.data.originalCommentId;
     commentIdToFakeId[commentId] = fakeCommentId;
   });
@@ -76,7 +75,7 @@ const buildCommentIdToFakeIdMap = (commentsData) => {
 
 const replaceCommentIdsWithFakeIds = (commentsData, html) => {
   const commentIdToFakeId = buildCommentIdToFakeIdMap(commentsData);
-  _.each(commentIdToFakeId, (fakeCommentId, commentId) => {
+  Object.entries(commentIdToFakeId).forEach(([commentId, fakeCommentId]) => {
     $(html).find(`.${commentId}`).removeClass(commentId).addClass(fakeCommentId);
   });
   const htmlWithFakeCommentIds = getHtml(html);
@@ -86,7 +85,7 @@ const replaceCommentIdsWithFakeIds = (commentsData, html) => {
 const buildCommentsData = (html, comments) => {
   const commentsData = {};
   const originalCommentIds = getCommentIds(html);
-  _.each(originalCommentIds, (originalCommentId) => {
+  originalCommentIds.forEach((originalCommentId) => {
     const fakeCommentId = generateFakeCommentId();
     const comment = comments[originalCommentId];
     comment.data.originalCommentId = originalCommentId;
@@ -101,9 +100,9 @@ const generateFakeCommentId = () => {
 };
 
 const getCommentIds = (html) => {
-  const allSpans = $(html).find('span');
+  const allSpans = $(html).find('span').toArray();
   const commentIds = [];
-  _.each(allSpans, (span) => {
+  allSpans.forEach((span) => {
     const cls = $(span).attr('class');
     const classCommentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(cls);
     const commentId = (classCommentId) ? classCommentId[1] : false;
@@ -217,7 +216,7 @@ const saveComments = (comments) => {
   const mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
   const mapFakeComments = pad.plugins.ep_comments_page.mapFakeComments;
 
-  _.each(comments, (comment, fakeCommentId) => {
+  Object.entries(comments).forEach(([fakeCommentId, comment]) => {
     const newCommentId = shared.generateCommentId();
     mapFakeComments[fakeCommentId] = newCommentId;
     const originalCommentId = comment.data.originalCommentId;
@@ -231,7 +230,7 @@ const saveReplies = (replies) => {
   const repliesToSave = {};
   const padId = clientVars.padId;
   const mapOriginalCommentsId = pad.plugins.ep_comments_page.mapOriginalCommentsId;
-  _.each(replies, (reply, replyId) => {
+  Object.entries(replies).forEach(([replyId, reply]) => {
     const originalCommentId = reply.commentId;
     // as the comment copied has got a new commentId, we set this id in the reply as well
     reply.commentId = mapOriginalCommentsId[originalCommentId];
@@ -258,7 +257,7 @@ const htmlDecode = (input) => {
 exports.getCommentIdOnFirstPositionSelected = function () {
   const attributeManager = this.documentAttributeManager;
   const rep = this.rep;
-  const commentId = _.object(
+  const commentId = Object.fromEntries(
       attributeManager.getAttributesOnPosition(rep.selStart[0], rep.selStart[1])).comment;
   return commentId;
 };
@@ -311,7 +310,7 @@ const hasCommentOnLine = (lineNumber, firstColumn, lastColumn, attributeManager)
   let foundCommentOnLine = false;
   for (let column = firstColumn; column <= lastColumn && !foundCommentOnLine; column++) {
     const commentId =
-      _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).comment;
+      Object.fromEntries(attributeManager.getAttributesOnPosition(lineNumber, column)).comment;
     if (commentId !== undefined) {
       foundCommentOnLine = true;
     }
