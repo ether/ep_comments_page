@@ -156,6 +156,10 @@ EpComments.prototype.init = async function () {
     e.preventDefault(); // stops focus from being lost
     this.displayNewCommentForm();
   });
+  // #8: don't offer commenting to read-only viewers unless an admin enabled it.
+  if (clientVars.readonly && !clientVars.allowReadonlyComments) {
+    $('.addComment').hide();
+  }
 
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
