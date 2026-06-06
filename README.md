@@ -10,6 +10,21 @@
 pnpm run plugins install ep_comments_page
 ```
 
+## Comments in the timeslider
+
+Comments are shown **read-only** in the timeslider and in-place pad history.
+Each comment lines up with the text it annotates and only appears for the
+revisions where that text exists, so you can read the discussion as you scrub
+through history. Suggested changes are shown too, with the original text struck
+through once the change has been accepted. Toggling **Show Comments** off hides
+the comments — both the sidebar and the inline highlight — in history as well.
+
+This works on the latest Etherpad release as well as develop. Older timeslider
+bundles can't load plugin client hooks, so the read-only viewer is injected as a
+plain script and reconstructs the comment positions from the server — no core
+update required. (Reading comments while scrubbing *in-place* history on the pad
+URL additionally needs develop's in-place history mode.)
+
 ## Extra settings
 This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
 
@@ -39,6 +54,25 @@ To enable this feature, add the following code to your `settings.json`:
 ```
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
+
+### Let read-only viewers comment
+By default a read-only viewer cannot add comments (the add-comment button is
+hidden and the server rejects comment changes from a read-only session). To let
+read-only viewers annotate a pad without being able to edit its text, enable:
+```
+"ep_comments_page": {
+  "allowReadonlyComments": true
+},
+```
+
+### Comments in exported documents
+Comments are included when you export a pad. Each commented passage gets a
+numbered footnote marker (`[1]`, `[2]`, …) and a **Comments** section is appended
+listing each comment as `[n] author: text` (suggested changes are noted too).
+Because the markers are numbered they stay correlatable in rich formats such as
+**ODT, DOC, DOCX and PDF**, where the in-document anchor link is lost — so your
+comments are not silently dropped when you export. Plain-text (`.txt`) export
+omits comments, as the core text exporter has no extension point for them.
 
 ### Floating comment button
 When text is selected, a small floating button appears next to it for quickly

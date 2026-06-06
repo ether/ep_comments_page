@@ -65,26 +65,41 @@ const highlightComment = (commentId, e, editorComment) => {
     // get modal position
     const containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
     const modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
-    let targetLeft = e.clientX;
-    let targetTop = $(e.target).offset().top;
+    // Be tolerant of being called without a (complete) event — e.g. programmatic
+    // navigation (#241). Fall back to the anchor element's position so we never
+    // dereference a missing event (clientX/target).
+    const $anchor = (e && e.target) ? $(e.target) : (editorComment || commentElm);
+    const anchorOffset = $anchor.offset() || {left: 0, top: 0};
+    let targetLeft = (e && typeof e.clientX === 'number') ? e.clientX : anchorOffset.left;
+    let targetTop = anchorOffset.top;
     if (editorComment) {
       targetLeft += padInner.offset().left;
       targetTop += parseInt(padInner.css('padding-top').split('px')[0]);
       targetTop += parseInt(padOuter.find('#outerdocbody').css('padding-top').split('px')[0]);
     } else {
       // mean we are clicking from a comment Icon
-      targetLeft = $(e.target).offset().left - 20;
+      targetLeft = anchorOffset.left - 20;
     }
 
-    // if positioning modal on target left will make part of the modal to be
-    // out of screen, we place it closer to the middle of the screen
-    if (targetLeft + modalWitdh > containerWidth) {
-      targetLeft = containerWidth - modalWitdh - 25;
-    }
+    // Clamp horizontally so the modal never spills off either edge. The old
+    // code only guarded the right edge, which left the popup half off-screen
+    // (or pushed it past the left edge from the icon's `offset - 20`) on
+    // narrow / mobile viewports (#192). max() keeps the left margin valid even
+    // when the modal is wider than the container.
+    // Read the safe-margin from the CSS custom property so JS and CSS stay in
+    // sync (single source of truth on .comment-modal); fall back to 10px.
+    const $modal = getPadOuter().find('.comment-modal');
+    const marginProp = $modal.length
+      ? parseFloat(getComputedStyle($modal[0]).getPropertyValue('--comment-modal-margin'))
+      : NaN;
+    const margin = Number.isFinite(marginProp) ? marginProp : 10;
+    const maxLeft = Math.max(margin, containerWidth - modalWitdh - margin);
+    targetLeft = Math.min(Math.max(targetLeft, margin), maxLeft);
     const editorCommentHeight = editorComment ? editorComment.outerHeight(true) : 30;
+    targetTop = Math.max(margin, targetTop + editorCommentHeight);
     getPadOuter().find('.comment-modal').addClass('popup-show').css({
       left: `${targetLeft}px`,
-      top: `${targetTop + editorCommentHeight}px`,
+      top: `${targetTop}px`,
     });
   }
 };
