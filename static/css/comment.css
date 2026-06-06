@@ -220,6 +220,12 @@ input.error, textarea.error {
 .comment-modal {
   bottom: auto !important;
   right: auto !important;
+  /* Never let the popup grow wider than the viewport, otherwise it spills off
+     the right edge on narrow / mobile screens regardless of its left position
+     (#192). Pairs with the left/right clamp in commentBoxes.js. */
+  max-width: calc(100% - 20px);
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 .comment-modal-comment {
   padding: 0;
