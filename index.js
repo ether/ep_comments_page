@@ -278,6 +278,9 @@ exports.clientVars = async (hook, context) => {
     settings.ep_comments_page ? settings.ep_comments_page.displayCommentAsIcon : false;
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
+  // #6: author-colour accent is on unless an admin disables it.
+  const showAuthorColor = !(settings.ep_comments_page &&
+    settings.ep_comments_page.showAuthorColor === false);
   // #8: read-only viewers may comment only when an admin opts in (default off).
   const allowReadonlyComments =
     !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
@@ -285,7 +288,8 @@ exports.clientVars = async (hook, context) => {
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
   return Object.assign(
-      {displayCommentAsIcon, highlightSelectedText, allowReadonlyComments}, helperVars);
+      {displayCommentAsIcon, highlightSelectedText, showAuthorColor, allowReadonlyComments},
+      helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {

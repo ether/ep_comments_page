@@ -47,6 +47,10 @@
 .sidebar-comment {
   position: absolute;
   width: 100%;
+  box-sizing: border-box;
+  /* Reserve room for the author-colour accent (#6) so commented boxes with and
+     without a known author colour stay aligned; the colour is set inline. */
+  border-left: 3px solid transparent;
 }
 
 /* WITH ICONS */
@@ -268,6 +272,16 @@ input.error, textarea.error {
 .comment-modal {
   bottom: auto !important;
   right: auto !important;
+  /* Single source of truth for the viewport safe-margin so the CSS width cap
+     and the JS left/top clamp can't drift apart (#192). commentBoxes.js reads
+     this custom property back via getComputedStyle. */
+  --comment-modal-margin: 10px;
+  /* Never let the popup grow wider than the viewport, otherwise it spills off
+     the right edge on narrow / mobile screens regardless of its left position
+     (#192). Pairs with the left/right clamp in commentBoxes.js. */
+  max-width: calc(100% - (2 * var(--comment-modal-margin)));
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 .comment-modal-comment {
   padding: 0;
