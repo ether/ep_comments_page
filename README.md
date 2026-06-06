@@ -49,6 +49,29 @@ Because the markers are numbered they stay correlatable in rich formats such as
 comments are not silently dropped when you export. Plain-text (`.txt`) export
 omits comments, as the core text exporter has no extension point for them.
 
+#### Native Word comments — not yet supported (contributions/funding welcome)
+The exported comments above are ordinary **document text**, not native review
+comments. In particular, **DOCX export does _not_ use Microsoft Word's comment
+feature**: the comments do not appear in Word's *Review* pane, cannot be replied
+to or resolved there, and carry no author/timestamp metadata beyond the text
+line. The same applies on **import** — native Word comments in an imported
+`.docx` are dropped rather than turned into Etherpad comments.
+
+Round-tripping real Word comments is technically feasible, just not implemented
+yet:
+
+- **Import.** Etherpad's DOCX import uses [`mammoth`](https://www.npmjs.com/package/mammoth),
+  which ignores Word comments by default but can extract them via a style mapping
+  for `comment-reference`; mammoth then appends the comments to the end of the
+  generated HTML and links them, which could be mapped onto Etherpad comments.
+- **Export.** Native Word comments require emitting the DOCX comment parts
+  (`word/comments.xml`, `commentRangeStart`/`commentRangeEnd` and
+  `commentReference` runs), which neither LibreOffice nor the built-in
+  `html-to-docx` converter generate from the exported HTML.
+
+If your organisation would benefit from native Word-comment import/export,
+[sponsorship of this work is welcome](https://etherpad.org/).
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
