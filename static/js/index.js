@@ -154,11 +154,18 @@ EpComments.prototype.init = async function () {
   // On click comment icon toolbar
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
+    // An aria-disabled control must not be activatable by mouse or keyboard
+    // (keyboard Enter/Space on the link also fires click), so don't open the
+    // form while there is no selection (#96).
+    if (this._addCommentDisabled) return;
     this.displayNewCommentForm();
   });
   // Start disabled-looking: nothing is selected on load (#96). aceEditEvent
   // keeps it in sync from here on.
-  $('.addComment').addClass('comment-btn-disabled').attr('aria-disabled', 'true');
+  this.$addCommentButtons = $('.addComment');
+  this._addCommentDisabled = true;
+  this._lastHasSelection = false;
+  this.$addCommentButtons.addClass('comment-btn-disabled').attr('aria-disabled', 'true');
 
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
@@ -975,7 +982,16 @@ EpComments.prototype.updateAddCommentButtonState = function (rep) {
   if (!rep || !rep.selStart || !rep.selEnd) return;
   const hasSelection =
     rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
-  $('.addComment')
+  // aceEditEvent is a hot hook; skip the DOM query/writes when the selection
+  // state hasn't changed since the last event (#96).
+  if (hasSelection === this._lastHasSelection) return;
+  this._lastHasSelection = hasSelection;
+  this._addCommentDisabled = !hasSelection;
+  // Reuse the cached button collection; re-query once if it wasn't ready yet.
+  if (!this.$addCommentButtons || !this.$addCommentButtons.length) {
+    this.$addCommentButtons = $('.addComment');
+  }
+  this.$addCommentButtons
       .toggleClass('comment-btn-disabled', !hasSelection)
       .attr('aria-disabled', String(!hasSelection));
 };
