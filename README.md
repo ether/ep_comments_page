@@ -111,6 +111,44 @@ By default comments are exported to HTML, but if you don't wish to do that then 
 },
 ```
 
+## How comments are exported
+
+Comments are embedded in the exported document as **endnote-style annotations**,
+not as native review comments. For each commented passage a superscript marker
+(`*`) is placed inline, and the full comment text is listed in a `comments`
+section at the end of the document. This is how comments appear in **HTML, DOCX,
+ODT and PDF** exports alike — the other formats are produced by converting the
+HTML export (via LibreOffice/soffice, or the built-in `html-to-docx` converter
+when soffice is not configured).
+
+In particular, **DOCX export does _not_ use Microsoft Word's native comment
+feature**: exported comments are document text, so they do not appear in Word's
+*Review* pane, cannot be replied to or resolved there, and do not carry author
+or timestamp metadata. Set `"exportHtml": false` (above) to omit comments from
+exports entirely.
+
+The same applies on **import**: when an existing `.docx` is imported into a pad,
+its native Word comments are dropped rather than converted into Etherpad
+comments.
+
+### Native Word comments — not yet supported (contributions/funding welcome)
+
+Round-tripping real Word comments is technically feasible and would be a great
+addition; it simply isn't implemented yet:
+
+- **Import.** Etherpad's DOCX import uses [`mammoth`](https://www.npmjs.com/package/mammoth),
+  which ignores Word comments by default but can extract them by passing a style
+  mapping for `comment-reference` — mammoth then appends the comments to the end
+  of the generated HTML and links them. That HTML could be mapped onto real
+  Etherpad comments.
+- **Export.** Producing native Word comments requires emitting the DOCX comment
+  parts (`word/comments.xml`, `commentRangeStart`/`commentRangeEnd` and
+  `commentReference` runs), which neither LibreOffice nor `html-to-docx`
+  generate from the current HTML.
+
+If your organisation would benefit from native Word-comment import/export,
+[sponsorship of this work is welcome](https://etherpad.org/).
+
 ## Creating comment via API
 If you need to add comments to a pad:
 
