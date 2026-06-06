@@ -10,6 +10,21 @@
 pnpm run plugins install ep_comments_page
 ```
 
+## Comments in the timeslider
+
+Comments are shown **read-only** in the timeslider and in-place pad history.
+Each comment lines up with the text it annotates and only appears for the
+revisions where that text exists, so you can read the discussion as you scrub
+through history. Suggested changes are shown too, with the original text struck
+through once the change has been accepted. Toggling **Show Comments** off hides
+the comments — both the sidebar and the inline highlight — in history as well.
+
+This works on the latest Etherpad release as well as develop. Older timeslider
+bundles can't load plugin client hooks, so the read-only viewer is injected as a
+plain script and reconstructs the comment positions from the server — no core
+update required. (Reading comments while scrubbing *in-place* history on the pad
+URL additionally needs develop's in-place history mode.)
+
 ## Extra settings
 This plugin has some extra features that can be enabled by changing values on `settings.json` of your Etherpad instance.
 
