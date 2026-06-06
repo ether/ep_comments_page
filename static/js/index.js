@@ -271,6 +271,8 @@ EpComments.prototype.init = async function () {
     // although the comment or reply was saved on the data base successfully, it needs
     // to update the comment or comment reply variable with the new text saved
     self.setCommentOrReplyNewText(commentId, commentText);
+    // Reflect the edit in an open all-comments overview immediately (#12).
+    self.refreshCommentsOverview();
   });
 
   // hide the edit form and make the comment author and text visible again
@@ -1005,6 +1007,29 @@ EpComments.prototype.ensureCommentsOverview = function () {
   return $panel;
 };
 
+// Resolve a comment author's Etherpad colour for the overview tint. The current
+// user's colour is on clientVars.userColor; other authors come from the
+// historical author data core ships in clientVars. colorId is normally a hex
+// string but may be a palette index. Returns null when unknown (#12).
+EpComments.prototype.authorColor = function (authorId) {
+  try {
+    if (clientVars.showAuthorColor === false) return null;
+    let colorId = null;
+    if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
+      colorId = clientVars.userColor;
+    } else {
+      const cv = clientVars.collab_client_vars;
+      const data = cv && cv.historicalAuthorData && cv.historicalAuthorData[authorId];
+      colorId = data ? data.colorId : null;
+    }
+    if (colorId == null) return null;
+    if (typeof colorId === 'number') colorId = (clientVars.colorPalette || [])[colorId];
+    return colorId || null;
+  } catch (err) {
+    return null;
+  }
+};
+
 EpComments.prototype.refreshCommentsOverview = function () {
   if (!this.$commentsOverview || !this.$commentsOverview.hasClass('visible')) return;
   const $list = this.$commentsOverview.find('.comments-overview-list').empty();
@@ -1355,18 +1380,32 @@ EpComments.prototype.showChangeAsAccepted = function (commentId) {
       .find('.comment-container.change-accepted').addBack('.change-accepted')
       .each(function () {
         $(this).removeClass('change-accepted');
-        const data = {commentId: $(this).attr('data-commentid'), padId: self.padId};
+        const cid = $(this).attr('data-commentid');
+        if (self.comments[cid] && self.comments[cid].data) {
+          self.comments[cid].data.changeAccepted = false;
+        }
+        const data = {commentId: cid, padId: self.padId};
         self._send('revertChange', data);
       });
 
   // this comment get accepted
   comment.addClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = true;
+  }
+  this.refreshCommentsOverview();
 };
 
 EpComments.prototype.showChangeAsReverted = function (commentId) {
   // Get the comment
   const comment = this.container.parent().find(`[data-commentid='${commentId}']`);
   comment.removeClass('change-accepted');
+  // Keep the cached comment data + overview in sync (#12).
+  if (this.comments[commentId] && this.comments[commentId].data) {
+    this.comments[commentId].data.changeAccepted = false;
+  }
+  this.refreshCommentsOverview();
 };
 
 // Push comment from collaborators
@@ -1375,6 +1414,10 @@ EpComments.prototype.pushComment = function (eventType, callback) {
 
   socket.on('textCommentUpdated', (commentId, commentText) => {
     this.updateCommentBoxText(commentId, commentText);
+    // Keep the cached comment data + overview in sync with collaborator edits
+    // (the overview renders from this.comments, not the DOM) (#12).
+    this.setCommentOrReplyNewText(commentId, commentText);
+    this.refreshCommentsOverview();
   });
 
   socket.on('commentDeleted', (commentId) => {
