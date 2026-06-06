@@ -222,7 +222,9 @@ exports.padInitToolbar = (hookName, args, cb) => {
   const button = toolbar.button({
     command: 'addComment',
     localizationId: 'ep_comments_page.add_comment.title',
-    class: 'buttonicon buttonicon-comment-medical',
+    // `acl-write` lets Etherpad core hide the button on read-only pads
+    // (`.readonly .acl-write { display: none }`) — see issue #204.
+    class: 'buttonicon buttonicon-comment-medical acl-write',
   });
 
   toolbar.registerButton('addComment', button);
