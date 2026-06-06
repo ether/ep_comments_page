@@ -55,6 +55,16 @@ To enable this feature, add the following code to your `settings.json`:
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
+### Let read-only viewers comment
+By default a read-only viewer cannot add comments (the add-comment button is
+hidden and the server rejects comment changes from a read-only session). To let
+read-only viewers annotate a pad without being able to edit its text, enable:
+```
+"ep_comments_page": {
+  "allowReadonlyComments": true
+},
+```
+
 ### Author colour accent
 Each comment box shows a left-border accent in its author's colour. This is on
 by default; disable it with:

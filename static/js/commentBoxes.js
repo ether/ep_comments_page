@@ -71,15 +71,20 @@ const highlightComment = (commentId, e, editorComment) => {
     // get modal position
     const containerWidth = getPadOuter().find('#outerdocbody').outerWidth(true);
     const modalWitdh = getPadOuter().find('.comment-modal').outerWidth(true);
-    let targetLeft = e.clientX;
-    let targetTop = $(e.target).offset().top;
+    // Be tolerant of being called without a (complete) event — e.g. programmatic
+    // navigation (#241). Fall back to the anchor element's position so we never
+    // dereference a missing event (clientX/target).
+    const $anchor = (e && e.target) ? $(e.target) : (editorComment || commentElm);
+    const anchorOffset = $anchor.offset() || {left: 0, top: 0};
+    let targetLeft = (e && typeof e.clientX === 'number') ? e.clientX : anchorOffset.left;
+    let targetTop = anchorOffset.top;
     if (editorComment) {
       targetLeft += padInner.offset().left;
       targetTop += parseInt(padInner.css('padding-top').split('px')[0]);
       targetTop += parseInt(padOuter.find('#outerdocbody').css('padding-top').split('px')[0]);
     } else {
       // mean we are clicking from a comment Icon
-      targetLeft = $(e.target).offset().left - 20;
+      targetLeft = anchorOffset.left - 20;
     }
 
     // if positioning modal on target left will make part of the modal to be

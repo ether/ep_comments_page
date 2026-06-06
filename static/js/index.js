@@ -108,6 +108,14 @@ EpComments.prototype.init = async function () {
   this.findContainers();
   this.insertContainers(); // Insert comment containers in sidebar
 
+  // On read-only pads, tag the outer body so the CSS can hide the edit/delete
+  // controls (#112). The sidebar lives in the ace_outer iframe, which doesn't
+  // get core's `readonly` body class. The server already rejects writes from
+  // read-only sessions; this just removes the dead controls from the UI.
+  if (clientVars.readonly && this.outerBody) {
+    this.outerBody.addClass('comments-readonly');
+  }
+
   // Init icons container
   commentIcons.insertContainer();
 
@@ -155,6 +163,21 @@ EpComments.prototype.init = async function () {
   $('.addComment').on('click', (e) => {
     e.preventDefault(); // stops focus from being lost
     this.displayNewCommentForm();
+  });
+  // #8: don't offer commenting to read-only viewers unless an admin enabled it.
+  if (clientVars.readonly && !clientVars.allowReadonlyComments) {
+    $('.addComment').hide();
+  }
+
+  // #241: navigate to the previous/next comment from an open comment box, so
+  // you don't have to hover precisely between adjacent comments.
+  this.container.parent().on('click', '.comment-nav-prev', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), -1);
+  });
+  this.container.parent().on('click', '.comment-nav-next', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), 1);
   });
 
   // Import for below listener : we are using this.container.parent() so we include
@@ -754,7 +777,10 @@ EpComments.prototype.getUniqueCommentsId = function (padInner) {
     if (commentId && commentId[1]) return commentId[1];
   });
   const onlyUnique = (value, index, self) => self.indexOf(value) === index;
-  return commentsId.filter(onlyUnique);
+  // Drop falsy IDs (e.g. fakecomment-* spans created transiently during paste
+  // flows return undefined above) so consumers like navigateComment() never
+  // index into an undefined entry and stall (#241).
+  return commentsId.filter(Boolean).filter(onlyUnique);
 };
 
 // Indicates if all comments are on the correct Y position, and don't need to
@@ -990,6 +1016,36 @@ const getXYOffsetOfRep = (rep) => {
     // Remove the clone element
     $(clone).remove();
     return [left, top];
+  }
+};
+
+// #241: open the comment adjacent (dir = -1 prev, +1 next) to the one whose
+// nav arrow was clicked, in document order, wrapping around the ends. Scrolls
+// the editor to it and opens its box, so a reviewer can step through comments
+// without hovering precisely over each highlight.
+EpComments.prototype.navigateComment = function ($el, dir) {
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const innerDoc = padOuter.find('iframe[name="ace_inner"]').contents();
+  const currentId = $el.closest('.sidebar-comment').attr('data-commentid');
+  const ordered = this.getUniqueCommentsId(innerDoc); // document order
+  if (!ordered.length) return;
+  const idx = ordered.indexOf(currentId);
+  if (idx === -1) return;
+  const targetId = ordered[(idx + dir + ordered.length) % ordered.length];
+  if (!targetId || targetId === currentId) return;
+
+  const span = innerDoc.find(`.${targetId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  this.setYofComments();
+  // Open the target's sidebar box. On narrow/mobile viewports the sidebar is
+  // hidden (comments use a tap-triggered modal), so just scrolling is the
+  // sensible behaviour there — and it avoids the eventless modal path.
+  if (padOuter.find('#comments').is(':visible')) {
+    commentBoxes.highlightComment(targetId);
   }
 };
 

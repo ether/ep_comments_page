@@ -87,6 +87,10 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
   if (dtype !== 'USER_CHANGES') return;
   // Nothing needs to be done if the user already has write access.
   if (!padMessageHandler.sessioninfos[socket.id].readonly) return;
+  // Read-only commenting is opt-in (#8). When it's off (the default), fall
+  // through without granting permission so core's normal read-only enforcement
+  // rejects the change.
+  if (!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments)) return;
   const pool = new AttributePool().fromJsonable(apool);
   const cs = Changeset.unpack(changeset);
   const opIter = Changeset.opIterator(cs.ops);
@@ -218,7 +222,9 @@ exports.padInitToolbar = (hookName, args, cb) => {
   const button = toolbar.button({
     command: 'addComment',
     localizationId: 'ep_comments_page.add_comment.title',
-    class: 'buttonicon buttonicon-comment-medical',
+    // `acl-write` lets Etherpad core hide the button on read-only pads
+    // (`.readonly .acl-write { display: none }`) — see issue #204.
+    class: 'buttonicon buttonicon-comment-medical acl-write',
   });
 
   toolbar.registerButton('addComment', button);
@@ -263,10 +269,15 @@ exports.clientVars = async (hook, context) => {
   // #6: author-colour accent is on unless an admin disables it.
   const showAuthorColor = !(settings.ep_comments_page &&
     settings.ep_comments_page.showAuthorColor === false);
+  // #8: read-only viewers may comment only when an admin opts in (default off).
+  const allowReadonlyComments =
+    !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
   // Merge in the padToggle helper's clientVars block so the client-side
   // helper can read padWideSupported/initialPadEnabled/etc.
   const helperVars = await commentsToggle.clientVars(hook, context);
-  return Object.assign({displayCommentAsIcon, highlightSelectedText, showAuthorColor}, helperVars);
+  return Object.assign(
+      {displayCommentAsIcon, highlightSelectedText, showAuthorColor, allowReadonlyComments},
+      helperVars);
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {

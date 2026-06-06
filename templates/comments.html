@@ -56,6 +56,11 @@
                 <span class="comment-author-name">${name}</span>
                 <span class="comment-created-at" datetime="${formattedDate}">${date}</span>
 
+                <span class="comment-nav-wrapper">
+                    <span class="comment-nav-prev" title="Previous comment" data-l10n-id="ep_comments_page.comment_nav.prev"></span>
+                    <span class="comment-nav-next" title="Next comment" data-l10n-id="ep_comments_page.comment_nav.next"></span>
+                </span>
+
                 <span class="comment-actions-wrapper">
                     {{if text.length > 0}}
                         <span class="comment-edit buttonicon buttonicon-pencil" data-l10n-id="ep_comments_page.edit_comment.title"></span>
