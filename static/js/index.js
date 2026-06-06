@@ -160,6 +160,17 @@ EpComments.prototype.init = async function () {
   // keeps it in sync from here on.
   $('.addComment').addClass('comment-btn-disabled').attr('aria-disabled', 'true');
 
+  // #12: all-comments overview panel. The toolbar button is rendered for
+  // everyone; wire it up only when the feature is enabled, otherwise hide it.
+  if (clientVars.showCommentsOverview === false) {
+    $('.commentsOverview').hide();
+  } else {
+    $('.commentsOverview').on('click', (e) => {
+      e.preventDefault();
+      this.toggleCommentsOverview();
+    });
+  }
+
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
 
@@ -543,6 +554,8 @@ EpComments.prototype.collectComments = function (callback) {
   }
 
   this.setYofComments();
+  // Keep the overview panel (#12) in sync when comments are (re)collected.
+  this.refreshCommentsOverview();
   if (callback) callback();
 };
 
@@ -913,6 +926,10 @@ EpComments.prototype.deleteComment = function (commentId) {
   while ($('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).length > 0) {
     $('iframe[name="ace_outer"]').contents().find(`#icon-${commentId}`).remove();
   }
+  // Drop it from the in-memory store too so the overview panel (#12) and any
+  // other readers don't keep a deleted comment around.
+  if (this.comments && this.comments[commentId]) delete this.comments[commentId];
+  this.refreshCommentsOverview();
 };
 
 const cloneLine = (line) => {
@@ -1068,6 +1085,76 @@ EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
   left = Math.min(Math.max(left, margin), Math.max(margin, containerWidth - btnWidth - margin));
   const top = Math.max(margin, position[1] + 2);
   $btn.css({left: `${left}px`, top: `${top}px`}).addClass('visible');
+};
+
+// #12: a togglable panel listing every comment in the pad, with click-to-jump.
+// Distinct from the Y-aligned sidebar — this is a flat, scrollable index.
+EpComments.prototype.ensureCommentsOverview = function () {
+  if (this.$commentsOverview && this.$commentsOverview.length) return this.$commentsOverview;
+  const self = this;
+  const $panel = $('<div>').attr('id', 'comments-overview');
+  const headerText =
+    (html10n.translations && html10n.translations['ep_comments_page.comments_overview.header']) ||
+      'All comments';
+  $panel.append($('<div>').addClass('comments-overview-header').text(headerText));
+  $panel.append($('<div>').addClass('comments-overview-list'));
+  // Jump to the clicked comment (event-delegated so it survives re-renders).
+  $panel.on('click', '.comments-overview-row', function () {
+    self.jumpToComment($(this).attr('data-commentid'));
+  });
+  $panel.appendTo($('#editorcontainerbox'));
+  this.$commentsOverview = $panel;
+  return $panel;
+};
+
+EpComments.prototype.refreshCommentsOverview = function () {
+  if (!this.$commentsOverview || !this.$commentsOverview.hasClass('visible')) return;
+  const $list = this.$commentsOverview.find('.comments-overview-list').empty();
+  const comments = this.comments || {};
+  const ids = Object.keys(comments);
+  if (!ids.length) {
+    const emptyText =
+      (html10n.translations &&
+        html10n.translations['ep_comments_page.comments_overview.empty']) || 'No comments yet';
+    $list.append($('<div>').addClass('comments-overview-empty').text(emptyText));
+    return;
+  }
+  ids.forEach((commentId) => {
+    const data = (comments[commentId] && comments[commentId].data) || {};
+    const $row = $('<div>')
+        .addClass('comments-overview-row')
+        .attr('data-commentid', commentId);
+    if (data.changeAccepted) $row.addClass('resolved');
+    const color = this.authorColor && this.authorColor(data.author);
+    if (color) $row.css('border-left', `3px solid ${color}`);
+    $row.append($('<span>').addClass('comments-overview-author').text(data.name || 'Anonymous'));
+    $row.append($('<span>').addClass('comments-overview-text').text(data.text || ''));
+    $list.append($row);
+  });
+};
+
+EpComments.prototype.toggleCommentsOverview = function () {
+  const $panel = this.ensureCommentsOverview();
+  const nowVisible = !$panel.hasClass('visible');
+  $panel.toggleClass('visible', nowVisible);
+  $('.commentsOverview').toggleClass('selected', nowVisible);
+  if (nowVisible) this.refreshCommentsOverview();
+};
+
+EpComments.prototype.jumpToComment = function (commentId) {
+  if (!commentId) return;
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const padInner = padOuter.find('iframe[name="ace_inner"]');
+  const span = padInner.contents().find(`.${commentId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  // Re-align and open the target comment box.
+  this.setYofComments();
+  padOuter.find('#comments .sidebar-comment').removeClass('full-display');
+  padOuter.find(`#${commentId}`).addClass('full-display');
 };
 
 EpComments.prototype.displayNewCommentForm = function () {

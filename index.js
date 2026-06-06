@@ -206,6 +206,7 @@ exports.clientVars = async (hook, context) => {
   const highlightSelectedText =
     settings.ep_comments_page ? settings.ep_comments_page.highlightSelectedText : false;
 <<<<<<< HEAD
+<<<<<<< HEAD
   // #6: author-colour accent is on unless an admin disables it.
   const showAuthorColor = !(settings.ep_comments_page &&
     settings.ep_comments_page.showAuthorColor === false);
@@ -223,6 +224,16 @@ exports.clientVars = async (hook, context) => {
   return Object.assign(
       {displayCommentAsIcon, highlightSelectedText, floatingCommentButton}, helperVars);
 >>>>>>> fix/95-floating-comment-button
+=======
+  // #12: the all-comments overview panel is on unless an admin disables it.
+  const showCommentsOverview = !(settings.ep_comments_page &&
+    settings.ep_comments_page.showCommentsOverview === false);
+  // Merge in the padToggle helper's clientVars block so the client-side
+  // helper can read padWideSupported/initialPadEnabled/etc.
+  const helperVars = await commentsToggle.clientVars(hook, context);
+  return Object.assign(
+      {displayCommentAsIcon, highlightSelectedText, showCommentsOverview}, helperVars);
+>>>>>>> fix/12-all-comments-overview
 };
 
 exports.expressCreateServer = (hookName, args, callback) => {
