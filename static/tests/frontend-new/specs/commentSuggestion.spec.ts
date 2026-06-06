@@ -98,4 +98,36 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
       (await inner.locator('div').first().locator('.comment').textContent())?.trim())
         .toBe(suggestedText);
   });
+
+  // #380: the suggestion value spans used to be rendered at opacity: .8, which
+  // alpha-blends the text against an unknown skin background and can drop below
+  // WCAG AA on darker/branded skins. The fix removes the opacity so the value
+  // inherits the skin's full-strength text color. Guard against the regression
+  // by asserting the rendered spans are fully opaque.
+  test('Suggestion value spans are fully opaque for contrast (#380)',
+      async ({page}) => {
+        const outer = await getPadOuter(page);
+        const inner = await getPadBody(page);
+        const suggestedText = 'a contrast-safe suggestion';
+        await openCommentFormWithSuggestion(page, 'This content will receive a comment');
+        await expect(page.locator('#newComment.popup-show')).toBeVisible();
+        await page.locator('#newComment textarea.comment-content').fill('A comment');
+        await expect.poll(async () =>
+          page.locator('#newComment textarea.to-value').count()).toBeGreaterThan(0);
+        await page.locator('#newComment textarea.to-value').fill(suggestedText);
+        await page.locator('#comment-create-btn').click();
+
+        await expect.poll(async () =>
+          inner.locator('div').first().locator('.comment').count()).toBeGreaterThan(0);
+        await inner.locator('div').first().locator('.comment').first().click();
+        await expect.poll(async () =>
+          outer.locator('.comment-container .full-display-content:visible').count())
+            .toBeGreaterThan(0);
+
+        const opacityOf = async (selector: string) =>
+          outer.locator(selector).first().evaluate((el) =>
+            window.getComputedStyle(el).opacity);
+        expect(await opacityOf('.suggestion-display .from-value')).toBe('1');
+        expect(await opacityOf('.suggestion-display .to-value')).toBe('1');
+      });
 });

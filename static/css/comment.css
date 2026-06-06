@@ -118,7 +118,6 @@ input.error, textarea.error {
 }
 .suggestion-display .from-value,
 .suggestion-display .to-value {
-  opacity: .8;
   font-style: italic;
 }
 .suggestion-display .from-value:after, .suggestion-display .from-value:before,
@@ -133,7 +132,6 @@ input.error, textarea.error {
 }
 .suggestion-create .from-value {
   display: block;
-  opacity: .8;
   font-style: italic;
   margin: 5px 0;
 }
