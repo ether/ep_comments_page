@@ -40,6 +40,15 @@ To enable this feature, add the following code to your `settings.json`:
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
+### Author colour accent
+Each comment box shows a left-border accent in its author's colour. This is on
+by default; disable it with:
+```
+"ep_comments_page": {
+  "showAuthorColor": false
+},
+```
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```

@@ -621,6 +621,7 @@ EpComments.prototype.insertContainers = function () {
 // palette index too just in case. Returns null when unknown.
 EpComments.prototype.authorColor = function (authorId) {
   try {
+    if (clientVars.showAuthorColor === false) return null;
     let colorId = null;
     if (authorId && authorId === clientVars.userId && clientVars.userColor != null) {
       colorId = clientVars.userColor;
