@@ -103,8 +103,10 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
   // alpha-blends the text against an unknown skin background and can drop below
   // WCAG AA on darker/branded skins. The fix removes the opacity so the value
   // inherits the skin's full-strength text color. Guard against the regression
-  // by asserting the rendered spans are fully opaque.
-  test('Suggestion value spans are fully opaque for contrast (#380)',
+  // by computing the actual rendered contrast ratio (not just opacity) of the
+  // value text against its effective background, and asserting it meets
+  // WCAG 2.1 AA (>= 4.5:1) on the default colibris skin.
+  test('Suggestion value spans meet WCAG AA contrast (#380)',
       async ({page}) => {
         const outer = await getPadOuter(page);
         const inner = await getPadBody(page);
@@ -124,10 +126,43 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
           outer.locator('.comment-container .full-display-content:visible').count())
             .toBeGreaterThan(0);
 
-        const opacityOf = async (selector: string) =>
-          outer.locator(selector).first().evaluate((el) =>
-            window.getComputedStyle(el).opacity);
-        expect(await opacityOf('.suggestion-display .from-value')).toBe('1');
-        expect(await opacityOf('.suggestion-display .to-value')).toBe('1');
+        // Compute the rendered contrast ratio of a value span against its
+        // effective (first opaque ancestor) background, the way a browser
+        // actually paints it — this catches both the old opacity regression
+        // and any future colour change that fails AA.
+        const contrastOf = async (selector: string) =>
+          outer.locator(selector).first().evaluate((el) => {
+            const parse = (c: string) => {
+              const m = c.match(/[\d.]+/g)!.map(Number);
+              return {r: m[0], g: m[1], b: m[2], a: m[3] === undefined ? 1 : m[3]};
+            };
+            // Effective text colour folds the element's own opacity in.
+            const cs = getComputedStyle(el);
+            const fg = parse(cs.color);
+            const opacity = parseFloat(cs.opacity);
+            // Walk ancestors for the first opaque background colour.
+            let bg = {r: 255, g: 255, b: 255, a: 1};
+            let node: HTMLElement | null = el as HTMLElement;
+            while (node) {
+              const c = parse(getComputedStyle(node).backgroundColor);
+              if (c.a > 0) { bg = c; break; }
+              node = node.parentElement;
+            }
+            // Blend fg (with its opacity) over bg.
+            const blend = (f: number, b: number) => f * opacity + b * (1 - opacity);
+            const rgb = {r: blend(fg.r, bg.r), g: blend(fg.g, bg.g), b: blend(fg.b, bg.b)};
+            const lum = (c: {r: number, g: number, b: number}) => {
+              const ch = (v: number) => {
+                v /= 255;
+                return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+              };
+              return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
+            };
+            const l1 = lum(rgb); const l2 = lum(bg);
+            return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+          });
+
+        expect(await contrastOf('.suggestion-display .from-value')).toBeGreaterThanOrEqual(4.5);
+        expect(await contrastOf('.suggestion-display .to-value')).toBeGreaterThanOrEqual(4.5);
       });
 });
