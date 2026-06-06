@@ -68,9 +68,14 @@ input.error, textarea.error {
 }
 .comment-nav-prev,
 .comment-nav-next {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 4px;
+  text-align: center;
   cursor: pointer;
-  padding: 0 3px;
   color: #666;
+  font-size: 1.2em;
+  line-height: 1.2;
   font-weight: bold;
 }
 .comment-nav-prev:hover,

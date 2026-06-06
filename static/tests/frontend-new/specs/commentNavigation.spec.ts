@@ -55,4 +55,76 @@ test.describe('ep_comments_page - Comment navigation arrows (#241)', () => {
       return (t || '').includes('COMMENT_ALPHA');
     }).toBe(true);
   });
+
+  // #6 follow-up: the arrows render as the ‹ / › glyph (CSS), not a text label.
+  // Their l10n key ends in `.title` so html10n sets the tooltip, not the element
+  // text (regression guard for the keys rendering as "Previous comment").
+  test('arrows show a glyph and a localized tooltip, not a text label',
+      async ({page}) => {
+        test.setTimeout(60_000);
+        await aNewCommentsPad(page);
+        const inner = await getPadBody(page);
+        const outer = await getPadOuter(page);
+        await inner.click();
+        await page.keyboard.press('Control+A');
+        await page.keyboard.press('Delete');
+        await page.keyboard.type('a commented word');
+        await addCommentOnLine(page, 0, 'NAV_LABEL');
+        await inner.locator('div').first().locator('.comment').first().click();
+        const navNext = outer.locator('#comments .sidebar-comment.full-display .comment-nav-next')
+            .first();
+        await expect.poll(async () => navNext.count()).toBeGreaterThan(0);
+        expect((await navNext.textContent() || '').trim()).not.toContain('comment');
+        expect(await navNext.getAttribute('title')).toBe('Next comment');
+      });
+
+  // #6 follow-up: navigating on a narrow/mobile viewport (sidebar hidden, comments
+  // shown in a modal) must not throw "Cannot read properties of undefined
+  // (reading 'clientX')".
+  test('navigating does not throw on a narrow viewport', async ({page}) => {
+    test.setTimeout(60_000);
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.setViewportSize({width: 360, height: 720});
+    await aNewCommentsPad(page);
+    const inner = await getPadBody(page);
+    const outer = await getPadOuter(page);
+
+    await inner.click();
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type('alpha bravo');
+    await addCommentOnLine(page, 0, 'M_ALPHA');
+    // second comment on same line (select last word)
+    await inner.locator('div').first().click();
+    await page.keyboard.press('End');
+    for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+ArrowLeft');
+    await page.locator('.addComment').click();
+    await expect(page.locator('#newComment.popup-show')).toBeVisible();
+    await page.locator('#newComment textarea.comment-content').fill('M_BRAVO');
+    await page.locator('#comment-create-btn').click();
+    await expect(page.locator('#newComment.popup-show')).toBeHidden();
+
+    // Open a comment as a modal and click next.
+    await inner.locator('div').first().locator('.comment').first().click();
+    const modalNext = outer.locator('.comment-modal .comment-nav-next');
+    await expect.poll(async () => modalNext.count()).toBeGreaterThan(0);
+    await modalNext.first().click();
+    await page.waitForTimeout(300);
+    expect(errors.join('\n')).not.toContain('clientX');
+  });
 });
+
+const addCommentOnLine = async (
+  page: import('@playwright/test').Page, lineIndex: number, text: string,
+) => {
+  const inner = await getPadBody(page);
+  await expect.poll(async () => {
+    await inner.locator('div').nth(lineIndex).click({clickCount: 3});
+    await page.locator('.addComment').click();
+    return page.locator('#newComment.popup-show').count();
+  }, {timeout: 20_000}).toBeGreaterThan(0);
+  await page.locator('#newComment textarea.comment-content').fill(text);
+  await page.locator('#comment-create-btn').click();
+  await expect(page.locator('#newComment.popup-show')).toBeHidden();
+};

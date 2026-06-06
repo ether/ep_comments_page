@@ -970,7 +970,12 @@ EpComments.prototype.navigateComment = function ($el, dir) {
     padOuter.find('#outerdocbody').parent().scrollTop(y);
   }
   this.setYofComments();
-  commentBoxes.highlightComment(targetId);
+  // Open the target's sidebar box. On narrow/mobile viewports the sidebar is
+  // hidden (comments use a tap-triggered modal), so just scrolling is the
+  // sensible behaviour there — and it avoids the eventless modal path.
+  if (padOuter.find('#comments').is(':visible')) {
+    commentBoxes.highlightComment(targetId);
+  }
 };
 
 EpComments.prototype.displayNewCommentForm = function () {
