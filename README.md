@@ -40,6 +40,15 @@ To enable this feature, add the following code to your `settings.json`:
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
+### Comments in exported documents
+Comments are included when you export a pad. Each commented passage gets a
+numbered footnote marker (`[1]`, `[2]`, …) and a **Comments** section is appended
+listing each comment as `[n] author: text` (suggested changes are noted too).
+Because the markers are numbered they stay correlatable in rich formats such as
+**ODT, DOC, DOCX and PDF**, where the in-document anchor link is lost — so your
+comments are not silently dropped when you export. Plain-text (`.txt`) export
+omits comments, as the core text exporter has no extension point for them.
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
