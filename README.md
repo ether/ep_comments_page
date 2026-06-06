@@ -69,6 +69,15 @@ by default; disable it with:
 },
 ```
 
+### Floating comment button
+When text is selected, a small floating button appears next to it for quickly
+adding a comment. This is on by default; disable it with:
+```
+"ep_comments_page": {
+  "floatingCommentButton": false
+},
+```
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
