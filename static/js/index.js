@@ -1171,7 +1171,10 @@ EpComments.prototype.getMapfakeComments = function () {
 EpComments.prototype.saveCommentReplies = async function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
   const replies = await this._send('bulkAddCommentReplies', padId, data);
-  (replies || []).forEach((reply) => {
+  // _send() resolves to {} on its 5s timeout, so guard with Array.isArray
+  // rather than a truthy check ({} is truthy and has no .forEach). Mirrors the
+  // no-op-on-non-collection behaviour the former _.each gave here.
+  (Array.isArray(replies) ? replies : []).forEach((reply) => {
     this.setCommentReply(reply);
   });
   this.shouldCollectComment = true; // force collect the comment replies saved
