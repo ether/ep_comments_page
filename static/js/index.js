@@ -149,16 +149,21 @@ EpComments.prototype.init = async function () {
     this.displayNewCommentForm();
   });
 
-  // #12: all-comments overview panel. The toolbar button is rendered for
-  // everyone; wire it up only when the feature is enabled, otherwise hide it.
-  if (clientVars.showCommentsOverview === false) {
-    $('.commentsOverview').hide();
-  } else {
-    $('.commentsOverview').on('click', (e) => {
-      e.preventDefault();
-      this.toggleCommentsOverview();
-    });
-  }
+  // #12/#5: the all-comments overview is driven by the "Show all comments"
+  // checkbox in the user Settings pane (rendered server-side by the
+  // ep_plugin_helpers toggle). Restore its cookie state, reflect it into the
+  // panel, and persist + react on change. (The toggle helper's own init isn't
+  // importable client-side — it pulls server-only modules — so the small
+  // cookie/bind mirrors it here.)
+  const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+  const $overviewToggle = $('#options-comments-overview');
+  if (padcookie.getPref('comments-overview') === true) $overviewToggle.prop('checked', true);
+  this.setCommentsOverviewVisible($overviewToggle.is(':checked'));
+  $overviewToggle.on('change', () => {
+    const on = $overviewToggle.is(':checked');
+    padcookie.setPref('comments-overview', on);
+    this.setCommentsOverviewVisible(on);
+  });
 
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
@@ -1000,12 +1005,10 @@ EpComments.prototype.refreshCommentsOverview = function () {
   });
 };
 
-EpComments.prototype.toggleCommentsOverview = function () {
+EpComments.prototype.setCommentsOverviewVisible = function (visible) {
   const $panel = this.ensureCommentsOverview();
-  const nowVisible = !$panel.hasClass('visible');
-  $panel.toggleClass('visible', nowVisible);
-  $('.commentsOverview').toggleClass('selected', nowVisible);
-  if (nowVisible) this.refreshCommentsOverview();
+  $panel.toggleClass('visible', !!visible);
+  if (visible) this.refreshCommentsOverview();
 };
 
 EpComments.prototype.jumpToComment = function (commentId) {

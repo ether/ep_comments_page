@@ -218,13 +218,8 @@ input.error, textarea.error {
   margin-top: 0 !important;
 }
 
-/* #12: all-comments overview panel + its toolbar button icon. */
-.commentsOverviewIcon:before {
-  content: "\2261"; /* ≡ — works without depending on the icon font */
-  font-family: sans-serif;
-  font-size: 18px;
-  line-height: 1;
-}
+/* #12/#5: all-comments overview panel (opened from the "Show all comments"
+   checkbox in the Settings pane). */
 #comments-overview {
   position: absolute;
   top: 6px;

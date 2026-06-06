@@ -2,9 +2,16 @@ import {expect, test} from '@playwright/test';
 import {getPadBody, getPadOuter} from 'ep_etherpad-lite/tests/frontend-new/helper/padHelper';
 import {aNewCommentsPad} from '../helper/comments';
 
-// #12: a toolbar-toggled panel that lists every comment in the pad and lets you
-// jump to one. The existing sidebar is Y-aligned to the text; this is a flat,
-// browsable index that updates as comments are added/removed.
+// #12/#5: a "Show all comments" checkbox in the Settings pane toggles a panel
+// that lists every comment in the pad and lets you jump to one. The existing
+// sidebar is Y-aligned to the text; this is a flat, browsable index.
+const setOverview = async (page: import('@playwright/test').Page, on: boolean) =>
+  page.evaluate((checked) => {
+    const cb = document.querySelector('#options-comments-overview') as HTMLInputElement;
+    cb.checked = checked;
+    cb.dispatchEvent(new Event('change', {bubbles: true}));
+  }, on);
+
 test.describe('ep_comments_page - All-comments overview (#12)', () => {
   test('lists every comment and jumps to one', async ({page}) => {
     test.setTimeout(60_000);
@@ -33,9 +40,9 @@ test.describe('ep_comments_page - All-comments overview (#12)', () => {
     await addCommentOnLine(0, 'COMMENT_ONE_MARKER');
     await addCommentOnLine(1, 'COMMENT_TWO_MARKER');
 
-    // Open the overview from the toolbar.
+    // Open the overview from the Settings "Show all comments" checkbox.
     const panel = page.locator('#comments-overview');
-    await page.locator('.commentsOverview').click();
+    await setOverview(page, true);
     await expect(panel).toHaveClass(/visible/);
 
     // It lists both comments.
@@ -49,8 +56,8 @@ test.describe('ep_comments_page - All-comments overview (#12)', () => {
     await expect.poll(async () =>
       outer.locator('#comments .sidebar-comment.full-display').count()).toBeGreaterThan(0);
 
-    // Toolbar toggle hides it again.
-    await page.locator('.commentsOverview').click();
+    // Un-ticking the setting hides the panel again.
+    await setOverview(page, false);
     await expect(panel).not.toHaveClass(/visible/);
   });
 });
