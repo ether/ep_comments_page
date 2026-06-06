@@ -171,6 +171,17 @@ EpComments.prototype.init = async function () {
     });
   }
 
+  // #241: navigate to the previous/next comment from an open comment box, so
+  // you don't have to hover precisely between adjacent comments.
+  this.container.parent().on('click', '.comment-nav-prev', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), -1);
+  });
+  this.container.parent().on('click', '.comment-nav-next', function (e) {
+    e.preventDefault();
+    self.navigateComment($(this), 1);
+  });
+
   // Import for below listener : we are using this.container.parent() so we include
   // events on both comment-modal and sidebar
 
@@ -1155,6 +1166,31 @@ EpComments.prototype.jumpToComment = function (commentId) {
   this.setYofComments();
   padOuter.find('#comments .sidebar-comment').removeClass('full-display');
   padOuter.find(`#${commentId}`).addClass('full-display');
+};
+
+// #241: open the comment adjacent (dir = -1 prev, +1 next) to the one whose
+// nav arrow was clicked, in document order, wrapping around the ends. Scrolls
+// the editor to it and opens its box, so a reviewer can step through comments
+// without hovering precisely over each highlight.
+EpComments.prototype.navigateComment = function ($el, dir) {
+  const padOuter = $('iframe[name="ace_outer"]').contents();
+  const innerDoc = padOuter.find('iframe[name="ace_inner"]').contents();
+  const currentId = $el.closest('.sidebar-comment').attr('data-commentid');
+  const ordered = this.getUniqueCommentsId(innerDoc); // document order
+  if (!ordered.length) return;
+  const idx = ordered.indexOf(currentId);
+  if (idx === -1) return;
+  const targetId = ordered[(idx + dir + ordered.length) % ordered.length];
+  if (!targetId || targetId === currentId) return;
+
+  const span = innerDoc.find(`.${targetId}`).first();
+  if (span.length) {
+    const y = span[0].offsetTop;
+    padOuter.find('#outerdocbody').scrollTop(y);
+    padOuter.find('#outerdocbody').parent().scrollTop(y);
+  }
+  this.setYofComments();
+  commentBoxes.highlightComment(targetId);
 };
 
 EpComments.prototype.displayNewCommentForm = function () {

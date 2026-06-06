@@ -86,6 +86,29 @@ input.error, textarea.error {
   display: inline;
 }
 
+/* #241: previous/next comment navigation arrows in the comment header. */
+.comment-nav-wrapper {
+  float: right;
+  margin-left: 6px;
+}
+.comment-nav-prev,
+.comment-nav-next {
+  cursor: pointer;
+  padding: 0 3px;
+  color: #666;
+  font-weight: bold;
+}
+.comment-nav-prev:hover,
+.comment-nav-next:hover {
+  color: #000;
+}
+.comment-nav-prev:before {
+  content: "\2039"; /* ‹ */
+}
+.comment-nav-next:before {
+  content: "\203A"; /* › */
+}
+
 /* COMMENT COMPACTED (Visible on right side) */
 .sidebar-comment:not(.full-display) .full-display-content {
   display: none;
