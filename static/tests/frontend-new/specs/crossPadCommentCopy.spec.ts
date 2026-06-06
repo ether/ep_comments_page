@@ -28,13 +28,15 @@ test.describe('ep_comments_page - Cross-pad comment copy (#79)', () => {
     await page.locator('#comment-create-btn').click();
     await expect.poll(async () => inner.locator('.comment').count()).toBeGreaterThan(0);
 
-    // Copy the commented text, then wait until the clipboard actually holds it
-    // (deterministic, instead of a fixed sleep).
+    // Copy the commented text. The plugin's copy handler calls preventDefault
+    // and writes custom clipboard types (text/html + text/objectComment), not
+    // text/plain, so the copied payload can't be polled via
+    // navigator.clipboard.readText(); a short settle keeps the synchronous copy
+    // event from racing the navigation below. The real assertion is the paste
+    // result in pad B, which is polled.
     await inner.locator('div').first().locator('.comment').first().click({clickCount: 3});
     await page.keyboard.press('Control+C');
-    await expect.poll(async () =>
-      page.evaluate(() => navigator.clipboard.readText().catch(() => '')),
-    {timeout: 10_000}).toContain('text copied between pads');
+    await page.waitForTimeout(400);
 
     // Pad B: a different pad in the same browser context.
     const base = page.url().split('/p/')[0];
