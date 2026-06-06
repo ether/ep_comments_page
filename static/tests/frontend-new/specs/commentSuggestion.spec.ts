@@ -132,9 +132,22 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
     await expect.poll(async () =>
       inner.locator('div').first().locator('.comment').count()).toBeGreaterThan(0);
 
+    // Wait for the comment+suggestion to be persisted server-side before
+    // reloading: DOM presence in this session doesn't guarantee the save has
+    // round-tripped, and reloading too early can race persistence and load a
+    // pad that lacks the comment (flaky false failure). Poll the comments
+    // socket until the suggestion data is actually stored.
+    const padId = page.url().split('/p/')[1].split(/[?#]/)[0];
+    await expect.poll(async () => page.evaluate(async () => {
+      const ep = (window as any).pad?.plugins?.ep_comments_page;
+      if (!ep) return false;
+      const res = await ep.getComments();
+      const comments = res && res.comments ? res.comments : res;
+      return !!comments && Object.values(comments).some((c: any) => c && c.changeTo);
+    }), {timeout: 15_000}).toBe(true);
+
     // Reload the pad as a fresh page load so the comment box is rebuilt from
     // the server data (collectComments), not the create-time DOM.
-    const padId = page.url().split('/p/')[1].split(/[?#]/)[0];
     await reopenCommentsPad(page, padId);
 
     const innerAfter = await getPadBody(page);
