@@ -40,6 +40,17 @@ To enable this feature, add the following code to your `settings.json`:
 
 **Warning**: there is a side effect when you enable this feature: a revision is created everytime the text is highlighted, resulting on apparently "empty" changes when you check your pad on the timeslider. If that is an issue for you, we don't recommend you to use this feature.
 
+### Who can edit or delete comments
+By default a comment can only be edited or deleted by the author who created it
+(and only while their original session is active). To instead let **anyone with
+write access to the pad** edit or delete any comment, add the following to your
+`settings.json`:
+```
+"ep_comments_page": {
+  "allowAnyoneToEditComments": true
+},
+```
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
