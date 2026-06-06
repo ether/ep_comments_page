@@ -661,27 +661,45 @@ EpComments.prototype.setYofComments = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]');
   const inlineComments = this.getFirstOcurrenceOfCommentIds();
   const commentsToBeShown = [];
+  const innerPaddingTop = parseInt(padInner.css('padding-top').split('px')[0]) || 0;
 
+  // First pass: compute each comment box's natural target top (aligned to its
+  // commented text). Collected up-front so the second pass can de-overlap
+  // comments that share a line (#181) instead of stacking them at the same Y.
+  const targets = [];
   $.each(inlineComments, function () {
-    // classname is the ID of the comment
-    const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
-    if (!commentId || !commentId[1]) return;
-    const commentEle = padOuter.find(`#${commentId[1]}`);
-
-    let topOffset = this.offsetTop;
-    topOffset += parseInt(padInner.css('padding-top').split('px')[0]);
-    topOffset += parseInt($(this).css('padding-top').split('px')[0]);
-
-    if (commentId) {
-      // adjust outer comment...
-      commentBoxes.adjustTopOf(commentId[1], topOffset);
-      // ... and adjust icons too
-      commentIcons.adjustTopOf(commentId[1], topOffset);
-
-      // mark this comment to be displayed if it was visible before we start adjusting its position
-      if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
-    }
+    const match = /(?:^| )(c-[A-Za-z0-9]*)/.exec(this.className);
+    if (!match || !match[1]) return;
+    let topOffset = this.offsetTop + innerPaddingTop;
+    topOffset += parseInt($(this).css('padding-top').split('px')[0]) || 0;
+    targets.push({commentId: match[1], top: topOffset});
   });
+
+  // Lay the boxes out top-to-bottom. When two comments resolve to the same (or
+  // overlapping) Y — e.g. two comments on one line — push the later one down so
+  // both stay visible and clickable instead of overlapping (#181). Comments on
+  // distinct lines keep their natural position because their natural top is
+  // already past the previous box's bottom.
+  targets.sort((a, b) => a.top - b.top);
+  const gap = 4;
+  let lastBottom = -Infinity;
+  for (const target of targets) {
+    const commentEle = padOuter.find(`#${target.commentId}`);
+    const top = Math.max(target.top, lastBottom + gap);
+    // adjust outer comment...
+    commentBoxes.adjustTopOf(target.commentId, top);
+    // ... and adjust icons too (icons stay aligned to the text line)
+    commentIcons.adjustTopOf(target.commentId, target.top);
+
+    // A collapsed box is a single compact line; measure it so the next box
+    // clears it. outerHeight may be 0 if the box is hidden — fall back to a
+    // sensible compact-row height so stacking still separates them.
+    const height = commentEle.outerHeight(true) || 24;
+    lastBottom = top + height;
+
+    // mark this comment to be displayed if it was visible before we start adjusting its position
+    if (commentIcons.shouldShow(commentEle)) commentsToBeShown.push(commentEle);
+  }
 
   // re-display comments that were visible before
   commentsToBeShown.forEach((commentEle) => {
