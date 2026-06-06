@@ -221,7 +221,14 @@ export const chooseToShowComments = async (
   await settings.click();
   const showComments = page.locator('#options-comments');
   const checked = await showComments.isChecked();
-  if (checked !== shouldShow) await showComments.click();
+  if (checked !== shouldShow) {
+    // The <label for="options-comments"> sits on top of the checkbox and
+    // intercepts pointer events, so clicking the input itself hangs on
+    // Playwright's actionability check. Click the label — the visible control
+    // the user actually clicks — which toggles the checkbox.
+    await page.locator('label[for="options-comments"]').click();
+    await expect(showComments).toBeChecked({checked: shouldShow});
+  }
   await settings.click();
 };
 

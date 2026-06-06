@@ -162,8 +162,13 @@ input.error, textarea.error {
 }
 .suggestion-display .from-value,
 .suggestion-display .to-value {
-  opacity: .8;
   font-style: italic;
+  /* #380: the colibris skin renders these values in its green --primary-color
+     (#64d29b), which is ~1.9:1 against the light comment background — well below
+     WCAG AA. Use the skin's regular text colour instead (readable everywhere,
+     still skin-overridable via the same token) with a dark fallback. !important
+     beats the core skin's non-important rule regardless of load order. */
+  color: var(--text-color, #2b2b2b) !important;
 }
 .suggestion-display .from-value:after, .suggestion-display .from-value:before,
 .suggestion-display .to-value:after, .suggestion-display .to-value:before {
@@ -177,7 +182,6 @@ input.error, textarea.error {
 }
 .suggestion-create .from-value {
   display: block;
-  opacity: .8;
   font-style: italic;
   margin: 5px 0;
 }
