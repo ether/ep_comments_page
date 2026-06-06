@@ -367,6 +367,8 @@ input.error, textarea.error {
 .comments-overview-author {
   font-weight: bold;
   margin-right: 6px;
+}
+
 /* READ-ONLY: hide write-only comment actions (edit / delete) on read-only
    pads (#112). The comment sidebar and modal live in the ace_outer iframe,
    which does not receive core's `readonly` body class, so the plugin tags the
