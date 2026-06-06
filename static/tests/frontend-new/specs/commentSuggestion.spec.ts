@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 import {getPadBody, getPadOuter}
     from 'ep_etherpad-lite/tests/frontend-new/helper/padHelper';
-import {aNewCommentsPad} from '../helper/comments';
+import {aNewCommentsPad, reopenCommentsPad} from '../helper/comments';
 
 // Replace pad content with raw HTML and select all (mirrors legacy
 // `$firstTextElement.html(targetText).sendkeys('{selectall}')`).
@@ -97,5 +97,62 @@ test.describe('ep_comments_page - Comment Suggestion', () => {
     await expect.poll(async () =>
       (await inner.locator('div').first().locator('.comment').textContent())?.trim())
         .toBe(suggestedText);
+  });
+
+  // #188: "Suggestion text does not display". The original report was that the
+  // proposed ("to") text did not render in the comment box — only the
+  // {{changeTo}} placeholder showed — even though applying the change replaced
+  // the text correctly. Fixed by #369/#378 (the value now lives in its own
+  // .to-value span instead of a placeholder-substituted label). The existing
+  // test above covers the just-created in-memory render; this one guards the
+  // *persisted display* path by reloading the pad and reopening the comment,
+  // which rebuilds the box from getComments rather than the create flow.
+  test('Displays the suggested text after reload (#188)', async ({page}) => {
+    const inner = await getPadBody(page);
+    const suggestedText = 'the proposed replacement text';
+
+    // Type real text (not the innerHTML-injection helper) so the comment
+    // attribute survives a full reload, then select it and open the form.
+    await inner.click();
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type('This content will receive a comment');
+    await page.keyboard.press('Control+A');
+    await page.locator('.addComment').first().click();
+    await expect.poll(async () =>
+      page.locator('#newComment.popup-show .suggestion-checkbox').count()).toBeGreaterThan(0);
+    await page.locator('#newComment.popup-show .label-suggestion-checkbox').first().click();
+
+    await expect(page.locator('#newComment.popup-show')).toBeVisible();
+    await page.locator('#newComment textarea.comment-content').fill('A comment');
+    await expect.poll(async () =>
+      page.locator('#newComment textarea.to-value').count()).toBeGreaterThan(0);
+    await page.locator('#newComment textarea.to-value').fill(suggestedText);
+    await page.locator('#comment-create-btn').click();
+    await expect.poll(async () =>
+      inner.locator('div').first().locator('.comment').count()).toBeGreaterThan(0);
+
+    // Reload the pad as a fresh page load so the comment box is rebuilt from
+    // the server data (collectComments), not the create-time DOM.
+    const padId = page.url().split('/p/')[1].split(/[?#]/)[0];
+    await reopenCommentsPad(page, padId);
+
+    const innerAfter = await getPadBody(page);
+    const outerAfter = await getPadOuter(page);
+    await expect.poll(async () =>
+      innerAfter.locator('div').first().locator('.comment').count()).toBeGreaterThan(0);
+
+    // The suggestion box is pre-built in the sidebar on collect; the proposed
+    // text lives in its own .to-value span (textContent is present even while
+    // the box is collapsed). #188 was that this text was missing / showed the
+    // literal {{changeTo}} placeholder.
+    await expect.poll(async () => {
+      const t = await outerAfter.locator('.comment-container .comment-title-wrapper .to-value')
+          .first().textContent();
+      return (t || '').trim();
+    }, {timeout: 15_000}).toBe(suggestedText);
+    const titleText = await outerAfter.locator('.comment-container .comment-title-wrapper')
+        .first().textContent();
+    expect(titleText).not.toContain('{{');
   });
 });
