@@ -68,18 +68,34 @@ input.error, textarea.error {
 }
 .comment-nav-prev,
 .comment-nav-next {
+  /* A fixed, comfortably-clickable icon box. The localized label html10n writes
+     into the element is clipped/invisible (kept as the accessible name via
+     aria-label); the ‹ / › glyph is painted by ::before over the whole box. */
+  position: relative;
   display: inline-block;
-  min-width: 18px;
-  padding: 0 4px;
-  text-align: center;
+  width: 1.5em;
+  height: 1.5em;
+  overflow: hidden;
+  white-space: nowrap;
+  color: transparent;
   cursor: pointer;
+  vertical-align: middle;
+}
+.comment-nav-prev:before,
+.comment-nav-next:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  line-height: 1.5em;
+  text-align: center;
   color: #666;
-  font-size: 1.2em;
-  line-height: 1.2;
+  font-size: 18px;
   font-weight: bold;
 }
-.comment-nav-prev:hover,
-.comment-nav-next:hover {
+.comment-nav-prev:hover:before,
+.comment-nav-next:hover:before {
   color: #000;
 }
 .comment-nav-prev:before {

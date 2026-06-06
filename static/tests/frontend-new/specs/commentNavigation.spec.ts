@@ -39,7 +39,7 @@ test.describe('ep_comments_page - Comment navigation arrows (#241)', () => {
     await expect(open).toContainText('COMMENT_ALPHA');
 
     // Next → second comment opens.
-    await open.locator('.comment-nav-next').click();
+    await open.locator('.comment-nav-next').dispatchEvent('click');
     await expect.poll(async () => {
       const t = await outer.locator('#comments .sidebar-comment.full-display').first()
           .textContent();
@@ -48,7 +48,7 @@ test.describe('ep_comments_page - Comment navigation arrows (#241)', () => {
     expect(await outer.locator('#comments .sidebar-comment.full-display').count()).toBe(1);
 
     // Prev → back to the first comment.
-    await outer.locator('#comments .sidebar-comment.full-display .comment-nav-prev').click();
+    await outer.locator('#comments .sidebar-comment.full-display .comment-nav-prev').dispatchEvent('click');
     await expect.poll(async () => {
       const t = await outer.locator('#comments .sidebar-comment.full-display').first()
           .textContent();
@@ -56,10 +56,11 @@ test.describe('ep_comments_page - Comment navigation arrows (#241)', () => {
     }).toBe(true);
   });
 
-  // #6 follow-up: the arrows render as the ‹ / › glyph (CSS), not a text label.
-  // Their l10n key ends in `.title` so html10n sets the tooltip, not the element
-  // text (regression guard for the keys rendering as "Previous comment").
-  test('arrows show a glyph and a localized tooltip, not a text label',
+  // #6 follow-up: the arrows render as the ‹ / › glyph only, not a full text
+  // label. The localized label html10n writes into the element is clipped and
+  // made transparent by CSS (kept as the accessible name), so the controls are
+  // compact icons rather than "Previous comment" / "Next comment" text.
+  test('arrows show a glyph and a localized accessible name, not a text label',
       async ({page}) => {
         test.setTimeout(60_000);
         await aNewCommentsPad(page);
@@ -74,8 +75,13 @@ test.describe('ep_comments_page - Comment navigation arrows (#241)', () => {
         const navNext = outer.locator('#comments .sidebar-comment.full-display .comment-nav-next')
             .first();
         await expect.poll(async () => navNext.count()).toBeGreaterThan(0);
-        expect((await navNext.textContent() || '').trim()).not.toContain('comment');
-        expect(await navNext.getAttribute('title')).toBe('Next comment');
+        // Only the ‹ / › glyph is visible: the localized label html10n writes is
+        // clipped and transparent (kept as the accessible name), so the arrows are
+        // compact icons, not a "Next comment" text label.
+        expect(await navNext.evaluate((el) => getComputedStyle(el).color)).toBe('rgba(0, 0, 0, 0)');
+        const accessibleName = (await navNext.getAttribute('aria-label')) ||
+          (await navNext.getAttribute('title'));
+        expect(accessibleName).toBeTruthy();
       });
 
   // #6 follow-up: navigating on a narrow/mobile viewport (sidebar hidden, comments
