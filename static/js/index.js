@@ -6,7 +6,6 @@
 */
 
 
-const _ = require('underscore');
 const commentBoxes = require('ep_comments_page/static/js/commentBoxes');
 const commentIcons = require('ep_comments_page/static/js/commentIcons');
 const commentL10n = require('ep_comments_page/static/js/commentL10n');
@@ -29,6 +28,15 @@ const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
 const socketIoClient = require('socket.io-client');
 const io = socketIoClient.default || socketIoClient;
+
+// Trailing-edge debounce (replaces the former underscore dependency, #263).
+const debounce = (fn, wait) => {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), wait);
+  };
+};
 
 const cssFiles = [
   'ep_comments_page/static/css/comment.css',
@@ -136,7 +144,7 @@ EpComments.prototype.init = async function () {
   this.padInner.contents().on(UPDATE_COMMENT_LINE_POSITION_EVENT, (e) => {
     this.setYofComments();
   });
-  $(window).resize(_.debounce(() => { this.setYofComments(); }, 100));
+  $(window).resize(debounce(() => { this.setYofComments(); }, 100));
 
   // Refresh the "N minutes ago" relative-time strings (#154). The original
   // date is stored in the `datetime` attribute so we can recompute
@@ -676,7 +684,7 @@ EpComments.prototype.setYofComments = function () {
   });
 
   // re-display comments that were visible before
-  _.each(commentsToBeShown, (commentEle) => {
+  commentsToBeShown.forEach((commentEle) => {
     commentEle.show();
   });
 };
@@ -686,13 +694,13 @@ EpComments.prototype.getFirstOcurrenceOfCommentIds = function () {
   const padInner = padOuter.find('iframe[name="ace_inner"]').contents();
   const commentsId = this.getUniqueCommentsId(padInner);
   const firstOcurrenceOfCommentIds =
-    _.map(commentsId, (commentId) => padInner.find(`.${commentId}`).first().get(0));
+    commentsId.map((commentId) => padInner.find(`.${commentId}`).first().get(0));
   return firstOcurrenceOfCommentIds;
 };
 
 EpComments.prototype.getUniqueCommentsId = function (padInner) {
-  const inlineComments = padInner.find('.comment');
-  const commentsId = _.map(inlineComments, (inlineComment) => {
+  const inlineComments = padInner.find('.comment').toArray();
+  const commentsId = inlineComments.map((inlineComment) => {
     const commentId = /(?:^| )(c-[A-Za-z0-9]*)/.exec(inlineComment.className);
     // avoid when it has a '.comment' that it has a fakeComment class 'fakecomment-123' yet.
     if (commentId && commentId[1]) return commentId[1];
@@ -892,7 +900,7 @@ const getXYOffsetOfRep = (rep) => {
   // make sure end is after start
   if (selStart[0] > selEnd[0] || (selStart[0] === selEnd[0] && selStart[1] > selEnd[1])) {
     selEnd = selStart;
-    selStart = _.clone(selStart);
+    selStart = [...selStart];
   }
 
   let startIndex = 0;
@@ -1136,8 +1144,8 @@ EpComments.prototype.saveCommentWithoutSelection = async function (padId, commen
 };
 
 EpComments.prototype.buildComments = function (commentsData) {
-  const comments =
-    _.map(commentsData, (commentData, commentId) => this.buildComment(commentId, commentData.data));
+  const comments = Object.entries(commentsData).map(
+      ([commentId, commentData]) => this.buildComment(commentId, commentData.data));
   return comments;
 };
 
@@ -1163,14 +1171,14 @@ EpComments.prototype.getMapfakeComments = function () {
 EpComments.prototype.saveCommentReplies = async function (padId, commentReplyData) {
   const data = this.buildCommentReplies(commentReplyData);
   const replies = await this._send('bulkAddCommentReplies', padId, data);
-  _.each(replies, (reply) => {
+  (replies || []).forEach((reply) => {
     this.setCommentReply(reply);
   });
   this.shouldCollectComment = true; // force collect the comment replies saved
 };
 
 EpComments.prototype.buildCommentReplies = function (repliesData) {
-  const replies = _.map(repliesData, (replyData) => this.buildCommentReply(replyData));
+  const replies = Object.values(repliesData).map((replyData) => this.buildCommentReply(replyData));
   return replies;
 };
 
@@ -1199,7 +1207,7 @@ EpComments.prototype.commentListen = function () {
       // but it's expected to be {c-123: {data: {author:...}}, c-124:{data:{author:...}}}
       // in this.comments
       const commentsProcessed = {};
-      _.map(allComments, (comment, commentId) => {
+      Object.entries(allComments).forEach(([commentId, comment]) => {
         commentsProcessed[commentId] = {};
         commentsProcessed[commentId].data = comment;
       });
