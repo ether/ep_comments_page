@@ -311,6 +311,60 @@ input.error, textarea.error {
   display: none !important;
 }
 
+/* #12/#5: all-comments overview panel (opened from the "Show all comments"
+   checkbox in the Settings pane). */
+#comments-overview {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 280px;
+  max-width: calc(100% - 12px);
+  max-height: 70%;
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+  z-index: 101;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+#comments-overview.visible {
+  display: flex;
+}
+.comments-overview-header {
+  font-weight: bold;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  flex: 0 0 auto;
+}
+.comments-overview-list {
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.comments-overview-empty {
+  padding: 10px;
+  color: #888;
+}
+.comments-overview-row {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+.comments-overview-row:hover {
+  background: #f5f5f5;
+}
+.comments-overview-row.resolved {
+  opacity: .6;
+  text-decoration: line-through;
+}
+.comments-overview-author {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
 /* OTHER */
 .hidden {
   display: none;
