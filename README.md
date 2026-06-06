@@ -49,6 +49,17 @@ Because the markers are numbered they stay correlatable in rich formats such as
 comments are not silently dropped when you export. Plain-text (`.txt`) export
 omits comments, as the core text exporter has no extension point for them.
 
+### Who can edit or delete comments
+By default a comment can only be edited or deleted by the author who created it
+(and only while their original session is active). To instead let **anyone with
+write access to the pad** edit or delete any comment, add the following to your
+`settings.json`:
+```
+"ep_comments_page": {
+  "allowAnyoneToEditComments": true
+},
+```
+
 ### Disable HTML export
 By default comments are exported to HTML, but if you don't wish to do that then you can disable it by adding the following to your `settings.json`:
 ```
