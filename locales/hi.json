@@ -6,6 +6,8 @@
 	},
 	"ep_comments_page.comment": "टिप्पणी",
 	"ep_comments_page.comments": "टिप्पणियाँ",
+	"ep_comments_page.comments_overview.header": "सभी टिप्पणियाँ",
+	"ep_comments_page.comment_nav.next": "अगली टिप्पणी",
 	"ep_comments_page.comments_template.cancel.value": "रद्द करें",
 	"ep_comments_page.comments_template.reply.value": "जवाब दें",
 	"ep_comments_page.comments_template.reply.placeholder": "जवाब दें",
