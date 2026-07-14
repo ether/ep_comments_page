@@ -33,7 +33,7 @@ jobs:
           repository: ether/etherpad-lite
           ref: ${{ matrix.core_ref }}
           path: etherpad-lite
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         name: Install Node.js
         with:
           node-version: ${{ matrix.node }}
