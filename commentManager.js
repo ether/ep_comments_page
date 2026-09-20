@@ -1,7 +1,11 @@
 'use strict';
 
 const db = require('ep_etherpad-lite/node/db/DB');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+// Read settings through the ES default export when there is one: on Etherpad 3.x
+// the CJS mirror is built before the top-level `ep_*` plugin blocks are merged in,
+// so `require(...).ep_comments_page` is undefined on released cores (#454).
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 const {createLogger} = require('ep_plugin_helpers/logger');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const shared = require('./static/js/shared');

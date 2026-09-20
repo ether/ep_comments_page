@@ -5,7 +5,8 @@
 // `ep_comments_page.allowAnyoneToEditComments` switches to a permissive model.
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 const commentManager = require('ep_comments_page/commentManager');
 const epComments = require('ep_comments_page');
 const authorManager =
