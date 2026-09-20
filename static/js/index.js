@@ -27,7 +27,7 @@ const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSe
 const hasCommentOnSelection = events.hasCommentOnSelection;
 const Security = require('ep_etherpad-lite/static/js/security');
 const socketIoClient = require('socket.io-client');
-const io = socketIoClient.default || socketIoClient;
+const socketIo = socketIoClient.default || socketIoClient;
 
 // Trailing-edge debounce (replaces the former underscore dependency, #263).
 const debounce = (fn, wait) => {
@@ -85,7 +85,7 @@ const EpComments = function (context) {
   const url = `${loc.protocol}//${loc.hostname}:${port}/comment`;
 
   this.padId = clientVars.padId;
-  this.socket = io.connect(url, {
+  this.socket = socketIo.connect(url, {
     path: `${basePath}socket.io`,
     query: `padId=${this.padId}`,
   });
@@ -1075,7 +1075,7 @@ EpComments.prototype.updateAddCommentButtonState = function (rep) {
   this.$addCommentButtons
       .toggleClass('comment-btn-disabled', !hasSelection)
       .attr('aria-disabled', String(!hasSelection));
-}
+};
 
 // #95: floating "add comment" button anchored to the current selection.
 // Lazily build the element once, in the same container the new-comment popup
@@ -1150,7 +1150,7 @@ EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
   left = Math.min(Math.max(left, margin), Math.max(margin, containerWidth - btnWidth - margin));
   const top = Math.max(margin, position[1] + 2);
   $btn.css({left: `${left}px`, top: `${top}px`}).addClass('visible');
-}
+};
 
 // #12: a togglable panel listing every comment in the pad, with click-to-jump.
 // Distinct from the Y-aligned sidebar — this is a flat, scrollable index.

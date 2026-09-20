@@ -14,16 +14,16 @@ describe(__filename, function () {
   let en;
   let template;
 
-  before(function () {
+  before(async function () {
     en = readJSON(enPath);
     template = fs.readFileSync(commentsTemplatePath, 'utf8');
   });
 
-  it('every data-l10n-id referenced in comments.html exists in en.json', function () {
+  it('every data-l10n-id referenced in comments.html exists in en.json', async function () {
     const ids = new Set();
     const re = /data-l10n-id="([^"]+)"/g;
     let m;
-    while ((m = re.exec(template)) !== null) ids.add(m[1]);
+    while ((m = re.exec(template)) != null) ids.add(m[1]);
     assert(ids.size > 0, 'expected at least one data-l10n-id in comments.html');
     for (const id of ids) {
       // Some data-l10n-id values are computed via jquery template syntax like
@@ -41,7 +41,7 @@ describe(__filename, function () {
   });
 
   it('suggestion label does not use a key with unresolved placeholders (regression for #273)',
-      function () {
+      async function () {
         // The display-suggestion template previously used
         // `suggested_change_from` whose English value contains {{changeFrom}} /
         // {{changeTo}}. No data-l10n-args is provided on the span, so the
@@ -71,7 +71,7 @@ describe(__filename, function () {
       });
 
   it('new-comment form label does not use a key with unresolved placeholders',
-      function () {
+      async function () {
         // The new-comment template previously used `suggest_change_from`
         // whose English value contains "{{changeFrom}}". The data-l10n-args
         // attribute relied on jquery.tmpl substituting the selected text into

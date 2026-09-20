@@ -9,7 +9,7 @@ const validateAuth = async (req, res) => {
     // If API key auth is configured
     const apiKeyHandler = require('ep_etherpad-lite/node/handler/APIKeyHandler');
     const apikey = apiKeyHandler.apikey;
-    if (apikey !== null && apikey.trim().length > 0) {
+    if (apikey != null && apikey.trim().length > 0) {
       const fields = Object.assign({}, req.query, req.body);
       const receivedKey = fields.apikey || fields.api_key || req.headers.authorization;
       if (receivedKey !== apikey.trim()) {
@@ -35,7 +35,8 @@ const validateAuth = async (req, res) => {
     if (clientIds.includes(payload.sub)) {
       await jwtVerify(jwtToCheck, publicKeyExported, {algorithms: ['RS256']});
     } else {
-      await jwtVerify(jwtToCheck, publicKeyExported, {algorithms: ['RS256'], requiredClaims: ['admin']});
+      await jwtVerify(
+          jwtToCheck, publicKeyExported, {algorithms: ['RS256'], requiredClaims: ['admin']});
     }
     return true;
   } catch (e) {

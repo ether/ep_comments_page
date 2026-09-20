@@ -40,7 +40,9 @@ describe(__filename, function () {
   let savedSetting;
 
   before(async function () { await common.init(); });
+
   beforeEach(async function () { savedSetting = settings.ep_comments_page; });
+
   afterEach(async function () { settings.ep_comments_page = savedSetting; });
 
   describe('the setting is actually read (#454, problem 1)', function () {
@@ -54,7 +56,7 @@ describe(__filename, function () {
       assert.equal(off.allowReadonlyComments, false);
     });
 
-    it('server modules read Settings through its ES default export', function () {
+    it('server modules read Settings through its ES default export', async function () {
       // The CJS mirror of core's Settings module is built before the top-level
       // `ep_*` blocks are merged onto the settings object, so on released cores
       // `require('.../Settings').ep_comments_page` is undefined. Reading the ES
