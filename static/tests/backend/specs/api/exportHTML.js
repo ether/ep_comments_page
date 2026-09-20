@@ -4,7 +4,8 @@ const utils = require('../../../utils');
 const codeToBe0 = utils.codeToBe0;
 const apiVersion = utils.apiVersion;
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 const common = require('ep_etherpad-lite/tests/backend/common');
 const generateJWTToken = common.generateJWTToken;
 const db = require('ep_etherpad-lite/node/db/DB');

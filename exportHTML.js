@@ -2,7 +2,11 @@
 
 const $ = require('cheerio').load('');
 const commentManager = require('./commentManager');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+// Read settings through the ES default export when there is one: on Etherpad 3.x
+// the CJS mirror is built before the top-level `ep_*` plugin blocks are merged in,
+// so `require(...).ep_comments_page` is undefined on released cores (#454).
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 
 // Iterate over pad attributes to find only the comment ones
 const findAllCommentUsedOn = (pad) => {

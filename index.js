@@ -5,7 +5,12 @@ const {template} = require('ep_plugin_helpers');
 const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
 const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+// Read the settings through the ES default export when there is one: on
+// Etherpad 3.x the CJS mirror of Settings is built before the top-level `ep_*`
+// plugin blocks are merged in, so `require(...).ep_comments_page` is undefined
+// on released cores and every option silently fell back to its default (#454).
+// Same `.default ||` idiom this file already uses for Changeset et al.
+const settings = require('ep_etherpad-lite/node/utils/Settings').default || require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
@@ -13,6 +18,43 @@ const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandl
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default || require('ep_etherpad-lite/node/db/AuthorManager');
+let expressHooks = {};
+try {
+  expressHooks = require('ep_etherpad-lite/node/hooks/express');
+} catch (err) {
+  // Core lays its express hooks out differently: carry on without the session
+  // (authors then resolve from the token cookie alone, as before).
+}
+
+// Core only installs its express-session middleware on its own socket.io
+// namespaces, so a plugin namespace's handshake request has no `session` — and
+// therefore no authenticated `user`. Run it here so `/comment` handshakes carry
+// the same session (and user) core's pad socket has. Without it the `getAuthorId`
+// hook chain runs without a user, so plugins that map an authenticated user to a
+// stable author id (ep_stable_authorid) fall back to the token-derived id and
+// comments get stamped with an author that never matches the pad session's —
+// which hides the edit/delete actions and rejects edits (#449).
+// Mirrors core's socketio.js `socketSessionMiddleware`.
+const attachSession = (socket, next) => {
+  const req = socket && socket.request;
+  if (!req || req.session != null) return next();
+  const sessionMiddleware = expressHooks && expressHooks.sessionMiddleware;
+  if (!sessionMiddleware) return next();
+  try {
+    if (req.headers && !req.headers.cookie && socket.handshake && socket.handshake.query) {
+      // socket.io-client on node.js doesn't support cookies, so it passes them
+      // via a query parameter (same fallback core uses).
+      req.headers.cookie = socket.handshake.query.cookie;
+    }
+    // Never fail the connection because the session couldn't be loaded: without
+    // a session the author is still resolved from the token cookie as before.
+    sessionMiddleware(req, {}, () => next());
+  } catch (err) {
+    next();
+  }
+};
+// Exported for tests (verifies the /comment handshake gets core's session).
+exports.attachSession = attachSession;
 
 // Resolve the authoritative authorId for a /comment socket connection from the
 // HttpOnly author-token cookie on its handshake — the same cookie core uses to
@@ -37,8 +79,14 @@ const authorIdForSocket = async (socket) => {
       throw err;
     }
     if (!token) return null;
+    // Pass the authenticated user along so the `getAuthorId` hook chain can map
+    // the session to a stable author id exactly as core's SecurityManager does
+    // (#449). Falls back to `{}` — i.e. the token-derived author — when the pad
+    // is not behind authentication or the session couldn't be loaded.
+    const user =
+      (socket && socket.request && socket.request.session && socket.request.session.user) || {};
     const getAuthorId = authorManager.getAuthorId
-      ? (t) => authorManager.getAuthorId(t, {})
+      ? (t) => authorManager.getAuthorId(t, user)
       : (t) => authorManager.getAuthor4Token(t); // older cores
     return await getAuthorId(token);
   } catch (err) {
@@ -164,6 +212,7 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
 
 exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
+  io.use(attachSession);
   io.on('connection', (socket) => {
     const handler = (fn) => (...args) => {
       const respond = args.pop();
@@ -281,15 +330,25 @@ exports.socketio = (hookName, args, cb) => {
 exports.eejsBlock_dd_insert =
     template('ep_comments_page/templates/menuButtons.ejs');
 
+// `acl-write` lets Etherpad core hide the add-comment affordance on read-only
+// pads (`.readonly .acl-write { display: none }`) — see issue #204. That rule is
+// also what made `allowReadonlyComments` unreachable: with the setting on, the
+// button was rendered but still `display: none`, so read-only viewers could
+// never open the comment form (#454). Drop the class when read-only commenting
+// is enabled; keep #204's behaviour when it is off (the default).
+const readonlyCommentsAllowed = () =>
+  !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
+const aclWriteClass = () => (readonlyCommentsAllowed() ? '' : 'acl-write');
+// Exported for tests.
+exports.aclWriteClass = aclWriteClass;
+
 exports.padInitToolbar = (hookName, args, cb) => {
   const toolbar = args.toolbar;
 
   const button = toolbar.button({
     command: 'addComment',
     localizationId: 'ep_comments_page.add_comment.title',
-    // `acl-write` lets Etherpad core hide the button on read-only pads
-    // (`.readonly .acl-write { display: none }`) — see issue #204.
-    class: 'buttonicon buttonicon-comment-medical acl-write',
+    class: `buttonicon buttonicon-comment-medical ${aclWriteClass()}`.trim(),
   });
 
   toolbar.registerButton('addComment', button);
@@ -301,6 +360,7 @@ exports.padInitToolbar = (hookName, args, cb) => {
 // custom toolbar layout. Uses the ep_plugin_helpers template() helper.
 exports.eejsBlock_editbarMenuLeft = template('ep_comments_page/templates/commentBarButtons.ejs', {
   skip: () => JSON.stringify(settings.toolbar).indexOf('addComment') > -1,
+  vars: () => ({aclWrite: aclWriteClass()}),
 });
 
 exports.eejsBlock_scripts = (hookName, args, cb) => {

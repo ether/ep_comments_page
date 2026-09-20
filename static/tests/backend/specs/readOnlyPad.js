@@ -6,7 +6,8 @@ const SmartOpAssemblerModule = require('ep_etherpad-lite/static/js/SmartOpAssemb
 const SmartOpAssembler = SmartOpAssemblerModule.SmartOpAssembler || SmartOpAssemblerModule.default || SmartOpAssemblerModule;
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const shared = require('../../../js/shared.js');

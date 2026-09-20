@@ -1128,8 +1128,11 @@ EpComments.prototype.updateFloatingAddCommentButton = function (rep) {
   const hasSelection =
     rep.selStart[0] !== rep.selEnd[0] || rep.selStart[1] !== rep.selEnd[1];
   if (!hasSelection) return this.hideFloatingAddCommentButton();
-  // On read-only pads commenting isn't possible, so don't offer the button.
-  if (clientVars.readonly) return this.hideFloatingAddCommentButton();
+  // On read-only pads commenting isn't possible unless an admin opted in with
+  // `allowReadonlyComments` (#454), so don't offer the button by default.
+  if (clientVars.readonly && !clientVars.allowReadonlyComments) {
+    return this.hideFloatingAddCommentButton();
+  }
   // Don't compete with the new-comment form once it's open over the selection.
   if ($('#newComment').hasClass('popup-show')) return this.hideFloatingAddCommentButton();
 
