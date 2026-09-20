@@ -18,6 +18,8 @@ const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandl
 const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
 const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default || require('ep_etherpad-lite/node/db/AuthorManager');
+const securityManager = require('ep_etherpad-lite/node/db/SecurityManager').default || require('ep_etherpad-lite/node/db/SecurityManager');
+const webaccess = require('ep_etherpad-lite/node/hooks/express/webaccess');
 let expressHooks = {};
 try {
   expressHooks = require('ep_etherpad-lite/node/hooks/express');
@@ -56,28 +58,32 @@ const attachSession = (socket, next) => {
 // Exported for tests (verifies the /comment handshake gets core's session).
 exports.attachSession = attachSession;
 
+// Read one cookie from a socket.io handshake. The handshake does not run
+// cookie-parser, so parse the raw Cookie header the way core's
+// PadMessageHandler does. A value that cannot be decoded (e.g. `name=%ZZ`)
+// is treated as absent rather than throwing.
+const readCookie = (socket, name) => {
+  const cookieHeader =
+    (socket && socket.request && socket.request.headers && socket.request.headers.cookie) || '';
+  const match = cookieHeader.split(/;\s*/).find((c) => c.split('=')[0] === name);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match.split('=').slice(1).join('=')) || null;
+  } catch (err) {
+    if (err instanceof URIError) return null;
+    throw err;
+  }
+};
+
 // Resolve the authoritative authorId for a /comment socket connection from the
 // HttpOnly author-token cookie on its handshake — the same cookie core uses to
 // identify the author. The cookie is never exposed to the page, so a client
 // cannot spoof another user's authorId (#222). Returns null when it can't be
 // resolved (e.g. no token cookie), in which case authorship checks fail closed.
-// Mirrors core's PadMessageHandler cookie parsing (the socket.io handshake does
-// not run cookie-parser, so read the Cookie header directly).
 const authorIdForSocket = async (socket) => {
   try {
     const cookiePrefix = (settings.cookie && settings.cookie.prefix) || '';
-    const cookieHeader =
-      (socket && socket.request && socket.request.headers && socket.request.headers.cookie) || '';
-    const match = cookieHeader.split(/;\s*/).find(
-        (c) => c.split('=')[0] === `${cookiePrefix}token`);
-    if (!match) return null;
-    let token;
-    try {
-      token = decodeURIComponent(match.split('=').slice(1).join('='));
-    } catch (err) {
-      if (err instanceof URIError) return null; // malformed cookie -> treat as absent
-      throw err;
-    }
+    const token = readCookie(socket, `${cookiePrefix}token`);
     if (!token) return null;
     // Pass the authenticated user along so the `getAuthorId` hook chain can map
     // the session to a stable author id exactly as core's SecurityManager does
@@ -95,6 +101,53 @@ const authorIdForSocket = async (socket) => {
 };
 // Exported for tests (verifies author identity derives from the token cookie).
 exports.authorIdForSocket = authorIdForSocket;
+
+// Authorize a /comment socket for the pad id it just named.
+//
+// The plugin has its own socket.io namespace, so core never authorizes anything
+// that arrives on it: core's PadMessageHandler only guards its own namespace.
+// Until this check existed, every handler below acted on whatever `padId` the
+// client sent, which let any connected client read — and write — the comments
+// of any pad it could name, including pads it was refused over HTTP.
+//
+// Ask core exactly what core asks itself before honouring a pad message: hand
+// `SecurityManager.checkAccess()` the connection's author token, its HTTP API
+// session cookie and the authenticated express-session user (available on this
+// namespace since #456 runs core's session middleware on the handshake), then
+// derive write permission the way core's `webaccess.userCanModify()` does.
+//
+// Fails closed: a missing session, a denial, or any error at all rejects.
+// Returns the real (non-read-only) pad id the caller may act on.
+const checkPadAccess = async (socket, userPadId, {write = false} = {}) => {
+  const unauth = () => new Error('unauth');
+  let padId;
+  let readonly;
+  try {
+    if (!userPadId || typeof userPadId !== 'string') throw unauth();
+    const cookiePrefix = (settings.cookie && settings.cookie.prefix) || '';
+    const req = (socket && socket.request) || {};
+    const {accessStatus} = await securityManager.checkAccess(
+        userPadId,
+        readCookie(socket, `${cookiePrefix}sessionID`) || readCookie(socket, 'sessionID'),
+        readCookie(socket, `${cookiePrefix}token`),
+        (req.session && req.session.user) || undefined) || {};
+    if (accessStatus !== 'grant') throw unauth();
+    padId = (await readOnlyManager.getIds(userPadId)).padId;
+    if (padId == null) throw unauth();
+    readonly = readOnlyManager.isReadOnlyId(userPadId) || !webaccess.userCanModify(userPadId, req);
+  } catch (err) {
+    // Never leak why access was refused, and never let an unexpected error
+    // (a missing session, a database hiccup) read as "allowed".
+    throw unauth();
+  }
+  // Read-only sessions may always read comments. They may only write them when
+  // the admin opted in with `allowReadonlyComments` (#8) — the same switch
+  // `handleMessageSecurity` above uses to let comment-only changesets through.
+  if (write && readonly && !readonlyCommentsAllowed()) throw unauth();
+  return padId;
+};
+// Exported for tests.
+exports.checkPadAccess = checkPadAccess;
 
 // Comment char-ranges per line for a given revision's atext. The timeslider on
 // older Etherpad cores can't run the plugin's client hooks, so it never paints
@@ -223,21 +276,22 @@ exports.socketio = (hookName, args, cb) => {
 
     // Join the rooms
     socket.on('getComments', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId);
       // Put read-only and read-write users in the same socket.io "room" so that they can see each
-      // other's updates.
+      // other's updates. Only after the access check: joining the room would
+      // otherwise subscribe an unauthorized socket to the pad's live comments.
       socket.join(padId);
       return await commentManager.getComments(padId);
     }));
 
     socket.on('getCommentReplies', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId);
       return await commentManager.getCommentReplies(padId);
     }));
 
     // Where each comment's text sits at a given revision (for the timeslider).
     socket.on('getCommentLocations', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId);
       const pad = await padManager.getPad(padId);
       const head = pad.getHeadRevisionNumber();
       let rev = Number(data.rev);
@@ -248,7 +302,7 @@ exports.socketio = (hookName, args, cb) => {
 
     // On add events
     socket.on('addComment', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       const content = data.comment;
       // Stamp the authoritative author server-side so a comment can't be created
       // labelled as someone else (#222). Fall back to the supplied value when no
@@ -263,7 +317,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('deleteComment', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       // Authorize against the server-resolved author, never the client-supplied
       // authorId (which is spoofable) (#222).
       const authorId = await authorIdForSocket(socket);
@@ -272,7 +326,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('revertChange', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       await commentManager.changeAcceptedState(padId, data.commentId, false);
@@ -280,7 +334,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('acceptChange', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       // Broadcast to all other users that this change was accepted.
       // Note that commentId here can either be the commentId or replyId..
       await commentManager.changeAcceptedState(padId, data.commentId, true);
@@ -288,7 +342,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('bulkAddComment', handler(async (padId, data) => {
-      padId = (await readOnlyManager.getIds(padId)).padId;
+      padId = await checkPadAccess(socket, padId, {write: true});
       const [commentIds, comments] = await commentManager.bulkAddComments(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentInBulk');
       // {c-123:data, c-124:data}
@@ -296,7 +350,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('bulkAddCommentReplies', handler(async (padId, data) => {
-      padId = (await readOnlyManager.getIds(padId)).padId;
+      padId = await checkPadAccess(socket, padId, {write: true});
       const [repliesId, replies] = await commentManager.bulkAddCommentReplies(padId, data);
       socket.broadcast.to(padId).emit('pushAddCommentReply', repliesId, replies);
       return repliesId.map((id, i) => [id, replies[i]]);
@@ -304,7 +358,7 @@ exports.socketio = (hookName, args, cb) => {
 
     socket.on('updateCommentText', handler(async (data) => {
       const {commentId, commentText} = data;
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       // Authorize against the server-resolved author, never the client-supplied
       // authorId (which is spoofable) (#222).
       const authorId = await authorIdForSocket(socket);
@@ -313,7 +367,7 @@ exports.socketio = (hookName, args, cb) => {
     }));
 
     socket.on('addCommentReply', handler(async (data) => {
-      const {padId} = await readOnlyManager.getIds(data.padId);
+      const padId = await checkPadAccess(socket, data.padId, {write: true});
       // Stamp the authoritative author server-side (#222); fall back to the
       // supplied value when no token is resolvable (API/test contexts).
       const resolvedAuthor = await authorIdForSocket(socket);
