@@ -1,7 +1,8 @@
 'use strict';
 
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+  require('ep_etherpad-lite/node/utils/Settings');
 
 // Validate authorization - checks API key or JWT token depending on auth method
 const validateAuth = async (req, res) => {
