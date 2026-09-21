@@ -1,0 +1,10 @@
+# pnpm 11 refuses dependencies published within the last 24 hours as a
+# supply-chain guard. eslint-config-etherpad@5.0.2 was published by this
+# organisation on 2026-09-20 via npm OIDC trusted publishing, with a
+# signed provenance attestation, and is a devDependency only — it is not
+# shipped to users of this plugin. Without this exclusion the publish job
+# cannot install and a merged security fix cannot be released.
+#
+# Remove this entry once the version is older than the policy window.
+minimumReleaseAgeExclude:
+  - eslint-config-etherpad@5.0.2
