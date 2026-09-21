@@ -78,8 +78,11 @@ describe(__filename, function () {
       plugins.hooks[hookName] = [];
     }
     backups.settings = {};
-    for (const s of ['requireAuthentication', 'requireAuthorization', 'users',
-      'ep_comments_page', 'editOnly']) {
+    for (const s of ['requireAuthentication',
+      'requireAuthorization',
+      'users',
+      'ep_comments_page',
+      'editOnly']) {
       backups.settings[s] = settings[s];
     }
     settings.editOnly = false;
@@ -123,7 +126,8 @@ describe(__filename, function () {
             await agent.get(`/p/${allowedPadId}`).auth('user', 'user-password').expect(200);
           socket = await connectComment(res);
           // Sanity check: the session really does reach the pad it is authorized for.
-          assert.deepEqual(await send(socket, 'getComments', {padId: allowedPadId}), {comments: {}});
+          assert.deepEqual(
+              await send(socket, 'getComments', {padId: allowedPadId}), {comments: {}});
           await assert.rejects(send(socket, 'getComments', {padId: victimPadId}), /unauth/);
         });
 

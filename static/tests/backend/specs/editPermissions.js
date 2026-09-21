@@ -21,7 +21,9 @@ describe(__filename, function () {
   let savedSetting;
 
   before(async function () { await common.init(); });
+
   beforeEach(async function () { savedSetting = settings.ep_comments_page; });
+
   afterEach(async function () { settings.ep_comments_page = savedSetting; });
 
   it('by default only the original author may delete a comment', async function () {

@@ -90,7 +90,8 @@
         margin: 0; z-index: 5; display: block;
       }
       @media (max-width: 1180px) { #comments.ts-comments { display: none; } }
-      #comments.ts-comments .sidebar-comment { right: 8px; cursor: default; border-left: 3px solid transparent; }
+      #comments.ts-comments .sidebar-comment {
+        right: 8px; cursor: default; border-left: 3px solid transparent; }
       #comments.ts-comments .comment-actions-wrapper,
       #comments.ts-comments .comment-reply,
       #comments.ts-comments .new-comment,
@@ -235,7 +236,8 @@
     const el = document.createElement('div');
     el.id = commentId;
     el.dataset.commentid = commentId;
-    el.className = `sidebar-comment comment-container${comment.changeAccepted ? ' change-accepted' : ''}`;
+    el.className =
+        `sidebar-comment comment-container${comment.changeAccepted ? ' change-accepted' : ''}`;
     // #2: author-colour left-border accent, matching the editor sidebar.
     const color = authorColor(comment.author);
     if (color) el.style.borderLeft = `3px solid ${color}`;
@@ -330,8 +332,14 @@
         return;
       }
     }).observe(containerEl, {childList: true, subtree: true});
-    containerEl.addEventListener('mouseover', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, true); });
-    containerEl.addEventListener('mouseout', (e) => { const id = commentIdOfNode(e.target); if (id) relate(id, false); });
+    containerEl.addEventListener('mouseover', (e) => {
+      const id = commentIdOfNode(e.target);
+      if (id) relate(id, true);
+    });
+    containerEl.addEventListener('mouseout', (e) => {
+      const id = commentIdOfNode(e.target);
+      if (id) relate(id, false);
+    });
     window.addEventListener('hashchange', scheduleSync);
     scheduleSync();
   };
@@ -350,12 +358,21 @@
       socket.on('connect', () => { load(); });
       await load();
       const pb = parentBody();
-      if (pb) new MutationObserver(scheduleSync).observe(pb, {attributes: true, attributeFilter: ['class']});
+      if (pb) {
+        new MutationObserver(scheduleSync)
+            .observe(pb, {attributes: true, attributeFilter: ['class']});
+      }
       socket.on('pushAddComment', (id, c) => { comments[id] = c; scheduleSync(); });
       socket.on('commentDeleted', (id) => { delete comments[id]; scheduleSync(); });
-      socket.on('textCommentUpdated', (id, t) => { if (comments[id]) { comments[id].text = t; scheduleSync(); } });
-      socket.on('changeAccepted', (id) => { if (comments[id]) { comments[id].changeAccepted = true; scheduleSync(); } });
-      socket.on('changeReverted', (id) => { if (comments[id]) { comments[id].changeAccepted = false; scheduleSync(); } });
+      socket.on('textCommentUpdated', (id, t) => {
+        if (comments[id]) { comments[id].text = t; scheduleSync(); }
+      });
+      socket.on('changeAccepted', (id) => {
+        if (comments[id]) { comments[id].changeAccepted = true; scheduleSync(); }
+      });
+      socket.on('changeReverted', (id) => {
+        if (comments[id]) { comments[id].changeAccepted = false; scheduleSync(); }
+      });
     } catch (_e) { /* fail silent */ }
   };
 

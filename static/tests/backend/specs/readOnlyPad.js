@@ -1,15 +1,19 @@
 'use strict';
 
-const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
-const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default ||
+    require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset').default ||
+    require('ep_etherpad-lite/static/js/Changeset');
 const SmartOpAssemblerModule = require('ep_etherpad-lite/static/js/SmartOpAssembler');
-const SmartOpAssembler = SmartOpAssemblerModule.SmartOpAssembler || SmartOpAssemblerModule.default || SmartOpAssemblerModule;
+const SmartOpAssembler = SmartOpAssemblerModule.SmartOpAssembler ||
+    SmartOpAssemblerModule.default || SmartOpAssemblerModule;
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
 const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
   require('ep_etherpad-lite/node/utils/Settings');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
-const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default ||
+    require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const shared = require('../../../js/shared.js');
 
 describe(__filename, function () {
@@ -63,11 +67,13 @@ describe(__filename, function () {
     // Read-only commenting is opt-in (#8); enable it so comment-only changes
     // from a read-only session are granted permission.
     let origSettings;
-    before(function () {
+
+    before(async function () {
       origSettings = settings.ep_comments_page;
       settings.ep_comments_page = {...origSettings, allowReadonlyComments: true};
     });
-    after(function () { settings.ep_comments_page = origSettings; });
+
+    after(async function () { settings.ep_comments_page = origSettings; });
 
     it('add/change comment attribute', async function () {
       await Promise.all([
@@ -93,11 +99,13 @@ describe(__filename, function () {
   describe('comment-only changes are rejected when read-only commenting is disabled (default)',
       function () {
         let origSettings;
-        before(function () {
+
+        before(async function () {
           origSettings = settings.ep_comments_page;
           settings.ep_comments_page = {...origSettings, allowReadonlyComments: false};
         });
-        after(function () { settings.ep_comments_page = origSettings; });
+
+        after(async function () { settings.ep_comments_page = origSettings; });
 
         it('add comment attribute is rejected', async function () {
           const head = pad.head;
@@ -111,11 +119,13 @@ describe(__filename, function () {
     // Enable read-only commenting so these assertions prove the security
     // boundary holds: comments are allowed, but text/format edits are not.
     let origSettings;
-    before(function () {
+
+    before(async function () {
       origSettings = settings.ep_comments_page;
       settings.ep_comments_page = {...origSettings, allowReadonlyComments: true};
     });
-    after(function () { settings.ep_comments_page = origSettings; });
+
+    after(async function () { settings.ep_comments_page = origSettings; });
 
     const testCases = [
       {

@@ -14,8 +14,8 @@ const shared = require('./static/js/shared');
 // (the restrictive behaviour introduced in #163). Setting
 // `ep_comments_page.allowAnyoneToEditComments: true` switches to the permissive
 // model where anyone with write access to the pad may edit/delete any comment.
-const anyoneMayEditComments = () =>
-  !!(settings.ep_comments_page && settings.ep_comments_page.allowAnyoneToEditComments);
+const anyoneMayEditComments =
+    () => !!(settings.ep_comments_page && settings.ep_comments_page.allowAnyoneToEditComments);
 
 const logger = createLogger('ep_comments_page');
 

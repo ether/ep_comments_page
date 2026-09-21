@@ -2,23 +2,29 @@
 
 const {template} = require('ep_plugin_helpers');
 
-const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default || require('ep_etherpad-lite/static/js/AttributePool');
-const Changeset = require('ep_etherpad-lite/static/js/Changeset').default || require('ep_etherpad-lite/static/js/Changeset');
+const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default ||
+    require('ep_etherpad-lite/static/js/AttributePool');
+const Changeset = require('ep_etherpad-lite/static/js/Changeset').default ||
+    require('ep_etherpad-lite/static/js/Changeset');
 const eejs = require('ep_etherpad-lite/node/eejs');
 // Read the settings through the ES default export when there is one: on
 // Etherpad 3.x the CJS mirror of Settings is built before the top-level `ep_*`
 // plugin blocks are merged in, so `require(...).ep_comments_page` is undefined
 // on released cores and every option silently fell back to its default (#454).
 // Same `.default ||` idiom this file already uses for Changeset et al.
-const settings = require('ep_etherpad-lite/node/utils/Settings').default || require('ep_etherpad-lite/node/utils/Settings');
+const settings = require('ep_etherpad-lite/node/utils/Settings').default ||
+    require('ep_etherpad-lite/node/utils/Settings');
 const {Formidable} = require('formidable');
 const commentManager = require('./commentManager');
 const apiUtils = require('./apiUtils');
 const padMessageHandler = require('ep_etherpad-lite/node/handler/PadMessageHandler');
-const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default || require('ep_etherpad-lite/node/db/ReadOnlyManager');
+const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').default ||
+    require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const padManager = require('ep_etherpad-lite/node/db/PadManager');
-const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default || require('ep_etherpad-lite/node/db/AuthorManager');
-const securityManager = require('ep_etherpad-lite/node/db/SecurityManager').default || require('ep_etherpad-lite/node/db/SecurityManager');
+const authorManager = require('ep_etherpad-lite/node/db/AuthorManager').default ||
+    require('ep_etherpad-lite/node/db/AuthorManager');
+const securityManager = require('ep_etherpad-lite/node/db/SecurityManager').default ||
+    require('ep_etherpad-lite/node/db/SecurityManager');
 const webaccess = require('ep_etherpad-lite/node/hooks/express/webaccess');
 let expressHooks = {};
 try {
@@ -206,9 +212,8 @@ const overviewToggle = toggle({
 exports.loadSettings = commentsToggle.loadSettings;
 // Compose both settings checkboxes (Show Comments + Show all comments) into the
 // single eejsBlock_mySettings hook.
-exports.eejsBlock_mySettings = (hookName, args, cb) =>
-  commentsToggle.eejsBlock_mySettings(hookName, args, () =>
-    overviewToggle.eejsBlock_mySettings(hookName, args, cb));
+exports.eejsBlock_mySettings = (hookName, args, cb) => commentsToggle.eejsBlock_mySettings(
+    hookName, args, () => overviewToggle.eejsBlock_mySettings(hookName, args, cb));
 exports.eejsBlock_padSettings = commentsToggle.eejsBlock_padSettings;
 
 let io;
@@ -390,8 +395,8 @@ exports.eejsBlock_dd_insert =
 // button was rendered but still `display: none`, so read-only viewers could
 // never open the comment form (#454). Drop the class when read-only commenting
 // is enabled; keep #204's behaviour when it is off (the default).
-const readonlyCommentsAllowed = () =>
-  !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
+const readonlyCommentsAllowed =
+    () => !!(settings.ep_comments_page && settings.ep_comments_page.allowReadonlyComments);
 const aclWriteClass = () => (readonlyCommentsAllowed() ? '' : 'acl-write');
 // Exported for tests.
 exports.aclWriteClass = aclWriteClass;
