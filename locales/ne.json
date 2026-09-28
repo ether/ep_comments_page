@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"पर्वत सुबेदी",
+			"बडा काजी",
+			"सरोज कुमार ढकाल"
+		]
+	},
+	"ep_comments_page.comment": "टिप्पणी",
+	"ep_comments_page.comments": "टिप्पणीहरु",
+	"ep_comments_page.add_comment.title": "चयनमा नयाँ टिप्पणी थप्नुहोस्",
+	"ep_comments_page.add_comment": "चयनमा नयाँ टिप्पणी थप्नुहोस्",
+	"ep_comments_page.add_comment.hint": "कृपया पहिला टिप्पणी गर्न पाठ चयन गर्नुहोस्",
+	"ep_comments_page.comments_overview.title": "सबै टिप्पणीहरू देखाउनुहोस्",
+	"ep_comments_page.comments_overview.header": "सबै टिप्पणीहरु",
+	"ep_comments_page.comments_overview.empty": "अहिलेसम्म कुनै टिप्पणी छैन",
+	"ep_comments_page.delete_comment.title": "यो टिप्पणी मेट्नुहोस्",
+	"ep_comments_page.edit_comment.title": "यो टिप्पणी सम्पादन गर्नुहोस्",
+	"ep_comments_page.comment_nav.prev": "अघिल्लो टिप्पणी",
+	"ep_comments_page.comment_nav.next": "पछिल्लो टिप्पणी",
+	"ep_comments_page.show_comments": "टिप्पणीहरू देखाउनुहोस्",
+	"ep_comments_page.comments_template.suggested_change": "सुझाव गरिएको परिवर्तन",
+	"ep_comments_page.comments_template.from": "बाट",
+	"ep_comments_page.comments_template.accept_change.value": "परिवर्तन स्वीकार गर्नुहोस्",
+	"ep_comments_page.comments_template.revert_change.value": "परिवर्तन उल्टाउनुहोस्",
+	"ep_comments_page.comments_template.suggested_change_from": "\"{{changeFrom}}\" बाट \"{{changeTo}}\" मा सुझाव गरिएको परिवर्तन",
+	"ep_comments_page.comments_template.suggested_change_from_label": "यसबाट सुझाव गरिएको परिवर्तन",
+	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\" बाट परिवर्तन गर्न सुझाव दिनुहोस्",
+	"ep_comments_page.comments_template.suggest_change_from_label": "यसबाट परिवर्तन सुझाव दिनुहोस्",
+	"ep_comments_page.comments_template.suggest_change_to_label": "लाई",
+	"ep_comments_page.comments_template.to": "लाई",
+	"ep_comments_page.comments_template.include_suggestion": "सुझाव गरिएको परिवर्तन समावेश गर्नुहोस्",
+	"ep_comments_page.comments_template.comment.value": "टिप्पणी",
+	"ep_comments_page.comments_template.cancel.value": "रद्द गर्नुहोस्",
+	"ep_comments_page.comments_template.reply.value": "उत्तर दिनुहोस्",
+	"ep_comments_page.comments_template.reply.placeholder": "उत्तर दिनुहोस्",
+	"ep_comments_page.comments_template.edit_comment.save": "बचत गर्नुहोस्",
+	"ep_comments_page.comments_template.edit_comment.cancel": "रद्द गर्नुहोस्",
+	"ep_comments_page.error.edit_unauth": "तपाईँले अन्य प्रयोगकर्ता टिप्पणीहरू सम्पादन गर्न सक्नुहुन्न !",
+	"ep_comments_page.error.delete_unauth": "तपाईँले अन्य प्रयोगकर्ताका टिप्पणीहरू मेट्न सक्नुहुन्न !"
+}
