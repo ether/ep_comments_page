@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sabelöga"
+			"Sabelöga",
+			"WikiPhoenix"
 		]
 	},
 	"ep_comments_page.comment": "Kommentar",
@@ -9,15 +10,23 @@
 	"ep_comments_page.add_comment.title": "Lägg till ny kommentar till markering",
 	"ep_comments_page.add_comment": "Lägg till ny kommentar till markering",
 	"ep_comments_page.add_comment.hint": "Markera först den text du vill kommentera",
+	"ep_comments_page.comments_overview.title": "Visa alla kommentarer",
+	"ep_comments_page.comments_overview.header": "Alla kommentarer",
+	"ep_comments_page.comments_overview.empty": "Inga kommentarer ännu",
 	"ep_comments_page.delete_comment.title": "Radera den här kommentaren",
 	"ep_comments_page.edit_comment.title": "Redigera den här kommentaren",
+	"ep_comments_page.comment_nav.prev": "Föregående kommentar",
+	"ep_comments_page.comment_nav.next": "Nästa kommentar",
 	"ep_comments_page.show_comments": "Visa kommentarer",
 	"ep_comments_page.comments_template.suggested_change": "Föreslagen ändring",
 	"ep_comments_page.comments_template.from": "Från",
 	"ep_comments_page.comments_template.accept_change.value": "Godkänn ändring",
 	"ep_comments_page.comments_template.revert_change.value": "Ångra ändring",
 	"ep_comments_page.comments_template.suggested_change_from": "Föreslagen ändring från \"{{changeFrom}}\" till \"{{changeTo}}\"",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Föreslagen ändring från",
 	"ep_comments_page.comments_template.suggest_change_from": "Föreslå ändring från \"{{changeFrom}}\" till",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Föreslå ändring från",
+	"ep_comments_page.comments_template.suggest_change_to_label": "till",
 	"ep_comments_page.comments_template.to": "Till",
 	"ep_comments_page.comments_template.include_suggestion": "Bifoga ändringsförslag",
 	"ep_comments_page.comments_template.comment.value": "Kommentera",
