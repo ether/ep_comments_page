@@ -1,22 +1,40 @@
 {
 	"@metadata": {
 		"authors": [
-			"Saraiki"
+			"Saraiki",
+			"Tauqeerkhansurani"
 		]
 	},
 	"ep_comments_page.comment": "تبصرہ",
 	"ep_comments_page.comments": "تبصرے",
+	"ep_comments_page.add_comment.title": "منتخب تے نواں تبصرہ شامل کرو",
+	"ep_comments_page.add_comment": "منتخب تے نواں تبصرہ شامل کرو",
+	"ep_comments_page.add_comment.hint": "برائے مہربانی پہلے تبصرہ کرݨ کیتے متن منتخب کرو",
+	"ep_comments_page.comments_overview.title": "سارے تبصرے ݙکھاؤ",
 	"ep_comments_page.comments_overview.header": "سارے تبصرے",
+	"ep_comments_page.comments_overview.empty": "ابھے تک کوئی تبصرہ نئیں",
 	"ep_comments_page.delete_comment.title": "ایہ تبصرہ مٹاؤ",
 	"ep_comments_page.edit_comment.title": "ایں تبصرے وچ تبدیلی کرو",
+	"ep_comments_page.comment_nav.prev": "پچھلا تبصرہ",
+	"ep_comments_page.comment_nav.next": "اڳلا تبصرہ",
 	"ep_comments_page.show_comments": "تبصرے ݙکھاؤ",
+	"ep_comments_page.comments_template.suggested_change": "تجویز کردہ تبدیلی",
 	"ep_comments_page.comments_template.from": "کنوں",
 	"ep_comments_page.comments_template.accept_change.value": "تبدیلی قبول کرو",
+	"ep_comments_page.comments_template.revert_change.value": "تبدیلی واپس کرو",
+	"ep_comments_page.comments_template.suggested_change_from": "تجویز کردہ تبدیلی \"{{changeFrom}}\" توں \"{{changeTo}}\" تائیں",
+	"ep_comments_page.comments_template.suggested_change_from_label": "تجویز کردہ تبدیلی توں",
+	"ep_comments_page.comments_template.suggest_change_from": "\"{{changeFrom}}\" توں تبدیلی دی تجویز ݙیو تائیں",
+	"ep_comments_page.comments_template.suggest_change_from_label": "تبدیلی دی تجویز ݙیو توں",
+	"ep_comments_page.comments_template.suggest_change_to_label": "تائیں",
 	"ep_comments_page.comments_template.to": "کوں",
+	"ep_comments_page.comments_template.include_suggestion": "تجویز کردہ تبدیلی شامل کرو",
 	"ep_comments_page.comments_template.comment.value": "تبصرہ",
 	"ep_comments_page.comments_template.cancel.value": "منسوخ",
 	"ep_comments_page.comments_template.reply.value": "جواب",
 	"ep_comments_page.comments_template.reply.placeholder": "جواب",
 	"ep_comments_page.comments_template.edit_comment.save": "بچاؤ",
-	"ep_comments_page.comments_template.edit_comment.cancel": "منسوخ"
+	"ep_comments_page.comments_template.edit_comment.cancel": "منسوخ",
+	"ep_comments_page.error.edit_unauth": "تساں ٻئے ورتنݨ آلیاں دے تبصرے دی ترمیم نئیں کر سڳدے!",
+	"ep_comments_page.error.delete_unauth": "تساں ٻئے ورتنݨ آلیاں دے تبصرے مٹا نئیں سڳدے!"
 }
