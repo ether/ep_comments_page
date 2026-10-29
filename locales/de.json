@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Brettchenweber",
+			"Nbux",
 			"SamTV",
 			"Tim.krieger"
 		]
@@ -11,15 +12,23 @@
 	"ep_comments_page.add_comment.title": "Kommentar zur Auswahl hinzufügen",
 	"ep_comments_page.add_comment": "Kommentar zur Auswahl hinzufügen",
 	"ep_comments_page.add_comment.hint": "Bitte wähle zuerst den zu kommentierenden Text aus!",
+	"ep_comments_page.comments_overview.title": "Alle Kommentare anzeigen",
+	"ep_comments_page.comments_overview.header": "Alle Kommentare",
+	"ep_comments_page.comments_overview.empty": "Noch keine Kommentare.",
 	"ep_comments_page.delete_comment.title": "Diesen Kommentar löschen",
 	"ep_comments_page.edit_comment.title": "Diesen Kommentar bearbeiten",
+	"ep_comments_page.comment_nav.prev": "Vorheriger Kommentar",
+	"ep_comments_page.comment_nav.next": "Nächster Kommentar",
 	"ep_comments_page.show_comments": "Kommentare anzeigen",
 	"ep_comments_page.comments_template.suggested_change": "Vorgeschlagene Änderung",
 	"ep_comments_page.comments_template.from": "von",
 	"ep_comments_page.comments_template.accept_change.value": "Änderung akzeptieren",
 	"ep_comments_page.comments_template.revert_change.value": "Änderung zurücknehmen",
 	"ep_comments_page.comments_template.suggested_change_from": "Ersetze \"{{changeFrom}}\" durch \"{{changeTo}}\"",
-	"ep_comments_page.comments_template.suggest_change_from": "Änderung vorschlagen von \"{{changeFrom}}\" zu",
+	"ep_comments_page.comments_template.suggested_change_from_label": "Vorgeschlagene Änderung von",
+	"ep_comments_page.comments_template.suggest_change_from": "Änderung vorschlagen: ändere \"{{changeFrom}}\" zu",
+	"ep_comments_page.comments_template.suggest_change_from_label": "Änderung vorschlagen: ändere von",
+	"ep_comments_page.comments_template.suggest_change_to_label": "zu",
 	"ep_comments_page.comments_template.to": "zu",
 	"ep_comments_page.comments_template.include_suggestion": "Änderungsvorschlag hinzufügen",
 	"ep_comments_page.comments_template.comment.value": "Kommentar",
