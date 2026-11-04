@@ -16,6 +16,32 @@ const readOnlyManager = require('ep_etherpad-lite/node/db/ReadOnlyManager').defa
     require('ep_etherpad-lite/node/db/ReadOnlyManager');
 const shared = require('../../../js/shared.js');
 
+// Like common.waitForAcceptCommit(), but skips USER_NEWINFO broadcasts. Other plugins can
+// announce a virtual user to the room when a client joins (ep_ai_chat announces its AI author on
+// userJoin), and that message can land after CLIENT_VARS but before ACCEPT_COMMIT.
+const isUserNewInfo = (msg) => msg != null && msg.type === 'COLLABROOM' &&
+    msg.data != null && msg.data.type === 'USER_NEWINFO';
+
+const waitForAcceptCommit = (socket, wantRev, ms = 1000) => new Promise((resolve, reject) => {
+  let timeout = null;
+  const onMessage = (msg) => {
+    if (isUserNewInfo(msg)) return;
+    clearTimeout(timeout);
+    socket.off('message', onMessage);
+    try {
+      assert.deepEqual(msg, {type: 'COLLABROOM', data: {type: 'ACCEPT_COMMIT', newRev: wantRev}});
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
+  };
+  timeout = setTimeout(() => {
+    socket.off('message', onMessage);
+    reject(new Error('timed out waiting for ACCEPT_COMMIT'));
+  }, ms);
+  socket.on('message', onMessage);
+});
+
 describe(__filename, function () {
   let agent;
   let pad;
@@ -77,7 +103,7 @@ describe(__filename, function () {
 
     it('add/change comment attribute', async function () {
       await Promise.all([
-        common.waitForAcceptCommit(socket, pad.head + 1),
+        waitForAcceptCommit(socket, pad.head + 1),
         common.sendUserChanges(
             socket, makeUserChanges('=', [['comment', shared.generateCommentId()]])),
       ]);
@@ -85,12 +111,12 @@ describe(__filename, function () {
 
     it('remove comment attribute', async function () {
       await Promise.all([
-        common.waitForAcceptCommit(socket, pad.head + 1),
+        waitForAcceptCommit(socket, pad.head + 1),
         common.sendUserChanges(
             socket, makeUserChanges('=', [['comment', shared.generateCommentId()]])),
       ]);
       await Promise.all([
-        common.waitForAcceptCommit(socket, pad.head + 1),
+        waitForAcceptCommit(socket, pad.head + 1),
         common.sendUserChanges(socket, makeUserChanges('=', [['comment', '']])),
       ]);
     });
