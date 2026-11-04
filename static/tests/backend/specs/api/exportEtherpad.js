@@ -7,6 +7,8 @@
 const assert = require('assert').strict;
 const common = require('ep_etherpad-lite/tests/backend/common');
 const generateJWTToken = common.generateJWTToken;
+const padutils = require('ep_etherpad-lite/static/js/pad_utils').default ||
+    require('ep_etherpad-lite/static/js/pad_utils');
 const superagent = require('superagent');
 const fs = require('fs');
 const path = require('path');
@@ -17,24 +19,22 @@ const path = require('path');
 // with `ERR_UNKNOWN_FILE_EXTENSION`. Fixtures must live OUTSIDE specs/.
 const etherpadDoc = fs.readFileSync(
     path.join(__dirname, '..', '..', 'fixtures', 'test.etherpad'));
-const apiVersion = 1;
 const testPadId = makeid();
+const authorToken = padutils.generateAuthorToken();
 let api;
 
 describe(__filename, function () {
   before(async function () { api = await common.init(); });
 
   describe('Imports and Exports', function () {
-    it('creates a new Pad, imports content to it, checks that content', async function () {
-      await api.get(`${endPoint('createPad')}&padID=${testPadId}`)
-          .set('Authorization', await generateJWTToken())
-          .expect(200)
-          .expect('Content-Type', /json/);
-    });
-
+    // Since etherpad 3.3.13 only the pad's creator may import a .etherpad file whose rev-0
+    // author differs from the target pad's. Import into a pad that doesn't exist yet, with an
+    // author token, so the importer creates the pad and is its creator. Pre-creating the pad
+    // through the HTTP API would make the system author the creator and the import a 400.
     it('imports .etherpad incuding a comment', async function () {
       await api.post(`/p/${testPadId}/import`)
           .set('Authorization', await generateJWTToken())
+          .set('Cookie', `token=${authorToken}`)
           .attach('file', etherpadDoc, {
             filename: '/test.etherpad',
             contentType: 'application/etherpad',
@@ -54,11 +54,6 @@ describe(__filename, function () {
   });
 }); // End of tests.
 
-
-const endPoint = function (point, version) {
-  version = version || apiVersion;
-  return `/api/${version}/${point}?`;
-};
 
 function makeid() {
   let text = '';
