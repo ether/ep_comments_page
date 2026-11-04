@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-frontend:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     name: Playwright (Node ${{ matrix.node }} / core ${{ matrix.core_ref || 'develop' }})
     strategy:
       fail-fast: false
@@ -20,6 +20,9 @@ jobs:
         include:
           - node: '22'
             core_ref: 'v2.7.3'
+            # ubuntu-latest is now 26.04, and the Playwright pinned by core
+            # v2.7.3 refuses to install chromium there.
+            os: ubuntu-24.04
           - node: '24'
             core_ref: ''
           - node: '26'
