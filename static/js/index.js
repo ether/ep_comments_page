@@ -22,6 +22,7 @@ const newComment = require('ep_comments_page/static/js/newComment');
 // `toggle` reach server-only modules (eejs, Settings) which esbuild can't
 // resolve for the browser.
 const {padToggle} = require('ep_plugin_helpers/pad-toggle');
+const {padSocketAuth} = require('ep_plugin_helpers/socket-origin');
 const preCommentMark = require('ep_comments_page/static/js/preCommentMark');
 const getCommentIdOnFirstPositionSelected = events.getCommentIdOnFirstPositionSelected;
 const hasCommentOnSelection = events.hasCommentOnSelection;
@@ -88,6 +89,9 @@ const EpComments = function (context) {
   this.socket = socketIo.connect(url, {
     path: `${basePath}socket.io`,
     query: `padId=${this.padId}`,
+    // Core's pad socket token: tells the server this socket was opened by an
+    // Etherpad page, so it may use the visitor's cookies.
+    auth: padSocketAuth(basePath),
   });
 
   this.comments = [];

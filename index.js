@@ -1,6 +1,6 @@
 'use strict';
 
-const {template} = require('ep_plugin_helpers');
+const {template, guardSocketNamespace} = require('ep_plugin_helpers');
 
 const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default ||
     require('ep_etherpad-lite/static/js/AttributePool');
@@ -271,6 +271,12 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
 exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
   io.use(attachSession);
+  // Same origin check core runs on its pad socket: a handshake that did not
+  // come from an Etherpad page connects without the browser's cookies and
+  // session (or is refused, per socketIo.crossOriginPadSockets), so it can
+  // only do what an anonymous visitor can. The client sends core's pad
+  // socket token, so this does not depend on the Host header.
+  guardSocketNamespace(io);
   io.on('connection', (socket) => {
     const handler = (fn) => (...args) => {
       const respond = args.pop();
