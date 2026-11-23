@@ -31,12 +31,33 @@
     return decodeURIComponent(document.location.pathname.split('/p/')[1].split('/')[0]);
   };
 
+  // Core's pad socket token (Etherpad >= 3.3.21), sent in the handshake so
+  // the server knows this socket was opened by an Etherpad page and may use
+  // the visitor's cookies. Same steps as ep_plugin_helpers/socket-origin's
+  // padSocketAuth(), inlined because this file cannot require(). Resolves to
+  // {} if the token can't be fetched (older cores), as before.
+  const socketAuth = (cb) => {
+    const done = (token) => cb(typeof token === 'string' ? {padSocketToken: token} : {});
+    if (typeof fetch !== 'function') return done(null);
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 5000) : null;
+    fetch(`${root()}/pad-socket-token`, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined,
+    })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((body) => body && body.token, () => null)
+        .then((token) => { if (timer) clearTimeout(timer); done(token); });
+  };
+
   const connect = () => {
     const loc = document.location;
     const port = loc.port || (loc.protocol === 'https:' ? 443 : 80);
     socket = io(`${loc.protocol}//${loc.hostname}:${port}/comment`, {
       path: `${root()}/socket.io`,
       query: `padId=${padId}`,
+      auth: socketAuth,
     });
   };
 

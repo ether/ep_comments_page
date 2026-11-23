@@ -1,6 +1,6 @@
 'use strict';
 
-const {template} = require('ep_plugin_helpers');
+const {template, guardSocketNamespace, trustsAmbientCredentials} = require('ep_plugin_helpers');
 
 const AttributePool = require('ep_etherpad-lite/static/js/AttributePool').default ||
     require('ep_etherpad-lite/static/js/AttributePool');
@@ -96,7 +96,8 @@ const authorIdForSocket = async (socket) => {
     // (#449). Falls back to `{}` — i.e. the token-derived author — when the pad
     // is not behind authentication or the session couldn't be loaded.
     const user =
-      (socket && socket.request && socket.request.session && socket.request.session.user) || {};
+      (trustsAmbientCredentials(socket) && socket && socket.request &&
+       socket.request.session && socket.request.session.user) || {};
     const getAuthorId = authorManager.getAuthorId
       ? (t) => authorManager.getAuthorId(t, user)
       : (t) => authorManager.getAuthor4Token(t); // older cores
@@ -136,7 +137,9 @@ const checkPadAccess = async (socket, userPadId, {write = false} = {}) => {
         userPadId,
         readCookie(socket, `${cookiePrefix}sessionID`) || readCookie(socket, 'sessionID'),
         readCookie(socket, `${cookiePrefix}token`),
-        (req.session && req.session.user) || undefined) || {};
+        // Core already empties the session of a socket it does not trust;
+        // check the flag too so that never depends on it.
+        (trustsAmbientCredentials(socket) && req.session && req.session.user) || undefined) || {};
     if (accessStatus !== 'grant') throw unauth();
     padId = (await readOnlyManager.getIds(userPadId)).padId;
     if (padId == null) throw unauth();
@@ -271,6 +274,12 @@ exports.handleMessageSecurity = async (hookName, ctx) => {
 exports.socketio = (hookName, args, cb) => {
   io = args.io.of('/comment');
   io.use(attachSession);
+  // Same origin check core runs on its pad socket: a handshake that did not
+  // come from an Etherpad page connects without the browser's cookies and
+  // session (or is refused, per socketIo.crossOriginPadSockets), so it can
+  // only do what an anonymous visitor can. The client sends core's pad
+  // socket token, so this does not depend on the Host header.
+  guardSocketNamespace(io);
   io.on('connection', (socket) => {
     const handler = (fn) => (...args) => {
       const respond = args.pop();
