@@ -77,6 +77,8 @@ describe(__filename, function () {
     backups.socketIo = settings.socketIo;
     backups.trustProxy = settings.trustProxy;
     backups.publicURL = settings.publicURL;
+    backups.requireAuthentication = settings.requireAuthentication;
+    backups.users = settings.users;
     backups.hooks = {};
     for (const hookName of ['preAuthorize', 'authenticate', 'authorize']) {
       backups.hooks[hookName] = plugins.hooks[hookName];
@@ -103,6 +105,8 @@ describe(__filename, function () {
     settings.socketIo = backups.socketIo;
     settings.trustProxy = backups.trustProxy;
     settings.publicURL = backups.publicURL;
+    settings.requireAuthentication = backups.requireAuthentication;
+    settings.users = backups.users;
     Object.assign(plugins.hooks, backups.hooks);
     if (groupID) await groupManager.deleteGroup(groupID);
     groupID = null;
@@ -112,6 +116,18 @@ describe(__filename, function () {
     const res = await agent.get('/pad-socket-token').set('Cookie', cookieHeader).expect(200);
     assert.equal(typeof res.body.token, 'string');
     return res.body.token;
+  };
+
+  // Logs in over HTTP (requireAuthentication) and returns the Cookie header
+  // holding the express session, whose session.user the /comment namespace
+  // then sees on the handshake.
+  const loginCookie = async () => {
+    settings.requireAuthentication = true;
+    settings.users = {user: {password: 'user-password'}};
+    const res = await agent.get(`/p/${encodeURIComponent(padId)}`)
+        .auth('user', 'user-password');
+    return ((res.headers['set-cookie'] || []).map((c) => c.split(';')[0])
+        .concat(cookie)).join('; ');
   };
 
   const readsComments = async (s) => {
@@ -158,6 +174,14 @@ describe(__filename, function () {
       assert.equal(await readsComments(socket), 1);
     });
 
+    it('a logged-in user with the pad socket token keeps the login', async function () {
+      const login = await loginCookie();
+      const token = await padSocketToken(login);
+      socket = await connectComment(
+          {cookie: login, headers: proxied, auth: {padSocketToken: token}});
+      assert.equal(await readsComments(socket), 1);
+    });
+
     it('works with publicURL set and no token', async function () {
       settings.publicURL = 'https://pad.example.com';
       socket = await connectComment({cookie, headers: proxied});
@@ -182,6 +206,22 @@ describe(__filename, function () {
           send(socket, 'addComment', {padId, comment: {text: 'graffiti'}}), /unauth/);
       const {comments} = await commentManager.getComments(padId);
       assert.equal(Object.keys(comments).length, 1);
+    });
+
+    it('a same-site page does not get the visitor\'s login session', async function () {
+      const login = await loginCookie();
+      // Sanity check: the same cookies from the same origin are logged in.
+      const same = await connectComment(
+          {cookie: login, headers: {origin: `http://${serverHost}`}});
+      try {
+        assert.equal(await readsComments(same), 1);
+      } finally {
+        same.close();
+      }
+      socket = await connectComment({cookie: login, headers: sibling});
+      await assert.rejects(send(socket, 'getComments', {padId}), /unauth/);
+      await assert.rejects(
+          send(socket, 'addComment', {padId, comment: {text: 'graffiti'}}), /unauth/);
     });
 
     it('an Origin that matches nothing, without Fetch Metadata, gets no cookies',
