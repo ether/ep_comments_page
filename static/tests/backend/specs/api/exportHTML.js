@@ -61,6 +61,7 @@ describe(__filename, function () {
           });
     });
   });
+
   context('when pad text has two comments in a single line', function () {
     before(async function () {
       html = () => buildHTML(textWithComment('c-1234') + textWithComment('c-82a3'));
